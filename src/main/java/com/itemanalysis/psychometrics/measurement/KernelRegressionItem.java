@@ -1,0 +1,95 @@
+/*
+ * Copyright 2012 J. Patrick Meyer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.itemanalysis.psychometrics.measurement;
+
+import com.itemanalysis.psychometrics.data.VariableInfo;
+import com.itemanalysis.psychometrics.data.VariableType;
+import com.itemanalysis.psychometrics.distribution.UniformDistributionApproximation;
+import com.itemanalysis.psychometrics.kernel.Bandwidth;
+import com.itemanalysis.psychometrics.kernel.KernelFunction;
+import com.itemanalysis.psychometrics.kernel.KernelRegression;
+
+import java.util.Iterator;
+import java.util.TreeMap;
+
+public class KernelRegressionItem {
+
+    private boolean continuousItem = false;
+
+    private VariableInfo variableInfo = null;
+
+    private DefaultItemScoring itemScoring = new DefaultItemScoring();
+
+    private KernelFunction kernel = null;
+
+    private Bandwidth bandwidth = null;
+
+    private UniformDistributionApproximation uniform = null;
+
+    private KernelRegression expectedScore = null;
+
+    public KernelRegressionItem(VariableInfo variableInfo, KernelFunction kernel, Bandwidth bandwidth, UniformDistributionApproximation uniform){
+        this.variableInfo = variableInfo;
+        this.kernel = kernel;
+        this.bandwidth = bandwidth;
+        this.uniform = uniform;
+        this.itemScoring = variableInfo.getItemScoring();
+        initializeCategories();
+    }
+
+    public void initializeCategories(){
+        expectedScore = new KernelRegression(kernel, bandwidth, uniform);
+    }
+
+    public void increment(double x, Object y){
+        KernelRegression kreg;
+        double score;
+
+        //increment item
+        score = itemScoring.computeItemScore(y);
+        expectedScore.increment(x, score);
+    }
+
+    public double[] getExpectedValues(){
+        return expectedScore.value();
+    }
+
+    public double[] getValues(Object obj){
+        return expectedScore.value();
+    }
+
+    public double[] getPoints(){
+        return expectedScore.getPoints();
+    }
+
+    public double[][] getSeriesForChart(){
+        double[][] series = new double[2][];
+        series[0] = getPoints();
+        series[1] = getExpectedValues();
+        return series;
+    }
+
+    public double getMinimumPossibleScore(){
+        return itemScoring.minimumPossibleScore();
+    }
+
+    public double getMaximumPossibleScore(){
+        return itemScoring.maximumPossibleScore();
+    }
+
+
+
+}
