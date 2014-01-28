@@ -23,7 +23,10 @@ import org.apache.commons.math3.optim.*;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.MultiStartMultivariateOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
 import org.apache.commons.math3.random.*;
 
 import java.util.Arrays;
@@ -43,6 +46,7 @@ public class FactorAnalysis {
         this.nFactors = Math.max(nFactors, 1);
         this.nVariables = correlationMatrix.getColumnDimension();
         this.nParameters = nVariables;
+//        this.nParameters = nVariables*nFactors;
     }
 
     private double[] getInitialValues(){
@@ -56,7 +60,7 @@ public class FactorAnalysis {
     private double[] getLowerBounds(){
         double[] lb = new double[nParameters];
         for(int i=0;i<nParameters;i++){
-            lb[i] = -1.0;
+            lb[i] = 0.005;
         }
         return lb;
     }
@@ -71,38 +75,43 @@ public class FactorAnalysis {
 
     public void estimateParameters(){
         minres = new MINRESmethod(correlationMatrix, nFactors);
-
-//        QNMinimizer minimizer = new QNMinimizer(15, true);
-//        double[] x = minimizer.minimize(minres, 1e-8, getInitialValues());
-
-//        CGMinimizer minimizer = new CGMinimizer();
-//        double[] x = minimizer.minimize(minres, 1e-4, getInitialValues(), 150);
-
-//        for(int i=0;i<x.length;i++){
-//            System.out.println("U2: " + x[i]);
-//        }
-
-//        System.out.println(minimizer.printRecord());
-
-
+        NonLinearConjugateGradientOptimizer optimizer
+                = new NonLinearConjugateGradientOptimizer(NonLinearConjugateGradientOptimizer.Formula.POLAK_RIBIERE,
+                new SimpleValueChecker(1e-8, 1e-8));
+        uniqueness = optimizer.optimize(new MaxEval(1000),
+                minres.getObjectiveFunction(),
+                minres.getObjectiveFunctionGradient(),
+                GoalType.MINIMIZE,
+                new InitialGuess(getInitialValues()));
+        minres.computeFactorLoadings(uniqueness.getPoint());
 
 
 //FOR R way
-        int numIterpolationPoints = nParameters + 2;
-        BOBYQAOptimizer underlying = new BOBYQAOptimizer(numIterpolationPoints);
-        RandomGenerator g = new JDKRandomGenerator();
-        RandomVectorGenerator generator = new UncorrelatedRandomVectorGenerator(nParameters, new GaussianRandomGenerator(g));
-        MultiStartMultivariateOptimizer optimizer = new MultiStartMultivariateOptimizer(underlying, 10, generator);
-        uniqueness = optimizer.optimize(new MaxEval(5000),
-                new ObjectiveFunction(minres),
-                GoalType.MINIMIZE,
+//        int numIterpolationPoints = nParameters + 2;
+//        BOBYQAOptimizer underlying = new BOBYQAOptimizer(numIterpolationPoints);
+//        RandomGenerator g = new JDKRandomGenerator();
+//        RandomVectorGenerator generator = new UncorrelatedRandomVectorGenerator(nParameters, new GaussianRandomGenerator(g));
+//        MultiStartMultivariateOptimizer optimizer = new MultiStartMultivariateOptimizer(underlying, 100, generator);
+//        uniqueness = optimizer.optimize(new MaxEval(5000),
+//                new ObjectiveFunction(minres),
+//                GoalType.MINIMIZE,
 //                new SimpleBounds(getLowerBounds(), getUpperBounds()),
-                SimpleBounds.unbounded(nParameters),
-                new InitialGuess(getInitialValues()));
-        minres.computeFactorLoadings(uniqueness.getPoint(), correlationMatrix);
+////                SimpleBounds.unbounded(nParameters),
+//                new InitialGuess(minres.getStartValues()));
+//        System.out.println(minres.printStartValues());
+//        System.out.println("Fmin: " + uniqueness.getValue());
+//        minres.computeFactorLoadings(uniqueness.getPoint());
 
 
-
+//        SimplexOptimizer optimizer = new SimplexOptimizer(1e-10, 1e-30);
+//        uniqueness = optimizer.optimize(new MaxEval(10000),
+//                new ObjectiveFunction(minres),
+//                GoalType.MINIMIZE,
+//                new InitialGuess(getInitialValues()),
+//                new NelderMeadSimplex(minres.getStartValues()),
+//                SimpleBounds.unbounded(nParameters));
+//        System.out.println("Fmin: " + uniqueness.getValue() + "  Iter: " + optimizer.getEvaluations());
+//        minres.computeFactorLoadings(uniqueness.getPoint());
 
 
     }
@@ -125,22 +134,76 @@ public class FactorAnalysis {
         return f.toString();
     }
 
-//    public String printFactorLoadings(){
-//        StringBuilder sb = new StringBuilder();
-//        Formatter f = new Formatter(sb);
-//
-//        int offset = 0;
-//        int offset2 = nVariables*nFactors;
-//        for(int i=0;i<nVariables;i++){
-//            f.format("%10s", "v"+(i+1));
-//            for(int j=0;j<nFactors;j++){
-//                f.format("%10.4f", uniqueness.getPoint()[offset++]); f.format("%5s", "");
-//            }
-//            f.format("%10.4f", uniqueness.getPoint()[offset2++]);
-//            f.format("%n");
-//        }
-//
-//        return f.toString();
-//    }
+    public String printOutput(){
+        StringBuilder sb = new StringBuilder();
+        Formatter f = new Formatter(sb);
+
+        int size = 24;
+        String line1 = "=========================";
+        String line2 = "-------------------------";
+        for(int j=0;j<nFactors;j++){
+            size = size + 10;
+            line1 += "==========";
+            line2 += "----------";
+        }
+        size = size + 10;
+        line1 += "==========";
+        line2 += "----------";
+        size = size + 6;
+        line1 += "======";
+        line2 += "------";
+
+
+        f.format("%36s", "MINRES Factor Analysis (no rotation)"); f.format("%n");
+        f.format("%"+size+"s", line1);f.format("%n");
+        f.format("%20s", "Name"); f.format("%4s", "");
+        for(int j=0;j<nFactors;j++){
+            f.format("%6s", "F"+(j+1)); f.format("%4s", "");
+        }
+        f.format("%6s", "H2");f.format("%4s", "");f.format("%6s", "U2");f.format("%n");
+        f.format("%"+size+"s", line2);f.format("%n");
+
+        for(int i=0;i<nVariables;i++){
+            f.format("%20s", "V"+ (i+1));f.format("%5s", "");
+            for(int j=0;j<nFactors;j++){
+                f.format("%6.2f",  minres.getFactorLoadingAt(i,j));f.format("%4s", "");
+            }
+            f.format("%6.2f", minres.getCommunalityAt(i));f.format("%4s", "");
+            f.format("%6.2f", minres.getUniquenessAt(i));f.format("%n");
+        }
+
+        f.format("%"+size+"s", line1);f.format("%n");
+        f.format("%30s", "Value of the objective function = "); f.format("%-8.4f", uniqueness.getValue());
+        f.format("%n");
+        f.format("%n");
+
+        f.format("%20s", "");
+        for(int j=0;j<nFactors;j++){
+            f.format("%6s", "F" + (j+1)); f.format("%2s", "");
+        }
+        f.format("%n");
+
+        f.format("%20s", "SS loadings");
+        for(int j=0;j<nFactors;j++){
+            f.format("%6.2f", minres.getSumsOfSquaresAt(j)); f.format("%2s", "");
+        }
+        f.format("%n");
+
+        f.format("%20s", "Proportion Var");
+        for(int j=0;j<nFactors;j++){
+            f.format("%6.2f", minres.getProportionOfVarianceAt(j)); f.format("%2s", "");
+        }
+        f.format("%n");
+
+        f.format("%20s", "Proportion Explained");
+        for(int j=0;j<nFactors;j++){
+            f.format("%6.2f", minres.getProportionOfExplainedVarianceAt(j)); f.format("%2s", "");
+        }
+        f.format("%n");
+
+
+
+        return f.toString();
+    }
 
 }

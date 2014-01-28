@@ -1,12 +1,12 @@
-/*
- * Copyright 2012 J. Patrick Meyer
- *
+/**
+ * Copyright 2014 J. Patrick Meyer
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,31 +15,23 @@
  */
 package com.itemanalysis.psychometrics.analysis;
 
-
 import com.itemanalysis.psychometrics.optimization.DiffFunction;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
-import org.apache.commons.math3.analysis.differentiation.MultivariateDifferentiableFunction;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
 import java.util.Arrays;
 
-/**
- * Abstract class that includes methods for numeric computations of teh gradient, partial derivatives, and hessian.
- * Extend this class with an implementation of the rho(double[] x) method as specified in the MultivariateRealFunction
- * interface.
- *
- */
-public abstract class AbstractMultivariateFunction implements MultivariateFunction {
+public abstract class AbstractDiffFunction implements DiffFunction {
 
     private double EPSILON = 1e-8;
 
-    public AbstractMultivariateFunction(){
+    public AbstractDiffFunction(){
 
     }
 
-    public AbstractMultivariateFunction(double EPSILON){
+    public AbstractDiffFunction(double EPSILON){
         this.EPSILON = EPSILON;
     }
 
@@ -67,6 +59,10 @@ public abstract class AbstractMultivariateFunction implements MultivariateFuncti
                 return gradient(point)[k];
             }
         };
+    }
+
+    public double value(double[] x){
+        return valueAt(x);
     }
 
     /**
@@ -99,6 +95,10 @@ public abstract class AbstractMultivariateFunction implements MultivariateFuncti
             grd[i] = (f1-f2)/(2.0*stepSize);
         }
         return grd;
+    }
+
+    public double[] derivativeAt(double[] x){
+        return gradient(x);
     }
 
     /**

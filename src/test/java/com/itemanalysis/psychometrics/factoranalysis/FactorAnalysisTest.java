@@ -57,70 +57,46 @@ public class FactorAnalysisTest {
         return harman74;
     }
 
-
-    @Test
-    public void eigenValues(){
-        RealMatrix R = new Array2DRowRealMatrix(readHarman74Data());
-
-        int nFactors = 2;
-        int nVariables=24;
-        double[] x = new double[nVariables];
-        for(int i=0;i<nVariables;i++){
-            x[i]=.5;
-        }
-
-        for(int i=0;i<nVariables;i++){
-            R.setEntry(i,i,1.0-x[i]);
-        }
-
-        EigenDecomposition eigen = new EigenDecomposition(R);
-        RealMatrix eigenVectors = eigen.getV().getSubMatrix(0,nVariables-1, 0, nFactors-1);
-
-        double[] ev = new double[nFactors];
-        for(int i=0;i<nFactors;i++){
-            ev[i] = Math.sqrt(eigen.getRealEigenvalue(i));
-        }
-        DiagonalMatrix evMatrix = new DiagonalMatrix(ev);//USE Apache version of Diagonal matrix when upgrade to version 3.2
-        RealMatrix LAMBDA = eigenVectors.multiply(evMatrix);
-        RealMatrix SIGMA = (LAMBDA.multiply(LAMBDA.transpose()));
-        RealMatrix RESID = R.subtract(SIGMA);
-
-        double sum = 0.0;
-        double squared = 0.0;
-        for(int i=0;i<RESID.getRowDimension();i++){
-            for(int j=0;j<RESID.getColumnDimension();j++){
-                if(i!=j){
-                    sum += Math.pow(RESID.getEntry(i,j),2);
+    private double[][] readM255(){
+        double[][] harman74 = new double[12][12];
+        try{
+            File f = FileUtils.toFile(this.getClass().getResource("/testdata/m255-cor.txt"));
+            BufferedReader br = new BufferedReader(new FileReader(f));
+            String line = "";
+            String[] s = null;
+            int row = 0;
+            while((line=br.readLine())!=null){
+                s = line.split(",");
+                for(int j=0;j<s.length;j++){
+                    harman74[row][j] = Double.parseDouble(s[j]);
                 }
+                row++;
             }
+            br.close();
+        }catch(IOException ex){
+            ex.printStackTrace();
         }
-
-
-        System.out.println(sum);
-
-
-
-
-
-//        RealMatrix SIGMA = (LAMBDA.multiply(LAMBDA.transpose()));
-//
-//        System.out.println("SIGMA");
-//        for(int i=0;i<SIGMA.getRowDimension();i++){
-//            for(int j=0;j<SIGMA.getColumnDimension();j++){
-//                System.out.print(SIGMA.getEntry(i, j) + " ");
-//            }
-//            System.out.println();
-//        }
+        return harman74;
     }
 
     //@Ignore
     @Test
     public void harmanTest(){
         RealMatrix correlationMatrix = new Array2DRowRealMatrix(readHarman74Data());
-        FactorAnalysis fa = new FactorAnalysis(correlationMatrix, 2);
+        FactorAnalysis fa = new FactorAnalysis(correlationMatrix, 4);
         fa.estimateParameters();
-        System.out.println(fa.printFactorLoadings());
+        System.out.println(fa.printOutput());
 
+
+
+    }
+
+    @Test
+    public void m255Test(){
+        RealMatrix R = new Array2DRowRealMatrix(readM255());
+        FactorAnalysis fa = new FactorAnalysis(R, 3);
+        fa.estimateParameters();
+        System.out.println(fa.printOutput());
 
 
     }

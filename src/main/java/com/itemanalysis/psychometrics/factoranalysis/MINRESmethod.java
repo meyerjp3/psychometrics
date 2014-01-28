@@ -15,29 +15,43 @@
  */
 package com.itemanalysis.psychometrics.factoranalysis;
 
+import com.itemanalysis.psychometrics.analysis.AbstractDiffFunction;
+import com.itemanalysis.psychometrics.analysis.AbstractMultivariateFunction;
 import com.itemanalysis.psychometrics.measurement.DiagonalMatrix;
 import com.itemanalysis.psychometrics.optimization.DiffFunction;
 import com.itemanalysis.psychometrics.statistics.IdentityMatrix;
 import org.apache.commons.math3.analysis.MultivariateFunction;
+import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.linear.*;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
+import org.apache.commons.math3.stat.descriptive.summary.Sum;
 
+import java.util.Arrays;
 import java.util.Formatter;
 
-public class MINRESmethod implements DiffFunction, MultivariateFunction{
+public class MINRESmethod extends AbstractMultivariateFunction{//for commons math conjugate gradient method
+//public class MINRESmethod implements MultivariateFunction, DiffFunction {
+//    public class MINRESmethod extends AbstractDiffFunction {//use this for QNMethod optimizer
 
     private RealMatrix R = null;
+    private RealMatrix R2 = null;
     private int nVariables = 0;
     private int nFactors = 1;
     private int nParam = 0;
     private double[][] factorLoading = null;
-
+    private double[] uniqueness = null;
+    private double[] communality = null;
+    private double[] sumsOfSquares = null;
+    private double[] proportionOfVariance = null;
+    private double[] proportionOfExplainedVariance = null;
 
     public MINRESmethod(RealMatrix R, int nFactors){
         this.nVariables = R.getColumnDimension();
         this.nParam = nVariables;
         this.nFactors = nFactors;
         this.R = R;
-
+        this.R2 = R.copy();
     }
 
     public int domainDimension(){
@@ -77,39 +91,69 @@ public class MINRESmethod implements DiffFunction, MultivariateFunction{
 
     }
 
-//    public double valueAt(double[] param){
-//        RealMatrix LAMBDA = new Array2DRowRealMatrix(nVariables, nFactors);
-//        IdentityMatrix U = new IdentityMatrix(nVariables);
-//        int offset = 0;
+    //something's not right with this gradient is crashes in teh Eigenvalue decomposition.
+    //gradient computed numerically instead;
+//    /**
+//     * Gradient
+//     *
+//     * @param x a <code>double[]</code> input vector
+//     * @return
+//     */
+//    public double[] derivativeAt(double[] x){
+//        double[] sqrtPsi = new double[nVariables];
+//        double[] invSqrtPsi = new double[nVariables];
 //        for(int i=0;i<nVariables;i++){
-//            for(int j=0;j<nFactors;j++){
-//                LAMBDA.setEntry(i,j,param[offset++]);
-//            }
+//            sqrtPsi[i] = Math.sqrt(x[i]);
+//            invSqrtPsi[i] = 1.0/Math.sqrt(x[i]);
 //        }
+//        DiagonalMatrix diagPsi = new DiagonalMatrix(x);
+//        DiagonalMatrix diagSqtPsi = new DiagonalMatrix(sqrtPsi);
+//        DiagonalMatrix SC = new DiagonalMatrix(invSqrtPsi);
+//
+//        RealMatrix Sstar = SC.multiply(R2).multiply(SC);
+//
+//        EigenDecomposition E = new EigenDecomposition(Sstar);
+//        RealMatrix L = E.getV().getSubMatrix(0,nVariables-1, 0, nFactors-1);
+//        double[] ev = new double[nFactors];
+//        for(int i=0;i<nFactors;i++){
+//            ev[i] = Math.sqrt(Math.max(E.getRealEigenvalue(i) - 1, 0));
+//        }
+//        DiagonalMatrix M = new DiagonalMatrix(ev);
+//        RealMatrix LOAD = L.multiply(M);
+//
+//        RealMatrix LL = diagSqtPsi.multiply(LOAD);
+//        RealMatrix G = LL.multiply(LL.transpose()).add(diagPsi).subtract(R2);
+//
+//        double[] gradient = new double[nVariables];
 //        for(int i=0;i<nVariables;i++){
-//            U.setEntry(i,i,Math.pow(param[offset++],2));
+//            gradient[i] = G.getEntry(i,i)/(x[i]*x[i]);
 //        }
-//
-//        RealMatrix SIGMA = (LAMBDA.multiply(LAMBDA.transpose())).add(U);
-//        RealMatrix D = R.subtract(SIGMA);
-//        for(int i=0;i<D.getRowDimension();i++){
-//            for(int j=0;j<D.getColumnDimension();j++){
-//                D.setEntry(i,j, Math.pow(D.getEntry(i, j), 2));
-//            }
-//        }
-//
-//        double f = 0.5*D.getTrace();
-//        return f;
+//        return gradient;
 //
 //    }
 
-    /**
-     * Gradient
-     *
-     * @param x a <code>double[]</code> input vector
-     * @return
-     */
-    public double[] derivativeAt(double[] x){
+    //here for ConjugateGradientMethod
+    public ObjectiveFunction getObjectiveFunction() {
+        return new ObjectiveFunction(new MultivariateFunction() {
+            public double value(double[] point) {
+                return valueAt(point);
+            }
+        });
+    }
+
+    //here for ConjugateGradientMethod
+    public ObjectiveFunctionGradient getObjectiveFunctionGradient() {
+        return new ObjectiveFunctionGradient(new MultivariateVectorFunction() {
+            public double[] value(double[] point) {
+                return gradient(point);
+            }
+        });
+    }
+
+    public void computeFactorLoadings(double[] x){
+        uniqueness = x;
+        communality = new double[nVariables];
+
         double[] sqrtPsi = new double[nVariables];
         double[] invSqrtPsi = new double[nVariables];
         for(int i=0;i<nVariables;i++){
@@ -120,41 +164,7 @@ public class MINRESmethod implements DiffFunction, MultivariateFunction{
         DiagonalMatrix diagSqtPsi = new DiagonalMatrix(sqrtPsi);
         DiagonalMatrix diagInvSqrtPsi = new DiagonalMatrix(invSqrtPsi);
 
-        RealMatrix Sstar = diagInvSqrtPsi.multiply(R).multiply(diagInvSqrtPsi);
-
-        EigenDecomposition E = new EigenDecomposition(Sstar);
-        RealMatrix L = E.getV().getSubMatrix(0,nVariables-1, 0, nFactors-1);
-        double[] ev = new double[nFactors];
-        for(int i=0;i<nFactors;i++){
-            ev[i] = Math.sqrt(Math.max(E.getRealEigenvalue(i) - 1, 0));
-        }
-        DiagonalMatrix M = new DiagonalMatrix(ev);
-        RealMatrix LOAD = L.multiply(M);
-
-        RealMatrix LL = diagSqtPsi.multiply(LOAD);
-        RealMatrix G = LL.multiply(LL.transpose()).add(diagPsi).subtract(R);
-
-        double[] gradient = new double[nVariables];
-        for(int i=0;i<nVariables;i++){
-            gradient[i] = G.getEntry(i,i)/(x[i]*x[i]);
-        }
-        return gradient;
-    }
-
-    //NOT WORKING
-    //TODO check these computations
-    public void computeFactorLoadings(double[] x, RealMatrix cor){
-        double[] sqrtPsi = new double[nVariables];
-        double[] invSqrtPsi = new double[nVariables];
-        for(int i=0;i<nVariables;i++){
-            sqrtPsi[i] = Math.sqrt(x[i]);
-            invSqrtPsi[i] = 1.0/Math.sqrt(x[i]);
-        }
-//        DiagonalMatrix diagPsi = new DiagonalMatrix(x);
-        DiagonalMatrix diagSqtPsi = new DiagonalMatrix(sqrtPsi);
-        DiagonalMatrix diagInvSqrtPsi = new DiagonalMatrix(invSqrtPsi);
-
-        RealMatrix Sstar = diagInvSqrtPsi.multiply(cor).multiply(diagInvSqrtPsi);
+        RealMatrix Sstar = diagInvSqrtPsi.multiply(R2).multiply(diagInvSqrtPsi);
         EigenDecomposition E = new EigenDecomposition(Sstar);
         RealMatrix L = E.getV().getSubMatrix(0,nVariables-1, 0, nFactors-1);
         double[] ev = new double[nFactors];
@@ -165,13 +175,68 @@ public class MINRESmethod implements DiffFunction, MultivariateFunction{
         RealMatrix LOAD2 = L.multiply(M);
         RealMatrix LOAD = diagSqtPsi.multiply(LOAD2);
 
+        Sum[] colSums = new Sum[nFactors];
+        Sum[] colSumsSquares = new Sum[nFactors];
+
+        for(int j=0;j<nFactors;j++){
+            colSums[j] = new Sum();
+            colSumsSquares[j] = new Sum();
+        }
+
         factorLoading = new double[nVariables][nFactors];
+
         for(int i=0;i<nVariables;i++){
             for(int j=0;j<nFactors;j++){
                 factorLoading[i][j] = LOAD.getEntry(i,j);
+                colSums[j].increment(factorLoading[i][j]);
+                colSumsSquares[j].increment(Math.pow(factorLoading[i][j],2));
+                communality[i] += Math.pow(factorLoading[i][j], 2);
             }
         }
 
+        //check sign of factor
+        double sign = 1.0;
+        for(int i=0;i<nVariables;i++){
+            for(int j=0;j<nFactors;j++){
+                if(colSums[j].getResult()<0){
+                    sign = -1.0;
+                }else{
+                    sign = 1.0;
+                }
+                factorLoading[i][j] = factorLoading[i][j]*sign;
+            }
+        }
+
+        double totSumOfSquares = 0.0;
+        sumsOfSquares = new double[nFactors];
+        proportionOfExplainedVariance = new double[nFactors];
+        proportionOfVariance = new double[nFactors];
+        for(int j=0;j<nFactors;j++){
+            sumsOfSquares[j] = colSumsSquares[j].getResult();
+            totSumOfSquares += sumsOfSquares[j];
+        }
+        for(int j=0;j<nFactors;j++){
+            proportionOfExplainedVariance[j] = sumsOfSquares[j]/totSumOfSquares;
+            proportionOfVariance[j] = sumsOfSquares[j]/nVariables;
+        }
+
+    }
+
+    public double[] getStartValues(){
+        double[] start = new double[nVariables];
+
+        if(nFactors==1){
+            for(int i=0;i<nVariables;i++){
+                start[i] = 0.5;
+            }
+        }else{
+            RealMatrix rInverse = new LUDecomposition(R2).getSolver().getInverse();
+            for(int i=0;i<nVariables;i++){
+                start[i] = Math.min(1.0/rInverse.getEntry(i,i), 1.0);
+            }
+        }
+
+        return start;
     }
 
     public double[][] getFactorLoading(){
@@ -181,6 +246,39 @@ public class MINRESmethod implements DiffFunction, MultivariateFunction{
     public double getFactorLoadingAt(int i, int j){
         return factorLoading[i][j];
     }
+
+    public double getUniquenessAt(int i){
+        return uniqueness[i];
+    }
+
+    public double getCommunalityAt(int i){
+        return communality[i];
+    }
+
+    public double getSumsOfSquaresAt(int j){
+        return sumsOfSquares[j];
+    }
+
+    public double getProportionOfExplainedVarianceAt(int j){
+        return proportionOfExplainedVariance[j];
+    }
+
+    public double getProportionOfVarianceAt(int j){
+        return proportionOfVariance[j];
+    }
+
+    public String printStartValues(){
+        StringBuilder sb = new StringBuilder();
+        Formatter f = new Formatter(sb);
+
+        double[] start = getStartValues();
+        for(int i=0;i<start.length;i++){
+            f.format("%8.4f", start[i]);f.format("%n");
+        }
+        return f.toString();
+    }
+
+
 
 
 }

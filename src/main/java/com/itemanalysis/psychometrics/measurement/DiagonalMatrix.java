@@ -16,6 +16,7 @@
 package com.itemanalysis.psychometrics.measurement;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
 
 /**
  *
@@ -41,6 +42,22 @@ public class DiagonalMatrix  extends Array2DRowRealMatrix {
                 else this.setEntry(i, j, 0.0);
             }
         }
+    }
+
+    public DiagonalMatrix(RealMatrix matrix){
+        super(matrix.getColumnDimension(), matrix.getColumnDimension());
+        int ncol = matrix.getColumnDimension();
+        for(int i=0;i<ncol;i++){
+            for(int j=0;j<ncol;j++){
+                if(i==j){
+                    this.setEntry(i,j,matrix.getEntry(i,j));
+                }else{
+                    this.setEntry(i,j, 0.0);
+                }
+            }
+        }
+
+
     }
 
 }
