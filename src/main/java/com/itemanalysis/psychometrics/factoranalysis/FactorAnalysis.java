@@ -34,19 +34,19 @@ import java.util.Formatter;
 
 public class FactorAnalysis {
 
-    private PointValuePair uniqueness = null;
     private RealMatrix correlationMatrix = null;
     private int nVariables = 0;
     private int nFactors = 0;
     private int nParameters = 0;
-    private MINRESmethod minres = null;
+    private FactorModel factorModel = null;
+    private double fmin = 0.0;
+    private String title = "";
 
     public FactorAnalysis(RealMatrix correlationMatrix, int nFactors){
         this.correlationMatrix = correlationMatrix;
         this.nFactors = Math.max(nFactors, 1);
         this.nVariables = correlationMatrix.getColumnDimension();
         this.nParameters = nVariables;
-//        this.nParameters = nVariables*nFactors;
     }
 
     private double[] getInitialValues(){
@@ -73,17 +73,28 @@ public class FactorAnalysis {
         return ub;
     }
 
-    public void estimateParameters(){
-        minres = new MINRESmethod(correlationMatrix, nFactors);
-        NonLinearConjugateGradientOptimizer optimizer
-                = new NonLinearConjugateGradientOptimizer(NonLinearConjugateGradientOptimizer.Formula.POLAK_RIBIERE,
-                new SimpleValueChecker(1e-8, 1e-8));
-        uniqueness = optimizer.optimize(new MaxEval(1000),
-                minres.getObjectiveFunction(),
-                minres.getObjectiveFunctionGradient(),
-                GoalType.MINIMIZE,
-                new InitialGuess(getInitialValues()));
-        minres.computeFactorLoadings(uniqueness.getPoint());
+    public void estimateParameters(EstimationMethod fm){
+
+        if(fm==EstimationMethod.PRINCOMP){
+            factorModel = new PrincipalComponents(correlationMatrix, nFactors);
+            title = "Principal Components Analysis (no rotation)";
+        }else{
+            factorModel = new MINRESmethod(correlationMatrix, nFactors);
+            title = "MINRES Factor Analysis (no rotation)";
+        }
+
+        fmin = factorModel.estimateParameters();
+
+//        minres = new MINRESmethod(correlationMatrix, nFactors);
+//        NonLinearConjugateGradientOptimizer optimizer
+//                = new NonLinearConjugateGradientOptimizer(NonLinearConjugateGradientOptimizer.Formula.POLAK_RIBIERE,
+//                new SimpleValueChecker(1e-8, 1e-8));
+//        uniqueness = optimizer.optimize(new MaxEval(1000),
+//                minres.getObjectiveFunction(),
+//                minres.getObjectiveFunctionGradient(),
+//                GoalType.MINIMIZE,
+//                new InitialGuess(getInitialValues()));
+//        minres.computeFactorLoadings(uniqueness.getPoint());
 
 
 //FOR R way
@@ -116,23 +127,23 @@ public class FactorAnalysis {
 
     }
 
-    public String printFactorLoadings(){
-        StringBuilder sb = new StringBuilder();
-        Formatter f = new Formatter(sb);
-
-        int offset = 0;
-        int offset2 = nVariables*nFactors;
-        for(int i=0;i<nVariables;i++){
-            f.format("%10s", "v"+(i+1));
-            for(int j=0;j<nFactors;j++){
-                f.format("%10.4f", minres.getFactorLoadingAt(i,j)); f.format("%5s", "");
-            }
-            f.format("%10.4f", uniqueness.getPoint()[i]);
-            f.format("%n");
-        }
-
-        return f.toString();
-    }
+//    public String printFactorLoadings(){
+//        StringBuilder sb = new StringBuilder();
+//        Formatter f = new Formatter(sb);
+//
+//        int offset = 0;
+//        int offset2 = nVariables*nFactors;
+//        for(int i=0;i<nVariables;i++){
+//            f.format("%10s", "v"+(i+1));
+//            for(int j=0;j<nFactors;j++){
+//                f.format("%10.4f", minres.getFactorLoadingAt(i,j)); f.format("%5s", "");
+//            }
+//            f.format("%10.4f", uniqueness.getPoint()[i]);
+//            f.format("%n");
+//        }
+//
+//        return f.toString();
+//    }
 
     public String printOutput(){
         StringBuilder sb = new StringBuilder();
@@ -154,7 +165,7 @@ public class FactorAnalysis {
         line2 += "------";
 
 
-        f.format("%36s", "MINRES Factor Analysis (no rotation)"); f.format("%n");
+        f.format("%36s", title); f.format("%n");
         f.format("%"+size+"s", line1);f.format("%n");
         f.format("%20s", "Name"); f.format("%4s", "");
         for(int j=0;j<nFactors;j++){
@@ -166,14 +177,14 @@ public class FactorAnalysis {
         for(int i=0;i<nVariables;i++){
             f.format("%20s", "V"+ (i+1));f.format("%5s", "");
             for(int j=0;j<nFactors;j++){
-                f.format("%6.2f",  minres.getFactorLoadingAt(i,j));f.format("%4s", "");
+                f.format("%6.2f",  factorModel.getFactorLoadingAt(i,j));f.format("%4s", "");
             }
-            f.format("%6.2f", minres.getCommunalityAt(i));f.format("%4s", "");
-            f.format("%6.2f", minres.getUniquenessAt(i));f.format("%n");
+            f.format("%6.2f", factorModel.getCommunalityAt(i));f.format("%4s", "");
+            f.format("%6.2f", factorModel.getUniquenessAt(i));f.format("%n");
         }
 
         f.format("%"+size+"s", line1);f.format("%n");
-        f.format("%30s", "Value of the objective function = "); f.format("%-8.4f", uniqueness.getValue());
+        f.format("%30s", "Value of the objective function = "); f.format("%-8.4f", fmin);
         f.format("%n");
         f.format("%n");
 
@@ -185,19 +196,19 @@ public class FactorAnalysis {
 
         f.format("%20s", "SS loadings");
         for(int j=0;j<nFactors;j++){
-            f.format("%6.2f", minres.getSumsOfSquaresAt(j)); f.format("%2s", "");
+            f.format("%6.2f", factorModel.getSumsOfSquaresAt(j)); f.format("%2s", "");
         }
         f.format("%n");
 
         f.format("%20s", "Proportion Var");
         for(int j=0;j<nFactors;j++){
-            f.format("%6.2f", minres.getProportionOfVarianceAt(j)); f.format("%2s", "");
+            f.format("%6.2f", factorModel.getProportionOfVarianceAt(j)); f.format("%2s", "");
         }
         f.format("%n");
 
         f.format("%20s", "Proportion Explained");
         for(int j=0;j<nFactors;j++){
-            f.format("%6.2f", minres.getProportionOfExplainedVarianceAt(j)); f.format("%2s", "");
+            f.format("%6.2f", factorModel.getProportionOfExplainedVarianceAt(j)); f.format("%2s", "");
         }
         f.format("%n");
 

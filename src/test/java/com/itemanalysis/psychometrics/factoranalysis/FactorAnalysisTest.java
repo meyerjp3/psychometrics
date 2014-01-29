@@ -79,26 +79,46 @@ public class FactorAnalysisTest {
         return harman74;
     }
 
-    //@Ignore
     @Test
-    public void harmanTest(){
+    public void harmanTestMINRES(){
+        System.out.println("MINRES Factor Analysis Test: Harman data");
         RealMatrix correlationMatrix = new Array2DRowRealMatrix(readHarman74Data());
         FactorAnalysis fa = new FactorAnalysis(correlationMatrix, 4);
-        fa.estimateParameters();
+        fa.estimateParameters(EstimationMethod.MINRES);
+        System.out.println();
         System.out.println(fa.printOutput());
-
-
-
     }
 
     @Test
-    public void m255Test(){
+    public void m255TestMINRES(){
+        System.out.println("MINRES Factor Analysis Test: m255 data");
         RealMatrix R = new Array2DRowRealMatrix(readM255());
         FactorAnalysis fa = new FactorAnalysis(R, 3);
-        fa.estimateParameters();
+        fa.estimateParameters(EstimationMethod.MINRES);
+        System.out.println();
         System.out.println(fa.printOutput());
-
-
     }
+
+    @Test
+    public void harmanTestPrincipalComponents(){
+        System.out.println("Principal Components Analysis Test: Harman data");
+        RealMatrix R = new Array2DRowRealMatrix(readHarman74Data());
+        FactorAnalysis fa = new FactorAnalysis(R, 4);
+        fa.estimateParameters(EstimationMethod.PRINCOMP);
+        System.out.println();
+        System.out.println(fa.printOutput());
+    }
+
+    @Test
+    public void m255TestPrincipalComponents(){
+        System.out.println("Principal Components Analysis Test: m255 data");
+        RealMatrix R = new Array2DRowRealMatrix(readM255());
+        FactorAnalysis fa = new FactorAnalysis(R, 3);
+        fa.estimateParameters(EstimationMethod.PRINCOMP);
+        System.out.println();
+        System.out.println(fa.printOutput());
+    }
+
+
 
 }
