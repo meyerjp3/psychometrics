@@ -821,9 +821,11 @@ public class JointMaximumLikelihoodEstimation {
      * @param scale scale transformation coefficient.
      */
     public void linearTransformation(double intercept, double scale){
+
         for(ItemResponseModel m:irm){
             m.scale(intercept, scale);
         }
+
         for(int i=0;i<nPeople;i++){
             theta[i] = scale*theta[i]+intercept;
             thetaStdError[i] = thetaStdError[i]*scale;
@@ -1095,8 +1097,8 @@ public class JointMaximumLikelihoodEstimation {
                                   DefaultLinearTransformation transformation, int precision){
         RaschScoreTable table = new RaschScoreTable(irm, extremeItem, droppedStatus);
         table.updateScoreTable(maxIter, converge, adjustment);
-        table.linearTransformation(transformation, precision);
         table.computePersonStandardErrors();
+        table.linearTransformation(transformation, precision);//must come after computation of standard errors
         return table.printScoreTable();
     }
 
