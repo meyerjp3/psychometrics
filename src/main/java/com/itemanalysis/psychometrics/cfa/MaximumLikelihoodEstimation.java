@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
  *
  * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
  */
+@Deprecated
 public class MaximumLikelihoodEstimation extends AbstractConfirmatoryFactorAnalysisEstimator{
 
     //compute determinant of varcov

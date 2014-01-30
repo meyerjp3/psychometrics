@@ -28,6 +28,7 @@ import java.util.Formatter;
  *
  * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
  */
+@Deprecated
 public abstract class AbstractConfirmatoryFactorAnalysisEstimator extends AbstractMultivariateFunction
         implements ConfirmatoryFactorAnalysisEstimator{
     

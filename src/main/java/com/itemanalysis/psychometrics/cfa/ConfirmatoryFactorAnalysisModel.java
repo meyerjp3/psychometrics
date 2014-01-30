@@ -22,6 +22,7 @@ import org.apache.commons.math3.linear.RealMatrix;
  *
  * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
  */
+@Deprecated
 public interface ConfirmatoryFactorAnalysisModel {
 
     public final static int CONGENERIC = 1;

@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
  *
  * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
  */
+@Deprecated
 public class GeneralizedLeastSquares extends AbstractConfirmatoryFactorAnalysisEstimator {
 
     static Logger logger = Logger.getLogger("jmetrik-logger");

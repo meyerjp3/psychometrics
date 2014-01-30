@@ -23,6 +23,7 @@ import org.apache.commons.math3.linear.RealMatrix;
  *
  * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
  */
+@Deprecated
 public class TauEquivalentModel extends AbstractConfirmatoryFactorAnalysisModel{
 
     RealMatrix SIGMA = null;

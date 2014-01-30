@@ -25,6 +25,7 @@ import java.util.ArrayList;
  *
  * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
  */
+@Deprecated
 public interface ConfirmatoryFactorAnalysisEstimator extends DifferentiableMultivariateFunction {
 
     public final static int UNWEIGHTED_LEAST_SQUARES = 1;

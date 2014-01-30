@@ -27,6 +27,7 @@ import java.util.Formatter;
  *
  * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
  */
+@Deprecated
 public class CfaSummary{
     
     private Array2DRowRealMatrix cfaMatrix = null;

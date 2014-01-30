@@ -17,6 +17,7 @@ package com.itemanalysis.psychometrics.cfa;
 
 import org.apache.commons.math3.linear.RealMatrix;
 
+@Deprecated
 public class ConfirmatoryFactorAnalysis {
 
     private ConfirmatoryFactorAnalysisModel model = null;

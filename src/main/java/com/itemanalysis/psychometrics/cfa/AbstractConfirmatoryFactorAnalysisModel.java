@@ -19,6 +19,7 @@ package com.itemanalysis.psychometrics.cfa;
  *
  * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
  */
+@Deprecated
 public abstract class AbstractConfirmatoryFactorAnalysisModel implements ConfirmatoryFactorAnalysisModel{
     
     public double[] factorLoading = null;

@@ -19,6 +19,7 @@ package com.itemanalysis.psychometrics.cfa;
  *
  * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
  */
+@Deprecated
 public interface OptimizationMethod {
 
     public final static int CONJUGATE_GRADIENT = 1;
