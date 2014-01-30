@@ -15,34 +15,21 @@
  */
 package com.itemanalysis.psychometrics.factoranalysis;
 
-import com.itemanalysis.psychometrics.optimization.BOBYQAOptimizer;
-import com.itemanalysis.psychometrics.optimization.CGMinimizer;
-import com.itemanalysis.psychometrics.optimization.QNMinimizer;
 import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.optim.*;
-import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
-import org.apache.commons.math3.optim.nonlinear.scalar.MultiStartMultivariateOptimizer;
-import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
-import org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer;
-import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
-import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
-import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
-import org.apache.commons.math3.random.*;
 
-import java.util.Arrays;
 import java.util.Formatter;
 
-public class FactorAnalysis {
+public class ExploratoryFactorAnalysis {
 
     private RealMatrix correlationMatrix = null;
     private int nVariables = 0;
     private int nFactors = 0;
     private int nParameters = 0;
-    private FactorModel factorModel = null;
+    private FactorMethod factorMethod = null;
     private double fmin = 0.0;
     private String title = "";
 
-    public FactorAnalysis(RealMatrix correlationMatrix, int nFactors){
+    public ExploratoryFactorAnalysis(RealMatrix correlationMatrix, int nFactors){
         this.correlationMatrix = correlationMatrix;
         this.nFactors = Math.max(nFactors, 1);
         this.nVariables = correlationMatrix.getColumnDimension();
@@ -76,14 +63,17 @@ public class FactorAnalysis {
     public void estimateParameters(EstimationMethod fm){
 
         if(fm==EstimationMethod.PRINCOMP){
-            factorModel = new PrincipalComponents(correlationMatrix, nFactors);
+            factorMethod = new PrincipalComponentsMethod(correlationMatrix, nFactors);
             title = "Principal Components Analysis (no rotation)";
+        }else if(fm==EstimationMethod.ML){
+            factorMethod = new MaximumLikelihoodMethod(correlationMatrix, nFactors);
+            title = "Maximum Likelihood Factor Analysis (no rotation)";
         }else{
-            factorModel = new MINRESmethod(correlationMatrix, nFactors);
+            factorMethod = new MINRESmethod(correlationMatrix, nFactors);
             title = "MINRES Factor Analysis (no rotation)";
         }
 
-        fmin = factorModel.estimateParameters();
+        fmin = factorMethod.estimateParameters();
 
 //        minres = new MINRESmethod(correlationMatrix, nFactors);
 //        NonLinearConjugateGradientOptimizer optimizer
@@ -145,7 +135,15 @@ public class FactorAnalysis {
 //        return f.toString();
 //    }
 
+    public FactorMethod getFactorMethod(){
+        return factorMethod;
+    }
+
     public String printOutput(){
+        return printOutput(2);
+    }
+
+    public String printOutput(int precision){
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
 
@@ -177,10 +175,10 @@ public class FactorAnalysis {
         for(int i=0;i<nVariables;i++){
             f.format("%20s", "V"+ (i+1));f.format("%5s", "");
             for(int j=0;j<nFactors;j++){
-                f.format("%6.2f",  factorModel.getFactorLoadingAt(i,j));f.format("%4s", "");
+                f.format("%6."+precision+"f",  factorMethod.getFactorLoadingAt(i,j));f.format("%4s", "");
             }
-            f.format("%6.2f", factorModel.getCommunalityAt(i));f.format("%4s", "");
-            f.format("%6.2f", factorModel.getUniquenessAt(i));f.format("%n");
+            f.format("%6."+precision+"f", factorMethod.getCommunalityAt(i));f.format("%4s", "");
+            f.format("%6."+precision+"f", factorMethod.getUniquenessAt(i));f.format("%n");
         }
 
         f.format("%"+size+"s", line1);f.format("%n");
@@ -196,19 +194,19 @@ public class FactorAnalysis {
 
         f.format("%20s", "SS loadings");
         for(int j=0;j<nFactors;j++){
-            f.format("%6.2f", factorModel.getSumsOfSquaresAt(j)); f.format("%2s", "");
+            f.format("%6."+precision+"f", factorMethod.getSumsOfSquaresAt(j)); f.format("%2s", "");
         }
         f.format("%n");
 
         f.format("%20s", "Proportion Var");
         for(int j=0;j<nFactors;j++){
-            f.format("%6.2f", factorModel.getProportionOfVarianceAt(j)); f.format("%2s", "");
+            f.format("%6."+precision+"f", factorMethod.getProportionOfVarianceAt(j)); f.format("%2s", "");
         }
         f.format("%n");
 
         f.format("%20s", "Proportion Explained");
         for(int j=0;j<nFactors;j++){
-            f.format("%6.2f", factorModel.getProportionOfExplainedVarianceAt(j)); f.format("%2s", "");
+            f.format("%6."+precision+"f", factorMethod.getProportionOfExplainedVarianceAt(j)); f.format("%2s", "");
         }
         f.format("%n");
 

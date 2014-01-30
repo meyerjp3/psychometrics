@@ -20,20 +20,9 @@ import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.stat.descriptive.summary.Sum;
 
-public class PrincipalComponents implements FactorModel{
+public class PrincipalComponentsMethod extends AbstractFactorMethod {
 
-    private RealMatrix R = null;
-    private int nVariables = 0;
-    private int nFactors = 1;
-    private double[][] factorLoading = null;
-    private double[] uniqueness = null;
-    private double[] communality = null;
-    private double[] sumsOfSquares = null;
-    private double[] proportionOfExplainedVariance = null;
-    private double[] proportionOfVariance = null;
-
-
-    public PrincipalComponents(RealMatrix R, int nFactors){
+    public PrincipalComponentsMethod(RealMatrix R, int nFactors){
         this.R = R;
         this.nVariables = R.getColumnDimension();
         this.nFactors = nFactors;
@@ -103,28 +92,5 @@ public class PrincipalComponents implements FactorModel{
 
     }
 
-    public double getFactorLoadingAt(int i, int j){
-        return factorLoading[i][j];
-    }
-
-    public double getUniquenessAt(int i){
-        return uniqueness[i];
-    }
-
-    public double getCommunalityAt(int i){
-        return communality[i];
-    }
-
-    public double getSumsOfSquaresAt(int j){
-        return sumsOfSquares[j];
-    }
-
-    public double getProportionOfExplainedVarianceAt(int j){
-        return proportionOfExplainedVariance[j];
-    }
-
-    public double getProportionOfVarianceAt(int j){
-        return proportionOfVariance[j];
-    }
 
 }

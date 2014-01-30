@@ -15,7 +15,7 @@
  */
 package com.itemanalysis.psychometrics.factoranalysis;
 
-public interface FactorModel {
+public interface FactorMethod {
 
     public double estimateParameters();
 

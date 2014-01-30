@@ -17,6 +17,6 @@ package com.itemanalysis.psychometrics.factoranalysis;
 
 public enum EstimationMethod {
 
-    MINRES, PRINCOMP
+    MINRES, PRINCOMP, ML
 
 }

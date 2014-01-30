@@ -834,10 +834,14 @@ public class JointMaximumLikelihoodEstimation {
 
     public void computeItemFitStatistics(){
         itemFit = new RaschFitStatistics[nItems];
+
+        for(int j=0;j<nItems;j++){
+            itemFit[j] = new RaschFitStatistics();
+        }
+
         for(int i=0;i<nPeople;i++){
             if(extremePerson[i]==0){
                 for(int j=0;j<nItems;j++){
-                    if(i==0) itemFit[j] = new RaschFitStatistics();
                     if(data[i][j]>-1 && droppedStatus[j]==0) itemFit[j].increment(irm[j], theta[i], data[i][j]);
                 }
             }
