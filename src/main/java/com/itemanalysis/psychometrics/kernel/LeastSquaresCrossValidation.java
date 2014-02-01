@@ -23,7 +23,12 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math3.stat.descriptive.rank.Max;
 import org.apache.commons.math3.stat.descriptive.rank.Min;
 
-public class LeastSquaresCrossValidation implements Bandwidth, UnivariateFunction {
+/**
+ * A class for computing the bandwidth by least squares cross validation kernel. This clas
+ * is still in development. It needs more work and testing. Not ready for use.
+ *
+ **/
+ public class LeastSquaresCrossValidation implements Bandwidth, UnivariateFunction {
 
     private KernelFunction kernel = null;
 

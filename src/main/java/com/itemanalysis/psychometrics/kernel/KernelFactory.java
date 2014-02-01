@@ -15,6 +15,9 @@
  */
 package com.itemanalysis.psychometrics.kernel;
 
+/**
+ * A factory class for returning either the kernel class or the name of the type of kernel
+ */
 public class KernelFactory {
 
     private KernelType type = KernelType.GAUSSIAN;

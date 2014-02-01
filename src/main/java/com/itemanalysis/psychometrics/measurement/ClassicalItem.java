@@ -25,6 +25,12 @@ import java.util.Iterator;
 import java.util.TreeMap;
 
 /**
+ * This is the main class for conducting a classical item analysis. It scores the item
+ * and incrementally updates the item statistics. Output includes item difficulty
+ * and discrimination.
+ *
+ * It computes statistic for the entire item ("overall") and optionally for each
+ * possible response option.
  *
  * @author J. Patrick Meyer 
  */
@@ -34,16 +40,34 @@ public class ClassicalItem {
 
     private TreeMap<Object, ItemStats> categoryStats = null;
 
+    /**
+     * Use a bias corrected standard deviation (n-1) if true. Otherwise use a biased estimator (n).
+     */
     private boolean biasCorrection = true;
 
+    /**
+     * compute statistic for all response options.
+     */
     boolean allCategories = true;
 
+    /**
+     * Information about teh variable
+     */
     private VariableInfo varInfo = null;
 
+    /**
+     * A continuous item (not binary and not polytomous)
+     */
     private boolean continuousItem = false;
 
+    /**
+     * Use a Pearson type correlation
+     */
     private boolean pearson = true;
 
+    /**
+     * Item scoring tells the class how to score each possible response option.
+     */
     private DefaultItemScoring itemScoring = null;
 
     public ClassicalItem(VariableInfo varInfo){
@@ -81,6 +105,12 @@ public class ClassicalItem {
         return varInfo.getType().getItemType()==VariableType.CONTINUOUS_ITEM;
     }
 
+    /**
+     * Incrementally update item statistics
+     *
+     * @param rawScore sum score for the entire test
+     * @param response observed item response (not the score value)
+     */
     public void increment(RawScore rawScore, Object response){
         double testScore = rawScore.value();
         double itemScore = itemScoring.computeItemScore(response, varInfo.getType());
@@ -108,47 +138,100 @@ public class ClassicalItem {
      *
      * @return
      */
+    @Deprecated
     public double factorLoadingApproximation(){
         return Math.pow(itemStats.getStdDev(),2)*itemStats.getDiscrimination();
     }
 
+    /**
+     * Number of response categories
+     * @return
+     */
     public int numberOfCategories(){
         if(allCategories) return itemScoring.numberOfCategories();
         return 1;
     }
 
+    /**
+     * Name of item
+     *
+     * @return
+     */
     public VariableName getName(){
         return varInfo.getName();
     }
 
+    /**
+     * Classical item difficulty estimate
+     *
+     * @return item difficulty
+     */
     public double getDifficulty(){
         return itemStats.getDifficulty();
     }
 
+    /**
+     * Item standard deviation
+     *
+     * @return item standard deviation
+     */
     public double getStdDev(){
         return itemStats.getStdDev();
     }
 
+    /**
+     * Classical item discrimination estimate (i.e. item-total correlation)
+     *
+     * @return
+     */
     public double getDiscrimination(){
         return itemStats.getDiscrimination();
     }
 
+    /**
+     * Return the proportion selecting a particular response option.
+     *
+     * @param index value of teh response option
+     * @return proportion endorsing the resposne option
+     */
     public double getDifficultyAt(Object index){
         return categoryStats.get(index).getDifficulty();
     }
 
+    /**
+     * Standard deviation for the proportion of examinees endorsing teh response option.
+     *
+     * @param index value of teh response option
+     * @return standard deviation for the proportion of examinees endorsing teh response option
+     */
     public double getStdDevAt(Object index){
         return categoryStats.get(index).getStdDev();
     }
 
+    /**
+     * Option-total score correlation. For teh correct answer this value is the item discrimination.
+     * For teh distractors it is the distractor total correlation.
+     *
+     * @param index value of teh response option
+     * @return option-total correlation
+     */
     public double getDiscriminationAt(Object index){
         return categoryStats.get(index).getDiscrimination();
     }
 
+    /**
+     * Iterator for teh catgory objects
+     * @return
+     */
     public Iterator<Object> categoryIterator(){
         return categoryStats.keySet().iterator();
     }
 
+    /**
+     * Header for the item analysis output. Usually only called for the first item.
+     *
+     * @return output header
+     */
     public String printHeader(){
 		StringBuilder buffer = new StringBuilder();
 		Formatter f = new Formatter(buffer);
@@ -167,12 +250,15 @@ public class ClassicalItem {
 		return f.toString();
 	}
 
+    /**
+     * Provide all requested statistics for the item. This output aligns with the printHeader() method.
+     * @return
+     */
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
-        
-//        ClassicalCategory cat = null;
+
         f.format("%-11s", " " + varInfo.getName());f.format("%1s", " ");
 
         //list overall item statistics

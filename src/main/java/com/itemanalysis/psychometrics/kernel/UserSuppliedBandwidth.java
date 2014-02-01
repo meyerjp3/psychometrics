@@ -16,6 +16,10 @@
 package com.itemanalysis.psychometrics.kernel;
 
 
+/**
+ * This class is for processing a user supplied bandwidth. In other cases the
+ * bandwith is computed but in some applications a user provides teh bandwith directly.
+ */
 public final class UserSuppliedBandwidth implements Bandwidth{
 
     private double h = 1.0;

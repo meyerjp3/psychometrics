@@ -29,6 +29,9 @@ import org.apache.commons.math3.stat.descriptive.summary.Sum;
 
 import java.util.Formatter;
 
+/**
+ * Harman's minimum residual (MINRES) method of factor analysis.
+ */
 public class MINRESmethod extends AbstractFactorMethod {
 
     private RealMatrix R2 = null;
@@ -162,6 +165,9 @@ public class MINRESmethod extends AbstractFactorMethod {
         return f.toString();
     }
 
+    /**
+     * This class is used for teh numeric optimization routine.
+     */
     private class MINRESObjectiveFunction extends AbstractMultivariateFunction{
 
         public double value(double[] param){

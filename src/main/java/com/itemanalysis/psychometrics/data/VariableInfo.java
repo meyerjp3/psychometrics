@@ -66,6 +66,16 @@ public class VariableInfo implements Comparable<VariableInfo> {
      */
     private DefaultItemScoring itemScoring = null;
 
+    /**
+     *
+     *
+     * @param name name of variable
+     * @param label label for variable
+     * @param itemType type of item (see VariableType class)
+     * @param dataType type of data (see VariableType class)
+     * @param positionInDb column position of teh variable in the database
+     * @param subscale a code indicating the item group to which the item belongs
+     */
     public VariableInfo(String name, String label, int itemType, int dataType, int positionInDb, String subscale){
         this.name = new VariableName(name.trim());
         this.label = new VariableLabel(label.trim());
@@ -75,6 +85,10 @@ public class VariableInfo implements Comparable<VariableInfo> {
         itemScoring = new DefaultItemScoring();
     }
 
+    /**
+     *
+     * @return name of variable
+     */
     public VariableName getName(){
         return name;
     }
@@ -154,22 +168,20 @@ public class VariableInfo implements Comparable<VariableInfo> {
             return "VARCHAR(" + varcharSize + ")";
         }
     }
-    
+
+    /**
+     * compare by item name.
+     *
+     * @param o another VariableInfo object
+     * @return
+     */
     public int compareTo(VariableInfo o){
-//        if(!(o instanceof VariableInfo))
-//            throw new ClassCastException("VariableInfo object expected");
-//        VariableInfo that = (VariableInfo)o;
 		return this.name.compareTo(o.name);
 	}
 
     @Override
     public boolean equals(Object o){
         return (o instanceof VariableInfo) && (this.compareTo((VariableInfo)o)==0);
-//        if(!(o instanceof VariableInfo)) return false;
-//		if(o==this) return true;
-//		VariableInfo that = (VariableInfo)o;
-//        return (this.name.equals(that.name));
-//        return (this.name.equals(that.name) && this.label.equals(that.label) && this.type.equals(that.type));
     }
 
     @Override

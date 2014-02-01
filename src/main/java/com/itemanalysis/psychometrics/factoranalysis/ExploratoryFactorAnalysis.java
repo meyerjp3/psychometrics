@@ -19,6 +19,12 @@ import org.apache.commons.math3.linear.RealMatrix;
 
 import java.util.Formatter;
 
+/**
+ * This class is the main entry point for conducting exploratory factor analysis. Users will
+ * focus on this class. All other classes in this package provide support for this class.
+ * All factor analysis methods require a correlation matrix and number indicating the
+ * number of factors.
+ */
 public class ExploratoryFactorAnalysis {
 
     private RealMatrix correlationMatrix = null;
@@ -29,6 +35,12 @@ public class ExploratoryFactorAnalysis {
     private double fmin = 0.0;
     private String title = "";
 
+    /**
+     * The constructor requires a corelation matrix and the number of factors.
+     *
+     * @param correlationMatrix correlation matrix
+     * @param nFactors number of factor to use
+     */
     public ExploratoryFactorAnalysis(RealMatrix correlationMatrix, int nFactors){
         this.correlationMatrix = correlationMatrix;
         this.nFactors = Math.max(nFactors, 1);
@@ -36,30 +48,12 @@ public class ExploratoryFactorAnalysis {
         this.nParameters = nVariables;
     }
 
-    private double[] getInitialValues(){
-        double[] init = new double[nParameters];
-        for(int i=0;i<nParameters;i++){
-            init[i] = 0.5;
-        }
-        return init;
-    }
-
-    private double[] getLowerBounds(){
-        double[] lb = new double[nParameters];
-        for(int i=0;i<nParameters;i++){
-            lb[i] = 0.005;
-        }
-        return lb;
-    }
-
-    private double[] getUpperBounds(){
-        double[] ub = new double[nParameters];
-        for(int i=0;i<nParameters;i++){
-            ub[i] = 1.0;
-        }
-        return ub;
-    }
-
+    /**
+     * The main method for estimating parameters. It will use the estimation method
+     * provided in the argument.
+     *
+     * @param fm estimation method for computing factor loadings
+     */
     public void estimateParameters(EstimationMethod fm){
 
         if(fm==EstimationMethod.PRINCOMP){
@@ -75,66 +69,14 @@ public class ExploratoryFactorAnalysis {
 
         fmin = factorMethod.estimateParameters();
 
-//        minres = new MINRESmethod(correlationMatrix, nFactors);
-//        NonLinearConjugateGradientOptimizer optimizer
-//                = new NonLinearConjugateGradientOptimizer(NonLinearConjugateGradientOptimizer.Formula.POLAK_RIBIERE,
-//                new SimpleValueChecker(1e-8, 1e-8));
-//        uniqueness = optimizer.optimize(new MaxEval(1000),
-//                minres.getObjectiveFunction(),
-//                minres.getObjectiveFunctionGradient(),
-//                GoalType.MINIMIZE,
-//                new InitialGuess(getInitialValues()));
-//        minres.computeFactorLoadings(uniqueness.getPoint());
-
-
-//FOR R way
-//        int numIterpolationPoints = nParameters + 2;
-//        BOBYQAOptimizer underlying = new BOBYQAOptimizer(numIterpolationPoints);
-//        RandomGenerator g = new JDKRandomGenerator();
-//        RandomVectorGenerator generator = new UncorrelatedRandomVectorGenerator(nParameters, new GaussianRandomGenerator(g));
-//        MultiStartMultivariateOptimizer optimizer = new MultiStartMultivariateOptimizer(underlying, 100, generator);
-//        uniqueness = optimizer.optimize(new MaxEval(5000),
-//                new ObjectiveFunction(minres),
-//                GoalType.MINIMIZE,
-//                new SimpleBounds(getLowerBounds(), getUpperBounds()),
-////                SimpleBounds.unbounded(nParameters),
-//                new InitialGuess(minres.getStartValues()));
-//        System.out.println(minres.printStartValues());
-//        System.out.println("Fmin: " + uniqueness.getValue());
-//        minres.computeFactorLoadings(uniqueness.getPoint());
-
-
-//        SimplexOptimizer optimizer = new SimplexOptimizer(1e-10, 1e-30);
-//        uniqueness = optimizer.optimize(new MaxEval(10000),
-//                new ObjectiveFunction(minres),
-//                GoalType.MINIMIZE,
-//                new InitialGuess(getInitialValues()),
-//                new NelderMeadSimplex(minres.getStartValues()),
-//                SimpleBounds.unbounded(nParameters));
-//        System.out.println("Fmin: " + uniqueness.getValue() + "  Iter: " + optimizer.getEvaluations());
-//        minres.computeFactorLoadings(uniqueness.getPoint());
-
-
     }
 
-//    public String printFactorLoadings(){
-//        StringBuilder sb = new StringBuilder();
-//        Formatter f = new Formatter(sb);
-//
-//        int offset = 0;
-//        int offset2 = nVariables*nFactors;
-//        for(int i=0;i<nVariables;i++){
-//            f.format("%10s", "v"+(i+1));
-//            for(int j=0;j<nFactors;j++){
-//                f.format("%10.4f", minres.getFactorLoadingAt(i,j)); f.format("%5s", "");
-//            }
-//            f.format("%10.4f", uniqueness.getPoint()[i]);
-//            f.format("%n");
-//        }
-//
-//        return f.toString();
-//    }
-
+    /**
+     * Return s the factor method for obtaining values of the estimates and other information as
+     * indicated in the FactorMethod interface.
+     *
+     * @return a FactorMethod
+     */
     public FactorMethod getFactorMethod(){
         return factorMethod;
     }
@@ -143,6 +85,13 @@ public class ExploratoryFactorAnalysis {
         return printOutput(2);
     }
 
+    /**
+     * Formatted output of teh results. It includes the factor loadings, communalities,
+     * and unqiuenesses.
+     *
+     * @param precision number of decimal places to report
+     * @return string of result
+     */
     public String printOutput(int precision){
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);

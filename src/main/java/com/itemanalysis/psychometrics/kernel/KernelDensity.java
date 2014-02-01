@@ -29,15 +29,27 @@ public class KernelDensity implements DistributionApproximation {
 
     private double h = 1.0;
 
+    /**
+     * Points at which the kernel is evaluated (not the data points)
+     */
     private double[] points = null;
 
+    /**
+     * Density values at the evaluation points
+     */
     private double[] density = null;
 
     private double[] sum = null;
 
-    private int n = 0;//sample size
+    /**
+     * Sample size
+     */
+    private int n = 0;
 
-    private int numPoints = 0;//number of grid getPoints
+    /**
+     * number of evaluation points
+     */
+    private int numPoints = 0;
 
 	public KernelDensity(KernelFunction kernel, Bandwidth h, UniformDistributionApproximation uniform){
         this.kernel = kernel;
@@ -48,6 +60,11 @@ public class KernelDensity implements DistributionApproximation {
         sum = new double[numPoints];
     }
 
+    /**
+     * Incremental computation of the density. This method is called for each data point.
+     *
+     * @param x a data point
+     */
 	public void increment(double x){
 		double z=0.0;
         n+=1;
@@ -58,6 +75,11 @@ public class KernelDensity implements DistributionApproximation {
 
 	}
 
+    /**
+     * Call this method when using the incremental update to the density estimator.
+     *
+     * @return an array representing the density (y-axis) at the evaluation points.
+     */
     public double[] evaluate(){
         if(density!=null) return density;
         density = new double[numPoints];
@@ -67,6 +89,13 @@ public class KernelDensity implements DistributionApproximation {
         return density;
     }
 
+    /**
+     * Call tihs method when not using the incremental update. It will compute the density from an
+     * array of data points.
+     *
+     * @param x an array of data points
+     * @return density of the points
+     */
     public double[] evaluate(double[] x){
         int sampleSize = x.length;
         density = new double[numPoints];
@@ -84,7 +113,7 @@ public class KernelDensity implements DistributionApproximation {
     /**
      * Leave one out kernel evaluate estimate. Omitted data point is given by index.
      * This method is primarily used by the least squares cross validation method
-     * of choosing teh smoothing parameter.
+     * of choosing the smoothing parameter.
      *
      * @param x
      * @param index
@@ -114,6 +143,11 @@ public class KernelDensity implements DistributionApproximation {
         return numPoints;
     }
 
+    /**
+     * Bandwith
+     *
+     * @return bandwith used for the kernel estimator
+     */
     public Bandwidth getBandwidth(){
         return bandwidth;
     }

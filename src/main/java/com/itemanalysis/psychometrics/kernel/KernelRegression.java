@@ -23,23 +23,53 @@ import com.itemanalysis.psychometrics.distribution.UniformDistributionApproximat
  * stored in this object. Only the evaluation getPoints (x-values) and their
  * corresponding y-values are stored.
  *
+ * This class is designed to incrementally compute the regression.
+ *
  */
 public class KernelRegression{
 
+    /**
+     * Evaluation points
+     */
     private double[] points = null;
 
+    /**
+     * Holds the numerator value of teh kernel regression estimator
+     */
     private double[] numerator = null;
 
+    /**
+     * Holds the denominator value of teh kernel regression estimator
+     */
     private double[] denominator = null;
 
+    /**
+     * Kernel function
+     */
     private KernelFunction kernel = null;
 
+    /**
+     * Bandwith of teh function (i.e. smoothing parameter)
+     */
     private double bandwidth = 1.0;
 
+    /**
+     * Sample size
+     */
     private int n = 0;
 
+    /**
+     * Number of evaluation points
+     */
     private int numPoints = 50;
 
+    /**
+     * Default constructor for the class.
+     *
+     * @param kernel type of kernel function
+     * @param bandwidth bandwidth
+     * @param uniform distribution representing the evaluation points
+     */
     public KernelRegression(KernelFunction kernel, Bandwidth bandwidth, UniformDistributionApproximation uniform){
         this.kernel = kernel;
         this.bandwidth = bandwidth.value();
@@ -48,7 +78,12 @@ public class KernelRegression{
         numerator = new double[numPoints];
         denominator = new double[numPoints];
     }
-    
+
+    /**
+     * Increment the estimate by x and y
+     * @param x value of teh independent variable
+     * @param y value of the dependent variable
+     */
     public void increment(double x, double y){
         double k = 0.0;
         n+=1;
@@ -59,6 +94,10 @@ public class KernelRegression{
         }
     }
 
+    /**
+     * Computes teh kernel regression estimate at teh evaluation points.
+     * @return predicted values of y
+     */
     public double[] value(){
 		double[] v = new double[numPoints];
 		for(int i=0;i<v.length;i++){
@@ -67,14 +106,26 @@ public class KernelRegression{
 		return v;
 	}
 
+    /**
+     *
+     * @return evaluae pints points
+     */
     public double[] getPoints(){
         return points;
     }
 
+    /**
+     *
+     * @return bandwidth of the kernel regression estimator
+     */
     public double getBandwidth(){
         return bandwidth;
     }
 
+    /**
+     *
+     * @return sample size use din teh computation of teh regression
+     */
     public int getSampleSize(){
         return n;
     }

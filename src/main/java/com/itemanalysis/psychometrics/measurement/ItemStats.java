@@ -23,11 +23,16 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import java.util.Formatter;
 
 /**
+ * This class computes statistics for individual item response options. It is used by the
+ * ClassicalItem class in a classical item analysis.
  *
  * @author J. Patrick Meyer
  */
 public class ItemStats {
 
+    /**
+     * The string or double value respresenting the value of the response option
+     */
     private Object id = null;
 
     /**
@@ -50,8 +55,14 @@ public class ItemStats {
      */
     private PolyserialPlugin polyserial = null;
 
+    /**
+     * Use a biased corrected (n-1) standard deviation if true. Use baised (n) strandard deviation if not.
+     */
     private boolean biasCorrection = true;
 
+    /**
+     * Use a Pearson type of correlation if true. Otherwise use a polyserial type of correlation.
+     */
     private boolean pearson = true;
 
     public ItemStats(Object id, boolean biasCorrection, boolean pearson, boolean continuousItem){
@@ -69,6 +80,12 @@ public class ItemStats {
         }
     }
 
+    /**
+     * Incrementally update the item statistics
+     *
+     * @param testScore sum score on teh total test
+     * @param itemScore score on teh individual item (or response option)
+     */
     public void increment(double testScore, double itemScore){
         mean.increment(itemScore);
         sd.increment(itemScore);
@@ -79,6 +96,10 @@ public class ItemStats {
         }
     }
 
+    /**
+     *
+     * @return id of the response option
+     */
     public Object getId(){
         return id;
     }
@@ -102,11 +123,15 @@ public class ItemStats {
 
     }
 
+    /**
+     * A string that contains all of the item statistics.
+     *
+     * @return string of estimated statistics
+     */
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
-//        f.format("%27s", id.toString() + "(" + category.scoreValue() + ")");f.format("%2s", " ");  //list original values
         f.format("% 10.4f", getDifficulty()); f.format("%2s", " ");//category proportion endorsing
         f.format("% 10.4f", getStdDev()); f.format("%2s", " ");//category standard deviation
         f.format("% 10.4f", getDiscrimination());f.format("%2s", " ");  //item discrimination

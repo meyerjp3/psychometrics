@@ -19,6 +19,7 @@ package com.itemanalysis.psychometrics.data;
  *
  * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
  */
+@Deprecated
 public class VariableException extends Exception{
     
     String error = "Variable Error";

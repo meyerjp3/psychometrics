@@ -17,6 +17,12 @@ package com.itemanalysis.psychometrics.kernel;
 
 public interface KernelFunction {
 
+    /**
+     * Computes the value of teh kernel at a given point
+     *
+     * @param u point at which teh kernel is evaluated
+     * @return value of the kernel function
+     */
     public double value(double u);
 
 }

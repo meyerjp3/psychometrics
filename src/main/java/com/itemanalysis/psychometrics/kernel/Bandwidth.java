@@ -18,8 +18,18 @@ package com.itemanalysis.psychometrics.kernel;
 
 public interface Bandwidth {
 
+    /**
+     * The value of teh bandwidth
+     * @return
+     */
     public double value();
 
+    /**
+     * The bandwidth is multiplied by teh adjustment factor to increase or decrease smoothing. This
+     * number must be greater than 0.
+     *
+     * @return adjustment factor
+     */
     public double getAdjustmentFactor();
 
 }

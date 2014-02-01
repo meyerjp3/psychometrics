@@ -17,6 +17,12 @@ package com.itemanalysis.psychometrics.factoranalysis;
 
 import org.apache.commons.math3.linear.RealMatrix;
 
+/**
+ * An abstract implementation of FactorMethod. It includes methods that are common
+ * to all specific instances of FactorMethod.
+ *
+ * See the FactorMethod interface for details on each of the methods below.
+ */
 public abstract class AbstractFactorMethod implements FactorMethod{
 
     protected RealMatrix R = null;
@@ -30,6 +36,10 @@ public abstract class AbstractFactorMethod implements FactorMethod{
     protected double[] proportionOfVariance = null;
     protected double[] proportionOfExplainedVariance = null;
 
+    /**
+     * Lower bounds of the parameters
+     * @return
+     */
     public double[] getLowerBounds(){
         double[] lower = new double[nParam];
         for(int i=0;i<nParam;i++){
@@ -38,6 +48,10 @@ public abstract class AbstractFactorMethod implements FactorMethod{
         return lower;
     }
 
+    /**
+     * Upper bound of the parameters
+     * @return
+     */
     public double[] getUpperBounds(){
         double[] upper = new double[nParam];
         for(int i=0;i<nParam;i++){
@@ -45,6 +59,7 @@ public abstract class AbstractFactorMethod implements FactorMethod{
         }
         return upper;
     }
+
 
     public double[][] getFactorLoading(){
         return factorLoading;

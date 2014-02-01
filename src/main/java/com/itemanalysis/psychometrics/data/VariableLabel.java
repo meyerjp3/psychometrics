@@ -16,8 +16,9 @@
 package com.itemanalysis.psychometrics.data;
 
 /**
+ * This class represent a variable label. The length of the label is the only restriction.
  *
- * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
+ * @author J. Patrick Meyer
  */
 public class VariableLabel implements Comparable<Object>{
 

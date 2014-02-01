@@ -26,7 +26,7 @@ package com.itemanalysis.psychometrics.data;
  * is of class Double (i.e. isDouble) or String (i.e. not isDouble).
  *
  *
- * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
+ * @author J. Patrick Meyer
  */
 public class VariableType {
 

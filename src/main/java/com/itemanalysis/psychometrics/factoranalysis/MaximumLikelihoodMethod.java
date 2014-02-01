@@ -29,9 +29,19 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient
 import org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer;
 import org.apache.commons.math3.stat.descriptive.summary.Sum;
 
+/**
+ * Exploratory factor analysis by maximum likelihood estimation.
+ */
 public class MaximumLikelihoodMethod extends AbstractFactorMethod {
 
+    /**
+     * Optimizer for obtaining the optimal uniquenesses.
+     */
     private NonLinearConjugateGradientOptimizer optimizer = null;
+
+    /**
+     * The result of the optimization
+     */
     private PointValuePair solution = null;
 
     public MaximumLikelihoodMethod(RealMatrix correlationMatrix, int nFactors){
@@ -151,6 +161,9 @@ public class MaximumLikelihoodMethod extends AbstractFactorMethod {
 
     }
 
+    /**
+     * This class is used by the optimization routine.
+     */
     private class MLObjectiveFunction extends AbstractMultivariateFunction {
 
         public double value(double[] param){

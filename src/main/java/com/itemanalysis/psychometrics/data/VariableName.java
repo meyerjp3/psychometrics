@@ -16,18 +16,27 @@
 package com.itemanalysis.psychometrics.data;
 
 /**
- *
+ * This class represents a variable name. It allows you to easily switch between the display name
+ * and teh name needed by a database. The database name adds a prefix and suffix of "x" to the
+ * variable name. This convention prevents confusion with reserved SQL words when interacting
+ * with a database.
  */
 public class VariableName implements Comparable<VariableName>{
 
+    /**
+     * The display name of the variable
+     */
     private String variableName = "";
+
+    /**
+     * The original name of the variable before special characters and white spaces have been removed
+     */
 	private String originalVariableName = "";
 	private static int NAME_LENGTH = 20; //limit variable names to 20 characters
     private int index = 0;//used for VariableNameListModel
 
 	public VariableName(String variableName){
         String lcVarName = variableName.trim().toLowerCase();
-//        String lcVarName = variableName.trim();//old way
 		if(lcVarName.startsWith("x") && lcVarName.endsWith("x")){
 			String temp = lcVarName.substring(1,lcVarName.length()-1);
 			int length=Math.min(temp.length(), NAME_LENGTH);
@@ -48,35 +57,52 @@ public class VariableName implements Comparable<VariableName>{
 
 	}
 
+    @Deprecated
     public void setIndex(int index){
         this.index = index;
     }
 
+    @Deprecated
     public int getIndex(){
         return index;
     }
 
 	private String checkVariableName(String variableName){
         String a = variableName.replaceAll("\\s+", "");
-//        String newVariableName = a.trim().replaceAll("\\p{Punct}+", "");//removes all special characters
         String newVariableName = a.trim().replaceAll("(?:(?!_)\\p{Punct})+", "");//remove special characters except underscore
 		return newVariableName;
 	}
 
+    /**
+     * Returns the variable name after stripping special characters and spaces from teh name but without the
+     * "x" prefix and suffix. It is teh display name of teh variable.
+     *
+     * @return name of variable
+     */
     @Override
 	public String toString(){
 		return variableName;
 	}
 
+    @Deprecated
     public String getText(){
         return variableName;
     }
 
-	//leading and trainling X added for database security and prevent use of reserved words
+    /**
+     * Leading and trailing "x" added for database security and prevent use of reserved words
+     *
+     * @return the name of teh variable used by calls to the database.
+     */
 	public String nameForDatabase(){
 		return "x" + variableName + "x";
 	}
 
+    /**
+     * A particular format of the name often used for databases.
+     *
+     * @return
+     */
     public String quotedNameForDatabase(){
 		return "'x" + variableName + "x'";
 	}
@@ -100,10 +126,6 @@ public class VariableName implements Comparable<VariableName>{
     @Override
     public boolean equals(Object o){
         return (o instanceof VariableName) && (this.compareTo((VariableName)o)==0);
-//        if(!(o instanceof VariableName)) return false;
-//		if(o==this) return true;
-//		VariableName that = (VariableName)o;
-//        return this.variableName.equals(that.variableName);
     }
 
     @Override
@@ -112,10 +134,6 @@ public class VariableName implements Comparable<VariableName>{
 	}
 
     public int compareTo(VariableName o){
-//        if(!(o instanceof VariableName))
-//            throw new ClassCastException("VariableName object expected");
-//        VariableName that = (VariableName)o;
-
         return this.variableName.compareTo(o.variableName);
 
 	}

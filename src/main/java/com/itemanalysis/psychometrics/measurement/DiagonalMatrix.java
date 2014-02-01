@@ -19,23 +19,32 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
 /**
+ * A diagonal matrix. Off-diagonal elements are set to zero.
  *
- * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
+ * @author J. Patrick Meyer
  */
 public class DiagonalMatrix  extends Array2DRowRealMatrix {
 
     int cols = 0;
     int rows = 0;
 
+    /**
+     * Creates a matrix with diagonal elements set to x. Off diagonal elements are zero.
+     * @param x
+     */
     public DiagonalMatrix(double[] x){
         super(x.length, x.length);
         this.cols = x.length;
         this.rows = x.length;
-//        data = new double[cols][cols];
         setMatrix(x);
     }
 
-    public void setMatrix(double[] x){
+    /**
+     * Changes the diagonal of the matrix to teh values in x.
+     *
+     * @param x
+     */
+    public void setMatrix(double[] x){//TODO check that x.length==cols
         for(int i=0;i<rows;i++){
             for(int j=0;j<cols;j++){
                 if(i==j) this.setEntry(i, j, x[i]);
@@ -44,6 +53,11 @@ public class DiagonalMatrix  extends Array2DRowRealMatrix {
         }
     }
 
+    /**
+     * Extracts the diagonal elements from a matrix.
+     *
+     * @param matrix a matrix from which teh diagonal elements are extracted.
+     */
     public DiagonalMatrix(RealMatrix matrix){
         super(matrix.getColumnDimension(), matrix.getColumnDimension());
         int ncol = matrix.getColumnDimension();
