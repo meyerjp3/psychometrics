@@ -20,9 +20,9 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
 
 /**
- * A class for computing Rasch scale quality statistics such as reliability an separation. Values are computed in a
- * storeless manner by incrementally updating each statistic with a new observation. This class is used for
- * both item side quality and person side quality.
+ * Storeless computation of Rasch scale quality statistics such as reliability an separation. Values are computed
+ * by incrementally updating each statistic with a new observation. This class is used for both item side quality
+ * and person side quality.
  */
 public class RaschScaleQualityStatistics {
 

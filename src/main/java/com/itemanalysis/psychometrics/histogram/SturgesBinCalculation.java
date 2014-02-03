@@ -16,6 +16,7 @@
 package com.itemanalysis.psychometrics.histogram;
 
 /**
+ * Sturges' method for computing the number of bins.
  *
  * @author J. Patrick Meyer
  */
@@ -25,6 +26,11 @@ public class SturgesBinCalculation extends AbstractBinCalculation{
 
     }
 
+    /**
+     * Gets the number of bins as computed by Sturges' method.
+     * 
+     * @return number of bins.
+     */
     public int numberOfBins(){
         if(n==0.0) return 1;
 		double logBase2Ofn = Math.log(n)/Math.log(2);
@@ -32,6 +38,11 @@ public class SturgesBinCalculation extends AbstractBinCalculation{
         return numberOfBins;
     }
 
+    /**
+     * Gets the bin width according to the number of bins calculated by Sturges' method.
+     * 
+     * @return bin width.
+     */
     public double binWidth(){
         double n = sampleSize();
         if(n==0.0) return 1.0;

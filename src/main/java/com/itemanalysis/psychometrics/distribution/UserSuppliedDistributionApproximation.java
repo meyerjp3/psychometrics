@@ -17,7 +17,10 @@ package com.itemanalysis.psychometrics.distribution;
 
 import org.apache.commons.math3.util.ResizableDoubleArray;
 
-
+/**
+ * A distribution approximation that allows the user to provide the evaluation points and the density values.
+ * This is a class that can be used for numeric integration with user provided quadrature points and weights.
+ */
 public final class UserSuppliedDistributionApproximation implements DistributionApproximation{
 
     private ResizableDoubleArray pointsStore = new ResizableDoubleArray();
@@ -27,38 +30,76 @@ public final class UserSuppliedDistributionApproximation implements Distribution
     private int numberOfPoints = 0;
     private double weightSum = 0;
 
+    /**
+     * Create the distribution approximation with an array of evaluation points and an array of density values
+     * provided by the user.
+     *
+     * @param points array of evaluation points.
+     * @param density array of density values.
+     */
     public UserSuppliedDistributionApproximation(double[] points, double[] density){
         this.pointsStore.addElements(points);
         this.densityStore.addElements(density);
         this.numberOfPoints = points.length;
     }
 
+    /**
+     * Creates the distribution approximation with no evaluation points or density values. This constructor
+     * is useful when the evaluation points and weights are provided incrementally with {@link #increment(double)}
+     * or {@link #increment(double)};
+     */
     public UserSuppliedDistributionApproximation(){
 
     }
 
+    /**
+     * Increment the array of evaluation points and weights with the provided values.
+     * 
+     * @param point an evaluation point.
+     * @param density a density value.
+     */
     public void increment(double point, double density){
         this.pointsStore.addElement(point);
         this.densityStore.addElement(density);
         numberOfPoints++;
     }
 
+    /**
+     * An evaluation points. This method will result in uniform density values.
+     * 
+     * @param point
+     */
     public void increment(double point){
         this.pointsStore.addElement(point);
         numberOfPoints++;
         weightSum += 1.0;
     }
 
+    /**
+     * Gets the number of evaluation points (and corresponding number of density values).
+     * 
+     * @return number of evaluation points.
+     */
     public int getNumberOfPoints(){
         return numberOfPoints;
     }
 
+    /**
+     * Gets the array of evaluation points.
+     * 
+     * @return evaluation points.
+     */
     public double[] getPoints(){
         if(points!=null) return points;
         points = pointsStore.getElements();
         return points;
     }
 
+    /**
+     * Gets the array of density values.
+     * 
+     * @return density values.
+     */
     public double[] evaluate(){
         if(density!=null) return density;
         if(points==null) getPoints();
@@ -71,11 +112,23 @@ public final class UserSuppliedDistributionApproximation implements Distribution
         return density;
     }
 
+    /**
+     * Gets an evaluation point from the array at position given by the index.
+     * 
+     * @param index array index of evaluation point.
+     * @return an evaluation point.
+     */
     public double getPointAt(int index){
         if(points==null) getPoints();
         return points[index];
     }
 
+    /**
+     * Gets the density value from the array at the psition given by index.
+     * 
+     * @param index array index of density value.
+     * @return a density value.
+     */
     public double getDensityAt(int index){
         if(density==null) evaluate();
         return density[index];

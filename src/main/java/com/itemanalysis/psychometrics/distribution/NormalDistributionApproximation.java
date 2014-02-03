@@ -18,8 +18,10 @@ package com.itemanalysis.psychometrics.distribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 /**
- * An immutable object for creating evaluation getPoints and associated evaluate.
- * Used in kernel evaluate estimation and equating.
+ * An immutable object for creating evaluation points and associated density values from a normal distribution.
+ * This class creates a set of evenly spaced evaluation points between the the minimum and maximum values.
+ * Normal density values for each point are also computed. By default the distribution is a standard normal
+ * distribution (mean=0, sd=1), but the user cna optionally provide a different mean and standard deviation.
  *
  */
 public final class NormalDistributionApproximation implements DistributionApproximation {
@@ -40,10 +42,29 @@ public final class NormalDistributionApproximation implements DistributionApprox
 
     private double[] density = null;
 
+    /**
+     * Creates a numerical approximation to the standard normal distribution. Evaluation points will lie between
+     * the minimum and maximum values. The number of evaluation points is specified as an argument.
+     *
+     * @param min minimum evaluation point.
+     * @param max maximum evaluation point.
+     * @param numberOfPoints number of evaluation points (and corresponding number of density values).
+     */
     public NormalDistributionApproximation(double min, double max, int numberOfPoints){
         this(0.0, 1.0, min, max, numberOfPoints);
     }
 
+    /**
+     * Creates a numerical approximation to a normal distribution with the specified mean and standard deviation.
+     * Evaluation points will lie between the minimum and maximum values. The number of evaluation points is
+     * specified as an argument.
+     *
+     * @param mean mean of the normal distribution.
+     * @param sd standard deviation of the normal distribution.
+     * @param min minimum evaluation point.
+     * @param max maximum evaluation point.
+     * @param numberOfPoints number of evaluation points (and corresponding number of density values).
+     */
     public NormalDistributionApproximation(double mean, double sd, double min, double max, int numberOfPoints){
         this.mean = mean;
         this.sd = sd;
@@ -58,7 +79,7 @@ public final class NormalDistributionApproximation implements DistributionApprox
         }
         range = this.max - this.min;
 
-        //If mean is outside min or max value or is on teh boundary (an invalid case),
+        //If mean is outside min or max value or is on the boundary (an invalid case),
         // make the mean the midpoint between min and max.
         if(mean<=this.min || mean>=this.max){
             this.mean = this.min+range/2;
@@ -66,6 +87,11 @@ public final class NormalDistributionApproximation implements DistributionApprox
 
     }
 
+    /**
+     * Gets the array of evaluation points.
+     *
+     * @return evaluation points.
+     */
     public double[] getPoints(){
         if(points!=null) return points;
 
@@ -78,6 +104,11 @@ public final class NormalDistributionApproximation implements DistributionApprox
         return points;
     }
 
+    /**
+     * Gets the array of density values.
+     *
+     * @return density values.
+     */
     public double[] evaluate(){
         if(density!=null) return density;
         if(points==null) getPoints();
@@ -98,16 +129,33 @@ public final class NormalDistributionApproximation implements DistributionApprox
         return density;
     }
 
+    /**
+     * Gets an evaluation points at the specified index of the array.
+     *
+     * @param index array index of evaluation point.
+     * @return an evaluation point.
+     */
     public double getPointAt(int index){
         if(points==null) getPoints();
         return points[index];
     }
 
+    /**
+     * Gets a density value at the specified index of the array.
+     *
+     * @param index array index of density value.
+     * @return a density value.
+     */
     public double getDensityAt(int index){
         if(density==null) evaluate();
         return density[index];
     }
 
+    /**
+     * Gets the number of evaluation points (and corresponding number of density values).
+     *
+     * @return number of evaluation points.
+     */
     public int getNumberOfPoints(){
         return numberOfPoints;
     }

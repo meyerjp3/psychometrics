@@ -22,18 +22,17 @@ package com.itemanalysis.psychometrics.factoranalysis;
 public interface FactorMethod {
 
     /**
-     * A method for estimating parameters. The returned value is teh value of the criterion
-     * function at teh estimated values. It should be the smallest possible value. This
-     * value is returned for display in teh output.
+     * A method for estimating parameters. The returned value is the value of the criterion function at the 
+     * estimated values. It should be the smallest possible value. This value is returned for display in the output.
      *
-     * @return value of the criterion function at teh estimated values
+     * @return value of the criterion function at the estimated values
      */
     public double estimateParameters();
 
     /**
      * Return a factor loading for a particular item.
      *
-     * @param i variable index of teh factor loading
+     * @param i variable index of the factor loading
      * @param j factor index of the loading
      * @return
      */
@@ -48,10 +47,9 @@ public interface FactorMethod {
     public double getUniquenessAt(int i);
 
     /**
-     * Returns the communality (sum of squared factor laodings) for a variable.
-     * The sum is computed over factors.
+     * Returns the communality (sum of squared factor laodings) for a variable. The sum is computed over factors.
      *
-     * @param i index of the variable for which teh communality is sought.
+     * @param i index of the variable for which the communality is sought.
      * @return communality for a variable.
      */
     public double getCommunalityAt(int i);
@@ -59,7 +57,7 @@ public interface FactorMethod {
     /**
      * Sum of squared factor loading for a particular factor. The sum is computed over items.
      *
-     * @param j index of teh factor for which the computation is needed.
+     * @param j index of the factor for which the computation is needed.
      * @return sum of squared factor loadings.
      */
     public double getSumsOfSquaresAt(int j);
@@ -75,7 +73,7 @@ public interface FactorMethod {
     /**
      * Returns the proportion of total variance for a factor.
      *
-     * @param j ndex of teh factor for which the proportion of variance is computed
+     * @param j ndex of the factor for which the proportion of variance is computed
      * @return
      */
     public double getProportionOfVarianceAt(int j);

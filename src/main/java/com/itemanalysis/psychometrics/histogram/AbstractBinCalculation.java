@@ -21,24 +21,47 @@ import org.apache.commons.math3.stat.descriptive.rank.Max;
 import org.apache.commons.math3.stat.descriptive.rank.Min;
 
 /**
- *
+ * An abstract implementation of {@link BinCalculation}. It holds the instance variables and method used by each 
+ * specific implementation. It allows for a storeless computation the number of bins by incrementally updating 
+ * summary statistics.
+ * 
  * @author J. Patrick Meyer
  */
 public abstract class AbstractBinCalculation implements BinCalculation{
 
+    /**
+     * Smallest observed value.
+     */
     protected Min min = null;
 
+    /**
+     * Largest observe value.
+     */
     protected Max max = null;
 
+    /**
+     * Standard deviation of values.
+     */
     protected StandardDeviation sd = new StandardDeviation();
 
+    /**
+     * Sample size.
+     */
     protected double n = 0.0;
 
+    /**
+     * Creates the object and instantiates the min and max objects.
+     */
     public AbstractBinCalculation(){
         min = new Min();
         max = new Max();
     }
 
+    /**
+     * Update the summary statistics with a new value.
+     * 
+     * @param x a data value.
+     */
     public void increment(double x){
         min.increment(x);
         max.increment(x);
@@ -46,14 +69,29 @@ public abstract class AbstractBinCalculation implements BinCalculation{
         n++;
     }
 
+    /**
+     * Gets the sample size.
+     * 
+     * @return sample size.
+     */
     public double sampleSize(){
         return n;
     }
 
+    /**
+     * Gets the smallest observed data points.
+     * 
+     * @return smallest value.
+     */
     public double min(){
         return min.getResult();
     }
 
+    /**
+     * Gets the largest observed data point.
+     * 
+     * @return largest value.
+     */
     public double max(){
         return max.getResult();
     }

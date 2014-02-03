@@ -16,6 +16,7 @@
 package com.itemanalysis.psychometrics.histogram;
 
 /**
+ * An implementation of {@link AbstractBinCalculation} such that the user can provide the number of bins.
  *
  * @author J. Patrick Meyer
  */

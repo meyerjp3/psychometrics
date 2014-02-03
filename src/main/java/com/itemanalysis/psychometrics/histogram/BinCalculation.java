@@ -16,7 +16,10 @@
 package com.itemanalysis.psychometrics.histogram;
 
 /**
- *
+ * An interface for class that compute the number of bins in a histogram. The interface is design for a storeless
+ * computation of the number of bins. Implementations of this interface do not need to store the entire array of
+ * data points. The bins will be computed by incrementally updating them.
+ * 
  * @author J. Patrick Meyer
  */
 public interface BinCalculation {
@@ -25,16 +28,46 @@ public interface BinCalculation {
         STURGES, SCOTT, FREEDMAN_DIACONIS;
     }
 
+    /**
+     * Update the summary statistic with a new data point.
+     * 
+     * @param x data point to be added to the summary statistics.
+     */
     public void increment(double x);
 
+    /**
+     * Get the number of histogram bins.
+     * 
+     * @return number of bins.
+     */
     public int numberOfBins();
 
+    /**
+     * Gets the width of the bin according to the calculated number of bins.
+     * 
+     * @return bin width.
+     */
     public double binWidth();
 
+    /**
+     * Gets the smallest data point.
+     * 
+     * @return smallest value.
+     */
     public double min();
 
+    /**
+     * Gets the largest data point.
+     * 
+     * @return largest value.
+     */
     public double max();
 
+    /**
+     * Get the sample size.
+     * 
+     * @return saple size.
+     */
     public double sampleSize();
 
 }

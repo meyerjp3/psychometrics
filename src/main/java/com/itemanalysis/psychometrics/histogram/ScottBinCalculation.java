@@ -16,6 +16,7 @@
 package com.itemanalysis.psychometrics.histogram;
 
 /**
+ * Scott's method form computing the number of bins in a histogram.
  *
  * @author J. Patrick Meyer
  */

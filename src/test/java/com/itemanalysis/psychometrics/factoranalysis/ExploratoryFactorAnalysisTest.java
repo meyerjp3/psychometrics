@@ -187,8 +187,8 @@ public class ExploratoryFactorAnalysisTest {
 //        System.out.println();
 //        System.out.println(fa.printOutput());
 
-        //True values obtained from R but changed teh optimization routine from L-BFGS-B
-        //to CG. This change was needed to obtain teh same small value of teh objective function obtained
+        //True values obtained from R but changed the optimization routine from L-BFGS-B
+        //to CG. This change was needed to obtain the same small value of the objective function obtained
         //by the tested class. The L-BFGS-B method stopped at a larger value of the objective function.
         double[][] true_loadings = {
                 {0.6157,-0.0054,0.4277,-0.2045},

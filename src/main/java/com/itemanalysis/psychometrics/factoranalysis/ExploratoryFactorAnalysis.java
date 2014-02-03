@@ -20,10 +20,9 @@ import org.apache.commons.math3.linear.RealMatrix;
 import java.util.Formatter;
 
 /**
- * This class is the main entry point for conducting exploratory factor analysis. Users will
- * focus on this class. All other classes in this package provide support for this class.
- * All factor analysis methods require a correlation matrix and number indicating the
- * number of factors.
+ * This class is the main entry point for conducting exploratory factor analysis. Users will focus on this class. 
+ * All other classes in this package provide support for this class. All factor analysis methods require a 
+ * correlation matrix and number indicating the number of factors.
  */
 public class ExploratoryFactorAnalysis {
 
@@ -49,8 +48,7 @@ public class ExploratoryFactorAnalysis {
     }
 
     /**
-     * The main method for estimating parameters. It will use the estimation method
-     * provided in the argument.
+     * The main method for estimating parameters. It will use the estimation method provided in the argument.
      *
      * @param fm estimation method for computing factor loadings
      */
@@ -72,8 +70,8 @@ public class ExploratoryFactorAnalysis {
     }
 
     /**
-     * Return s the factor method for obtaining values of the estimates and other information as
-     * indicated in the FactorMethod interface.
+     * Return s the factor method for obtaining values of the estimates and other information as indicated in the
+     * FactorMethod interface.
      *
      * @return a FactorMethod
      */
@@ -86,8 +84,7 @@ public class ExploratoryFactorAnalysis {
     }
 
     /**
-     * Formatted output of teh results. It includes the factor loadings, communalities,
-     * and unqiuenesses.
+     * Formatted output of the results. It includes the factor loadings, communalities, and unqiuenesses.
      *
      * @param precision number of decimal places to report
      * @return string of result

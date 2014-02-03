@@ -23,9 +23,9 @@ import java.util.Formatter;
 import java.util.Iterator;
 
 /**
- * Computes histogram using two passes over the data. The first pass is needed for
- * BinCalculation.java which is needed in the constructor for Histogram.java.
- * Provides midpoints and frequencies, relative frequencies, or evaluate at midpoints.
+ * Computes a histogram using two passes over the data. The first pass is needed for calculating the number of bins
+ * (See {@link BinCalculation}, which is needed in the constructor of this class. A histogram provides midpoints and
+ * frequencies, relative frequencies, or density values at the midpoints.
  *
  * @author J. Patrick Meyer
  *
@@ -50,12 +50,21 @@ public class Histogram implements DistributionApproximation {
         FREQUENCY, RELATIVE_FREQUENCY, DENSITY;
     }
 
+    /**
+     * Creates a histogram with a bin calculation and specified type of y-axis.
+     *
+     * @param binCalc a bin calculation.
+     * @param type type of values for the y-axis.
+     */
 	public Histogram(BinCalculation binCalc, HistogramType type){
         this.binCalc = binCalc;
         this.type = type;
         createBins();
 	}
 
+    /**
+     * Create the bins.
+     */
     private void createBins(){
 		Bin bin=null;
 		double start=binCalc.min();
@@ -74,23 +83,42 @@ public class Histogram implements DistributionApproximation {
         }
 	}
 
+    /**
+     * Incrementally counts the number of observations in each bin. The value is counted only in the bin to which
+     * it belongs.
+     *
+     * @param value a value to be counted in a bin.
+     */
 	public void increment(double value){
 		for(Bin b : bins){
             b.increment(value);
         }
 	}
 
+    /**
+     * Gets the number of histogram bins.
+     *
+     * @return number of bins.
+     */
     public int getNumberOfBins(){
         return bins.size();
     }
 
+    /**
+     * Histogram bins are stored in an array list. Gets the bin at the specified index.
+     *
+     * @param index position in the array list of the bin.
+     * @return a histogram bin.
+     */
     public Bin getBinAt(int index){
         return bins.get(index);
     }
 
     /**
+     * Gets an array of evaluation points. This method is required by the {@link DistributionApproximation} interface.
+     * The evaluation points are the bin midpoints.
      *
-     * @return midpoints of bins
+     * @return an array of evaluation points
      */
     public double[] getPoints(){
         if(points!=null) return points;
@@ -103,6 +131,11 @@ public class Histogram implements DistributionApproximation {
 		return points;
     }
 
+    /**
+     * Gets an array of density values. This method is required by the {@link DistributionApproximation} interface.
+     *
+     * @return an array of density values.
+     */
     public double[] evaluate(){
         if(points==null) getPoints();
         if(density!=null) return density;
@@ -115,24 +148,54 @@ public class Histogram implements DistributionApproximation {
         return density;
     }
 
+    /**
+     * Gets an evaluation points at the specified index. This method is required by the
+     * {@link DistributionApproximation} interface. The evaluation points are the bin midpoints.
+     *
+     * @param index array index of evaluation point.
+     * @return an evaluation point.
+     */
     public double getPointAt(int index){
         if(points==null) getPoints();
         return points[index];
     }
 
+    /**
+     * Gets a density value at the specified index.  This method is required by the
+     * {@link DistributionApproximation} interface.
+     *
+     * @param index array index of density value.
+     * @return density value.
+     */
     public double getDensityAt(int index){
         if(density==null) evaluate();
         return density[index];
     }
 
+    /**
+     * Gets the number of evaluation points (and corresponding number of density values).
+     *  This method is required by the {@link DistributionApproximation} interface.
+     *
+     * @return number of evaluation points.
+     */
     public int getNumberOfPoints(){
         return bins.size();
     }
 
+    /**
+     * Gets the iterator for the array list of bin objects.
+     *
+     * @return an iterator.
+     */
     public Iterator<Bin> iterator(){
         return bins.iterator();
     }
 
+    /**
+     * A string representation of the histogram. It lists the bin intervals, midpoints, and density values.
+     *
+     * @return histogram values for display as plain text.
+     */
     @Override
 	public String toString(){
 		StringBuilder sb = new StringBuilder();

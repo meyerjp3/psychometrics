@@ -25,7 +25,7 @@ import org.apache.commons.math3.linear.RealMatrix;
  */
 public abstract class AbstractFactorMethod implements FactorMethod{
 
-    protected RealMatrix R = null;
+    protected RealMatrix R = null;//the correlation matrix
     protected int nVariables = 0;
     protected int nFactors = 1;
     protected int nParam = 0;

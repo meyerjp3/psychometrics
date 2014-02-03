@@ -21,7 +21,7 @@ import com.itemanalysis.psychometrics.data.VariableName;
 import java.util.LinkedHashMap;
 
 /**
- * Ac lass for storing the item response vector and frequency counts. This class is designed
+ * A class for storing the item response vector and frequency counts. This class is designed
  * for storing summary information for marginal maximum likelihood estimation.
  */
 public class ItemResponseVector {

@@ -19,7 +19,7 @@ package com.itemanalysis.psychometrics.irt.estimation;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 
 /**
- * A class for storeless computation of Rasch category INFIT and OUTFIT statistics. Statistics are
+ * Storeless computation of Rasch category INFIT and OUTFIT statistics. Statistics are
  * incrementally updated with each observation and then computed before the result is returned.
  */
 public class RaschCategoryFitStatistic {

@@ -19,6 +19,8 @@ import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.commons.math3.util.ResizableDoubleArray;
 
 /**
+ * The Freedman-Diaconis method fro computing the number of bins. Unlike the other bin calculations, this class
+ * is not storeless because it must store the array of data points to compute percentiles.
  *
  * @author J. Patrick Meyer
  */
@@ -26,10 +28,19 @@ public class FreedmanDiaconisBinCalculation extends AbstractBinCalculation{
 
     private ResizableDoubleArray x = null;
 
+    /**
+     * Create the Freedman-Diaconis class fro computing the number of bins.
+     */
     public FreedmanDiaconisBinCalculation(){
         x = new ResizableDoubleArray();
     }
 
+    /**
+     * Incrementally update summary statistics. Even though the data are stored, the incremental statistics should
+     * cut down on the memory requirements and processing time.
+     *
+     * @param value a value added to the summary statistics.
+     */
     @Override
     public void increment(double value){
         x.addElement(value);
@@ -39,6 +50,11 @@ public class FreedmanDiaconisBinCalculation extends AbstractBinCalculation{
         n++;
     }
 
+    /**
+     * Gets the number of bins calculated by the Freedman-Diaconis method.
+     *
+     * @return number of histogram bins.
+     */
     public int numberOfBins(){
         if(n==0.0) return 1;
         Percentile p = new Percentile();
@@ -52,6 +68,11 @@ public class FreedmanDiaconisBinCalculation extends AbstractBinCalculation{
         return numberOfBins;
     }
 
+    /**
+     * Gets the width of the bins according to the number of bins being used.
+     *
+     * @return bin width.
+     */
     public double binWidth(){
         if(n==0.0) return 1;
         Percentile p = new Percentile();

@@ -19,16 +19,50 @@ import org.apache.commons.math3.util.Pair;
 
 import java.util.ArrayList;
 
+/**
+ * An interface for distribution approximations such as those used for quadrature points and weights in
+ * numeric integration. Each approximation has an array of evaluation points (x-axis) and an array
+ * of density values (y-axis). The minimum and maximum values and the number of evaluation points
+ * (and corresponding density values) are usually provided by the user.
+ *
+ */
 public interface DistributionApproximation {
 
+    /**
+     * Gets an array of evaluation points.
+     * 
+     * @return evaluation points.
+     */
     public double[] getPoints();
 
+    /**
+     * Gets and array of density values.
+     * 
+     * @return density values.
+     */
     public double[] evaluate();
 
+    /**
+     * Gets an element from the array of evaluation points.
+     * 
+     * @param index array index of evaluation points.
+     * @return evaluation point at index.
+     */
     public double getPointAt(int index);
 
+    /**
+     * Gets an elements from the array of density values.
+     * 
+     * @param index array index of density value.
+     * @return density value at index.
+     */
     public double getDensityAt(int index);
 
+    /**
+     * Number of evaluation points (and corresponding number of density values) in this approximation.
+     * 
+     * @return number of points.
+     */
     public int getNumberOfPoints();
 
 }
