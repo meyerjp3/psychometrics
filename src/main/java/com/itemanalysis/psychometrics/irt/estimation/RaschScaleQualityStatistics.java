@@ -56,7 +56,7 @@ public class RaschScaleQualityStatistics {
     }
 
     /**
-     * Observed standard deviation of teh estimate.
+     * Observed standard deviation of the estimate.
      *
      * @return stanmdard deviation.
      */
@@ -65,7 +65,7 @@ public class RaschScaleQualityStatistics {
     }
 
     /**
-     * Mean square error of teh estimate.
+     * Mean square error of the estimate.
      *
      * @return mean square error.
      */
@@ -119,7 +119,7 @@ public class RaschScaleQualityStatistics {
     }
 
     /**
-     * Reliability is teh reproduceability of the item or person estimates.
+     * Reliability is the reproduceability of the item or person estimates.
      *
      * @return reliability of the estimates.
      */

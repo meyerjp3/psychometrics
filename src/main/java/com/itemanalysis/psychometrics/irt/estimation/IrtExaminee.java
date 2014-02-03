@@ -36,7 +36,7 @@ import java.util.LinkedHashMap;
  * and the first derivative of the loglikelihood. These methods can be used for maximum
  * likelihood (ML), Bayes modal (MAP), expected a posteriori (EAP), and proportinal curve
  * fitting (PCF) estimation of person ability in univariate item response models.
- * Note: The PCF method should only be used for members of teh Rasch family of item
+ * Note: The PCF method should only be used for members of the Rasch family of item
  * response models.
  *
  * The order of item in the array irm MUST be the same as the order or item

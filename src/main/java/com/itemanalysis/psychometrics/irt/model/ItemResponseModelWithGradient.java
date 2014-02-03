@@ -17,8 +17,20 @@ package com.itemanalysis.psychometrics.irt.model;
 
 public interface ItemResponseModelWithGradient extends ItemResponseModel {
 
+    /**
+     * Derivative from Mathematica. First derivative with respect to person ability.
+     *
+     * @param theta person ability value.
+     * @return first derivative wrt theta.
+     */
     public double[] firstDerivative(double theta);
 
+    /**
+     * Hessian or matrix of second derivatives.
+     *
+     * @param theta person ability value.
+     * @return a two-way array containing teh Hessian matrix values.
+     */
     public double[][] hessian(double theta);
 
 }

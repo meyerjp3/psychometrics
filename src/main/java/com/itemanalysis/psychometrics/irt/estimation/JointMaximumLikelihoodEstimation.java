@@ -31,16 +31,18 @@ import java.util.Formatter;
 import java.util.LinkedHashMap;
 
 /**
- * Joint maximum likelihood estimation of the Rasch, partial credit, and rating scale models.
- * Methods conduct item and person parameter estimation, computation of standard errors,
- * and linear transformations of parameters. Fixed common item calibration is also possible.
+ * Joint maximum likelihood estimation (JMLE) of the Rasch, partial credit, and rating scale models. Methods conduct item
+ * and person parameter estimation, computation of standard errors, and linear transformations of parameters. Fixed
+ * common item calibration is also possible. JMLE is an iterative procedure. At each iteration, item and person
+ * parameters estimates are updated using a proportional curve fitting algorithm instead of the Newton-Raphson method.
  * For details on the estimation algorithm see:
  * <p>
  * Meyer, J. P., & Hailey, E. (2012). A study of Rasch partial credit, and rating scale model<br />
  *  &nbsp;&nbsp;&nbsp;&nbsp;parameter recovery in WINSTEPS and jMetrik. <em>Journal of Applied Measurement</em>,<br />
  *  &nbsp;&nbsp;&nbsp;&nbsp;<em>13</em>(3), 248-258.
  * </p>
- * This class also provides a way to obtain item and person fit statistics.
+ * In additional to parameter estimates, this class also provides a way to obtain item and person fit statistics and
+ * scale quality statistics.
  *
  * @Author J. Patrick Meyer
  */

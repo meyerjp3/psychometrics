@@ -129,7 +129,7 @@ public class ItemResponseVector {
     }
 
     /**
-     * Gets teh frequency count for this response vector.
+     * Gets the frequency count for this response vector.
      *
      * @return frequency count.
      */
@@ -138,7 +138,7 @@ public class ItemResponseVector {
     }
 
     /**
-     * A string representation of teh response string.
+     * A string representation of the response string.
      *
      * @return response string.
      */

@@ -16,7 +16,7 @@
 package com.itemanalysis.psychometrics.factoranalysis;
 
 /**
- * This interface allows for a variety f methods for estimating parameters in exploratory
+ * This interface allows for a variety of methods for estimating parameters in exploratory
  * factor analysis.
  */
 public interface FactorMethod {

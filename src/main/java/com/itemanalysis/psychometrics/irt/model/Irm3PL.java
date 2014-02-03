@@ -18,6 +18,12 @@ package com.itemanalysis.psychometrics.irt.model;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
+/**
+ * An implementation of {@link AbstractItemResponseModel} that allows for the three-parameter logistic (3PL) model,
+ * two-parameter logistic (2PL) model, one-parameter logistic (1PL) model, and the Rasch model. The particular
+ * type of item response model is determined by the constructor used to create the object. See the constructors
+ * for more details on which one to use for each type of model.
+ */
 public class Irm3PL extends AbstractItemResponseModelWithGradient {
 
     private double discrimination = 1.0;
@@ -109,6 +115,12 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         return scoreWeight[1]*probRight(theta);
     }
 
+    /**
+     * Computes the gradient (vector of first partial derivatives) with respect to the item parameters.
+     *
+     * @param theta person ability estimate.
+     * @return an array of first partial derivatives (i.e. the gradient).
+     */
     public double[] firstDerivative(double theta){
         double[] deriv = new double[numberOfParameters];
         double t = Math.exp(D*discrimination*(theta-difficulty));
@@ -139,6 +151,12 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         return deriv;
     }
 
+    /**
+     * Hessian or matrix of second derivatives.
+     *
+     * @param theta person ability value.
+     * @return a two-way array containing the Hessian matrix values.
+     */
     public double[][] hessian(double theta){
         double[][] deriv = new double[numberOfParameters][numberOfParameters];
         double e = Math.exp(discrimination*D*(theta-difficulty));
@@ -198,10 +216,11 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
     }
 
     /**
-     * From Equating recipes
-     * @param theta
-     * @param response
-     * @return
+     * From Equating recipes. Computes the derivative with respect to person ability.
+     *
+     * @param theta person ability value.
+     * @param response item response value.
+     * @return derivative wrt theta.
      */
     public double derivTheta2(double theta, int response){
         double z = Math.exp(D*discrimination*(theta-difficulty));
@@ -214,10 +233,10 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
     }
 
     /**
-     * Derivative from Mathematica.
+     * Derivative from Mathematica. First derivative with respect to person ability.
      *
-     * @param theta
-     * @return
+     * @param theta person ability value.
+     * @return first derivative wrt theta.
      */
     public double derivTheta(double theta){
         double p1 = D*discrimination*(1-guessing)*Math.exp(2.0*D*discrimination*(theta-difficulty));
@@ -228,6 +247,12 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         return deriv;
     }
 
+    /**
+     * Computes the item information function at theta.
+     *
+     * @param theta person ability value.
+     * @return item information.
+     */
     public double itemInformationAt(double theta){
         double p = probRight(theta);
         double part1 = Math.pow(p - guessing, 2);
@@ -237,20 +262,36 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         return info;
     }
 
+    /**
+     * Mean/sigma linking coefficients are computed from the mean and standard deviation of item difficulty.
+     * The summary statistics are computed in a storeless manner. This method allows for the incremental
+     * update to item difficulty summary statistics by combining them with other summary statistics.
+     *
+     * @param mean item difficulty mean.
+     * @param sd item difficulty standard deviation.
+     */
     public void incrementMeanSigma(Mean mean, StandardDeviation sd){
         mean.increment(difficulty);
         sd.increment(difficulty);
     }
 
+    /**
+     * Mean/mean linking coefficients are computed from the mean item difficulty and mean item discrimination.
+     * The summary statistics are computed in a storeless manner. This method allows for the incremental
+     * update to item difficulty summary statistics by combining them with other summary statistics.
+     *
+     * @param meanDiscrimination item discrimination mean.
+     * @param meanDifficulty item difficulty mean.
+     */
     public void incrementMeanMean(Mean meanDiscrimination, Mean meanDifficulty){
         meanDiscrimination.increment(discrimination);
         meanDifficulty.increment(difficulty);
     }
 
-        /**
-     * Computes probability of a response under a linear transformation. This method
-     * is mainly used for the Characteristic Curve Linking method. It applies
-     * the linear transformation such that the New form is transformed to the Old Form.
+    /**
+     * Computes probability of a response under a linear transformation. This method is mainly used for the
+     * characteristic curve linking methods (see {@link com.itemanalysis.psychometrics.irt.equating.StockingLordMethod}).
+     * It applies the linear transformation such that the New form is transformed to the Old Form.
      *
      * @param theta examinee proficiency value
      * @param response target category
@@ -276,9 +317,9 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
     }
 
     /**
-     * Computes probability of a response under a linear transformation. This method
-     * is mainly used for the Characteristic Curve Linking method. It applies
-     * the linear transformation such that the Old form is transformed to the New Form.
+     * Computes probability of a response under a linear transformation. This method is mainly used for the
+     * characteristic curve linking methods (see {@link com.itemanalysis.psychometrics.irt.equating.StockingLordMethod}).
+     * It applies the linear transformation such that the Old form is transformed to the New Form.
      *
      * @param theta examinee proficiency value
      * @param response target category
@@ -303,18 +344,49 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         return 1.0-tSharpProbRight(theta, intercept, slope);
     }
 
+    /**
+     * Computes item expected value under a linear transformation. This method is mainly used for the characteristic
+     * curve linking methods (see {@link com.itemanalysis.psychometrics.irt.equating.StockingLordMethod}).
+     * It applies the linear transformation such that the New form is transformed to the Old Form.
+     *
+     * @param theta person ability value
+     * @param intercept intercept linking coefficient.
+     * @param slope slope linking coefficient.
+     * @return expected value under a linear transformation.
+     */
     public double tStarExpectedValue(double theta, double intercept, double slope){
         return tStarProbRight(theta, intercept, slope);
     }
 
+    /**
+     * Computes probability of a response under a linear transformation. This method is mainly used for the
+     * characteristic curve linking methods (see {@link com.itemanalysis.psychometrics.irt.equating.StockingLordMethod}).
+     * It applies the linear transformation such that the Old form is transformed to the New Form.
+     *
+     * @param theta examinee proficiency value
+     * @param intercept linking coefficient for intercept
+     * @param slope linking coefficient for slope
+     * @return expected value under a linear transformation.
+     */
     public double tSharpExpectedValue(double theta, double intercept, double slope){
         return tSharpProbRight(theta, intercept, slope);
     }
 
+    /**
+     * Gets the number of item parameters.
+     *
+     * @return number of item parameters.
+     */
     public int getNumberOfParameters(){
         return numberOfParameters;
     }
 
+    /**
+     * Linear transformation of item parameters.
+     *
+     * @param intercept intercept transformation coefficient.
+     * @param slope slope transformation coefficient.
+     */
     public void scale(double intercept, double slope){
         difficulty = intercept + slope*difficulty;
         discrimination = discrimination/slope;
@@ -322,10 +394,20 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         discriminationStdError *= slope;
     }
 
+    /**
+     * A string representaiton of the item parameters. Mainly used for printing and debugging.
+     *
+     * @return a string of item parameters.
+     */
     public String toString(){
         return "[" + getDiscrimination() + ", " + getDifficulty() + ", " + getGuessing() + "]";
     }
 
+    /**
+     * Gets the type of item response model.
+     *
+     * @return type of item response model.
+     */
     public IrmType getType(){
         return IrmType.L3;
     }
@@ -333,43 +415,77 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
 //=====================================================================================================================//
 // GETTER AND SETTER METHODS MAINLY FOR USE WHEN ESTIMATING PARAMETERS                                                 //
 //=====================================================================================================================//
+
+    /**
+     * Gets the item difficulty parameter.
+     *
+     * @return item difficulty.
+     */
     public double getDifficulty(){
         return difficulty;
     }
 
     /**
-     * Set difficulty to an existing value. If you are using this method to fix an
-     * item parameter during estimation, you must also set the proposal value.
-     * @param difficulty
+     * Set difficulty parameter to an existing value. If you are using this method to fix an item parameter during
+     * estimation, you must also set the proposal value in {@link #setProposalDifficulty(double)}.
+     *
      */
     public void setDifficulty(double difficulty){
         this.difficulty = difficulty;
     }
 
+    /**
+     * A proposal difficulty value is obtained during each iteration of the estimation routine. This method gets
+     * the proposal item difficulty values. This method is needed for estimating item difficulty.
+     *
+     * @return proposed item difficulty value.
+     */
     public double getProposalDifficulty(){
         return proposalDifficulty;
     }
 
+    /**
+     * A proposal difficulty value is obtained during each iteration of the estimation routine. This method
+     * sets the proposal value.
+     *
+     * @param difficulty proposed item difficulty value.
+     */
     public void setProposalDifficulty(double difficulty){
         if(!isFixed) this.proposalDifficulty = difficulty;
     }
 
+    /**
+     * Gets the item difficulty standard error.
+     *
+     * @return item difficulty standard error.
+     */
     public double getDifficultyStdError(){
         return difficultyStdError;
     }
 
+    /**
+     * Item difficulty standard error may be computed external to the class. This method sets the difficulty
+     * standard error to a computed value.
+     *
+     * @param stdError item difficulty standard error.
+     */
     public void setDifficultyStdError(double stdError){
         difficultyStdError = stdError;
     }
 
+    /**
+     * Gets item discrimination.
+     *
+     * @return item discrimination.
+     */
     public double getDiscrimination(){
         return discrimination;
     }
 
     /**
-     * Set item discrimination to an existing value. If you are using this method to fix an
-     * item parameter during estimation, you must also set the proposal value.
-     * @param discrimination
+     * Set discrimination parameter to an existing value. If you are using this method to fix an item parameter
+     * during estimation, you must also set the proposal value with {@link #setProposalDiscrimination(double)}.
+     *
      */
     public void setDiscrimination(double discrimination){
         this.discrimination = discrimination;
@@ -379,52 +495,96 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         return proposalDiscrimination;
     }
 
+    /**
+     * Set the proposed discrimination estimate.
+     *
+     * @param discrimination proposed item discrimination value.
+     */
     public void setProposalDiscrimination(double discrimination){
         if(!isFixed) this.proposalDiscrimination = discrimination;
     }
 
+    /**
+     * Gets the standard error for the item discrimination estimate.
+     *
+     * @return item discrimination standard error.
+     */
     public double getDiscriminationStdError(){
         return discriminationStdError;
     }
 
+    /**
+     * The standard error may be computed external to the class. It can be set to a specific value with this method.
+     *
+     * @param stdError item discrimination standard error.
+     */
     public void setDiscriminationStdError(double stdError){
         discriminationStdError = stdError;
     }
 
+    /**
+     * Gets the pseudo-guessing (i.e. lower asymptote) parameter.
+     *
+     * @return guessing parameter.
+     */
     public double getGuessing(){
         return guessing;
     }
 
     /**
-     * Set lower asymptote parameter to an existing value. If you are using this method to fix an
-     * item parameter during estimation, you must also set the proposal value.
-     * @return
+     * Set lower asymptote parameter to an existing value. If you are using this method to fix an item parameter
+     * during estimation, you must also set the proposal value in {@link #setProposalGuessing(double)}.
+     *
      */
     public void setGuessing(double guessing){
         this.guessing = guessing;
     }
 
-    public double getProposalGuessing(){
-        return proposalGuessing;
-    }
-
+    /**
+     * A proposal guessing parameter value is obtained during each iteration of the estimation routine. This method
+     * sets the proposal value.
+     *
+     * @param guessing proposed guessing parameter estimate.
+     */
     public void setProposalGuessing(double guessing){
         if(!isFixed) this.proposalGuessing = guessing;
     }
 
+    /**
+     * Gets the guessing parameter estimate standard error.
+     *
+     * @return guessing parameter estimate standard error.
+     */
     public double getGuessingStdError(){
         return guessingStdError;
     }
 
+    /**
+     * The guessing parameter standard error may be computed external to the class. Use this method to set the
+     * standard error to a particular value.
+     *
+     * @param stdError standard error for the guessing parameter estimate.
+     */
     public void setGuessingStdError(double stdError){
         guessingStdError = stdError;
     }
 
+    /**
+     * Proposal values for every item parameter are obtained at each iteration of the estimation routine. The
+     * proposal values for each parameters are obtained for each in turn using the estimated values from the
+     * previous iteration. For example, a proposal difficulty estimate for itemA is obtained in iteration k+1
+     * using estimates from iteration k. Then, a proposal difficulty estimate for itemB is obtained in iteration k+1
+     * using estimates from iteration k (even though a new estimate exists for itemA). After obtaining proposal
+     * values for every item on the test, the proposal values can be accepted as the new parameter estimates. This
+     * method must be called to accept the proposal values as the new estimates.
+     *
+     */
     public void acceptAllProposalValues(){
         this.difficulty = proposalDifficulty;
         this.discrimination = proposalDiscrimination;
         this.guessing = proposalGuessing;
     }
+
 
     public double[] getStepParameters(){
         throw new UnsupportedOperationException();

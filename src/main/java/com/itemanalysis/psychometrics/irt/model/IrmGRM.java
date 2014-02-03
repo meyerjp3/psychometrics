@@ -19,6 +19,9 @@ import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
+/**
+ * Samejima's graded response model.
+ */
 public class IrmGRM extends AbstractItemResponseModel {
 
     private double discrimination = 1.0;

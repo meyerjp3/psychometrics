@@ -19,7 +19,7 @@ package com.itemanalysis.psychometrics.irt.estimation;
 import java.util.Formatter;
 
 /**
- * A class for storing the maximum change in logits and teh log-likelihood at each iteration.
+ * A class for storing the maximum change in logits and the log-likelihood at each iteration.
  * This class is just for record keeping and displaying the history.
  */
 public class IterationRecord {

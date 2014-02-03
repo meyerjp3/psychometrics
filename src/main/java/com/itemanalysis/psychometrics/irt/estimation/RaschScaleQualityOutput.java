@@ -33,7 +33,7 @@ public class RaschScaleQualityOutput {
     }
 
     /**
-     * Gets a string with teh formatted scale quality output.
+     * Gets a string with the formatted scale quality output.
      *
      * @return scale quality output.
      */
