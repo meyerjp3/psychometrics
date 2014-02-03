@@ -25,6 +25,12 @@ import org.apache.commons.math3.util.Precision;
 
 import java.util.ArrayList;
 
+/**
+ * A class for creating a raw to ablity score transformation table. It has its own estimation method.
+ * However, the estimation method is identical to
+ * {@link JointMaximumLikelihoodEstimation#updatePerson(int, int, double, double)}.
+ *
+ */
 public class RaschScoreTable {
 
     private ItemResponseModel[] irm = null;
@@ -37,6 +43,13 @@ public class RaschScoreTable {
     private double MaxPS = 0.0;
     private int nItems = 0;
 
+    /**
+     * The constructor should be called after joint maximum likelhood estimation is complete.
+     *
+     * @param irm an array of item resposne model objects.
+     * @param extremeItem an array of extreme item codes.
+     * @param droppedStatus an array of dropped item status codes. This argument is mainly needed for polytomous items.
+     */
     public RaschScoreTable(ItemResponseModel[] irm, int[] extremeItem, int[] droppedStatus){
         this.irm = irm;
         this.extremeItem = extremeItem;
@@ -45,18 +58,9 @@ public class RaschScoreTable {
         computeMPS();
     }
 
-//    public RaschScoreTable(ArrayList<ItemResponseModel> irm, int[] extremeItem){
-//        this.irm = new ItemResponseModel[irm.size()];
-//        int index = 0;
-//        for(ItemResponseModel m:irm){
-//            this.irm[index] = m;
-//            index++;
-//        }
-//        this.extremeItem = extremeItem;
-//        nItems = this.irm.length;
-//        computeMPS();
-//    }
-
+    /**
+     * Computes the maximum possible test score. This value is needed for identifying extreme examinees.
+     */
     private void computeMPS(){
         for(int i=0;i<nItems;i++){
             if(droppedStatus[i]==0 && extremeItem[i]==0){
@@ -76,6 +80,13 @@ public class RaschScoreTable {
 
     }
 
+    /**
+     * This method is the main entry point into the class. It should be called soon after instantiation.
+     *
+     * @param globalMaxIter maximum number of iterations.
+     * @param globalConvergence convergence criterion.
+     * @param adjustment extreme score adjustment factor.
+     */
     public void updateScoreTable(int globalMaxIter, double globalConvergence, double adjustment){
         for(int i=0;i<theta.length;i++){
             updatePerson(i, globalMaxIter, globalConvergence, adjustment);
@@ -152,6 +163,11 @@ public class RaschScoreTable {
         return Math.log((x-xMin)/(xMax-x));
     }
 
+    /**
+     * The score table is formatted for output here.
+     *
+     * @return score table.
+     */
     public String printScoreTable(){
         TextTableColumnFormat[] cformats = new TextTableColumnFormat[3];
         cformats[0] = new TextTableColumnFormat();
@@ -181,6 +197,13 @@ public class RaschScoreTable {
         return table.toString();
     }
 
+    /**
+     * A linear transformation can be applied to teh score table. This method should be called after
+     * {@link #computePersonStandardErrors()}.
+     *
+     * @param lt linear transformation to be applied.
+     * @param precision number of decimal places to retain after the linear transformation.
+     */
     public void linearTransformation(DefaultLinearTransformation lt, int precision){
         for(int i=0;i<theta.length;i++){
             theta[i] = Precision.round(lt.transform(theta[i]), precision);

@@ -18,6 +18,9 @@ package com.itemanalysis.psychometrics.irt.estimation;
 
 import java.util.Formatter;
 
+/**
+ * A class for formatting scale quality output for display in plain text form.
+ */
 public class RaschScaleQualityOutput {
 
     private RaschScaleQualityStatistics items = null;
@@ -29,6 +32,11 @@ public class RaschScaleQualityOutput {
         this.persons = persons;
     }
 
+    /**
+     * Gets a string with teh formatted scale quality output.
+     *
+     * @return scale quality output.
+     */
     public String printScaleQuality(){
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);

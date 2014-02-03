@@ -20,22 +20,34 @@ import com.itemanalysis.psychometrics.data.VariableName;
 import java.util.Arrays;
 import java.util.Formatter;
 
+/**
+ * This class is used to count and store item response frequencies for {@link JointMaximumLikelihoodEstimation}.
+ * It is not called directly. Rather, it is called via {@link JointMaximumLikelihoodEstimation#summarizeData(double)}.
+ * 
+ */
 public class ItemResponseSummary {
 
     private byte[] scoreCategories = null;
     private double[] Tij = null;//cell frequencies
-//    private double[] Tpj = null;
     private double[] Sij = null;//number in score category or higher category
-//    private double[] Spj = null;
     private double Sip = 0.0;//raw item score
     private double Tip = 0.0;
     public double adjustment = 0.3;
     private int nCat = 2;
-    private int itemsInGroup = 1;
     private int positionInArray = 0;
     private VariableName variableName = null;
     private String groupId = "";
 
+    /**
+     * Create an item response summary object with information about the variable. The groupId is used to determine
+     * whether an item is combined with other items in the group. The group Id may be unique to the item or
+     * shared for a set of items.
+     *
+     * @param variableName name of item.
+     * @param groupId a groupId for the item.
+     * @param adjustment extreme score adjustment.
+     * @param scoreCategories category scoring.
+     */
     public ItemResponseSummary(VariableName variableName, String groupId, double adjustment, byte[] scoreCategories){
         this.variableName = variableName;
         this.groupId = groupId;
@@ -44,9 +56,7 @@ public class ItemResponseSummary {
         Arrays.sort(this.scoreCategories);
         nCat = scoreCategories.length;
         Tij = new double[nCat];
-//        Tpj = new double[nCat];
         Sij = new double[nCat];
-//        Spj = new double[nCat];
     }
 
     public ItemResponseSummary(VariableName variableName, double adjustment, byte[] scoreCategories){
@@ -70,65 +80,35 @@ public class ItemResponseSummary {
             }
             if(itemResponse>=scoreCategories[i]){
                 Sij[i]++;
-//                if(i>0) Sip++;
             }
         }
         Sip += Byte.valueOf(itemResponse).doubleValue();
     }
 
     /**
-     * After frequencies have been counted for all items. Use this method to combine
-     * frequencies for items in the same group.
+     * Frequencies for each category are stored in an array. This method gets the frequency of the score
+     * category at this index.
      *
-     * @param itemResponseSummary
-     */
-//    public void incrementGroupFrequencies(ItemResponseSummary itemResponseSummary){
-//        if(sameItemGroup(itemResponseSummary)){
-//            itemsInGroup++;
-//            for(int i=0;i<nCat;i++){
-//                Tpj[i] += itemResponseSummary.TijAt(i);
-//                Spj[i] += itemResponseSummary.SijAt(i);
-//            }
-//        }
-//    }
-
-    /**
-     * Returns frequency of the score category at this index.
-     *
-     * @param index
-     * @return
+     * @param index position of score category.
+     * @return frequency of examinees in a score category.
      */
     public double TijAt(int index){
         return Tij[index];
     }
 
+    /**
+     * Total number of exmainees responding to this item.
+     **/
     public double Tip(){
         return Tip;
     }
 
-//    /**
-//     * This count is part of the threshold update in the partial credit
-//     * and rating scale model.
-//     *
-//     * @param index
-//     * @return
-//     */
-//    public double TpjAt(int index){
-//        //TODO check that these extreme score adjustments are ok
-//
-//        if(Tpj[index]==itemsInGroup*Tip){
-//            return Tpj[index]-adjustment;
-//        }else if(Tpj[index]==0){
-//            return Tpj[index]+adjustment;
-//        }
-//        return Tpj[index];
-//    }
-
     /**
-     * Returns the frequency of the score category at this index of higher.
+     * Sij is the frequency of responses in this score category or a higher category.
+     * This method returns the frequency of the score category at this index of higher.
      *
-     * @param index
-     * @return
+     * @param index position of response frequency.
+     * @return number of examinees responding in this category or a higher category.
      */
     public double SijAt(int index){
         return Sij[index];
@@ -166,36 +146,59 @@ public class ItemResponseSummary {
         return Tip*scoreCategories[nCat-1];
     }
 
-//    /**
-//     * This number is part of the PROX calculation for obtaining start values.
-//     *
-//     * @param index
-//     * @return
-//     */
-//    public double SpjAt(int index){
-//        return Spj[index];
-//    }
-
+    /**
+     * Gets the number of score categories for this item.
+     *
+     * @return number of score categories.
+     */
     public int getNumberOfCategories(){
         return nCat;
     }
 
+    /**
+     * Gets the groupId for this item.
+     *
+     * @return groupID.
+     */
     public String getGroupId(){
         return groupId;
     }
 
+    /**
+     * Gets the score point value for a particular category.
+     *
+     * @param index array position of the category score.
+     * @return score value for the category.
+     */
     public int getScoreCategoryAt(int index){
         return scoreCategories[index];
     }
 
+    /**
+     * Stores the items position in the array of item response models. See
+     * {@link JointMaximumLikelihoodEstimation#updateDifficulty}
+     *
+     * @return the item summary's position in the array if items.
+     */
     public int getPositionInArray(){
         return positionInArray;
     }
 
+    /**
+     * Stores the item's position in the array of item response models. It is set during the data summary steps. See
+     * {@link com.itemanalysis.psychometrics.irt.estimation.JointMaximumLikelihoodEstimation#initializeCounts()}
+     *
+     * @param positionInArray
+     */
     public void setPositionInArray(int positionInArray){
         this.positionInArray = positionInArray;
     }
 
+    /**
+     * Gets the extreme score adjustment factor.
+     *
+     * @return extreme score adjustment.
+     */
     public double getAdjustment(){
         return adjustment;
     }
@@ -217,32 +220,55 @@ public class ItemResponseSummary {
         return true;
     }
 
+    /**
+     * An extreme maximum item score is one in which the raw item score equals the minimum possible raw item score.
+     *
+     * @return true if the item is an extreme maximum. Returns false otherwise.
+     */
     public boolean isExtremeMaximum(){
         if(Sip==minSip()) return true;
         return false;
     }
 
+    /**
+     * An extreme minimum item score is one in which the raw item score equals the maximum possible raw item score.
+     *
+     * @return true if an extreme minimum. Return false otherwise.
+     */
     public boolean isExtremeMinimum(){
         if(Sip==maxSip()) return true;
         return false;
     }
 
+    /**
+     * A boolean method that returns true if the item is an extreme minimum or and extreme maximum.
+     *
+     * @return true if an extreme item. REturn false otherwise.
+     */
     public boolean isExtreme(){
         if(isExtremeMaximum() || isExtremeMinimum()) return true;
         return false;
     }
 
+    /**
+     * Resets the item counts to zero. This is needed during the recursive data summary step in
+     * {@link JointMaximumLikelihoodEstimation#summarizeData(double)}.
+     *
+     */
     public void clearCounts(){
         Sip = 0;
         Tip = 0;
         for(int i=0;i<nCat;i++){
             Tij[i] = 0;
             Sij[i] = 0;
-//            Tpj[i] = 0;
-//            Spj[i] = 0;
         }
     }
 
+    /**
+     * A string representation of the frequency counts. Used for displaying output.
+     *
+     * @return a string of frequency counts.
+     */
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();

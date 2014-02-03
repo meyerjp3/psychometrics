@@ -23,6 +23,15 @@ import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.Iterator;
 
+/**
+ * A rating scale group is a set of test items that share the same rating scale structure. Category
+ * frequencies for items in a rating scale group are combined for estimation of threshold parameters.
+ * This class is used for combining the frequencies and holding estimates of the thresholds and
+ * also their fit statistics.
+ *
+ * @author J. Patrick Meyer
+ *
+ */
 public class RaschRatingScaleGroup {
 
     private String groupId = "";
@@ -40,6 +49,13 @@ public class RaschRatingScaleGroup {
     private RaschCategoryFitStatistic[] fitStatistics = null;
     private int extremeCategory = 0;
 
+    /**
+     * Creates a rating scael group using an ID and set number of categories. Any item with the same group ID will
+     * be placed into this group.
+     *
+     * @param groupId A unique identifier for the group.
+     * @param nCat number of score categories for this group.
+     */
     public RaschRatingScaleGroup(String groupId, int nCat){
         this.groupId = groupId;
         this.nCat = nCat;
@@ -57,6 +73,14 @@ public class RaschRatingScaleGroup {
         }
     }
 
+    /**
+     * Called for every item on the test, this method will add any item that has the same groupId and number
+     * of score categories.
+     *
+     * @param irm an item response model.
+     * @param isum an item summary object.
+     * @param position column position of the item in the data array.
+     */
     public void addItem(ItemResponseModel irm, ItemResponseSummary isum, int position){
         if(this.groupId.equals(irm.getGroupId()) && this.nCat==irm.getNcat()){
             this.irm.add(irm);
@@ -75,6 +99,12 @@ public class RaschRatingScaleGroup {
         }
     }
 
+    /**
+     * The columns of data for each item in the group is recorded and stored in an array. Gets the array
+     * of column positions.
+     *
+     * @return column positions for items in this group.
+     */
     public int[] getPositions(){
         int n = columnPosition.size();
         int[] pos = new int[n];
@@ -85,14 +115,29 @@ public class RaschRatingScaleGroup {
         return pos;
     }
 
+    /**
+     * An iterator for item response models for this group.
+     *
+     * @return an iterator.
+     */
     public Iterator<ItemResponseModel> getIterator(){
         return irm.iterator();
     }
 
+    /**
+     * A groupId uniquely identifies each item in the rating scale group. Gets the groupId value.
+     *
+     * @return groupId
+     */
     public String getGroupId(){
         return groupId;
     }
 
+    /**
+     * The number of score categories for this group is fixed. Gets the number of score categories.
+     *
+     * @return number of score categories.
+     */
     public int getNumberOfCategories(){
         return nCat;
     }
@@ -108,10 +153,22 @@ public class RaschRatingScaleGroup {
         return Tpj[index];
     }
 
+    /**
+     * Spj is the sum of Sij over all categories.
+     *
+     * @param index an index of the category for which the statistic is sought.
+     * @return Spj for a category.
+     */
     public double SpjAt(int index){
         return Spj[index];
     }
 
+    /**
+     * Threshold parameters cannot be estimated if one or more categories do not have any observations.
+     * This method checks for empty categories and sets the flag for the item. A code of 0 indicates
+     * that all categories have at least one observation, a code of -1 indicates a category with no
+     * observations, and a code of +1 indicates a category that contains all of the responses.
+     */
     public void checkForDroppping(){
         for(int m=0;m<nCat;m++){
             if(Tpj[m]==0){
@@ -122,10 +179,19 @@ public class RaschRatingScaleGroup {
         }
     }
 
+    /**
+     * Status of the item with response to dropping. See {@link #checkForDroppping()}.
+     *
+     * @return
+     */
     public int dropStatus(){
         return extremeCategory;
     }
 
+    /**
+     * Resets the category counts. This method is used during the data summary in
+     * {@link com.itemanalysis.psychometrics.irt.estimation.JointMaximumLikelihoodEstimation#summarizeData(double)}.
+     */
     public void clearCounts(){
         for(int i=0;i<nCat;i++){
             Tpj[i] = 0;
@@ -133,22 +199,53 @@ public class RaschRatingScaleGroup {
         }
     }
 
+    /**
+     * Threshold parameters represent the point where the probability of scoring in two adjacent categories
+     * is equal. They are estimated in {@link com.itemanalysis.psychometrics.irt.estimation.JointMaximumLikelihoodEstimation}.
+     * Threshold estimates are stored in an array. This method gets the stored estimates.
+     *
+     * @return threshold estimates.
+     */
     public double[] getThresholds(){
         return thresholds;
     }
 
+    /**
+     * Gets threshold estimates for a particular category.
+     *
+     * @param index position of category in threshold array.
+     * @return estimate for the threshold at the position given by index.
+     */
     public double getThresholdAt(int index){
         return thresholds[index];
     }
 
+    /**
+     * Sets the array of threshold estimates. This should only be used for setting initial values.
+     *
+     * @param thresholds values of thresholds.
+     */
     public void setThresholds(double[] thresholds){
         this.thresholds = thresholds;
     }
 
+    /**
+     * During each iteration of the joint maximum likelihood routine, preliminary threshold estimates are obtained.
+     * These proposal values are stored in a separate array. After one complete iteration is complete, the threshold
+     * values are set to the proposal values. See
+     * {@link com.itemanalysis.psychometrics.irt.estimation.JointMaximumLikelihoodEstimation#updateAllThresholds()}.
+     *
+     * @return
+     */
     public double[] getProposalThresholds(){
         return proposalThresholds;
     }
 
+    /**
+     * Sets the array of proposal values.
+     *
+     * @param proposalThresholds proposed threshold values.
+     */
     public void setProposalThresholds(double[] proposalThresholds){
         this.proposalThresholds = proposalThresholds;
         for(ItemResponseModel i : irm){
@@ -156,6 +253,9 @@ public class RaschRatingScaleGroup {
         }
     }
 
+    /**
+     * After a complete iteration, the threshold values are replaced by the prposal values.
+     */
     public void acceptAllProposalValues(){
         if(!isFixed){
             this.thresholds = this.proposalThresholds;
@@ -163,10 +263,22 @@ public class RaschRatingScaleGroup {
 
     }
 
+    /**
+     * Each category has an associated score weight. They are stored in an array. Gets the score weights.
+     *
+     * @return score weights.
+     */
     public byte[] getScoreWeights(){
         return scoreWeight;
     }
 
+    /**
+     * Sums the probability of responding in category at position k over all items in this rating scale group.
+     *
+     * @param theta person ability estimate.
+     * @param k score category for which the probabilities are summed.
+     * @return
+     */
     public double probabilitySumAt(double theta, int k){
         double sum = 0;
          for(ItemResponseModel i : irm){
@@ -175,6 +287,14 @@ public class RaschRatingScaleGroup {
         return sum;
     }
 
+    /**
+     * Sums the probability of responding in category "category" or higher for all items in this group.
+     *
+     * @param m an item response model.
+     * @param theta person ability estimate.
+     * @param category category for which the sum is sought.
+     * @return
+     */
     private double probabilityOfCategoryOrHigher(ItemResponseModel m, double theta, int category){
         double sum = 0;
         for(int k=category;k<nCat;k++){
@@ -184,7 +304,7 @@ public class RaschRatingScaleGroup {
     }
 
     /**
-     * Computes teh standard error of the threshold parameters.
+     * Computes the standard error of the threshold parameters.
      *
      * @param theta array of person ability values
      * @param extremePersons array of extreme person flags
@@ -215,14 +335,34 @@ public class RaschRatingScaleGroup {
         }
     }
 
+    /**
+     * Each threshold parameter has an associated standard error. The standard errors are not computed during
+     * estimation. You must call {@link #computeCategoryStandardError(double[], int[])} before calling this
+     * method. Otherwise, the returned standard errors will be zero (and will be incorrect).
+     *
+     * @return array of threshold standard errors.
+     */
     public double[] getThresholdStandardError(){
         return thresholdStandardError;
     }
 
+    /**
+     * Gets a specific threshold standard error.
+     *
+     * @param index array position of the particular threshold standard error.
+     * @return a threshold standard error.
+     */
     public double getThresholdStdErrorAt(int index){
         return thresholdStandardError[index];
     }
 
+    /**
+     * Category fit statistics are incrementally updated with repeated calls to this method.
+     *
+     * @param model and item response model.
+     * @param theta person ability estimate.
+     * @param Xni an observed item response.
+     */
     public void incrementFitStatistics(ItemResponseModel model, double theta, byte Xni){
         if(fitStatistics==null) initializezFit();
 
@@ -232,6 +372,12 @@ public class RaschRatingScaleGroup {
 
     }
 
+    /**
+     * Gets category fit statistics for a particular category.
+     *
+     * @param index array index of category fit statistics.
+     * @return category fit statistics.
+     */
     public RaschCategoryFitStatistic getCategoryFitAt(int index){
         return fitStatistics[index];
     }
@@ -250,6 +396,11 @@ public class RaschRatingScaleGroup {
         return Wni;
     }
 
+    /**
+     * Category frequency summaries are stored in this object. This method provides a listing of the frequencies.
+     *
+     * @return output of response frequencies.
+     */
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
@@ -282,8 +433,6 @@ public class RaschRatingScaleGroup {
         for(int i=0;i<nCat;i++){
             f.format("%12.0f", SpjAt(i));
         }
-//        f.format("%n");
-//        f.format("%"+lineLength+"s", line);
         f.format("%n");f.format("%n");
         return f.toString();
     }

@@ -18,6 +18,10 @@ package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 
+/**
+ * A class for storeless computation of Rasch item or person INFIT and OUTFIT statistics. Statistics are
+ * incrementally updated with each observation and then computed before the result is returned.
+ */
 public class RaschFitStatistics {
 
     /**
@@ -81,18 +85,18 @@ public class RaschFitStatistics {
     }
 
     /**
-     * OUTFIT
+     * Computes and return the OUTFIT mean square fit statistic.
      *
-     * @return
+     * @return OUTFIT mean square fit statistic.
      */
     public double getUnweightedMeanSquare(){
         return Z2niSum/N;
     }
 
     /**
-     * INFIT
+     * Computes and returns the INFIT mean square fit statistic.
      *
-     * @return
+     * @return INFIT mean square fit statistic.
      */
     public double getWeightedMeanSquare(){
         return WniZ2niSum/WniSum;
@@ -129,14 +133,6 @@ public class RaschFitStatistics {
         double t = (Math.pow(vi, 1.0/3.0)-1.0)*(3.0/q)+(q/3.0);
         return t;
 
-    }
-
-    public double getCategoryUnweightedMeanSquare(){
-        return 0.0;
-    }
-
-    public double getCategoryWeightedMeanSquare(){
-        return 0.0;
     }
 
     /**

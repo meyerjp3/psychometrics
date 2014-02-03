@@ -20,6 +20,10 @@ import com.itemanalysis.psychometrics.data.VariableName;
 
 import java.util.LinkedHashMap;
 
+/**
+ * Ac lass for storing the item response vector and frequency counts. This class is designed
+ * for storing summary information for marginal maximum likelihood estimation.
+ */
 public class ItemResponseVector {
 
     protected byte[] response = null;
@@ -62,6 +66,9 @@ public class ItemResponseVector {
         index++;
     }
 
+    /**
+     * Resets the response vector and frequency counts to zero.
+     */
     public void clearResponseVector(){
         response = new byte[nItems];
         index = 0;
@@ -121,10 +128,20 @@ public class ItemResponseVector {
         return response[itemPosition];
     }
 
+    /**
+     * Gets teh frequency count for this response vector.
+     *
+     * @return frequency count.
+     */
     public double getFrequecy(){
         return freq;
     }
 
+    /**
+     * A string representation of teh response string.
+     *
+     * @return response string.
+     */
     @Override
     public String toString(){
         String s = "";

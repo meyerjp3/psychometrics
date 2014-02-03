@@ -18,6 +18,10 @@ package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 
+/**
+ * A class for storeless computation of Rasch category INFIT and OUTFIT statistics. Statistics are
+ * incrementally updated with each observation and then computed before the result is returned.
+ */
 public class RaschCategoryFitStatistic {
 
     double k = 0.0;
@@ -51,10 +55,20 @@ public class RaschCategoryFitStatistic {
 
     }
 
+    /**
+     * Computes and the returns the OUTFIT mean square fit statistic.
+     *
+     * @return OUTFIT mean squares fit statistic.
+     */
     public double getUnweightedMeanSquare(){
         return sumKmEniWni/sumPnikKmEniWni;
     }
 
+    /**
+     * Computes and then returns the INFIT mean square fit statistic.
+     *
+     * @return INFIT mean square fit statistic.
+     */
     public double getWeightedMeanSquare(){
         return sumKmEni/sumPnikKmEni;//Ox/Mx
     }

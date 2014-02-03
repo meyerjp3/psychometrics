@@ -18,25 +18,50 @@ package com.itemanalysis.psychometrics.irt.estimation;
 
 import java.util.Formatter;
 
+/**
+ * A class for storing the maximum change in logits and teh log-likelihood at each iteration.
+ * This class is just for record keeping and displaying the history.
+ */
 public class IterationRecord {
 
     private double delta = 0.0;
 
     private double loglikelihood = 0.0;
 
+    /**
+     * Each instance stores information about the iteration.
+     *
+     * @param delta maximum change in logits.
+     * @param loglikelihood log-likelihood value.
+     */
     public IterationRecord(double delta, double loglikelihood){
         this.delta = delta;
         this.loglikelihood = loglikelihood;
     }
 
+    /**
+     * Gets the maximum change in logits.
+     *
+     * @return maximum change in lgits.
+     */
     public double getDelta(){
         return delta;
     }
 
+    /**
+     * Gets the log-likelihood.
+     *
+     * @return log-likelihood value.
+     */
     public double getLoglikelihood(){
         return loglikelihood;
     }
 
+    /**
+     * A string for displaying results.
+     *
+     * @return value for this iteration.
+     */
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();

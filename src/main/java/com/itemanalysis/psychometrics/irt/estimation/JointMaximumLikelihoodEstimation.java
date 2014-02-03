@@ -34,7 +34,15 @@ import java.util.LinkedHashMap;
  * Joint maximum likelihood estimation of the Rasch, partial credit, and rating scale models.
  * Methods conduct item and person parameter estimation, computation of standard errors,
  * and linear transformations of parameters. Fixed common item calibration is also possible.
+ * For details on the estimation algorithm see:
+ * <p>
+ * Meyer, J. P., & Hailey, E. (2012). A study of Rasch partial credit, and rating scale model<br />
+ *  &nbsp;&nbsp;&nbsp;&nbsp;parameter recovery in WINSTEPS and jMetrik. <em>Journal of Applied Measurement</em>,<br />
+ *  &nbsp;&nbsp;&nbsp;&nbsp;<em>13</em>(3), 248-258.
+ * </p>
+ * This class also provides a way to obtain item and person fit statistics.
  *
+ * @Author J. Patrick Meyer
  */
 public class JointMaximumLikelihoodEstimation {
 
@@ -59,6 +67,17 @@ public class JointMaximumLikelihoodEstimation {
     private int extremeCount = 0;
     private int droppedCount = 0;
 
+    /**
+     * The object is created with a set of data and array of item response models (See {@link ItemResponseModel}.
+     * The data must be arranged such that each row respresents an examinee and each column represents an item.
+     * All item responses must be zero or larger (i.e. nonnegative). Use an item response value of -1 to indicate
+     * a missing item response. The length of the item response model array must equal the number of columns in
+     * the data array.
+     *
+     * @param data a two-way array of item responses.
+     * @param irm an array of item response model.
+     * @throws DimensionMismatchException
+     */
     public JointMaximumLikelihoodEstimation(byte[][] data, ItemResponseModel[] irm)throws DimensionMismatchException{
         if(data[0].length!=irm.length) throw new DimensionMismatchException(data[0].length, irm.length);
         this.irm = irm;
@@ -257,7 +276,7 @@ public class JointMaximumLikelihoodEstimation {
      * This method is where the estimation is managed. It corresponds to the global iterations in the Joint
      * Maximum Likelihood Estimation paradigm. First items and thresholds are updated, then persons
      * are updated. These cycles continue until the number of iterations reaches the global maximum
-     * or teh convergence criterion is reached.
+     * or the convergence criterion is reached.
      *
      * @param globalMaxIter maximum number of iteration in JMLE
      * @param globalConv maximum change in logits convergen criterion
@@ -317,13 +336,13 @@ public class JointMaximumLikelihoodEstimation {
     }
 
     /**
-     * This method manages the item updates during teh JMLE iterations.
+     * This method manages the item updates during the JMLE iterations.
      *
      * @param delta current value of the maximum observed change in logits
      * @param centerItems establish identification by centering item about the item difficulty mean (the approach
      *                    typically used in Rasch measurement). If false establish identification by centering
      *                    persons around the mean ability. Centering only done for nonextreme persons and items.
-     * @return maximum change in logits observed during teh item updates
+     * @return maximum change in logits observed during the item updates
      */
     private double updateAllItems(double delta, boolean centerItems){
         double maxDelta = 0.0;
@@ -396,7 +415,7 @@ public class JointMaximumLikelihoodEstimation {
     /**
      * All thresholds updated here.
      *
-     * @return
+     * @return largest change in threshold estimate.
      */
     private double updateAllThresholds(){
         double tDelta = 0.0;
@@ -601,8 +620,7 @@ public class JointMaximumLikelihoodEstimation {
     }
 
     /**
-     * Computes PROX difficulty estimates for item difficulty.
-     * These are used as starting values in JMLE.
+     * Computes PROX difficulty estimates for item difficulty. These are used as starting values in JMLE.
      */
     public void itemProx(){
         for(int j=0;j<nItems;j++){
@@ -649,9 +667,9 @@ public class JointMaximumLikelihoodEstimation {
     }
 
     /**
-     * Compute log-likelihood.
+     * Compute log-likelihood given the current values of item and person parameters.
      *
-     * @return
+     * @return log-likelihood
      */
     public double getLogLikelihood(){
         double sum = 0.0;
@@ -668,20 +686,37 @@ public class JointMaximumLikelihoodEstimation {
         return sum;
     }
 
+    /**
+     * Item response model objects are stored in an array. Gets the array of item response models.
+     *
+     * @return an array of item response models.
+     */
     public ItemResponseModel[] getItems(){
         return irm;
     }
 
+    /**
+     * Person ability estimates are stored as an array of doubles. Get the array of person estimates.
+     *
+     * @return an array of person estimates.
+     */
     public double[] getPersons(){
         return theta;
     }
 
+    /**
+     * Standard errors of person ability estimates are stored as an array of doubles. Gets the array of standard errors.
+     * Will return null if {@link #computePersonStandardErrors} has not been called.
+     *
+     * @return
+     */
     public double[] getPersonStdError(){
         return thetaStdError;
     }
 
     /**
-     * Item difficulty standard error calculation.
+     * Item difficulty standard error calculation. Standard errors for threshold parameters are also computed
+     * for polytomous items.
      */
     public void computeItemStandardErrors(){
         double tempStdError = 0.0;
@@ -708,7 +743,7 @@ public class JointMaximumLikelihoodEstimation {
     }
 
     /**
-     * Item threshold standar error calculation.
+     * Item threshold standard error calculation.
      */
     private void computeAllThresholdStandardErrors(){
         RaschRatingScaleGroup gr = null;
@@ -719,7 +754,7 @@ public class JointMaximumLikelihoodEstimation {
     }
 
     /**
-     * Person ability parameter standard error calculation.
+     * Person ability parameter standard error calculation. Must be called before {@link #getPersonStdError}.
      */
     public void computePersonStandardErrors(){
         thetaStdError = new double[nPeople];
@@ -735,11 +770,17 @@ public class JointMaximumLikelihoodEstimation {
         }
     }
 
-    public double[] getPersonStandardErrors(){
-        if(thetaStdError==null) computePersonStandardErrors();
-        return thetaStdError;
-    }
+//    public double[] getPersonStandardErrors(){
+//        if(thetaStdError==null) computePersonStandardErrors();
+//        return thetaStdError;
+//    }
 
+    /**
+     * An extreme iem is one in which all examinees with obtain the lowest possible item score or one in which
+     * all examinee obtain the highest possible item score. Gets the count of extreme items.
+     *
+     * @return count of extreme items.
+     */
     public int numberOfNonexremeItems(){
         int L = 0;
         for(int j=0;j<extremeItem.length;j++){
@@ -748,6 +789,12 @@ public class JointMaximumLikelihoodEstimation {
         return L;
     }
 
+    /**
+     * An extreme person is one that obtains the minimum possible test score or the maximum possible test score.
+     * Gets the count of extreme persons.
+     *
+     * @return count of extreme persons.
+     */
     public int numberOfNonextremePeople(){
         int N = 0;
         for(int i=0;i<extremePerson.length;i++){
@@ -809,6 +856,12 @@ public class JointMaximumLikelihoodEstimation {
         return out;
     }
 
+    /**
+     * Person ability estimates are stored in an array of doubles. Gets the entire arrya of person ability
+     * estimates.
+     *
+     * @return person ability estimates.
+     */
     public double[] getPersonEstimates(){
         return theta;
     }
@@ -832,6 +885,11 @@ public class JointMaximumLikelihoodEstimation {
         }
     }
 
+    /**
+     * After parameters have been estimated, fit statistics can be computed. Fit statistics include
+     * INFIT and OUTFIT mean squared error statistic and their standardized versions. See
+     * {@link RaschFitStatistics}. This method computes fit statistics for all items.
+     */
     public void computeItemFitStatistics(){
         itemFit = new RaschFitStatistics[nItems];
 
@@ -848,6 +906,13 @@ public class JointMaximumLikelihoodEstimation {
         }
     }
 
+    /**
+     * Computes person fit statistics for the examinee at the specified index. This method computes person
+     * fit statistic for a single examinee.
+     *
+     * @param index array position of examinee for which the fit statistic is computed.
+     * @return
+     */
     public RaschFitStatistics getPersonFitStatisticsAt(int index){
         RaschFitStatistics fit = new RaschFitStatistics();
         for(int j=0;j<nItems;j++){
@@ -860,6 +925,10 @@ public class JointMaximumLikelihoodEstimation {
         return fit;
     }
 
+    /**
+     * After estimation, INFIT and OUTFIT mean square fit statistics for category thresholds can be computed.
+     * This method computes category fit statistics for all items and categories.
+     */
     public void computeItemCategoryFitStatistics(){
         if(maxCategory > 2){
             RaschRatingScaleGroup g = null;
@@ -878,6 +947,12 @@ public class JointMaximumLikelihoodEstimation {
     }
 
 
+    /**
+     * After estimation, overall indices of scale quality can be computed such as reliability and separation.
+     * This method returns the scale quality statistics for the entire set of items.
+     *
+     * @return scale quality statistics for items.
+     */
     public RaschScaleQualityStatistics getItemSideScaleQuality(){
         RaschScaleQualityStatistics iStats = new RaschScaleQualityStatistics();
         for(int j=0;j<nItems;j++){
@@ -888,6 +963,12 @@ public class JointMaximumLikelihoodEstimation {
         return iStats;
     }
 
+    /**
+     * After estimation, overall indices of scale quality can be computed such as reliability and separation.
+     * This method returns the scale quality statistics for the entire group of examinees.
+     *
+     * @return
+     */
     public RaschScaleQualityStatistics getPersonSideScaleQuality(){
         RaschScaleQualityStatistics pStats = new RaschScaleQualityStatistics();
         for(int i=0;i<nPeople;i++){
@@ -896,44 +977,110 @@ public class JointMaximumLikelihoodEstimation {
         return pStats;
     }
 
+    /**
+     * Each item can have a different number of score categories. Gets the maximum score category.
+     *
+     * @return maximum score category among all items.
+     */
     public int getMaxCategory(){
         return maxCategory;
     }
 
+    /**
+     * The total number of items on the test is stored. It includes all good items and all extreme items.
+     *
+     * @return total number of items.
+     */
     public int getNumberOfItems(){
         return nItems;
     }
 
+    /**
+     * The total number of examinees is stored. It includes all extreme and nonextreme examinees.
+     *
+     * @return total number of examinees.
+     */
     public int getNumberOfPeople(){
         return nPeople;
     }
 
+    /**
+     * An {@link ItemResponseModel} object is stored in an array for each item. Gets the item response model
+     * at the given index.
+     *
+     * @param index array position of the item response model.
+     * @return item response model at the given index.
+     */
     public ItemResponseModel getItemResponseModelAt(int index){
         return irm[index];
     }
 
+    /**
+     * Fit statistics for each item are stored in an array. Gets the fit statistics for the item in the array
+     * at position given by the index.
+     *
+     * @param index array position of the item fit statistics.
+     * @return fit statistics for an item.
+     */
     public RaschFitStatistics getItemFitStatisticsAt(int index){
         return itemFit[index];
     }
 
+    /**
+     * Polytomous response models be long to a single {@link RaschRatingScaleGroup}. Gets the rating scale
+     * group for item at the indexed position in the array.
+     *
+     * @param index array position of the item.
+     * @return rating scale group for the item.
+     */
     public RaschRatingScaleGroup getRatingScaleGroupAt(int index){
         String groupId = irm[index].getGroupId();
         RaschRatingScaleGroup group = rsg.get(groupId);
         return group;
     }
 
+    /**
+     * Extreme items are items in whih all examinees obtain the maximum possitble item score or the minimum possible
+     * item score. An array stores flag as to whether items are extreme. Gets the indicator of the item's extreme
+     * status.
+     *
+     * @param index position of item in the array.
+     * @return extreme status for the item.
+     */
     public int getExtremeItemAt(int index){
         return extremeItem[index];
     }
 
+    /**
+     * Person ability estimates are stored in an array. Gets the estimate of ability for the person at the position
+     * given by the index.
+     *
+     * @param index array position of the examinee.
+     * @return current ability estimate for an examinee.
+     */
     public double getPersonEstimateAt(int index){
         return theta[index];
     }
 
+    /**
+     * Person estimate standard errors are stored in an array of doubles. Gets the standard error at the given position
+     * of the array. The method {@link #computePersonStandardErrors} must be called before this method. Otherwise, it
+     * will result in a null pointer exception.
+     *
+     * @param index position in array.
+     * @return person estimate standard error.
+     */
     public double getPersonEstimateStdErrorAt(int index){
         return thetaStdError[index];
     }
 
+    /**
+     * The valid sum score is the sum score based on the nonextreme items. Valid sum scores are stored as an array
+     * of doubles. Gets the valid sum score at the given position in the array.
+     *
+     * @param index position of valid sum score in the array.
+     * @return valid sum score.
+     */
     public double getValidSumScoreAt(int index){
         return sumScore[index];
     }
@@ -946,10 +1093,26 @@ public class JointMaximumLikelihoodEstimation {
         return sum;
     }
 
+    /**
+     * An extreme person is an examinee that obtains the minimum or maximum possible test score. Ability estimates
+     * are not possible with extreme examinees without an adjustment. Extreme persons are flagged in a integer array
+     * such that a code of 0 is a nonextreme examinee, -1 is an extreme minimum, and +1 is an extreme maximum.
+     *
+     * @param index position in array.
+     * @return extreme person code.
+     */
     public int getExtremePersonAt(int index){
         return extremePerson[index];
     }
 
+    /**
+     * A residual is the difference between the observed and expected item response. Computes and returns the
+     * residual for person i to item j.
+     *
+     * @param i index of examinee in data array.
+     * @param j index of item in array of item response models.
+     * @return residual for person i to item j.
+     */
     public double getResidualAt(int i, int j){
         if(data[i][j]==-1) return Double.NaN;
         double p = irm[j].expectedValue(theta[i]);
@@ -957,6 +1120,15 @@ public class JointMaximumLikelihoodEstimation {
         return x-p;
     }
 
+    /**
+     * A polytomous item with at least one category with 0 observations is dropped from the analysis. The dropped
+     * status of each item is stored in an integer array. The dropped status is coded such that a value of 0 indicates
+     * the item is not dropped, a value of -1 indicates a category with no observations, and a +1 indicates a category
+     * with all of the observations (hence one or more other categories have 0 observations).
+     *
+     * @param index array index of item.
+     * @return dropped status.
+     */
     public int getDroppedStatusAt(int index){
         return droppedStatus[index];
     }
@@ -1080,6 +1252,13 @@ public class JointMaximumLikelihoodEstimation {
         return f.toString();
     }
 
+    /**
+     * Joint maximum likelihood estimation is iterative. An iteration history is saved. The history includes
+     * the largest change in logits and the log-likelihood at each iteration. This method provides a string
+     * representation of the iteration history.
+     *
+     * @return a summary of the iteration history.
+     */
     public String printIterationHistory(){
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
@@ -1097,6 +1276,19 @@ public class JointMaximumLikelihoodEstimation {
         return f.toString();
     }
 
+    /**
+     * The sum score is a sufficient statistic for the latent trait in the Rasch family of models. As such,
+     * it is easy to create a table that shows the 1:1 correspondence between the sum score and person ability.
+     * A score table is created showing this correspondence. It requires its own set of iterations, which is why
+     * some parameters concern the iteration.
+     *
+     * @param maxIter maximum number of iterations to use when estimating ability.
+     * @param converge convergence criterion when estimating ability.
+     * @param adjustment extreme score adjustment that is applied to extreme persons.
+     * @param transformation linear transformation to be applied to person ability estimates.
+     * @param precision number of decimal places to use when reporting estimates int eh score table.
+     * @return a score table that ranges from the minimum possible score to the maximum possible score.
+     */
     public String printScoreTable(int maxIter, double converge, double adjustment,
                                   DefaultLinearTransformation transformation, int precision){
         RaschScoreTable table = new RaschScoreTable(irm, extremeItem, droppedStatus);
@@ -1106,6 +1298,14 @@ public class JointMaximumLikelihoodEstimation {
         return table.printScoreTable();
     }
 
+    /**
+     * Creates a string of item statistics. It includes (a) item name, (b) item difficulty, (c) difficulty
+     * standard error, (d) four item fit statistics, and (e) a extreme item flag. This method for displaying
+     * statistics is the one used in jMetrik for displaying results.
+     *
+     * @param title a title for the output table.
+     * @return a table of item statistics.
+     */
     public String printItemStats(String title){
         TextTableColumnFormat[] cformats = new TextTableColumnFormat[8];
         cformats[0] = new TextTableColumnFormat();
@@ -1181,6 +1381,12 @@ public class JointMaximumLikelihoodEstimation {
         return output;
     }
 
+    /**
+     * Polytomous items have a set of threshold statistics that must be reported. They are listed in a separate
+     * output table as defined by this method.
+     *
+     * @return a table of category statistics.
+     */
     public String printCategoryStats(){
         if(rsg.isEmpty()) return "";
         TextTableColumnFormat[] cformats = new TextTableColumnFormat[6];
