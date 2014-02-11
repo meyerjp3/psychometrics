@@ -60,6 +60,12 @@ public class ExploratoryFactorAnalysis {
         }else if(fm==EstimationMethod.ML){
             factorMethod = new MaximumLikelihoodMethod(correlationMatrix, nFactors);
             title = "Maximum Likelihood Factor Analysis (no rotation)";
+        }else if(fm==EstimationMethod.WLS){
+            factorMethod = new WeightedLeastSquaresMethod(correlationMatrix, nFactors);
+            title = "Weighted Least Squares Factor Analysis (no rotation)";
+        }else if(fm==EstimationMethod.GLS){
+//            factorMethod = new GeneralizedLeastSquaresMethod(correlationMatrix, nFactors);
+//            title = "Generalized Least Squares Factor Analysis (no rotation)";
         }else{
             factorMethod = new MINRESmethod(correlationMatrix, nFactors);
             title = "MINRES Factor Analysis (no rotation)";

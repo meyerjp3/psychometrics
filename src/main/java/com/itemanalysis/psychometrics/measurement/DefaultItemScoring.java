@@ -170,8 +170,24 @@ public class DefaultItemScoring implements ItemScoring{
         this.notReachedCode = null;
     }
 
+    /**
+     * Gets the number of response options.
+     *
+     * @return number of response options.
+     */
     public int numberOfCategories(){
         return categories.size();
+    }
+
+    /**
+     * Gets teh number of score levels. For a polytomous item, this number will be the same as teh value returned by
+     * {@link #numberOfCategories()} unless the score categories are collapsed. With collapsed score categories,
+     * the number of score levels will be less than the number of response options.
+     *
+     * @return number of score levels.
+     */
+    public int numberOfScoreLevels(){
+        return (int)(maximumPossibleScore()-minimumPossibleScore())+1;
     }
 
     public double maximumPossibleScore(){
