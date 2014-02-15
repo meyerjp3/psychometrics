@@ -36,10 +36,11 @@ public class WeightedLeastSquaresMethod extends AbstractFactorMethod {
     private RealMatrix Sinv = null;
     private RealMatrix R2 = null;
     
-    public WeightedLeastSquaresMethod(RealMatrix R, int nFactors){
+    public WeightedLeastSquaresMethod(RealMatrix R, int nFactors, RotationMethod rotationMethod){
         this.nVariables = R.getColumnDimension();
         this.nParam = nVariables;
         this.nFactors = nFactors;
+        this.rotationMethod = rotationMethod;
         this.R = R;
         this.R2 = R.copy();
     }
@@ -82,6 +83,12 @@ public class WeightedLeastSquaresMethod extends AbstractFactorMethod {
         }
         DiagonalMatrix M = new DiagonalMatrix(ev);
         RealMatrix LOAD = L.multiply(M);
+
+        //rotate factor loadings
+        if(rotationMethod!=RotationMethod.NONE){
+            GPArotation gpa = new GPArotation();
+            LOAD = gpa.rotate(LOAD, rotationMethod);
+        }
 
         Sum[] colSums = new Sum[nFactors];
         Sum[] colSumsSquares = new Sum[nFactors];
@@ -185,7 +192,6 @@ public class WeightedLeastSquaresMethod extends AbstractFactorMethod {
                 }
             }
 
-            //check that difference is being squared
             RealMatrix RESID = diagSdInv.multiply(DIF).multiply(diagSdInv);
 
             double sum = 0.0;

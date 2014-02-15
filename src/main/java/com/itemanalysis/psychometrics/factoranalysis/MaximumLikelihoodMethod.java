@@ -44,9 +44,10 @@ public class MaximumLikelihoodMethod extends AbstractFactorMethod {
      */
     private PointValuePair solution = null;
 
-    public MaximumLikelihoodMethod(RealMatrix correlationMatrix, int nFactors){
+    public MaximumLikelihoodMethod(RealMatrix correlationMatrix, int nFactors, RotationMethod rotationMethod){
         this.nVariables = correlationMatrix.getColumnDimension();
         this.nFactors = nFactors;
+        this.rotationMethod = rotationMethod;
         this.nParam = nVariables;
         this.R = correlationMatrix;
     }
@@ -113,6 +114,12 @@ public class MaximumLikelihoodMethod extends AbstractFactorMethod {
         DiagonalMatrix M = new DiagonalMatrix(ev);
         RealMatrix LOAD2 = L.multiply(M);
         RealMatrix LOAD = diagSqtPsi.multiply(LOAD2);
+
+        //rotate factor loadings
+        if(rotationMethod!=RotationMethod.NONE){
+            GPArotation gpa = new GPArotation();
+            LOAD = gpa.rotate(LOAD, rotationMethod);
+        }
 
         Sum[] colSums = new Sum[nFactors];
         Sum[] colSumsSquares = new Sum[nFactors];

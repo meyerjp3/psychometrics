@@ -25,10 +25,11 @@ import org.apache.commons.math3.stat.descriptive.summary.Sum;
  */
 public class PrincipalComponentsMethod extends AbstractFactorMethod {
 
-    public PrincipalComponentsMethod(RealMatrix R, int nFactors){
+    public PrincipalComponentsMethod(RealMatrix R, int nFactors, RotationMethod rotationMethod){
         this.R = R;
         this.nVariables = R.getColumnDimension();
         this.nFactors = nFactors;
+        this.rotationMethod = rotationMethod;
     }
 
     public double estimateParameters(){
@@ -42,6 +43,12 @@ public class PrincipalComponentsMethod extends AbstractFactorMethod {
         }
         DiagonalMatrix evMatrix = new DiagonalMatrix(ev);//USE Apache version of Diagonal matrix when upgrade to version 3.2
         RealMatrix LOAD = eigenVectors.multiply(evMatrix);
+
+        //rotate factor loadings
+        if(rotationMethod!=RotationMethod.NONE){
+            GPArotation gpa = new GPArotation();
+            LOAD = gpa.rotate(LOAD, rotationMethod);
+        }
 
         Sum[] colSums = new Sum[nFactors];
         Sum[] colSumsSquares = new Sum[nFactors];

@@ -31,11 +31,12 @@ public class ExploratoryFactorAnalysis {
     private int nFactors = 0;
     private int nParameters = 0;
     private FactorMethod factorMethod = null;
+    private RotationMethod rotationMethod = RotationMethod.NONE;
     private double fmin = 0.0;
     private String title = "";
 
     /**
-     * The constructor requires a corelation matrix and the number of factors.
+     * The constructor requires a correlation matrix and the number of factors.
      *
      * @param correlationMatrix correlation matrix
      * @param nFactors number of factor to use
@@ -51,27 +52,37 @@ public class ExploratoryFactorAnalysis {
      * The main method for estimating parameters. It will use the estimation method provided in the argument.
      *
      * @param fm estimation method for computing factor loadings
+     * @param rotationMethod method of rotating factor loadings
      */
-    public void estimateParameters(EstimationMethod fm){
+    public void estimateParameters(EstimationMethod fm, RotationMethod rotationMethod){
+        this.rotationMethod = rotationMethod;
 
         if(fm==EstimationMethod.PRINCOMP){
-            factorMethod = new PrincipalComponentsMethod(correlationMatrix, nFactors);
-            title = "Principal Components Analysis (no rotation)";
+            factorMethod = new PrincipalComponentsMethod(correlationMatrix, nFactors, rotationMethod);
+            title = "Principal Components Analysis (" + rotationMethod.toString() + ")";
         }else if(fm==EstimationMethod.ML){
-            factorMethod = new MaximumLikelihoodMethod(correlationMatrix, nFactors);
-            title = "Maximum Likelihood Factor Analysis (no rotation)";
+            factorMethod = new MaximumLikelihoodMethod(correlationMatrix, nFactors, rotationMethod);
+            title = "Maximum Likelihood Factor Analysis (" + rotationMethod.toString() + ")";
         }else if(fm==EstimationMethod.WLS){
-            factorMethod = new WeightedLeastSquaresMethod(correlationMatrix, nFactors);
-            title = "Weighted Least Squares Factor Analysis (no rotation)";
+            factorMethod = new WeightedLeastSquaresMethod(correlationMatrix, nFactors, rotationMethod);
+            title = "Weighted Least Squares Factor Analysis (" + rotationMethod.toString() + ")";
         }else if(fm==EstimationMethod.GLS){
-//            factorMethod = new GeneralizedLeastSquaresMethod(correlationMatrix, nFactors);
-//            title = "Generalized Least Squares Factor Analysis (no rotation)";
+            factorMethod = new GeneralizedLeastSquaresMethod(correlationMatrix, nFactors, rotationMethod);
+            title = "Generalized Least Squares Factor Analysis (" + rotationMethod.toString() + ")";
         }else{
-            factorMethod = new MINRESmethod(correlationMatrix, nFactors);
-            title = "MINRES Factor Analysis (no rotation)";
+            factorMethod = new MINRESmethod(correlationMatrix, nFactors, rotationMethod);
+            title = "MINRES Factor Analysis (" + rotationMethod.toString() + ")";
         }
 
         fmin = factorMethod.estimateParameters();
+
+    }
+
+    public void estimateParameters(EstimationMethod fm){
+        estimateParameters(fm, RotationMethod.NONE);
+    }
+
+    public void rotateFactor(RotationMethod method){
 
     }
 

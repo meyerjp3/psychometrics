@@ -29,6 +29,7 @@ public abstract class AbstractFactorMethod implements FactorMethod{
     protected int nVariables = 0;
     protected int nFactors = 1;
     protected int nParam = 0;
+    protected RotationMethod rotationMethod = RotationMethod.NONE;
     protected double[][] factorLoading = null;
     protected double[] uniqueness = null;
     protected double[] communality = null;

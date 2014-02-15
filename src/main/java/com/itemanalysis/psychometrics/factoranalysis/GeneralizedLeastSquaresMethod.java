@@ -19,7 +19,9 @@ import com.itemanalysis.psychometrics.analysis.AbstractMultivariateFunction;
 import com.itemanalysis.psychometrics.measurement.DiagonalMatrix;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
-import org.apache.commons.math3.linear.*;
+import org.apache.commons.math3.linear.EigenDecomposition;
+import org.apache.commons.math3.linear.LUDecomposition;
+import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.optim.*;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
@@ -27,18 +29,14 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient
 import org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer;
 import org.apache.commons.math3.stat.descriptive.summary.Sum;
 
-import java.util.Formatter;
+public class GeneralizedLeastSquaresMethod extends AbstractFactorMethod{
 
-/**
- * Harman's minimum residual (MINRES) method of factor analysis.
- */
-public class MINRESmethod extends AbstractFactorMethod {
-
-    private RealMatrix R2 = null;
     private NonLinearConjugateGradientOptimizer optimizer = null;
     private PointValuePair solution = null;
+    private RealMatrix Sinv = null;
+    private RealMatrix R2 = null;
 
-    public MINRESmethod(RealMatrix R, int nFactors, RotationMethod rotationMethod){
+    public GeneralizedLeastSquaresMethod(RealMatrix R, int nFactors, RotationMethod rotationMethod){
         this.nVariables = R.getColumnDimension();
         this.nParam = nVariables;
         this.nFactors = nFactors;
@@ -49,7 +47,9 @@ public class MINRESmethod extends AbstractFactorMethod {
 
     public double estimateParameters(){
 
-        MINRESObjectiveFunction objectiveFunction = new MINRESObjectiveFunction();
+        Sinv = new LUDecomposition(R).getSolver().getInverse();
+
+        GLSObjectiveFunction objectiveFunction = new GLSObjectiveFunction();
 
         optimizer = new NonLinearConjugateGradientOptimizer(
                 NonLinearConjugateGradientOptimizer.Formula.POLAK_RIBIERE,
@@ -64,32 +64,25 @@ public class MINRESmethod extends AbstractFactorMethod {
 
         computeFactorLoadings(solution.getPoint());
         return solution.getValue();
+
     }
 
     private void computeFactorLoadings(double[] x){
         uniqueness = x;
         communality = new double[nVariables];
 
-        double[] sqrtPsi = new double[nVariables];
-        double[] invSqrtPsi = new double[nVariables];
         for(int i=0;i<nVariables;i++){
-            sqrtPsi[i] = Math.sqrt(x[i]);
-            invSqrtPsi[i] = 1.0/Math.sqrt(x[i]);
+            R.setEntry(i,i,1.0-x[i]);
         }
-        DiagonalMatrix diagPsi = new DiagonalMatrix(x);
-        DiagonalMatrix diagSqtPsi = new DiagonalMatrix(sqrtPsi);
-        DiagonalMatrix diagInvSqrtPsi = new DiagonalMatrix(invSqrtPsi);
 
-        RealMatrix Sstar = diagInvSqrtPsi.multiply(R2).multiply(diagInvSqrtPsi);
-        EigenDecomposition E = new EigenDecomposition(Sstar);
+        EigenDecomposition E = new EigenDecomposition(R);
         RealMatrix L = E.getV().getSubMatrix(0,nVariables-1, 0, nFactors-1);
         double[] ev = new double[nFactors];
         for(int i=0;i<nFactors;i++){
-            ev[i] = Math.sqrt(Math.max(E.getRealEigenvalue(i) - 1, 0));
+            ev[i] = Math.sqrt(E.getRealEigenvalue(i));
         }
         DiagonalMatrix M = new DiagonalMatrix(ev);
-        RealMatrix LOAD2 = L.multiply(M);
-        RealMatrix LOAD = diagSqtPsi.multiply(LOAD2);
+        RealMatrix LOAD = L.multiply(M);
 
         //rotate factor loadings
         if(rotationMethod!=RotationMethod.NONE){
@@ -152,39 +145,32 @@ public class MINRESmethod extends AbstractFactorMethod {
                 start[i] = 0.5;
             }
         }else{
-            RealMatrix rInverse = new LUDecomposition(R2).getSolver().getInverse();
             for(int i=0;i<nVariables;i++){
-                start[i] = Math.min(1.0/rInverse.getEntry(i,i), 1.0);
+                start[i] = Math.min(1.0/Sinv.getEntry(i,i), 1.0);
             }
         }
 
         return start;
     }
 
-    public String printStartValues(){
-        StringBuilder sb = new StringBuilder();
-        Formatter f = new Formatter(sb);
-
-        double[] start = getStartValues();
-        for(int i=0;i<start.length;i++){
-            f.format("%8.4f", start[i]);f.format("%n");
-        }
-        return f.toString();
-    }
-
     /**
      * This class is used for the numeric optimization routine.
      */
-    private class MINRESObjectiveFunction extends AbstractMultivariateFunction{
+    private class GLSObjectiveFunction extends AbstractMultivariateFunction {
 
         public double value(double[] param){
             return valueAt(param);
         }
 
         public double valueAt(double[] param){
+            double[] sdInv = new double[nVariables];
+
             for(int i=0;i<nVariables;i++){
                 R.setEntry(i,i,1.0-param[i]);
+                sdInv[i] = 1.0/Sinv.getEntry(i,i);
             }
+
+            DiagonalMatrix diagSdInv = new DiagonalMatrix(sdInv);
 
             EigenDecomposition eigen = new EigenDecomposition(R);
             RealMatrix eigenVectors = eigen.getV().getSubMatrix(0,nVariables-1, 0, nFactors-1);
@@ -196,14 +182,23 @@ public class MINRESmethod extends AbstractFactorMethod {
             DiagonalMatrix evMatrix = new DiagonalMatrix(ev);//USE Apache version of Diagonal matrix when upgrade to version 3.2
             RealMatrix LAMBDA = eigenVectors.multiply(evMatrix);
             RealMatrix SIGMA = (LAMBDA.multiply(LAMBDA.transpose()));
-            RealMatrix RESID = R.subtract(SIGMA);
+
+            double value = 0.0;
+            RealMatrix DIF = R.subtract(SIGMA);
+            for(int i=0;i<DIF.getRowDimension();i++){
+                for(int j=0;j<DIF.getColumnDimension();j++){
+                    value = DIF.getEntry(i,j);
+                    DIF.setEntry(i,j, Math.pow(value, 2));
+                }
+            }
+
+            //This line of code is the only difference between this class and WeightedLeastSquaresMethod.
+            RealMatrix RESID = diagSdInv.multiply(DIF);
 
             double sum = 0.0;
             for(int i=0;i<RESID.getRowDimension();i++){
                 for(int j=0;j<RESID.getColumnDimension();j++){
-                    if(i!=j){
-                        sum += Math.pow(RESID.getEntry(i,j),2);
-                    }
+                    sum += RESID.getEntry(i,j);
                 }
             }
             return sum;
@@ -271,9 +266,4 @@ public class MINRESmethod extends AbstractFactorMethod {
 
     }
 
-
-
 }
-
-
-
