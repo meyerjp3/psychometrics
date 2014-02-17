@@ -45,8 +45,8 @@ public class GPArotation {
 
     /**
      * Users should call this method. It will decide whether to use
-     * {@link #GPForth(org.apache.commons.math3.linear.RealMatrix, int, double)}
-     * or {@link #GPFoblq(org.apache.commons.math3.linear.RealMatrix, int, double)} )}
+     * {@link #GPForth(org.apache.commons.math3.linear.RealMatrix, boolean, int, double)}
+     * or {@link #GPFoblq(org.apache.commons.math3.linear.RealMatrix, boolean, int, double)} )}
      * according to the type of rotation method specified in the method call.
      *
      * @param A a matrix of unrotated, orthogonal factor loadings.
@@ -56,23 +56,27 @@ public class GPArotation {
      * @return a matrix of rotated factor loadings.
      * @throws ConvergenceException
      */
-    public RealMatrix rotate(RealMatrix A, RotationMethod rotationMethod, int maxIter, double eps)throws ConvergenceException{
+    public RotationResults rotate(RealMatrix A, RotationMethod rotationMethod, boolean normalize, int maxIter, double eps)throws ConvergenceException{
         this.rotationMethod = rotationMethod;
 
         if(rotationMethod==RotationMethod.VARIMAX){
             gpFunction = new VarimaxCriteria();
-            return GPForth(A, maxIter, eps);
+            return GPForth(A, normalize, maxIter, eps);
         }else if(rotationMethod==RotationMethod.OBLIMIN){
             gpFunction = new ObliminCriteria();
-            return GPFoblq(A, maxIter, eps);
+            return GPFoblq(A, normalize, maxIter, eps);
         }else if(rotationMethod==RotationMethod.QUARTIMIN){
             gpFunction = new QuartiminCriteria();
-            return GPFoblq(A, maxIter, eps);
+            return GPFoblq(A, normalize, maxIter, eps);
+        }else if(rotationMethod==RotationMethod.GEOMIN){
+            //TODO give user a choice of oblique or orthogonal rotation
+            gpFunction = new GeominCriteria();
+            return GPFoblq(A, normalize, maxIter, eps);
         }
         else{
             //varimax is the default
             gpFunction = new VarimaxCriteria();
-            return GPForth(A, maxIter, eps);
+            return GPForth(A, normalize, maxIter, eps);
         }
 
     }
@@ -85,8 +89,8 @@ public class GPArotation {
      * @return a matrix of rotated factor loadings.
      * @throws ConvergenceException
      */
-    public RealMatrix rotate(RealMatrix A, RotationMethod method)throws ConvergenceException{
-        return rotate(A, method, 1000, 1e-5);
+    public RotationResults rotate(RealMatrix A, RotationMethod method)throws ConvergenceException{
+        return rotate(A, method, false, 1000, 1e-5);
     }
 
 
@@ -97,8 +101,19 @@ public class GPArotation {
      * @return a matrix of rotated factor loadings.
      * @throws ConvergenceException
      */
-    private RealMatrix GPForth(RealMatrix A, int maxIter, double eps)throws ConvergenceException{
+    private RotationResults GPForth(RealMatrix A, boolean normalize, int maxIter, double eps)throws ConvergenceException{
         int ncol = A.getColumnDimension();
+
+        if(normalize){
+            //elementwise division by normalizing weights
+            final RealMatrix W = getNormalizingWeights(A, true);
+            A.walkInRowOrder(new DefaultRealMatrixChangingVisitor(){
+                @Override
+                public double visit(int row, int column, double value) {
+                    return value/W.getEntry(row, column);
+                }
+            });
+        }
 
         RealMatrix Tmat = new IdentityMatrix(ncol);
         double alpha = 1;
@@ -157,7 +172,20 @@ public class GPArotation {
             throw new ConvergenceException();
         }
 
-        return L;
+        if(normalize){
+            //elementwise multiplication by normalizing weights
+            final RealMatrix W = getNormalizingWeights(A, true);
+            A.walkInRowOrder(new DefaultRealMatrixChangingVisitor(){
+                @Override
+                public double visit(int row, int column, double value) {
+                    return value*W.getEntry(row, column);
+                }
+            });
+        }
+
+        RealMatrix Phi = Tmat.transpose().multiply(Tmat);
+        RotationResults result = new RotationResults(L, Phi, Tmat, rotationMethod);
+        return result;
 
     }
 
@@ -173,12 +201,24 @@ public class GPArotation {
         return qr.getQ();
     }
 
-    private RealMatrix GPFoblq(RealMatrix A, int maxIter, double eps)throws ConvergenceException{
+    private RotationResults GPFoblq(RealMatrix A, boolean normalize, int maxIter, double eps)throws ConvergenceException{
         int ncol = A.getColumnDimension();
 
         RealMatrix Tinner = null;
         RealMatrix TinnerInv = null;
         RealMatrix Tmat = new IdentityMatrix(ncol);
+
+        if(normalize){
+            //elementwise division by normalizing weights
+            final RealMatrix W = getNormalizingWeights(A, true);
+            A.walkInRowOrder(new DefaultRealMatrixChangingVisitor(){
+                @Override
+                public double visit(int row, int column, double value) {
+                    return value/W.getEntry(row, column);
+                }
+            });
+        }
+
 
         RealMatrix TmatInv = new LUDecomposition(Tmat).getSolver().getInverse();
         RealMatrix L = A.multiply(TmatInv.transpose());
@@ -256,10 +296,56 @@ public class GPArotation {
             throw new ConvergenceException();
         }
 
-        return L;
+        if(normalize){
+            //elementwise multiplication by normalizing weights
+            final RealMatrix W = getNormalizingWeights(A, true);
+            A.walkInRowOrder(new DefaultRealMatrixChangingVisitor(){
+                @Override
+                public double visit(int row, int column, double value) {
+                    return value*W.getEntry(row, column);
+                }
+            });
+        }
+
+        RealMatrix Phi = Tmat.transpose().multiply(Tmat);
+        RotationResults result = new RotationResults(L, Phi, Tmat, rotationMethod);
+        return result;
 
     }
 
+    private RealMatrix getNormalizingWeights(RealMatrix A, boolean normalize){
+        int nrow = A.getRowDimension();
+        int ncol = A.getColumnDimension();
+        final double[] w = new double[nrow];
+
+        RealMatrix W = new Array2DRowRealMatrix(nrow, ncol);
+        if(!normalize){
+            W.walkInRowOrder(new DefaultRealMatrixChangingVisitor(){
+                @Override
+                public double visit(int row, int column, double value) {
+                    return 1.0;
+                }
+            });
+            return W;
+        }
+
+        //compute row sum of squared loadings
+        A.walkInRowOrder(new DefaultRealMatrixPreservingVisitor(){
+            @Override
+            public void visit(int row, int column, double value) {
+                w[row] += value*value;
+            }
+        });
+
+        //compute normalizing weights for the matrix
+        W.walkInRowOrder(new DefaultRealMatrixChangingVisitor(){
+            @Override
+            public double visit(int row, int column, double value) {
+                return Math.sqrt(w[row]);
+            }
+        });
+        return W;
+    }
 
 
     /**

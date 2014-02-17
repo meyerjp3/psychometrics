@@ -87,7 +87,8 @@ public class GeneralizedLeastSquaresMethod extends AbstractFactorMethod{
         //rotate factor loadings
         if(rotationMethod!=RotationMethod.NONE){
             GPArotation gpa = new GPArotation();
-            LOAD = gpa.rotate(LOAD, rotationMethod);
+            RotationResults results = gpa.rotate(LOAD, rotationMethod);
+            LOAD = results.getFactorLoadings();
         }
 
         Sum[] colSums = new Sum[nFactors];

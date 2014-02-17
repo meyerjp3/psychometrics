@@ -52,8 +52,14 @@ public class GPArotationTest {
                 {4,5}
         };
         RealMatrix X = new Array2DRowRealMatrix(x);
-        RealMatrix P = X.transpose().scalarMultiply(-1.0);
-        printMatrix(P, "PP");
+        X.walkInRowOrder(new DefaultRealMatrixChangingVisitor(){
+            @Override
+            public double visit(int row, int column, double value) {
+                return value*value;
+            }
+        });
+
+        printMatrix(X, "PP");
 
     }
 
@@ -81,8 +87,9 @@ public class GPArotationTest {
 
         RealMatrix L = new Array2DRowRealMatrix(m255MINRESLoadings);
         GPArotation gpa = new GPArotation();
-        RealMatrix Lr = gpa.rotate(L, RotationMethod.VARIMAX, 1000, 1e-5);
-        //printMatrix(Lr, "m255 Varimax");
+        RotationResults R = gpa.rotate(L, RotationMethod.VARIMAX, false, 1000, 1e-5);
+        RealMatrix Lr = R.getFactorLoadings();
+//        System.out.println(R.toString());
 
         for(int i=0;i<Lr.getRowDimension();i++){
             for(int j=0;j<Lr.getColumnDimension();j++){
@@ -115,10 +122,11 @@ public class GPArotationTest {
                 {-0.005289128,  0.004084979, -0.75198003}
         };
 
-        RealMatrix L = new Array2DRowRealMatrix(m255MINRESLoadings);
-        GPArotation gpa = new GPArotation();
-        RealMatrix Lr = gpa.rotate(L, RotationMethod.OBLIMIN, 60, 1e-5);
-//        printMatrix(Lr, "m255 Oblimin");
+       RealMatrix L = new Array2DRowRealMatrix(m255MINRESLoadings);
+       GPArotation gpa = new GPArotation();
+       RotationResults R = gpa.rotate(L, RotationMethod.OBLIMIN, false, 60, 1e-5);
+       RealMatrix Lr = R.getFactorLoadings();
+//        System.out.println(R.toString());
 
         for(int i=0;i<Lr.getRowDimension();i++){
             for(int j=0;j<Lr.getColumnDimension();j++){
@@ -153,8 +161,9 @@ public class GPArotationTest {
 
         RealMatrix L = new Array2DRowRealMatrix(m255MINRESLoadings);
         GPArotation gpa = new GPArotation();
-        RealMatrix Lr = gpa.rotate(L, RotationMethod.QUARTIMIN, 500, 1e-5);
-//        printMatrix(Lr, "m255 Quartimin");
+        RotationResults R = gpa.rotate(L, RotationMethod.QUARTIMIN, false, 500, 1e-5);
+        RealMatrix Lr = R.getFactorLoadings();
+//        System.out.println(R.toString());
 
         for(int i=0;i<Lr.getRowDimension();i++){
             for(int j=0;j<Lr.getColumnDimension();j++){
@@ -165,8 +174,56 @@ public class GPArotationTest {
 
     }
 
-    private void printMatrix(RealMatrix x, String title){
+    @Test
+    public void testM255GeominOblique(){
+        System.out.println("Oblique Geomin rotation test: m255 data");
 
+        /**
+         * True result obtained form R using GPArotation package
+         */
+        double[][] true_Geomin_oblique = {
+                {0.814401032, -0.07246248, -0.02746737},
+                {0.831474480, -0.01326628,  0.02443654},
+                {0.646042722,  0.11864079, -0.05620512},
+                {0.604841472,  0.16035608,  0.04246413},
+                {0.429130847,  0.32919710, -0.11951339},
+                {0.068651498,  0.74475428, -0.04555539},
+                {-0.026759588,  0.84183379,  0.08633271},
+                {0.111079049,  0.44919958, -0.05420552},
+                {0.130427210,  0.37116164, -0.31191986},
+                {-0.051932818,  0.47010788, -0.26735188},
+                {0.036623600,  0.01140911, -0.87276177},
+                {0.002120624,  0.01879531, -0.73637231},
+        };
+
+        double[][] true_Phi = {
+                {1.0000000,  0.5565973, -0.7280542},
+                {0.5565973,  1.0000000, -0.6808553},
+                {-0.7280542, -0.6808553,  1.0000000}
+        };
+
+        RealMatrix L = new Array2DRowRealMatrix(m255MINRESLoadings);
+        GPArotation gpa = new GPArotation();
+        RotationResults R = gpa.rotate(L, RotationMethod.GEOMIN, false, 500, 1e-5);
+        RealMatrix Lr = R.getFactorLoadings();
+//        System.out.println(R.toString());
+
+        for(int i=0;i<Lr.getRowDimension();i++){
+            for(int j=0;j<Lr.getColumnDimension();j++){
+                assertEquals("  loading: ", Precision.round(true_Geomin_oblique[i][j],4), Precision.round(Lr.getEntry(i,j), 5), 1e-4);
+            }
+        }
+
+        RealMatrix Phi = R.getPhi();
+        for(int i=0;i<Phi.getRowDimension();i++){
+            for(int j=0;j<Phi.getColumnDimension();j++){
+                assertEquals("  factor correlation: ", Precision.round(true_Phi[i][j],4), Precision.round(Phi.getEntry(i,j), 5), 1e-4);
+            }
+        }
+
+    }
+
+    private void printMatrix(RealMatrix x, String title){
         System.out.println("PRINTING MATRIX: " + title);
         for(int i=0;i<x.getRowDimension();i++){
             for(int j=0;j<x.getColumnDimension();j++){

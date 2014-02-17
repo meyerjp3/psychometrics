@@ -37,6 +37,10 @@ public class ObliminCriteria implements RotationCriteria {
 
     }
 
+    public ObliminCriteria(double gam){
+        this.gam = gam;
+    }
+
     public double getValue(){
         return functionValue;
     }
@@ -73,47 +77,7 @@ public class ObliminCriteria implements RotationCriteria {
         functionValue = sum/4.0;
         gradient = MatrixUtils.multiplyElements(L, X);
 
-
-//            //initialize dimensions and column mean array
-//        int nrow = L.getRowDimension();
-//        int ncol = L.getColumnDimension();
-//        RealMatrix C = null;
-//        RealMatrix I = new IdentityMatrix(nrow);
-//
-//        //square each element in matrix
-//        RealMatrix L2 = MatrixUtils.multiplyElements(L,L);
-//        RealMatrix N = getN(ncol);
-//        RealMatrix X = L2.multiply(N);
-//        if(0.0!=gam){
-//            C = new Array2DRowRealMatrix(nrow, nrow);
-//            for(int i=0;i<nrow;i++){
-//                for(int j=0;j<nrow;j++){
-//                    C.setEntry(i,j,gam/nrow);
-//                }
-//            }
-//            X = (I.subtract(C)).multiply(X);
-//        }
-//
-//        //compute gradient and function value
-//        gradient = MatrixUtils.multiplyElements(L, X);
-//        RealMatrix V = MatrixUtils.multiplyElements(L2,X);
-//        functionValue =  MatrixUtils.sumMatrix(V)/4.0;
-
     }
-
-//    private RealMatrix getN(int ncol){
-//        RealMatrix N = new Array2DRowRealMatrix(ncol, ncol);
-//        for(int i=0;i<ncol;i++){
-//            for(int j=0;j<ncol;j++){
-//                if(i==j){
-//                    N.setEntry(i,j,0.0);
-//                }else{
-//                    N.setEntry(i,j,1.0);
-//                }
-//            }
-//        }
-//        return N;
-//    }
 
     private void printMatrix(RealMatrix x, String title){
         System.out.println("PRINTING MATRIX: " + title);
