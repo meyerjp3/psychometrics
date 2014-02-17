@@ -15,11 +15,12 @@
  */
 package com.itemanalysis.psychometrics.factoranalysis;
 
+import com.itemanalysis.psychometrics.measurement.DiagonalMatrix;
 import com.itemanalysis.psychometrics.statistics.IdentityMatrix;
+import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.exception.ConvergenceException;
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.SingularValueDecomposition;
+import org.apache.commons.math3.exception.DimensionMismatchException;
+import org.apache.commons.math3.linear.*;
 
 /**
  * This class is a translation of the GPArotation package in R. Alternative translations for
@@ -45,8 +46,8 @@ public class GPArotation {
     /**
      * Users should call this method. It will decide whether to use
      * {@link #GPForth(org.apache.commons.math3.linear.RealMatrix, int, double)}
-     * or {@link #GPFoblq(org.apache.commons.math3.linear.RealMatrix)} according to the type of rotation method
-     * specified in the method call.
+     * or {@link #GPFoblq(org.apache.commons.math3.linear.RealMatrix, int, double)} )}
+     * according to the type of rotation method specified in the method call.
      *
      * @param A a matrix of unrotated, orthogonal factor loadings.
      * @param rotationMethod the type of rotation to conduct.
@@ -61,13 +62,19 @@ public class GPArotation {
         if(rotationMethod==RotationMethod.VARIMAX){
             gpFunction = new VarimaxCriteria();
             return GPForth(A, maxIter, eps);
-        }else{
+        }else if(rotationMethod==RotationMethod.OBLIMIN){
+            gpFunction = new ObliminCriteria();
+            return GPFoblq(A, maxIter, eps);
+        }else if(rotationMethod==RotationMethod.QUARTIMIN){
+            gpFunction = new QuartiminCriteria();
+            return GPFoblq(A, maxIter, eps);
+        }
+        else{
             //varimax is the default
             gpFunction = new VarimaxCriteria();
             return GPForth(A, maxIter, eps);
         }
 
-//        return GPForth(A, maxIter, eps);
     }
 
     /**
@@ -91,7 +98,6 @@ public class GPArotation {
      * @throws ConvergenceException
      */
     private RealMatrix GPForth(RealMatrix A, int maxIter, double eps)throws ConvergenceException{
-        int nrow = A.getRowDimension();
         int ncol = A.getColumnDimension();
 
         RealMatrix Tmat = new IdentityMatrix(ncol);
@@ -148,7 +154,6 @@ public class GPArotation {
 
         boolean convergence = s<eps;
         if(!convergence){
-            System.out.println("Convergence not reaced: " + s + " iter: " + iter);
             throw new ConvergenceException();
         }
 
@@ -156,10 +161,106 @@ public class GPArotation {
 
     }
 
-    private RealMatrix GPFoblq(RealMatrix A)throws ConvergenceException{
-        //empty method
-        return new Array2DRowRealMatrix(2,2);
+    private RealMatrix randomStart(int ncol){
+        NormalDistribution norm = new NormalDistribution(0.0, 1.0);
+        RealMatrix T = new Array2DRowRealMatrix(ncol, ncol);
+        for(int i=0;i<ncol;i++){
+            for(int j=0;j<ncol;j++){
+                T.setEntry(i,j,norm.sample());
+            }
+        }
+        QRDecomposition qr = new QRDecomposition(T);
+        return qr.getQ();
     }
+
+    private RealMatrix GPFoblq(RealMatrix A, int maxIter, double eps)throws ConvergenceException{
+        int ncol = A.getColumnDimension();
+
+        RealMatrix Tinner = null;
+        RealMatrix TinnerInv = null;
+        RealMatrix Tmat = new IdentityMatrix(ncol);
+
+        RealMatrix TmatInv = new LUDecomposition(Tmat).getSolver().getInverse();
+        RealMatrix L = A.multiply(TmatInv.transpose());
+
+        //compute gradient and function value
+        gpFunction.computeValues(L);
+        RealMatrix VgQ = gpFunction.getGradient();
+        RealMatrix VgQt = VgQ;
+        double f = gpFunction.getValue();
+        double ft = f;
+        RealMatrix G = ((L.transpose().multiply(VgQ).multiply(TmatInv)).transpose()).scalarMultiply(-1.0);
+
+        int iter = 0;
+        double alpha = 1.0;
+        double s = eps+0.5;
+        double s2 = Math.pow(s,2);
+        int innerMaxIter=10;
+        int innerCount = 0;
+
+        IdentityMatrix I = new IdentityMatrix(G.getRowDimension());
+        RealMatrix V1 = MatrixUtils.getVector(ncol,1.0);
+
+        while(iter< maxIter){
+            RealMatrix M = MatrixUtils.multiplyElements(Tmat, G);
+            RealMatrix diagP = new DiagonalMatrix(V1.multiply(M).getRow(0));
+            RealMatrix Gp = G.subtract(Tmat.multiply(diagP));
+            s = Math.sqrt(Gp.transpose().multiply(Gp).getTrace());
+            s2 = Math.pow(s,2);
+
+            if(s<eps){
+                break;
+            }
+            alpha = 2.0*alpha;
+
+            innerCount = 0;
+            for(int i=0;i<innerMaxIter;i++){
+                RealMatrix X = Tmat.subtract(Gp.scalarMultiply(alpha));
+                RealMatrix X2 = MatrixUtils.multiplyElements(X,X);
+                RealMatrix V = V1.multiply(X2);
+                V.walkInRowOrder(new DefaultRealMatrixChangingVisitor() {
+                    @Override
+                    public double visit(int row, int column, double value) {
+                        return 1.0 / Math.sqrt(value);
+                    }
+                });
+
+                //compute new value of T, its inverse, and the rotated loadings
+                RealMatrix diagV = new DiagonalMatrix(V.getRow(0));
+                Tinner = X.multiply(diagV);
+                TinnerInv = new LUDecomposition(Tinner).getSolver().getInverse();
+                L = A.multiply(TinnerInv.transpose());
+
+                //compute new values of the gradient and the rotation criteria
+                gpFunction.computeValues(L);
+                VgQt = gpFunction.getGradient();
+                ft = gpFunction.getValue();
+
+                innerCount++;
+                if(ft < f - 0.5*s2*alpha){
+                    break;
+                }
+                alpha = alpha/2.0;
+            }
+
+//            System.out.println(iter + "  " + f + "  " + s + "  " + Math.log10(s) + "  " + alpha + "  " + innerCount);
+
+            Tmat = Tinner;
+            f = ft;
+            G = (L.transpose().multiply(VgQt).multiply(TinnerInv)).transpose().scalarMultiply(-1.0);
+            iter++;
+        }
+
+        boolean convergence = s<eps;
+        if(!convergence){
+            throw new ConvergenceException();
+        }
+
+        return L;
+
+    }
+
+
 
     /**
      * For debugging

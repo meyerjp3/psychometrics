@@ -33,6 +33,12 @@ public enum RotationMethod {
         public String toString(){
             return "Oblimin rotation";
         }
+    },
+
+    QUARTIMIN{
+        public String toString(){
+            return "Quartimin rotation";
+        }
     }
 
 }
