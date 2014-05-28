@@ -108,7 +108,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     private static final double ftol = 1e-4; // Linesearch parameters
     private double gtol = 0.9;
     private static final double aMin = 1e-12; // Min step size
-    private static final double aMax = 1e12; // Max step size
+    private static final double aMax = 1e12; // Max step size originally 1e12
     private static final double p66 = 0.66; // used to check getting more than 2/3 of width improvement
     private static final double p5 = 0.5; // Some other magic constant
     private static final int a = 0;  // used as array index

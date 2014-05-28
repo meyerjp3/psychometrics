@@ -169,6 +169,11 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
         return ev;
     }
 
+    public double[] gradient(double theta){
+        //empty method
+        return null;
+    }
+
     public double itemInformationAt(double theta){
 
         double T = 0;
@@ -426,13 +431,19 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
         throw new UnsupportedOperationException();
     }
 
-    public void acceptAllProposalValues(){
+    public double acceptAllProposalValues(){
+        double max = 0;
         if(!isFixed){
+            max = Math.max(max, Math.abs(this.difficulty-this.proposalDifficulty));
+            max = Math.max(max, Math.abs(this.discrimination-this.proposalDiscrimination));
+            for(int m=0;m<getNcat();m++){
+                max = Math.max(max, Math.abs(this.threshold[m]-this.proposalThreshold[m]));
+            }
             this.difficulty = this.proposalDifficulty;
             this.discrimination = this.proposalDiscrimination;
             this.threshold = this.proposalThreshold;
         }
-
+        return max;
     }
 //=====================================================================================================================//
 // END GETTER AND SETTER METHODS                                                                                       //

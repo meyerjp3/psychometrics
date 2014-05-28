@@ -84,6 +84,11 @@ public class IrmGRM extends AbstractItemResponseModel {
         return ev;
     }
 
+    public double[] gradient(double theta){
+        //empty method
+        return null;
+    }
+
     public void setScoreWeights(double[] scoreWeight)throws DimensionMismatchException {
         if(scoreWeight.length!=step.length) throw new DimensionMismatchException(scoreWeight.length, step.length);
         this.scoreWeight = scoreWeight;
@@ -380,12 +385,17 @@ public class IrmGRM extends AbstractItemResponseModel {
         throw new UnsupportedOperationException();
     }
 
-    public void acceptAllProposalValues(){
+    public double acceptAllProposalValues(){
+        double max = 0.0;
         if(!isFixed){
+            max = Math.max(0, Math.abs(this.discrimination-proposalDiscrimination));
+            for(int m=0;m<this.getNcat();m++){
+                max = Math.max(max, Math.abs(this.step[m]-proposalStep[m]));
+            }
             this.discrimination = this.proposalDiscrimination;
             this.step = this.proposalStep;
         }
-
+        return max;
     }
 
 //=====================================================================================================================//

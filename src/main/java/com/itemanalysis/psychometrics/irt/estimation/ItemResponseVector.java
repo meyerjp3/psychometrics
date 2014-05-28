@@ -16,54 +16,94 @@
 
 package com.itemanalysis.psychometrics.irt.estimation;
 
-import com.itemanalysis.psychometrics.data.VariableName;
-
-import java.util.LinkedHashMap;
+import java.util.Arrays;
 
 /**
  * A class for storing the item response vector and frequency counts. This class is designed
- * for storing summary information for marginal maximum likelihood estimation.
+ * for storing summary information for marginal maximum likelihood estimation. It is also
+ * designed for use with IRT Person scoring.
+ *
+ * The item response vector should be ordered integers starting at 0. The code -1 indicates
+ * a missing response.
+ *
  */
-public class ItemResponseVector {
+public class ItemResponseVector{
 
+    /**
+     * The item response vector.
+     */
     protected byte[] response = null;
 
+    /**
+     * Number of times the response vector is observed in the sample. It could also be a smapling weight.
+     */
     protected double freq = 1;
 
+    /**
+     * Number of non-missing item responses.
+     */
     protected double validResponses = 0.0;
 
+    /**
+     * Sum of the response vector, excluding missing responses.
+     */
     protected double sumScore = 0.0;
 
+    /**
+     * Number of items in teh response vector
+     */
     protected int nItems = 0;
 
-    private int index = 0;
-
+    /**
+     * A group ID for this response vector. Used for multigroup estimation.
+     */
     private String groupID = "";
 
+    /**
+     * A constructor that is designed for storing all response vectors during MML estimation.
+     *
+     * @param groupID a group indicator code.
+     * @param response a response vector.
+     */
+    public ItemResponseVector(String groupID, byte[] response, double freq){
+        this.groupID = groupID;
+        this.response = response;
+        this.freq = freq;
+        this.nItems = response.length;
+        for(int i=0;i<response.length;i++){
+            if(response[i]!=-1){
+                sumScore += response[i];
+                validResponses++;
+            }
+        }
+    }
+
+    /**
+     * A constructor that is designed for storing all response vectors during MML estimation.
+     *
+     * @param response a response vector.
+     */
+    public ItemResponseVector(byte[] response, double freq){
+        this("", response, freq);
+    }
+
+    /**
+     * A constructor that takes an argument for the group ID and number of items.
+     * @param groupID the group ID code.
+     * @param nItems the number of items in the response vector.
+     */
     public ItemResponseVector(String groupID, int nItems){
         this.groupID = groupID;
         this.nItems = nItems;
         response = new byte[nItems];
     }
 
+    /**
+     * A constructor that only requires the number of items.
+     * @param nItems the number of items in the response vector.
+     */
     public ItemResponseVector(int nItems){
         this("", nItems);
-    }
-
-    /**
-     * Use this method to incrementally add values to the response vector.
-     * It is useful when reading data from a database.
-     *
-     * @param response item response
-     */
-    public void increment(byte response){
-        this.response[index] = response;
-        if(response!=-1){
-            sumScore += response;
-            validResponses++;
-        }
-
-        index++;
     }
 
     /**
@@ -71,43 +111,47 @@ public class ItemResponseVector {
      */
     public void clearResponseVector(){
         response = new byte[nItems];
-        index = 0;
         sumScore = 0;
         validResponses = 0;
     }
 
     /**
      * Use this method to add an entire item response vector for a single examinee.
-     * Also use it to change the response vector.
+     * Also use it to change the response vector. This method is primarily designed
+     * for use with IRT person scoring in {@link com.itemanalysis.psychometrics.irt.estimation.IrtExaminee}.
      *
      * @param response item response
      */
     public void setResponseVector(byte[] response){
-        index = 0;
+        if(response.length!=nItems) return;//TODO should probably throw an exception
         sumScore = 0;
         validResponses = 0;
-        for(byte b : response){
-            increment(b);
+        for(int i=0;i<nItems;i++){
+            this.response[i] = response[i];
+            if(response[i]!=-1){
+                sumScore += response[i];
+                validResponses++;
+            }
         }
     }
 
-    /**
-     * Checks whether byte array passed as the argument matches the byte array of the object.
-     * If it matches the count of examinees with this response vector is incremented. You
-     * should create a new IrtExaminee object when this method returns false. In that way,
-     * all unique response vectors are represented by an IrtExaminee object.
-     *
-     * @param response vector of item responses
-     * @return true if response vectors match. Returns false otherwise.
-     */
-    public boolean matchingResponseVector(byte[] response){
-        if(nItems!=response.length) return false;
-        for(int i=0;i<nItems;i++){
-            if(this.response[i]!=response[i]) return false;
-        }
-        freq++;
-        return true;
-    }
+//    /**
+//     * Checks whether byte array passed as the argument matches the byte array of the object.
+//     * If it matches the count of examinees with this response vector is incremented. You
+//     * should create a new IrtExaminee object when this method returns false. In that way,
+//     * all unique response vectors are represented by an IrtExaminee object.
+//     *
+//     * @param response vector of item responses
+//     * @return true if response vectors match. Returns false otherwise.
+//     */
+//    public boolean matchingResponseVector(byte[] response){
+//        if(nItems!=response.length) return false;
+//        for(int i=0;i<nItems;i++){
+//            if(this.response[i]!=response[i]) return false;
+//        }
+//        freq++;
+//        return true;
+//    }
 
     /**
      * Group indicator for use with multigroup estimation.
@@ -133,8 +177,12 @@ public class ItemResponseVector {
      *
      * @return frequency count.
      */
-    public double getFrequecy(){
+    public double getFrequency(){
         return freq;
+    }
+
+    public double getSumScore(){
+        return sumScore;
     }
 
     /**
@@ -150,5 +198,21 @@ public class ItemResponseVector {
         }
         return s;
     }
+
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof byte[]){
+            byte[] thatResponse = (byte[])o;
+            return Arrays.equals(this.response, thatResponse);
+        }else{
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode(){
+        return Arrays.hashCode(this.response);
+    }
+
 
 }

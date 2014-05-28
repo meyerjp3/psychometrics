@@ -36,7 +36,7 @@ import org.apache.commons.math3.linear.*;
  */
 public class GPArotation {
 
-    private RotationMethod rotationMethod = RotationMethod.NONE;
+    private RotationMethod rotationMethod = RotationMethod.OBLIMIN;
     private RotationCriteria gpFunction = null;
 
     public GPArotation(){
@@ -68,15 +68,17 @@ public class GPArotation {
         }else if(rotationMethod==RotationMethod.QUARTIMIN){
             gpFunction = new QuartiminCriteria();
             return GPFoblq(A, normalize, maxIter, eps);
-        }else if(rotationMethod==RotationMethod.GEOMIN){
-            //TODO give user a choice of oblique or orthogonal rotation
+        }else if(rotationMethod==RotationMethod.GEOMIN_T){
+            gpFunction = new GeominCriteria();
+            return GPForth(A, normalize, maxIter, eps);
+        }else if(rotationMethod==RotationMethod.GEOMIN_Q){
             gpFunction = new GeominCriteria();
             return GPFoblq(A, normalize, maxIter, eps);
         }
         else{
-            //varimax is the default
-            gpFunction = new VarimaxCriteria();
-            return GPForth(A, normalize, maxIter, eps);
+            //oblimin is the default
+            gpFunction = new ObliminCriteria();
+            return GPFoblq(A, normalize, maxIter, eps);
         }
 
     }
@@ -184,7 +186,7 @@ public class GPArotation {
         }
 
         RealMatrix Phi = Tmat.transpose().multiply(Tmat);
-        RotationResults result = new RotationResults(L, Phi, Tmat, rotationMethod);
+        RotationResults result = new RotationResults(gpFunction.getValue(), L, Phi, Tmat, rotationMethod);
         return result;
 
     }
@@ -308,7 +310,7 @@ public class GPArotation {
         }
 
         RealMatrix Phi = Tmat.transpose().multiply(Tmat);
-        RotationResults result = new RotationResults(L, Phi, Tmat, rotationMethod);
+        RotationResults result = new RotationResults(gpFunction.getValue(), L, Phi, Tmat, rotationMethod);
         return result;
 
     }

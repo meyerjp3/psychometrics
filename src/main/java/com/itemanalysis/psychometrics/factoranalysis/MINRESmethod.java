@@ -48,19 +48,18 @@ public class MINRESmethod extends AbstractFactorMethod {
     }
 
     public double estimateParameters(){
-
         MINRESObjectiveFunction objectiveFunction = new MINRESObjectiveFunction();
 
         optimizer = new NonLinearConjugateGradientOptimizer(
                 NonLinearConjugateGradientOptimizer.Formula.POLAK_RIBIERE,
-                new SimpleValueChecker(1e-8, 1e-8));
+                new SimpleValueChecker(1e-10, 1e-10),
+                1e-4, 1e-4, 1);
 
         solution = optimizer.optimize(new MaxEval(1000),
                 objectiveFunction.getObjectiveFunction(),
                 objectiveFunction.getObjectiveFunctionGradient(),
                 GoalType.MINIMIZE,
-                new InitialGuess(getStartValues()),
-                new SimpleBounds(getLowerBounds(), getUpperBounds()));
+                new InitialGuess(getStartValues()));
 
         computeFactorLoadings(solution.getPoint());
         return solution.getValue();

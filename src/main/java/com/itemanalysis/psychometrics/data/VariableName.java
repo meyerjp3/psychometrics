@@ -46,8 +46,9 @@ public class VariableName implements Comparable<VariableName>{
             length=Math.min(temp2.length(), NAME_LENGTH);
             this.variableName = temp2.substring(0,length);
 
+        }
 
-		}else{
+        else{
 			int length=Math.min(lcVarName.length(), NAME_LENGTH);
 			this.originalVariableName=lcVarName.substring(0,length);
             String temp = checkVariableName(lcVarName);
@@ -57,12 +58,10 @@ public class VariableName implements Comparable<VariableName>{
 
 	}
 
-    @Deprecated
     public void setIndex(int index){
         this.index = index;
     }
 
-    @Deprecated
     public int getIndex(){
         return index;
     }

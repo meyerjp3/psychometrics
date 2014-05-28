@@ -175,7 +175,7 @@ public class GPArotationTest {
     }
 
     @Test
-    public void testM255GeominOblique(){
+     public void testM255GeominOblique(){
         System.out.println("Oblique Geomin rotation test: m255 data");
 
         /**
@@ -204,7 +204,7 @@ public class GPArotationTest {
 
         RealMatrix L = new Array2DRowRealMatrix(m255MINRESLoadings);
         GPArotation gpa = new GPArotation();
-        RotationResults R = gpa.rotate(L, RotationMethod.GEOMIN, false, 500, 1e-5);
+        RotationResults R = gpa.rotate(L, RotationMethod.GEOMIN_Q, false, 500, 1e-5);
         RealMatrix Lr = R.getFactorLoadings();
 //        System.out.println(R.toString());
 

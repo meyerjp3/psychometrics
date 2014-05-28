@@ -17,6 +17,9 @@ package com.itemanalysis.psychometrics.factoranalysis;
 
 public enum RotationMethod {
 
+    //====================================================================
+    //Orthogonal rotations
+    //====================================================================
     NONE{
         public String toString(){
             return "No rotation";
@@ -29,9 +32,42 @@ public enum RotationMethod {
         }
     },
 
+    QUARTIIMAX{
+        public String toString(){
+            return "Quartimax rotation";
+        }
+    },
+
+    BENTLER_T{
+        public String toString(){
+            return "Bentler orthogonal rotation";
+        }
+    },
+
+    GEOMIN_T{
+        public String toString(){
+            return "Geomin orthogonal rotation";
+        }
+    },
+
+    BIFACTOR{
+        public String toString(){
+            return "Bifactor rotation";
+        }
+    },
+
+    //====================================================================
+    //Oblique rotations
+    //====================================================================
     OBLIMIN{
         public String toString(){
             return "Oblimin rotation";
+        }
+    },
+
+    GEOMIN_Q{
+        public String toString(){
+            return "Geomin oblique rotation";
         }
     },
 
@@ -41,10 +77,30 @@ public enum RotationMethod {
         }
     },
 
-    GEOMIN{
+    BIQUARTIMIN{
         public String toString(){
-            return "Geomin rotation";
+            return "Biquartimin rotation";
         }
-    }
+    },
+
+    SIMPLIMAX{
+        public String toString(){
+            return "Simplimax rotation";
+        }
+    },
+
+    BENTLER_Q{
+        public String toString(){
+            return "Bentler oblique rotation";
+        }
+    },
+
+    CLUSTER{
+        public String toString(){
+            return "Cluster rotation";
+        }
+    },
+
+
 
 }

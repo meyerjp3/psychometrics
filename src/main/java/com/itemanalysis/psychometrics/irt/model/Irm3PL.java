@@ -15,8 +15,12 @@
  */
 package com.itemanalysis.psychometrics.irt.model;
 
+import com.itemanalysis.psychometrics.irt.estimation.ItemParamPrior;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
+
+import java.util.Arrays;
+import java.util.Formatter;
 
 /**
  * An implementation of {@link AbstractItemResponseModel} that allows for the three-parameter logistic (3PL) model,
@@ -37,6 +41,9 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
     private double proposalDiscrimination = 1.0;
     private double proposalDifficulty = 0.0;
     private double proposalGuessing = 0.0;
+    private ItemParamPrior discriminationPrior = null;
+    private ItemParamPrior difficultyPrior = null;
+    private ItemParamPrior guessingPrior = null;
 
 
     /**
@@ -97,8 +104,13 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
     }
 
     public double probability(double theta, int response){
-        if(response==1) return probRight(theta);
-        return probWrong(theta);
+        double prob = 0.0;
+        if(response==1){
+            prob = probRight(theta);
+        }else{
+            prob = probWrong(theta);
+        }
+        return Math.min(1.0, Math.max(0.0, prob)); //always return value strictly between 0 and 1
     }
 
     private double probRight(double theta){
@@ -121,9 +133,9 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      * @param theta person ability estimate.
      * @return an array of first partial derivatives (i.e. the gradient).
      */
-    public double[] firstDerivative(double theta){
+    public double[] gradient(double theta){
         double[] deriv = new double[numberOfParameters];
-        double t = Math.exp(D*discrimination*(theta-difficulty));
+        double t = Math.exp(-discrimination*D*(theta-difficulty));
         double onept2 = 1.0 + t;
         onept2 *= onept2;
 
@@ -134,9 +146,9 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         if(numberOfParameters==1){
             deriv[0] = derivb;
             return deriv;
-        }else{
-            deriv[1] = derivb;
         }
+
+        deriv[1] = derivb;
 
         //derivative with respect to the a parameter
         deriv[0] = (1.0 - guessing)*(theta - difficulty)*D*t;
@@ -261,6 +273,35 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         double info = D*D*a2*(part1/part2)*((1.0-p)/p);
         return info;
     }
+
+    public void setDiscriminationPrior(ItemParamPrior discriminationPrior){
+        this.discriminationPrior = discriminationPrior;
+    }
+
+    public void setDifficultyPrior(ItemParamPrior difficultyPrior){
+        this.difficultyPrior = difficultyPrior;
+    }
+
+    public void setguessingPrior(ItemParamPrior guessingPrior){
+        this.guessingPrior = guessingPrior;
+    }
+
+    public ItemParamPrior getDiscriminationPrior(){
+        return discriminationPrior;
+    }
+
+    public ItemParamPrior getDifficultyPrior(){
+        return difficultyPrior;
+    }
+
+    public ItemParamPrior getGuessingPrior(){
+        return guessingPrior;
+    }
+
+
+//=======================================================================================================================
+// Methods related to scale linking
+//=======================================================================================================================
 
     /**
      * Mean/sigma linking coefficients are computed from the mean and standard deviation of item difficulty.
@@ -399,8 +440,18 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      *
      * @return a string of item parameters.
      */
+    @Override
     public String toString(){
-        return "[" + getDiscrimination() + ", " + getDifficulty() + ", " + getGuessing() + "]";
+        StringBuilder sb = new StringBuilder();
+        Formatter f = new Formatter(sb);
+
+        f.format("%1s", "[");
+        f.format("% .6f", getDiscrimination()); f.format("%2s", ", ");
+        f.format("% .6f", getDifficulty()); f.format("%2s", ", ");
+        f.format("% .6f", getGuessing()); f.format("%1s", "]");
+        return f.toString();
+
+//        return "[" + getDiscrimination() + ", " + getDifficulty() + ", " + getGuessing() + "]";
     }
 
     /**
@@ -448,10 +499,10 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      * A proposal difficulty value is obtained during each iteration of the estimation routine. This method
      * sets the proposal value.
      *
-     * @param difficulty proposed item difficulty value.
+     * @param proposalDifficulty proposed item difficulty value.
      */
-    public void setProposalDifficulty(double difficulty){
-        if(!isFixed) this.proposalDifficulty = difficulty;
+    public void setProposalDifficulty(double proposalDifficulty){
+        if(!isFixed) this.proposalDifficulty = proposalDifficulty;
     }
 
     /**
@@ -579,10 +630,14 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      * method must be called to accept the proposal values as the new estimates.
      *
      */
-    public void acceptAllProposalValues(){
+    public double acceptAllProposalValues(){
+        double max = Math.max(0, Math.abs(this.difficulty-proposalDifficulty));
+        max = Math.max(max, Math.abs(this.discrimination-proposalDiscrimination));
+        max = Math.max(max, Math.abs(this.guessing-proposalGuessing));
         this.difficulty = proposalDifficulty;
         this.discrimination = proposalDiscrimination;
         this.guessing = proposalGuessing;
+        return max;
     }
 
 

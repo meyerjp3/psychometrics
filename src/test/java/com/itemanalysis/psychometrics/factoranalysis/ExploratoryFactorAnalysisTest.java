@@ -85,35 +85,65 @@ public class ExploratoryFactorAnalysisTest {
         ExploratoryFactorAnalysis fa = new ExploratoryFactorAnalysis(R, 4);
         fa.estimateParameters(EstimationMethod.MINRES);
 //        System.out.println();
-//        System.out.println(fa.printOutput());
+        System.out.println(fa.printOutput(3));
 
         //true values obtained from psych package in R
         //fa(r=Harman74.cor$cov, nf=4, fm="minres", rotate="none")
+//        double[][] true_loadings = {
+//                {0.5534,0.0436,0.4538,-0.2179},
+//                {0.3439,-0.0104,0.2890,-0.1344},
+//                {0.3769,-0.1114,0.4209,-0.1578},
+//                {0.4648,-0.0710,0.2976,-0.1977},
+//                {0.7408,-0.2251,-0.2171,-0.0376},
+//                {0.7369,-0.3473,-0.1452,0.0601},
+//                {0.7379,-0.3245,-0.2416,-0.0958},
+//                {0.6961,-0.1207,-0.0335,-0.1201},
+//                {0.7492,-0.3911,-0.1599,0.0605},
+//                {0.4861,0.6171,-0.3782,-0.0137},
+//                {0.5401,0.3700,-0.0393,0.1374},
+//                {0.4474,0.5715,-0.0401,-0.1909},
+//                {0.5785,0.3067,0.1174,-0.2584},
+//                {0.4039,0.0447,0.0823,0.4266},
+//                {0.3648,0.0708,0.1617,0.3738},
+//                {0.4523,0.0724,0.4192,0.2554},
+//                {0.4385,0.1901,0.0806,0.4089},
+//                {0.4645,0.3145,0.2447,0.1814},
+//                {0.4155,0.0930,0.1743,0.1640},
+//                {0.6019,-0.0907,0.1909,0.037},
+//                {0.5608,0.2705,0.1461,-0.0900},
+//                {0.5949,-0.0807,0.1926,0.0380},
+//                {0.6695,-6e-04,0.2154,-0.0902},
+//                {0.6544,0.2373,-0.1125,0.0555}
+//        };
+
+        //true values obtained from psych package in R
+        //fa(r=Harman74.cor$cov, nf=4, fm="minres", rotate="none") but changed to
+        //use a conjugate gradient optimization method.
         double[][] true_loadings = {
-                {0.5534,0.0436,0.4538,-0.2179},
-                {0.3439,-0.0104,0.2890,-0.1344},
-                {0.3769,-0.1114,0.4209,-0.1578},
-                {0.4648,-0.0710,0.2976,-0.1977},
-                {0.7408,-0.2251,-0.2171,-0.0376},
-                {0.7369,-0.3473,-0.1452,0.0601},
-                {0.7379,-0.3245,-0.2416,-0.0958},
-                {0.6961,-0.1207,-0.0335,-0.1201},
-                {0.7492,-0.3911,-0.1599,0.0605},
-                {0.4861,0.6171,-0.3782,-0.0137},
-                {0.5401,0.3700,-0.0393,0.1374},
-                {0.4474,0.5715,-0.0401,-0.1909},
-                {0.5785,0.3067,0.1174,-0.2584},
-                {0.4039,0.0447,0.0823,0.4266},
-                {0.3648,0.0708,0.1617,0.3738},
-                {0.4523,0.0724,0.4192,0.2554},
-                {0.4385,0.1901,0.0806,0.4089},
-                {0.4645,0.3145,0.2447,0.1814},
-                {0.4155,0.0930,0.1743,0.1640},
-                {0.6019,-0.0907,0.1909,0.037},
-                {0.5608,0.2705,0.1461,-0.0900},
-                {0.5949,-0.0807,0.1926,0.0380},
-                {0.6695,-6e-04,0.2154,-0.0902},
-                {0.6544,0.2373,-0.1125,0.0555}
+                {0.5540,  0.0540,  0.4504, -0.2163},
+                {0.3446, -0.0043,  0.2900, -0.1354},
+                {0.3783, -0.1019,  0.4232, -0.1582},
+                {0.4655, -0.0650,  0.2993, -0.1975},
+                {0.7410, -0.2273, -0.2142, -0.0379},
+                {0.7376, -0.3484, -0.1400,  0.0602},
+                {0.7383, -0.3272, -0.2369, -0.0961},
+                {0.6964, -0.1196, -0.0321, -0.1206},
+                {0.7499, -0.3919, -0.1541,  0.0608},
+                {0.4831,  0.6076, -0.3881, -0.0136},
+                {0.5394,  0.3721, -0.0495,  0.1383},
+                {0.4461,  0.5737, -0.0534, -0.1925},
+                {0.5782,  0.3118,  0.1091, -0.2584},
+                {0.4039,  0.0477,  0.0797,  0.4245},
+                {0.3648,  0.0749,  0.1586,  0.3727},
+                {0.4527,  0.0808,  0.4170,  0.2553},
+                {0.4383,  0.1933,  0.0754,  0.4097},
+                {0.4642,  0.3209,  0.2374,  0.1827},
+                {0.4158,  0.0975,  0.1723,  0.1666},
+                {0.6025, -0.0859,  0.1921,  0.0361},
+                {0.5604,  0.2743,  0.1403, -0.0895},
+                {0.5956, -0.0754,  0.1931,  0.0389},
+                {0.6698,  0.0049,  0.2149, -0.0905},
+                {0.6535,  0.2365, -0.1179,  0.0559}
         };
 
         double[] true_uniqueness = {
@@ -124,12 +154,12 @@ public class ExploratoryFactorAnalysisTest {
         FactorMethod factorMethod = fa.getFactorMethod();
         for(int i=0;i<R.getColumnDimension();i++){
             for(int j=0;j<4;j++){
-                assertEquals("  Factor loadings: ", true_loadings[i][j], Precision.round(factorMethod.getFactorLoadingAt(i,j), 4), 1e-3);
+                assertEquals("  Factor loadings: ", true_loadings[i][j], Precision.round(factorMethod.getFactorLoadingAt(i,j), 4), 1e-2);
             }
         }
 
         for(int i=0;i<R.getColumnDimension();i++){
-            assertEquals("  Uniqueness: ", true_uniqueness[i], Precision.round(factorMethod.getUniquenessAt(i), 4), 1e-3);
+            assertEquals("  Uniqueness: ", true_uniqueness[i], Precision.round(factorMethod.getUniquenessAt(i), 4), 1e-2);
         }
 
     }
@@ -145,7 +175,7 @@ public class ExploratoryFactorAnalysisTest {
         ExploratoryFactorAnalysis fa = new ExploratoryFactorAnalysis(R, 3);
         fa.estimateParameters(EstimationMethod.MINRES);
 //        System.out.println();
-        System.out.println(fa.printOutput(6));
+        System.out.println(fa.printOutput(3));
 
         double[][] true_loadings = {
                 {0.6836,-0.3908,0.1130},
@@ -168,12 +198,12 @@ public class ExploratoryFactorAnalysisTest {
         FactorMethod factorMethod = fa.getFactorMethod();
         for(int i=0;i<R.getColumnDimension();i++){
             for(int j=0;j<3;j++){
-                assertEquals("  Factor loadings: ", true_loadings[i][j], Precision.round(factorMethod.getFactorLoadingAt(i,j), 4), 1e-1);
+                assertEquals("  Factor loadings: ", true_loadings[i][j], Precision.round(factorMethod.getFactorLoadingAt(i,j), 4), 1e-2);
             }
         }
 
         for(int i=0;i<R.getColumnDimension();i++){
-            assertEquals("  Uniqueness: ", true_uniqueness[i], Precision.round(factorMethod.getUniquenessAt(i), 4), 1e-1);
+            assertEquals("  Uniqueness: ", true_uniqueness[i], Precision.round(factorMethod.getUniquenessAt(i), 4), 1e-2);
         }
 
     }
@@ -502,7 +532,7 @@ public class ExploratoryFactorAnalysisTest {
                 0.5510, 0.4351, 0.4907, 0.6460, 0.6960, 0.5491, 0.5982, 0.5926, 0.7615, 0.5916,
                 0.5829, 0.6010, 0.4973, 0.4998};
 
-        FactorMethod factorMethod = fa.getFactorMethod();
+//        FactorMethod factorMethod = fa.getFactorMethod();
 //        for(int i=0;i<R.getColumnDimension();i++){
 //            for(int j=0;j<4;j++){
 //                assertEquals("  Factor loadings: ", true_loadings[i][j], Precision.round(factorMethod.getFactorLoadingAt(i,j), 4), 1e-3);
@@ -603,7 +633,7 @@ public class ExploratoryFactorAnalysisTest {
                 0.5510, 0.4351, 0.4907, 0.6460, 0.6960, 0.5491, 0.5982, 0.5926, 0.7615, 0.5916,
                 0.5829, 0.6010, 0.4973, 0.4998};
 
-        FactorMethod factorMethod = fa.getFactorMethod();
+//        FactorMethod factorMethod = fa.getFactorMethod();
 //        for(int i=0;i<R.getColumnDimension();i++){
 //            for(int j=0;j<4;j++){
 //                assertEquals("  Factor loadings: ", true_loadings[i][j], Precision.round(factorMethod.getFactorLoadingAt(i,j), 4), 1e-3);
@@ -649,12 +679,12 @@ public class ExploratoryFactorAnalysisTest {
         FactorMethod factorMethod = fa.getFactorMethod();
         for(int i=0;i<R.getColumnDimension();i++){
             for(int j=0;j<3;j++){
-//                assertEquals("  Factor loadings: ", true_loadings[i][j], Precision.round(factorMethod.getFactorLoadingAt(i,j), 4), 1e-2);
+                assertEquals("  Factor loadings: ", true_loadings[i][j], Precision.round(factorMethod.getFactorLoadingAt(i,j), 4), 1e-2);
             }
         }
 
         for(int i=0;i<R.getColumnDimension();i++){
-//            assertEquals("  Uniqueness: ", true_uniqueness[i], Precision.round(factorMethod.getUniquenessAt(i), 4), 1e-2);
+            assertEquals("  Uniqueness: ", true_uniqueness[i], Precision.round(factorMethod.getUniquenessAt(i), 4), 1e-2);
         }
 
 

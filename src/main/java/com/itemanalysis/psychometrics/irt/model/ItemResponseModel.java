@@ -58,6 +58,15 @@ public interface ItemResponseModel {
      */
     public void scale(double intercept, double slope);
 
+
+    /**
+     * Computes the gradient at theta
+     *
+     * @param theta person ability value
+     * @return
+     */
+    public double[] gradient(double theta);
+
     /**
      * Gets the number of item parameters in the response model.
      *
@@ -143,8 +152,10 @@ public interface ItemResponseModel {
      * values for every item on the test, the proposal values can be accepted as the new parameter estimates. This
      * method must be called to accept the proposal values as the new estimates.
      *
+     * Return the largest difference between the old and new parameters.
+     *
      */
-    public void acceptAllProposalValues();
+    public double acceptAllProposalValues();
 
     /**
      * Gets item discrimination.

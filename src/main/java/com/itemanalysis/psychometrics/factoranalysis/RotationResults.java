@@ -21,16 +21,22 @@ import java.util.Formatter;
 
 public class RotationResults {
 
+    private double functionValue = 0.0;
     private RealMatrix L = null;
     private RealMatrix Phi = null;
     private RealMatrix rotationMatrix = null;
     private RotationMethod rotationMethod = null;
 
-    public RotationResults(RealMatrix L, RealMatrix Phi, RealMatrix rotationMatrix, RotationMethod rotationMethod){
+    public RotationResults(double funcitonValue, RealMatrix L, RealMatrix Phi, RealMatrix rotationMatrix, RotationMethod rotationMethod){
+        this.functionValue = funcitonValue;
         this.L = L;
         this.Phi = Phi;
         this.rotationMatrix = rotationMatrix;
         this.rotationMethod = rotationMethod;
+    }
+
+    public double getFunctionValue(){
+        return functionValue;
     }
 
     public RealMatrix getFactorLoadings(){

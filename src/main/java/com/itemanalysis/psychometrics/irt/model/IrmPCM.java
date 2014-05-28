@@ -128,6 +128,11 @@ public class IrmPCM extends AbstractItemResponseModel{
         return ev;
     }
 
+    public double[] gradient(double theta){
+        //empty method
+        return null;
+    }
+
         /**
      * Partial derivative with respect to theta.
      *
@@ -430,10 +435,14 @@ public class IrmPCM extends AbstractItemResponseModel{
         throw new UnsupportedOperationException();
     }
 
-    public void acceptAllProposalValues(){
+    public double acceptAllProposalValues(){
+        double max = Math.max(0, Math.abs(this.difficulty-this.proposalDifficulty));
+        for(int m=0;m<getNcat();m++){
+            max = Math.max(max, Math.abs(this.threshold[m]-this.proposalThreshold[m]));
+        }
         this.difficulty = this.proposalDifficulty;
         this.threshold = this.proposalThreshold;
-
+        return max;
     }
 //=====================================================================================================================//
 // END GETTER AND SETTER METHODS                                                                                       //

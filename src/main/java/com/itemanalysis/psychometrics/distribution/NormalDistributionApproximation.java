@@ -17,6 +17,8 @@ package com.itemanalysis.psychometrics.distribution;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 
+import java.util.Arrays;
+
 /**
  * An immutable object for creating evaluation points and associated density values from a normal distribution.
  * This class creates a set of evenly spaced evaluation points between the the minimum and maximum values.
@@ -85,6 +87,33 @@ public final class NormalDistributionApproximation implements DistributionApprox
             this.mean = this.min+range/2;
         }
 
+        initialize();
+
+    }
+
+    private void initialize(){
+        //create points
+        points = new double[numberOfPoints];
+        double step = range/((double)numberOfPoints - 1.0);
+        points[0] = min;
+        for(int i=1;i<numberOfPoints;i++){
+            points[i] = points[i-1]+step;
+        }
+
+        //compute density
+        NormalDistribution normal = new NormalDistribution(mean, sd);
+        density = new double[numberOfPoints];
+        double densitySum = 0.0;
+        for(int i=0;i<numberOfPoints;i++){
+            density[i] = normal.density(points[i]);
+            densitySum += density[i];
+        }
+
+        //make sure probabilities sum to unity
+        for(int i=0;i<numberOfPoints;i++){
+            density[i] = density[i]/densitySum;
+        }
+
     }
 
     /**
@@ -93,14 +122,14 @@ public final class NormalDistributionApproximation implements DistributionApprox
      * @return evaluation points.
      */
     public double[] getPoints(){
-        if(points!=null) return points;
-
-        points = new double[numberOfPoints];
-        double step = range/((double)numberOfPoints - 1.0);
-        points[0] = min;
-        for(int i=1;i<numberOfPoints;i++){
-            points[i] = points[i-1]+step;
-        }
+//        if(points!=null) return points;
+//
+//        points = new double[numberOfPoints];
+//        double step = range/((double)numberOfPoints - 1.0);
+//        points[0] = min;
+//        for(int i=1;i<numberOfPoints;i++){
+//            points[i] = points[i-1]+step;
+//        }
         return points;
     }
 
@@ -110,21 +139,21 @@ public final class NormalDistributionApproximation implements DistributionApprox
      * @return density values.
      */
     public double[] evaluate(){
-        if(density!=null) return density;
-        if(points==null) getPoints();
-
-        NormalDistribution normal = new NormalDistribution(mean, sd);
-        density = new double[numberOfPoints];
-        double densitySum = 0.0;
-		for(int i=0;i<numberOfPoints;i++){
-            density[i] = normal.density(points[i]);
-            densitySum += density[i];
-		}
-
-        //make sure probabilities sum to unity
-        for(int i=0;i<numberOfPoints;i++){
-            density[i] = density[i]/densitySum;
-        }
+//        if(density!=null) return density;
+//        if(points==null) getPoints();
+//
+//        NormalDistribution normal = new NormalDistribution(mean, sd);
+//        density = new double[numberOfPoints];
+//        double densitySum = 0.0;
+//		for(int i=0;i<numberOfPoints;i++){
+//            density[i] = normal.density(points[i]);
+//            densitySum += density[i];
+//		}
+//
+//        //make sure probabilities sum to unity
+//        for(int i=0;i<numberOfPoints;i++){
+//            density[i] = density[i]/densitySum;
+//        }
 
         return density;
     }
@@ -136,7 +165,7 @@ public final class NormalDistributionApproximation implements DistributionApprox
      * @return an evaluation point.
      */
     public double getPointAt(int index){
-        if(points==null) getPoints();
+//        if(points==null) getPoints();
         return points[index];
     }
 
@@ -147,8 +176,12 @@ public final class NormalDistributionApproximation implements DistributionApprox
      * @return a density value.
      */
     public double getDensityAt(int index){
-        if(density==null) evaluate();
+//        if(density==null) evaluate();
         return density[index];
+    }
+
+    public void setDensityAt(int index, double value){
+        density[index] = value;
     }
 
     /**

@@ -59,8 +59,7 @@ public class WeightedLeastSquaresMethod extends AbstractFactorMethod {
                 objectiveFunction.getObjectiveFunction(),
                 objectiveFunction.getObjectiveFunctionGradient(),
                 GoalType.MINIMIZE,
-                new InitialGuess(getStartValues()),
-                new SimpleBounds(getLowerBounds(), getUpperBounds()));
+                new InitialGuess(getStartValues()));
 
         computeFactorLoadings(solution.getPoint());
         return solution.getValue();
