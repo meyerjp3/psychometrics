@@ -15,8 +15,6 @@
  */
 package com.itemanalysis.psychometrics.irt.model;
 
-import com.itemanalysis.psychometrics.data.VariableName;
-import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
@@ -223,6 +221,10 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
 
     public int getNumberOfParameters(){
         return threshold.length+2;
+    }
+
+    public double getScalingConstant(){
+        return D;
     }
 
     /**

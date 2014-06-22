@@ -24,16 +24,14 @@ package com.itemanalysis.psychometrics.histogram;
  */
 public interface BinCalculation {
 
-    public enum BinCalculationType{
-        STURGES, SCOTT, FREEDMAN_DIACONIS;
-    }
-
-    /**
-     * Update the summary statistic with a new data point.
-     * 
-     * @param x data point to be added to the summary statistics.
-     */
-    public void increment(double x);
+//    public void evaluate(double[] x);
+//
+//    /**
+//     * Update the summary statistic with a new data point.
+//     *
+//     * @param x data point to be added to the summary statistics.
+//     */
+//    public void increment(double x);
 
     /**
      * Get the number of histogram bins.
@@ -49,25 +47,27 @@ public interface BinCalculation {
      */
     public double binWidth();
 
-    /**
-     * Gets the smallest data point.
-     * 
-     * @return smallest value.
-     */
-    public double min();
+    public BinCalculationType getType();
 
-    /**
-     * Gets the largest data point.
-     * 
-     * @return largest value.
-     */
-    public double max();
-
-    /**
-     * Get the sample size.
-     * 
-     * @return saple size.
-     */
-    public double sampleSize();
+//    /**
+//     * Gets the smallest data point.
+//     *
+//     * @return smallest value.
+//     */
+//    public double min();
+//
+//    /**
+//     * Gets the largest data point.
+//     *
+//     * @return largest value.
+//     */
+//    public double max();
+//
+//    /**
+//     * Get the sample size.
+//     *
+//     * @return saple size.
+//     */
+//    public double sampleSize();
 
 }

@@ -57,6 +57,12 @@ public abstract class AbstractBinCalculation implements BinCalculation{
         max = new Max();
     }
 
+    public void evaluate(double[] x){
+        for(int i=0;i<x.length;i++){
+            increment(x[i]);
+        }
+    }
+
     /**
      * Update the summary statistics with a new value.
      * 

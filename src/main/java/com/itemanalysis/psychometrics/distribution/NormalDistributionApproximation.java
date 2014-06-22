@@ -16,9 +16,6 @@
 package com.itemanalysis.psychometrics.distribution;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
-
-import java.util.Arrays;
-
 /**
  * An immutable object for creating evaluation points and associated density values from a normal distribution.
  * This class creates a set of evenly spaced evaluation points between the the minimum and maximum values.
@@ -28,15 +25,15 @@ import java.util.Arrays;
  */
 public final class NormalDistributionApproximation implements DistributionApproximation {
 
-    private double mean = 0.0;
-
-    private double sd = 1.0;
-
-    private double min = 0.0;
-
-    private double max = 0.0;
-
-    private double range = 0.0;
+//    private double mean = 0.0;
+//
+//    private double sd = 1.0;
+//
+//    private double min = 0.0;
+//
+//    private double max = 0.0;
+//
+//    private double range = 0.0;
 
     private int numberOfPoints = 0;
 
@@ -52,7 +49,7 @@ public final class NormalDistributionApproximation implements DistributionApprox
      * @param max maximum evaluation point.
      * @param numberOfPoints number of evaluation points (and corresponding number of density values).
      */
-    public NormalDistributionApproximation(double min, double max, int numberOfPoints){
+    public NormalDistributionApproximation(double min, double max, int numberOfPoints)throws IllegalArgumentException{
         this(0.0, 1.0, min, max, numberOfPoints);
     }
 
@@ -67,32 +64,29 @@ public final class NormalDistributionApproximation implements DistributionApprox
      * @param max maximum evaluation point.
      * @param numberOfPoints number of evaluation points (and corresponding number of density values).
      */
-    public NormalDistributionApproximation(double mean, double sd, double min, double max, int numberOfPoints){
-        this.mean = mean;
-        this.sd = sd;
-        this.min = min;
-        this.max = max;
+    public NormalDistributionApproximation(double mean, double sd, double min, double max, int numberOfPoints)throws IllegalArgumentException{
         this.numberOfPoints = numberOfPoints;
 
         //force ordering of min and max from lowest to highest
         if(max<min){
-            this.min = max;
-            this.max = min;
+            double temp = min;
+            min = max;
+            max = temp;
         }
-        range = this.max - this.min;
 
         //If mean is outside min or max value or is on the boundary (an invalid case),
         // make the mean the midpoint between min and max.
-        if(mean<=this.min || mean>=this.max){
-            this.mean = this.min+range/2;
+        if(mean<=min || mean>=max){
+            throw new IllegalArgumentException("Invalid parameters for normal distribution approximation");
         }
 
-        initialize();
+        initialize(min, max, mean, sd);
 
     }
 
-    private void initialize(){
+    private void initialize(double min, double max, double mean, double sd){
         //create points
+        double range = max-min;
         points = new double[numberOfPoints];
         double step = range/((double)numberOfPoints - 1.0);
         points[0] = min;
@@ -122,14 +116,6 @@ public final class NormalDistributionApproximation implements DistributionApprox
      * @return evaluation points.
      */
     public double[] getPoints(){
-//        if(points!=null) return points;
-//
-//        points = new double[numberOfPoints];
-//        double step = range/((double)numberOfPoints - 1.0);
-//        points[0] = min;
-//        for(int i=1;i<numberOfPoints;i++){
-//            points[i] = points[i-1]+step;
-//        }
         return points;
     }
 
@@ -139,22 +125,6 @@ public final class NormalDistributionApproximation implements DistributionApprox
      * @return density values.
      */
     public double[] evaluate(){
-//        if(density!=null) return density;
-//        if(points==null) getPoints();
-//
-//        NormalDistribution normal = new NormalDistribution(mean, sd);
-//        density = new double[numberOfPoints];
-//        double densitySum = 0.0;
-//		for(int i=0;i<numberOfPoints;i++){
-//            density[i] = normal.density(points[i]);
-//            densitySum += density[i];
-//		}
-//
-//        //make sure probabilities sum to unity
-//        for(int i=0;i<numberOfPoints;i++){
-//            density[i] = density[i]/densitySum;
-//        }
-
         return density;
     }
 
@@ -165,7 +135,6 @@ public final class NormalDistributionApproximation implements DistributionApprox
      * @return an evaluation point.
      */
     public double getPointAt(int index){
-//        if(points==null) getPoints();
         return points[index];
     }
 
@@ -176,12 +145,32 @@ public final class NormalDistributionApproximation implements DistributionApprox
      * @return a density value.
      */
     public double getDensityAt(int index){
-//        if(density==null) evaluate();
         return density[index];
     }
 
     public void setDensityAt(int index, double value){
         density[index] = value;
+    }
+
+    public void setPointAt(int index, double value){
+        points[index] = value;
+    }
+
+    public double getMean(){
+        double m = 0.0;
+        for(int i=0;i<numberOfPoints;i++){
+            m += points[i]*density[i];
+        }
+        return m;
+    }
+
+    public double getStandardDeviation(){
+        double m = getMean();
+        double m2 = 0;
+        for(int i=0;i<numberOfPoints;i++){
+            m2 += (points[i]-m)*(points[i]-m)*density[i];
+        }
+        return Math.sqrt(m2);
     }
 
     /**

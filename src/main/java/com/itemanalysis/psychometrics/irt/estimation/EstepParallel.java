@@ -33,8 +33,18 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
     private ItemResponseVector[] responseVector = null;
     private DistributionApproximation latentDistribution = null;
     private ItemResponseModel[] irm = null;
-    private static int PARALLEL_THRESHOLD = 1000;
+    private static int PARALLEL_THRESHOLD = 250;
 
+    /**
+     * Default constructoir may be called recursively for parallel compuations.
+     *
+     * @param responseVector response vectors for a given set of data
+     * @param irm an array of item response models whose parameters are being estimated
+     * @param latentDistribution latent distribution quadrature used for computing the marginal likelihood
+     * @param start beginning index for the response vector. Manual calls should always be 0, recursive calls are done automatically.
+     * @param length length of the response vector segment. This length is manually set to the length of teh response vector.
+     *               Recursive calls use the value specified by {@link #PARALLEL_THRESHOLD}.
+     */
     public EstepParallel(ItemResponseVector[] responseVector, ItemResponseModel[] irm, DistributionApproximation latentDistribution, int start, int length){
         this.responseVector = responseVector;
         this.irm = irm;

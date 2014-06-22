@@ -20,10 +20,16 @@ package com.itemanalysis.psychometrics.histogram;
  *
  * @author J. Patrick Meyer
  */
-public class SturgesBinCalculation extends AbstractBinCalculation{
+public class SturgesBinCalculation implements BinCalculation{
 
-    public SturgesBinCalculation(){
+    private double n = 0;
+    private double min = 0;
+    private double max = 0;
 
+    public SturgesBinCalculation(double n, double min, double max){
+        this.n = n;
+        this.min = min;
+        this.max = max;
     }
 
     /**
@@ -33,7 +39,7 @@ public class SturgesBinCalculation extends AbstractBinCalculation{
      */
     public int numberOfBins(){
         if(n==0.0) return 1;
-		double logBase2Ofn = Math.log(n)/Math.log(2);
+		double logBase2Ofn = Math.log10(n)/Math.log10(2);
         int numberOfBins = (int)Math.ceil(logBase2Ofn + 1.0);
         return numberOfBins;
     }
@@ -44,12 +50,14 @@ public class SturgesBinCalculation extends AbstractBinCalculation{
      * @return bin width.
      */
     public double binWidth(){
-        double n = sampleSize();
         if(n==0.0) return 1.0;
-		double logBase2Ofn = Math.log(n)/Math.log(2);
-        int numberOfBins = (int)Math.ceil(logBase2Ofn + 1.0);
-        double binWidth = (max.getResult()-min.getResult())/numberOfBins;
+        int numberOfBins = numberOfBins();
+        double binWidth = (max-min)/numberOfBins;
         return binWidth;
+    }
+
+    public BinCalculationType getType(){
+        return BinCalculationType.STURGES;
     }
 
 }

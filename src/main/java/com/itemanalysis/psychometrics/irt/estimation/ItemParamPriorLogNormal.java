@@ -23,6 +23,7 @@ public class ItemParamPriorLogNormal implements ItemParamPrior {
 
     private double[] parameters = null;
     private double variance = 0.0;
+    private static double LOG_ZERO = Math.log(1e-8);
 
 
     /**
@@ -66,7 +67,7 @@ public class ItemParamPriorLogNormal implements ItemParamPrior {
      * @param sd
      */
     public ItemParamPriorLogNormal(double mean, double sd){
-        if(sd <= 0.0) throw new IllegalArgumentException("Negtive sd not allowed in ItemParamPriorLogNormal");
+        if(sd <= 0.0) throw new IllegalArgumentException("Negative sd not allowed in ItemParamPriorLogNormal");
         parameters = new double[2];
         parameters[0] = mean;
         parameters[1] = sd;
@@ -82,7 +83,7 @@ public class ItemParamPriorLogNormal implements ItemParamPrior {
         //Check for value outside limits of distribution
         if (zeroDensity(p)){
 		    //Return minus infinity to represent log of zero density
-            return Double.NEGATIVE_INFINITY;
+            return LOG_ZERO;
         }
         double value = Math.log(p) - parameters[0];
         value *= value;

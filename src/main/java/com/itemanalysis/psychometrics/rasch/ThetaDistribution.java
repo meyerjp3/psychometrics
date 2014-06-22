@@ -84,7 +84,7 @@ public class ThetaDistribution {
         int index = 0;
         while(iter.hasNext()){
             b = iter.next();
-            t = new Theta(b.getMidPoint(), b.getValue(), index);
+            t = new Theta(b.getMidPoint(), b.getFrequency(), index);
             thetaDistribution.add(t);
             index++;
         }

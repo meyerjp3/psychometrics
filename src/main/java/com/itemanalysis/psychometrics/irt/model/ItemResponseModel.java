@@ -82,6 +82,8 @@ public interface ItemResponseModel {
      */
     public int getNcat();
 
+    public double getScalingConstant();
+
     /**
      * A fixed item will use its initial values as the item parameters and no further estimation or update will be
      * applied to the item parameters. This method checks whether the item has been set as a fixed item.

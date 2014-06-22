@@ -19,7 +19,6 @@ import com.itemanalysis.psychometrics.irt.estimation.ItemParamPrior;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
-import java.util.Arrays;
 import java.util.Formatter;
 
 /**
@@ -110,7 +109,7 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         }else{
             prob = probWrong(theta);
         }
-        return Math.min(1.0, Math.max(0.0, prob)); //always return value strictly between 0 and 1
+        return Math.min(1.0, Math.max(0.0, prob)); //always return value between 0 and 1
     }
 
     private double probRight(double theta){
@@ -620,6 +619,10 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         guessingStdError = stdError;
     }
 
+    public double getScalingConstant(){
+        return D;
+    }
+
     /**
      * Proposal values for every item parameter are obtained at each iteration of the estimation routine. The
      * proposal values for each parameters are obtained for each in turn using the estimated values from the
@@ -631,12 +634,21 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      *
      */
     public double acceptAllProposalValues(){
-        double max = Math.max(0, Math.abs(this.difficulty-proposalDifficulty));
-        max = Math.max(max, Math.abs(this.discrimination-proposalDiscrimination));
-        max = Math.max(max, Math.abs(this.guessing-proposalGuessing));
+        double max = 0;
+
+        max = Math.max(max, this.difficulty - proposalDifficulty);
         this.difficulty = proposalDifficulty;
-        this.discrimination = proposalDiscrimination;
-        this.guessing = proposalGuessing;
+
+        if(numberOfParameters>=2){
+            max = Math.max(max, this.discrimination - proposalDiscrimination);
+            this.discrimination = proposalDiscrimination;
+        }
+
+        if(numberOfParameters==3){
+            max = Math.max(max, Math.abs(this.guessing-proposalGuessing));
+            this.guessing = proposalGuessing;
+        }
+
         return max;
     }
 
