@@ -15,10 +15,6 @@
  */
 package com.itemanalysis.psychometrics.distribution;
 
-import org.apache.commons.math3.util.Pair;
-
-import java.util.ArrayList;
-
 /**
  * An interface for distribution approximations such as those used for quadrature points and weights in
  * numeric integration. Each approximation has an array of evaluation points (x-axis) and an array
@@ -64,5 +60,13 @@ public interface DistributionApproximation {
      * @return number of points.
      */
     public int getNumberOfPoints();
+
+    public void setPointAt(int index, double point);
+
+    public void setDensityAt(int index, double density);
+
+    public double getMean();
+
+    public double getStandardDeviation();
 
 }

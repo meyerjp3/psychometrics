@@ -76,5 +76,18 @@ public class NormalDistributionApproximationTest {
 
     }
 
+    @Test
+    public void testMoments() {
+
+        NormalDistributionApproximation norm = new NormalDistributionApproximation(100, 15, 0, 200, 501);
+        assertEquals("Mean test", 100, norm.getMean(), 1e-8);
+        assertEquals("Std. Dev. test", 15, norm.getStandardDeviation(), 1e-8);
+
+        norm = new NormalDistributionApproximation(-6, 6, 501);
+        assertEquals("Mean test", 0, norm.getMean(), 1e-7);
+        assertEquals("Std. Dev. test", 1, norm.getStandardDeviation(), 1e-7);
+
+    }
+
 
 }

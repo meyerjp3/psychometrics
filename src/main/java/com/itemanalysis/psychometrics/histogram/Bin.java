@@ -15,8 +15,6 @@
  */
 package com.itemanalysis.psychometrics.histogram;
 
-import com.itemanalysis.psychometrics.histogram.Histogram.HistogramType;
-
 import java.io.Serializable;
 
 /**
@@ -31,15 +29,11 @@ import java.io.Serializable;
  */
 public class Bin  implements Cloneable, Serializable{
 
-	private static final long serialVersionUID = 7614685080015589931L;
-
     private double lowerBound=0.0;
 
 	private double upperBound=0.0;
 
 	private boolean lowerInclusive=true;
-
-	private boolean upperInclusive=true;
 
 	private double count = 0.0;
 
@@ -47,29 +41,18 @@ public class Bin  implements Cloneable, Serializable{
 
     private double binWidth = 1.0;
 
-    private double sampleSize = 0.0;
-
-    private HistogramType type = HistogramType.FREQUENCY;
-
     /**
      * Creates a histogram bin with the most amount of flexibility in the arguments.
      *
-     * @param sampleSize total sample size.
      * @param lowerBound lower bound of the bin.
      * @param upperBound upper bound of the bin.
      * @param lowerInclusive a value equal to the lower bound is counted in this bin if true. Otherwise, it is not
      *                       counted in this bin.
-     * @param upperInclusive a value equal to the upper bound is counted in this bin if true. Otherwise, it is not
-     *                       counted in this bin.
-     * @param type type of values for calculating the height of the bin.
      */
-	public Bin(double sampleSize, double lowerBound, double upperBound, boolean lowerInclusive, boolean upperInclusive, HistogramType type){
-		this.sampleSize = sampleSize;
+	public Bin(double lowerBound, double upperBound, boolean lowerInclusive){
         this.lowerBound=lowerBound;
 		this.upperBound=upperBound;
 		this.lowerInclusive=lowerInclusive;
-		this.upperInclusive=upperInclusive;
-        this.type = type;
         binWidth = upperBound-lowerBound;
 	}
 
@@ -88,8 +71,6 @@ public class Bin  implements Cloneable, Serializable{
         this.lowerBound=lowerBound;
 		this.upperBound=upperBound;
 		this.lowerInclusive=lowerInclusive;
-		this.upperInclusive=upperInclusive;
-        type = HistogramType.FREQUENCY;
     }
 
     /**
@@ -155,11 +136,11 @@ public class Bin  implements Cloneable, Serializable{
      * @return true if the value passes the upper bound test and false otherwise.
      */
 	private boolean upperTest(double value){
-		if(upperInclusive){
-			if(value <= upperBound) return true;
-		}else{
-			if(value < upperBound) return true;
-		}
+        if(lowerInclusive){
+            if(value < upperBound) return true;
+        }else{
+            if(value <= upperBound) return true;
+        }
 		return false;
 	}
 
@@ -172,21 +153,6 @@ public class Bin  implements Cloneable, Serializable{
 		if(lowerBound==upperBound) return upperBound;
 		return lowerBound+(upperBound-lowerBound)/2;
 	}
-
-    /**
-     * Gets the height of the bin, which may be a frequency, relative frequency, or density.
-     *
-     * @return the height of the bin.
-     */
-    public double getValue(){
-        if(type==HistogramType.RELATIVE_FREQUENCY){
-            return getFrequency();
-        }else if(type==HistogramType.DENSITY){
-            return getDensity();
-        }else{
-            return getFrequency();
-        }
-    }
 
     /**
      * Gets the mean of the bin.
@@ -203,30 +169,9 @@ public class Bin  implements Cloneable, Serializable{
      *
      * @return frequency of observations in the bin.
      */
-	private double getFrequency(){
+	public double getFrequency(){
 		return count;
 	}
-
-    /**
-     * Gets the relative frequency of the bin.
-     *
-     * @return the relative frequency.
-     */
-    private double getRelativeFrequency(){
-        if(sampleSize==0.0) return Double.NaN;
-        return count/sampleSize;
-    }
-
-    /**
-     * Gets the density value of the bin. This value differs from the relative frequency because it has been
-     * normalized so that the total area under all bins in the histogram is equal to unity.
-     *
-     * @return density value of the bin.
-     */
-    private double getDensity(){
-        if(sampleSize==0.0 || binWidth==0.0) return Double.NaN;
-        return count/(sampleSize*binWidth);
-    }
 
     /**
      * Gets the lower bound of the bin.
@@ -253,15 +198,6 @@ public class Bin  implements Cloneable, Serializable{
      */
 	public boolean lowerInclusive(){
 		return lowerInclusive;
-	}
-
-    /**
-     * Gets a boolean indicating whether the bin is upper inclusive.
-     *
-     * @return true if upper inclusive, false otherwise.
-     */
-	public boolean upperInclusive(){
-		return upperInclusive;
 	}
 
     /**

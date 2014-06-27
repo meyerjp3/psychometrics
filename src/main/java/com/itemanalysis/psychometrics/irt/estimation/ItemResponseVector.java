@@ -185,6 +185,10 @@ public class ItemResponseVector{
         return sumScore;
     }
 
+    public int getNumberOfItems(){
+        return nItems;
+    }
+
     /**
      * A string representation of the response string.
      *

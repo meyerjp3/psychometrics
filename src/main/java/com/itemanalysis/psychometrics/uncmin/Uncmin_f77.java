@@ -111,12 +111,12 @@ import java.util.ArrayList;
 
 public class Uncmin_f77 extends Object {
 
-    private static boolean showDetails = false;
+    private boolean showDetails = false;
 
     /**
      * Final status of optimizer only
      */
-    private static ArrayList<UncminStatusListener> uncminStatusListeners = new ArrayList<UncminStatusListener>();
+    private ArrayList<UncminStatusListener> uncminStatusListeners = new ArrayList<UncminStatusListener>();
 
     public void addUncminStatusListener(UncminStatusListener listener){
         uncminStatusListeners.add(listener);
@@ -126,10 +126,13 @@ public class Uncmin_f77 extends Object {
         uncminStatusListeners.remove(listener);
     }
 
-    public static void fireUncminStatusEvent(int terminationCode){
-        for(UncminStatusListener l:uncminStatusListeners){
-            l.handleUncminEvent(new UncminStatusEventObject(Uncmin_f77.class, terminationCode));
+    public void fireUncminStatusEvent(int terminationCode){
+        if(showDetails){
+            for(UncminStatusListener l:uncminStatusListeners){
+                l.handleUncminEvent(new UncminStatusEventObject(Uncmin_f77.class, terminationCode));
+            }
         }
+
     }
 
 
@@ -148,7 +151,7 @@ public class Uncmin_f77 extends Object {
      * for large optimization problems. Therefore, better to just show the message when debugging
      * and not save it.
      */
-    public static void fireUncminDetailsEvent(String message){
+    public void fireUncminDetailsEvent(String message){
         if(showDetails) System.out.println(message);
     }
 
@@ -177,14 +180,14 @@ public class Uncmin_f77 extends Object {
      *                  1.) a method, f_to_minimize, to minimize.
      *                      f_to_minimize must have the form
      *
-     *                      public static double f_to_minimize(double x[])
+     *                      public double f_to_minimize(double x[])
      *
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
      *                  2.) a method, gradient, that has the form
      *
-     *                      public static void gradient(double x[],
+     *                      public void gradient(double x[],
      *                                                  double g[])
      *
      *                      where g is the gradient of f evaluated at x.  This
@@ -193,7 +196,7 @@ public class Uncmin_f77 extends Object {
      *                      of the gradient.
      *                  3.) a method, hessian, that has the form
      *
-     *                      public static void hessian(double x[],
+     *                      public void hessian(double x[],
      *                                                 double h[][])
      *                      where h is the Hessian of f evaluated at x.  This
      *                      method will have an empty body if the user
@@ -223,7 +226,7 @@ public class Uncmin_f77 extends Object {
      *
      */
 
-    public static void optif0_f77(int n, double x[], Uncmin_methods minclass,
+    public final void optif0_f77(int n, double x[], Uncmin_methods minclass,
                                   double xpls[], double fpls[], double gpls[],
                                   int itrmcd[], double a[][], double udiag[]) throws UncminException{
 
@@ -289,11 +292,11 @@ C
         double gradtl[] = new double[2];
         double steptl[] = new double[2];
 
-        Uncmin_f77.dfault_f77(n,x,typsiz,fscale,method,iexp,msg,
+        dfault_f77(n,x,typsiz,fscale,method,iexp,msg,
                 ndigit,itnlim,iagflg,iahflg,dlt,
                 gradtl,stepmx,steptl);
 
-        Uncmin_f77.optdrv_f77(n,x,minclass,typsiz,fscale,method,
+        optdrv_f77(n,x,minclass,typsiz,fscale,method,
                 iexp,msg,ndigit,itnlim,iagflg,iahflg,
                 dlt,gradtl,stepmx,steptl,xpls,
                 fpls,gpls,itrmcd,a,udiag,g,p,sx,
@@ -341,14 +344,14 @@ C
      *                  1.) a method, f_to_minimize, to minimize.
      *                      f_to_minimize must have the form
      *
-     *                      public static double f_to_minimize(double x[])
+     *                      public double f_to_minimize(double x[])
      *
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
      *                  2.) a method, gradient, that has the form
      *
-     *                      public static void gradient(double x[],
+     *                      public void gradient(double x[],
      *                                                  double g[])
      *
      *                      where g is the gradient of f evaluated at x.  This
@@ -357,7 +360,7 @@ C
      *                      of the gradient.
      *                  3.) a method, hessian, that has the form
      *
-     *                      public static void hessian(double x[],
+     *                      public void hessian(double x[],
      *                                                 double h[][])
      *                      where h is the Hessian of f evaluated at x.  This
      *                      method will have an empty body if the user
@@ -407,7 +410,7 @@ C
      *
      */
 
-    public static void optif9_f77(int n, double x[], Uncmin_methods minclass,
+    public final void optif9_f77(int n, double x[], Uncmin_methods minclass,
                                   double typsiz[], double fscale[], int method[],
                                   int iexp[], int msg[], int ndigit[], int itnlim[],
                                   int iagflg[], int iahflg[], double dlt[],
@@ -489,7 +492,7 @@ C
 
 // MINIMIZE FUNCTION
 
-        Uncmin_f77.optdrv_f77(n,x,minclass,typsiz,fscale,method,
+        optdrv_f77(n,x,minclass,typsiz,fscale,method,
                 iexp,msg,ndigit,itnlim,iagflg,iahflg,
                 dlt,gradtl,stepmx,steptl,xpls,
                 fpls,gpls,itrmcd,a,udiag,g,p,sx,
@@ -531,7 +534,7 @@ C
      *
      */
 
-    public static void bakslv_f77(int n, double a[][], double x[], double b[]) {
+    public final void bakslv_f77(int n, double a[][], double x[], double b[]) {
 
 /*
 
@@ -616,7 +619,7 @@ C
      *
      */
 
-    public static void chlhsn_f77(int n, double a[][], double epsm,
+    public final void chlhsn_f77(int n, double a[][], double epsm,
                                   double sx[], double udiag[]) {
 
 /*
@@ -791,7 +794,7 @@ C
 
         }
 
-        Uncmin_f77.choldc_f77(n,a,diagmx,tol,addmax);
+        choldc_f77(n,a,diagmx,tol,addmax);
 
 // STEP3
 // -----
@@ -859,7 +862,7 @@ C
 
 // "A" NOW GUARANTEED SAFELY POSITIVE DEFINITE
 
-            Uncmin_f77.choldc_f77(n,a,0.0,tol,addmax);
+            choldc_f77(n,a,0.0,tol,addmax);
 
         }
 
@@ -913,7 +916,7 @@ C
      *
      */
 
-    public static void choldc_f77(int n, double a[][], double diagmx,
+    public final void choldc_f77(int n, double a[][], double diagmx,
                                   double tol, double addmax[]) {
 
 /*
@@ -1061,7 +1064,7 @@ C
      *
      */
 
-    public static void dfault_f77(int n, double x[], double typsiz[],
+    public final void dfault_f77(int n, double x[], double typsiz[],
                                   double fscale[], int method[], int iexp[],
                                   int msg[], int ndigit[], int itnlim[],
                                   int iagflg[], int iahflg[], double dlt[],
@@ -1167,14 +1170,14 @@ C
      *                  1.) a method, f_to_minimize, to minimize.
      *                      f_to_minimize must have the form
      *
-     *                      public static double f_to_minimize(double x[])
+     *                      public double f_to_minimize(double x[])
      *
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
      *                  2.) a method, gradient, that has the form
      *
-     *                      public static void gradient(double x[],
+     *                      public void gradient(double x[],
      *                                                  double g[])
      *
      *                      where g is the gradient of f evaluated at x.  This
@@ -1183,7 +1186,7 @@ C
      *                      of the gradient.
      *                  3.) a method, hessian, that has the form
      *
-     *                      public static void hessian(double x[],
+     *                      public void hessian(double x[],
      *                                                 double h[][])
      *                      where h is the Hessian of f evaluated at x.  This
      *                      method will have an empty body if the user
@@ -1213,7 +1216,7 @@ C
      *
      */
 
-    public static void dogdrv_f77(int n, double x[], double f[], double g[],
+    public final void dogdrv_f77(int n, double x[], double f[], double g[],
                                   double a[][], double p[], double xpls[],
                                   double fpls[], Uncmin_methods minclass,
                                   double sx[], double stepmx[], double steptl[],
@@ -1293,12 +1296,12 @@ C
 
 // FIND NEW STEP BY DOUBLE DOGLEG ALGORITHM
 
-            Uncmin_f77.dogstp_f77(n,g,a,p,sx,rnwtln,dlt,nwtake,fstdog,
+            dogstp_f77(n,g,a,p,sx,rnwtln,dlt,nwtake,fstdog,
                     wrk1,wrk2,cln,eta,sc,stepmx);
 
 // CHECK NEW POINT AND UPDATE TRUST REGION
 
-            Uncmin_f77.tregup_f77(n,x,f,g,a,minclass,sc,sx,nwtake,stepmx,
+            tregup_f77(n,x,f,g,a,minclass,sc,sx,nwtake,stepmx,
                     steptl,dlt,iretcd,wrk3,fplsp,xpls,fpls,
                     mxtake,2,wrk1);
 
@@ -1341,7 +1344,7 @@ C
      */
 
 
-    public static void dogstp_f77(int n, double g[], double a[][], double p[],
+    public final void dogstp_f77(int n, double g[], double a[][], double p[],
                                   double sx[], double rnwtln, double dlt[],
                                   boolean nwtake[], boolean fstdog[], double ssd[],
                                   double v[], double cln[], double eta[],
@@ -1526,7 +1529,7 @@ C
      *
      */
 
-    public static void forslv_f77(int n, double a[][], double x[],
+    public final void forslv_f77(int n, double a[][], double x[],
                                   double b[]) {
 
 /*
@@ -1600,14 +1603,14 @@ C
      *                  1.) a method, f_to_minimize, to minimize.
      *                      f_to_minimize must have the form
      *
-     *                      public static double f_to_minimize(double x[])
+     *                      public double f_to_minimize(double x[])
      *
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
      *                  2.) a method, gradient, that has the form
      *
-     *                      public static void gradient(double x[],
+     *                      public void gradient(double x[],
      *                                                  double g[])
      *
      *                      where g is the gradient of f evaluated at x.  This
@@ -1616,7 +1619,7 @@ C
      *                      of the gradient.
      *                  3.) a method, hessian, that has the form
      *
-     *                      public static void hessian(double x[],
+     *                      public void hessian(double x[],
      *                                                 double h[][])
      *                      where h is the Hessian of f evaluated at x.  This
      *                      method will have an empty body if the user
@@ -1633,7 +1636,7 @@ C
      */
 
 
-    public static void fstocd_f77(int n, double x[], Uncmin_methods minclass,
+    public final void fstocd_f77(int n, double x[], Uncmin_methods minclass,
                                   double sx[], double rnoise, double g[]) {
 
 /*
@@ -1708,14 +1711,14 @@ C
      *                  1.) a method, f_to_minimize, to minimize.
      *                      f_to_minimize must have the form
      *
-     *                      public static double f_to_minimize(double x[])
+     *                      public double f_to_minimize(double x[])
      *
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
      *                  2.) a method, gradient, that has the form
      *
-     *                      public static void gradient(double x[],
+     *                      public void gradient(double x[],
      *                                                  double g[])
      *
      *                      where g is the gradient of f evaluated at x.  This
@@ -1724,7 +1727,7 @@ C
      *                      of the gradient.
      *                  3.) a method, hessian, that has the form
      *
-     *                      public static void hessian(double x[],
+     *                      public void hessian(double x[],
      *                                                 double h[][])
      *                      where h is the Hessian of f evaluated at x.  This
      *                      method will have an empty body if the user
@@ -1743,7 +1746,7 @@ C
      *
      */
 
-    public static void fstofd_f77(int n, double xpls[], Uncmin_methods minclass,
+    public final void fstofd_f77(int n, double xpls[], Uncmin_methods minclass,
                                   double fpls[], double a[][], double sx[],
                                   double rnoise, double fhat[]) {
 
@@ -1866,14 +1869,14 @@ C
      *                  1.) a method, f_to_minimize, to minimize.
      *                      f_to_minimize must have the form
      *
-     *                      public static double f_to_minimize(double x[])
+     *                      public double f_to_minimize(double x[])
      *
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
      *                  2.) a method, gradient, that has the form
      *
-     *                      public static void gradient(double x[],
+     *                      public void gradient(double x[],
      *                                                  double g[])
      *
      *                      where g is the gradient of f evaluated at x.  This
@@ -1882,7 +1885,7 @@ C
      *                      of the gradient.
      *                  3.) a method, hessian, that has the form
      *
-     *                      public static void hessian(double x[],
+     *                      public void hessian(double x[],
      *                                                 double h[][])
      *                      where h is the Hessian of f evaluated at x.  This
      *                      method will have an empty body if the user
@@ -1900,7 +1903,7 @@ C
      */
 
 
-    public static void fstofd_f77(int n, double xpls[], Uncmin_methods minclass,
+    public final void fstofd_f77(int n, double xpls[], Uncmin_methods minclass,
                                   double fpls[], double g[], double sx[],
                                   double rnoise) {
 
@@ -2008,14 +2011,14 @@ C
      *                  1.) a method, f_to_minimize, to minimize.
      *                      f_to_minimize must have the form
      *
-     *                      public static double f_to_minimize(double x[])
+     *                      public double f_to_minimize(double x[])
      *
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
      *                  2.) a method, gradient, that has the form
      *
-     *                      public static void gradient(double x[],
+     *                      public void gradient(double x[],
      *                                                  double g[])
      *
      *                      where g is the gradient of f evaluated at x.  This
@@ -2024,7 +2027,7 @@ C
      *                      of the gradient.
      *                  3.) a method, hessian, that has the form
      *
-     *                      public static void hessian(double x[],
+     *                      public void hessian(double x[],
      *                                                 double h[][])
      *                      where h is the Hessian of f evaluated at x.  This
      *                      method will have an empty body if the user
@@ -2045,7 +2048,7 @@ C
      *
      */
 
-    public static void grdchk_f77(int n, double x[], Uncmin_methods minclass,
+    public final void grdchk_f77(int n, double x[], Uncmin_methods minclass,
                                   double f[], double g[], double typsiz[],
                                   double sx[], double fscale[], double rnf,
                                   double analtl, double gest[]) throws UncminException{
@@ -2091,7 +2094,7 @@ C
 // COMPUTE FIRST ORDER FINITE DIFFERENCE GRADIENT AND COMPARE TO
 // ANALYTIC GRADIENT.
 
-        Uncmin_f77.fstofd_f77(n,x,minclass,f,gest,sx,rnf);
+        fstofd_f77(n,x,minclass,f,gest,sx,rnf);
 
         ker = 0;
 
@@ -2142,14 +2145,14 @@ C
      *                  1.) a method, f_to_minimize, to minimize.
      *                      f_to_minimize must have the form
      *
-     *                      public static double f_to_minimize(double x[])
+     *                      public double f_to_minimize(double x[])
      *
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
      *                  2.) a method, gradient, that has the form
      *
-     *                      public static void gradient(double x[],
+     *                      public void gradient(double x[],
      *                                                  double g[])
      *
      *                      where g is the gradient of f evaluated at x.  This
@@ -2158,7 +2161,7 @@ C
      *                      of the gradient.
      *                  3.) a method, hessian, that has the form
      *
-     *                      public static void hessian(double x[],
+     *                      public void hessian(double x[],
      *                                                 double h[][])
      *                      where h is the Hessian of f evaluated at x.  This
      *                      method will have an empty body if the user
@@ -2181,7 +2184,7 @@ C
      *@param wrk2       Workspace
      */
 
-    public static void heschk_f77(int n, double x[], Uncmin_methods minclass,
+    public final void heschk_f77(int n, double x[], Uncmin_methods minclass,
                                   double f[], double g[], double a[][],
                                   double typsiz[],
                                   double sx[], double rnf,
@@ -2241,9 +2244,9 @@ C
 
 // COMPUTE FINITE DIFFERENCE APPROXIMATION H TO THE HESSIAN.
 
-        if (iagflg[1] == 1) Uncmin_f77.fstofd_f77(n,x,minclass,g,a,sx,rnf,wrk1);
+        if (iagflg[1] == 1) fstofd_f77(n,x,minclass,g,a,sx,rnf,wrk1);
 
-        if (iagflg[1] != 1) Uncmin_f77.sndofd_f77(n,x,minclass,f,a,sx,rnf,wrk1,wrk2);
+        if (iagflg[1] != 1) sndofd_f77(n,x,minclass,f,a,sx,rnf,wrk1,wrk2);
 
         ker = 0;
 
@@ -2334,14 +2337,14 @@ C
      *                  1.) a method, f_to_minimize, to minimize.
      *                      f_to_minimize must have the form
      *
-     *                      public static double f_to_minimize(double x[])
+     *                      public double f_to_minimize(double x[])
      *
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
      *                  2.) a method, gradient, that has the form
      *
-     *                      public static void gradient(double x[],
+     *                      public void gradient(double x[],
      *                                                  double g[])
      *
      *                      where g is the gradient of f evaluated at x.  This
@@ -2350,7 +2353,7 @@ C
      *                      of the gradient.
      *                  3.) a method, hessian, that has the form
      *
-     *                      public static void hessian(double x[],
+     *                      public void hessian(double x[],
      *                                                 double h[][])
      *                      where h is the Hessian of f evaluated at x.  This
      *                      method will have an empty body if the user
@@ -2381,7 +2384,7 @@ C
      *
      */
 
-    public static void hookdr_f77(int n, double x[], double f[], double g[],
+    public final void hookdr_f77(int n, double x[], double f[], double g[],
                                   double a[][], double udiag[],
                                   double p[], double xpls[], double fpls[],
                                   Uncmin_methods minclass,
@@ -2511,7 +2514,7 @@ C
 
 // FIND NEW STEP BY MORE-HEBDON ALGORITHM
 
-            Uncmin_f77.hookst_f77(n,g,a,udiag,p,sx,rnwtln,dlt,
+            hookst_f77(n,g,a,udiag,p,sx,rnwtln,dlt,
                     amu,dltp,phi,phip0,
                     fstime,sc,nwtake,wrk0,epsm);
 
@@ -2519,7 +2522,7 @@ C
 
 // CHECK NEW POINT AND UPDATE TRUST REGION
 
-            Uncmin_f77.tregup_f77(n,x,f,g,a,minclass,sc,sx,nwtake,stepmx,
+            tregup_f77(n,x,f,g,a,minclass,sc,sx,nwtake,stepmx,
                     steptl,dlt,iretcd,xplsp,fplsp,xpls,fpls,
                     mxtake,3,udiag);
 
@@ -2562,7 +2565,7 @@ C
      *
      */
 
-    public static void hookst_f77(int n, double g[], double a[][], double udiag[],
+    public final void hookst_f77(int n, double g[], double a[][], double udiag[],
                                   double p[], double sx[], double rnwtln,
                                   double dlt[], double amu[], double dltp[],
                                   double phi[], double phip0[],
@@ -2664,7 +2667,7 @@ C
 
 // SOLVE L*Y = (SX**2)*P
 
-                Uncmin_f77.forslv_f77(n,a,wrk0,wrk0);
+                forslv_f77(n,a,wrk0,wrk0);
                 phip0[1] = -Math.pow(Blas_f77.dnrm2_f77(n,wrk0,1),2)/rnwtln;
                 fstime[1] = false;
 
@@ -2712,7 +2715,7 @@ C
 
 // FACTOR H=L(L+)
 
-                Uncmin_f77.choldc_f77(n,a,0.0,Math.sqrt(epsm),addmax);
+                choldc_f77(n,a,0.0,Math.sqrt(epsm),addmax);
 
 // SOLVE H*P = L(L+)*SC = -G
 
@@ -2722,7 +2725,7 @@ C
 
                 }
 
-                Uncmin_f77.lltslv_f77(n,a,sc,wrk0);
+                lltslv_f77(n,a,sc,wrk0);
 
 // RESET H.  NOTE SINCE UDIAG HAS NOT BEEN DESTROYED WE NEED DO
 // NOTHING HERE.  H IS IN THE UPPER PART AND IN UDIAG, STILL INTACT
@@ -2744,7 +2747,7 @@ C
 
                 }
 
-                Uncmin_f77.forslv_f77(n,a,wrk0,wrk0);
+                forslv_f77(n,a,wrk0,wrk0);
 
                 phip = -Math.pow(Blas_f77.dnrm2_f77(n,wrk0,1),2)/stepln;
 
@@ -2790,7 +2793,7 @@ C
      *                       3 --- unfactored secant method
      */
 
-    public static void hsnint_f77(int n, double a[][], double sx[],
+    public final void hsnint_f77(int n, double a[][], double sx[],
                                   int method[]) {
 
 /*
@@ -2861,7 +2864,7 @@ C
      */
 
 
-    public static void lltslv_f77(int n, double a[][], double x[],
+    public final void lltslv_f77(int n, double a[][], double x[],
                                   double b[]) {
 
 /*
@@ -2895,11 +2898,11 @@ C
 
 // FORWARD SOLVE, RESULT IN X
 
-        Uncmin_f77.forslv_f77(n,a,x,b);
+        forslv_f77(n,a,x,b);
 
 // BACK SOLVE, RESULT IN X
 
-        Uncmin_f77.bakslv_f77(n,a,x,x);
+        bakslv_f77(n,a,x,x);
 
         return;
 
@@ -2927,14 +2930,14 @@ C
      *                  1.) a method, f_to_minimize, to minimize.
      *                      f_to_minimize must have the form
      *
-     *                      public static double f_to_minimize(double x[])
+     *                      public double f_to_minimize(double x[])
      *
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
      *                  2.) a method, gradient, that has the form
      *
-     *                      public static void gradient(double x[],
+     *                      public void gradient(double x[],
      *                                                  double g[])
      *
      *                      where g is the gradient of f evaluated at x.  This
@@ -2943,7 +2946,7 @@ C
      *                      of the gradient.
      *                  3.) a method, hessian, that has the form
      *
-     *                      public static void hessian(double x[],
+     *                      public void hessian(double x[],
      *                                                 double h[][])
      *                      where h is the Hessian of f evaluated at x.  This
      *                      method will have an empty body if the user
@@ -2965,7 +2968,7 @@ C
      */
 
 
-    public static void lnsrch_f77(int n, double x[], double f[],
+    public final void lnsrch_f77(int n, double x[], double f[],
                                   double g[], double p[], double xpls[],
                                   double fpls[], Uncmin_methods minclass,
                                   boolean mxtake[], int iretcd[], double stepmx[],
@@ -3033,7 +3036,7 @@ C
 // NEWTON STEP LONGER THAN MAXIMUM ALLOWED
 
             scl = stepmx[1]/sln;
-            Uncmin_f77.sclmul_f77(n,scl,p,p);
+            sclmul_f77(n,scl,p,p);
             sln = stepmx[1];
 
         }
@@ -3164,7 +3167,7 @@ C
      *
      */
 
-    public static void mvmltl_f77(int n, double a[][], double x[],
+    public final void mvmltl_f77(int n, double a[][], double x[],
                                   double y[]) {
 /*
 
@@ -3231,7 +3234,7 @@ C
      *
      */
 
-    public static void mvmlts_f77(int n, double a[][], double x[],
+    public final void mvmlts_f77(int n, double a[][], double x[],
                                   double y[]) {
 /*
 
@@ -3308,7 +3311,7 @@ C
      *
      */
 
-    public static void mvmltu_f77(int n, double a[][], double x[],
+    public final void mvmltu_f77(int n, double a[][], double x[],
                                   double y[]) {
 /*
 
@@ -3387,7 +3390,7 @@ C
      *
      */
 
-    public static void optchk_f77(int n, double x[], double typsiz[],
+    public final void optchk_f77(int n, double x[], double typsiz[],
                                   double sx[], double fscale[], double gradtl[],
                                   int itnlim[], int ndigit[], double epsm,
                                   double dlt[], int method[], int iexp[],
@@ -3604,14 +3607,14 @@ C
      *                  1.) a method, f_to_minimize, to minimize.
      *                      f_to_minimize must have the form
      *
-     *                      public static double f_to_minimize(double x[])
+     *                      public double f_to_minimize(double x[])
      *
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
      *                  2.) a method, gradient, that has the form
      *
-     *                      public static void gradient(double x[],
+     *                      public void gradient(double x[],
      *                                                  double g[])
      *
      *                      where g is the gradient of f evaluated at x.  This
@@ -3620,7 +3623,7 @@ C
      *                      of the gradient.
      *                  3.) a method, hessian, that has the form
      *
-     *                      public static void hessian(double x[],
+     *                      public void hessian(double x[],
      *                                                 double h[][])
      *                      where h is the Hessian of f evaluated at x.  This
      *                      method will have an empty body if the user
@@ -3673,7 +3676,7 @@ C
      *
      */
 
-    public static void optdrv_f77(int n, double x[], Uncmin_methods minclass,
+    public final void optdrv_f77(int n, double x[], Uncmin_methods minclass,
                                   double typsiz[], double fscale[], int method[],
                                   int iexp[], int msg[], int ndigit[], int itnlim[],
                                   int iagflg[], int iahflg[], double dlt[],
@@ -3801,7 +3804,7 @@ C
 
         epsm = 1.12e-16;
 
-        Uncmin_f77.optchk_f77(n,x,typsiz,sx,fscale,gradtl,itnlim,ndigit,
+        optchk_f77(n,x,typsiz,sx,fscale,gradtl,itnlim,ndigit,
                 epsm,dlt,method,iexp,iagflg,iahflg,stepmx,
                 msg);
 
@@ -3957,7 +3960,7 @@ C
 
         if (iagflg[1] == 0) {
 
-            Uncmin_f77.fstofd_f77(n,x,minclass,f,g,sx,rnf);
+            fstofd_f77(n,x,minclass,f,g,sx,rnf);
 
         } else {
 
@@ -3965,7 +3968,7 @@ C
 
             if ((msg[1]/2)%2 == 0) {
 
-                Uncmin_f77.grdchk_f77(n,x,minclass,f,g,typsiz,
+                grdchk_f77(n,x,minclass,f,g,typsiz,
                         sx,fscale,rnf,analtl,
                         wrk1);
 
@@ -3974,7 +3977,7 @@ C
         }
 
 
-        Uncmin_f77.optstp_f77(n,x,f,g,wrk1,itncnt,icscmx,
+        optstp_f77(n,x,f,g,wrk1,itncnt,icscmx,
                 itrmcd,gradtl,steptl,sx,fscale,
                 itnlim,iretcd,mxtake,msg);
 
@@ -3996,7 +3999,7 @@ C
 // IF OPTIMIZATION FUNCTION EXPENSIVE TO EVALUATE (IEXP=1), THEN
 // HESSIAN WILL BE OBTAINED BY SECANT UPDATES.  GET INITIAL HESSIAN.
 
-                Uncmin_f77.hsnint_f77(n,a,sx,method);
+                hsnint_f77(n,a,sx,method);
 
             } else {
 
@@ -4008,11 +4011,11 @@ C
 
                     if (iagflg[1] == 1) {
 
-                        Uncmin_f77.fstofd_f77(n,x,minclass,g,a,sx,rnf,wrk1);
+                        fstofd_f77(n,x,minclass,g,a,sx,rnf,wrk1);
 
                     } else {
 
-                        Uncmin_f77.sndofd_f77(n,x,minclass,f,a,sx,rnf,wrk1,wrk2);
+                        sndofd_f77(n,x,minclass,f,a,sx,rnf,wrk1,wrk2);
 
                     }
 
@@ -4024,7 +4027,7 @@ C
 
                     } else {
 
-                        Uncmin_f77.heschk_f77(n,x,minclass,f,g,a,typsiz,
+                        heschk_f77(n,x,minclass,f,g,a,typsiz,
                                 sx,rnf,analtl,iagflg,udiag,
                                 wrk1,wrk2);
 
@@ -4038,7 +4041,7 @@ C
 
             }
 
-            if ((msg[1]/8)%2 == 0) Uncmin_f77.result_f77(n,x,f,g,a,
+            if ((msg[1]/8)%2 == 0) result_f77(n,x,f,g,a,
                     p,itncnt,1);
 
 // ITERATION
@@ -4054,7 +4057,7 @@ C
 
                 if (iexp[1] != 1 || method[1] == 3) {
 
-                    Uncmin_f77.chlhsn_f77(n,a,epsm,sx,udiag);
+                    chlhsn_f77(n,a,epsm,sx,udiag);
 
                 }
 
@@ -4066,7 +4069,7 @@ C
 
                 }
 
-                Uncmin_f77.lltslv_f77(n,a,p,wrk1);
+                lltslv_f77(n,a,p,wrk1);
 
 // DECIDE WHETHER TO ACCEPT NEWTON STEP  XPLS=X + P
 // OR TO CHOOSE XPLS BY A GLOBAL STRATEGY.
@@ -4088,19 +4091,19 @@ C
 
                 if (method[1] == 1) {
 
-                    Uncmin_f77.lnsrch_f77(n,x,f,g,p,xpls,fpls,minclass,
+                    lnsrch_f77(n,x,f,g,p,xpls,fpls,minclass,
                             mxtake,iretcd,stepmx,steptl,
                             sx);
 
                 } else if (method[1] == 2 ) {
 
-                    Uncmin_f77.dogdrv_f77(n,x,f,g,a,p,xpls,fpls,minclass,
+                    dogdrv_f77(n,x,f,g,a,p,xpls,fpls,minclass,
                             sx,stepmx,steptl,dlt,iretcd,
                             mxtake,wrk0,wrk1,wrk2,wrk3);
 
                 } else {
 
-                    Uncmin_f77.hookdr_f77(n,x,f,g,a,udiag,p,xpls,fpls,
+                    hookdr_f77(n,x,f,g,a,udiag,p,xpls,fpls,
                             minclass,sx,stepmx,steptl,
                             dlt,iretcd,mxtake,amu,
                             dltp,phi,phip0,wrk0,wrk1,
@@ -4126,7 +4129,7 @@ C
 //                    System.out.print("\nOPTDRV      in iteration " + itncnt[1]);
 //                    System.out.print("\n");
 
-                    Uncmin_f77.fstocd_f77(n,x,minclass,sx,rnf,g);
+                    fstocd_f77(n,x,minclass,sx,rnf,g);
 
                     if (method[1] == 1) {
 
@@ -4138,9 +4141,9 @@ C
 
                         }
 
-                        Uncmin_f77.lltslv_f77(n,a,p,wrk1);
+                        lltslv_f77(n,a,p,wrk1);
 
-                        Uncmin_f77.lnsrch_f77(n,x,f,g,p,xpls,fpls,minclass,
+                        lnsrch_f77(n,x,f,g,p,xpls,fpls,minclass,
                                 mxtake,iretcd,stepmx,steptl,
                                 sx);
 
@@ -4158,9 +4161,9 @@ C
 
                             }
 
-                            Uncmin_f77.lltslv_f77(n,a,p,wrk1);
+                            lltslv_f77(n,a,p,wrk1);
 
-                            Uncmin_f77.dogdrv_f77(n,x,f,g,a,p,xpls,fpls,minclass,
+                            dogdrv_f77(n,x,f,g,a,p,xpls,fpls,minclass,
                                     sx,stepmx,steptl,dlt,iretcd,
                                     mxtake,wrk0,wrk1,wrk2,wrk3);
 
@@ -4172,7 +4175,7 @@ C
                             phi[1] = phisav;
                             phip0[1] = phpsav;
 
-                            Uncmin_f77.chlhsn_f77(n,a,epsm,sx,udiag);
+                            chlhsn_f77(n,a,epsm,sx,udiag);
 
 // SOLVE FOR NEWTON STEP:  AP=-G
 
@@ -4182,9 +4185,9 @@ C
 
                             }
 
-                            Uncmin_f77.lltslv_f77(n,a,p,wrk1);
+                            lltslv_f77(n,a,p,wrk1);
 
-                            Uncmin_f77.hookdr_f77(n,x,f,g,a,udiag,p,xpls,fpls,
+                            hookdr_f77(n,x,f,g,a,udiag,p,xpls,fpls,
                                     minclass,sx,stepmx,steptl,
                                     dlt,iretcd,mxtake,amu,
                                     dltp,phi,phip0,wrk0,wrk1,
@@ -4210,13 +4213,13 @@ C
 
 // CENTRAL DIFFERENCE GRADIENT
 
-                    Uncmin_f77.fstocd_f77(n,xpls,minclass,sx,rnf,gpls);
+                    fstocd_f77(n,xpls,minclass,sx,rnf,gpls);
 
                 } else if (iagflg[1] == 0) {
 
 // FORWARD DIFFERENCE GRADIENT
 
-                    Uncmin_f77.fstofd_f77(n,xpls,minclass,fpls,gpls,sx,rnf);
+                    fstofd_f77(n,xpls,minclass,fpls,gpls,sx,rnf);
 
                 } else {
 
@@ -4228,7 +4231,7 @@ C
 
 // CHECK WHETHER STOPPING CRITERIA SATISFIED
 
-                Uncmin_f77.optstp_f77(n,xpls,fpls,gpls,x,itncnt,icscmx,
+                optstp_f77(n,xpls,fpls,gpls,x,itncnt,icscmx,
                         itrmcd,gradtl,steptl,sx,fscale,
                         itnlim,iretcd,mxtake,msg);
 
@@ -4240,13 +4243,13 @@ C
 
                         if (method[1] == 3) {
 
-                            Uncmin_f77.secunf_f77(n,x,g,a,udiag,xpls,gpls,epsm,
+                            secunf_f77(n,x,g,a,udiag,xpls,gpls,epsm,
                                     itncnt,rnf,iagflg,noupdt,
                                     wrk1,wrk2,wrk3);
 
                         } else {
 
-                            Uncmin_f77.secfac_f77(n,x,g,a,xpls,gpls,epsm,itncnt,
+                            secfac_f77(n,x,g,a,xpls,gpls,epsm,itncnt,
                                     rnf,iagflg,noupdt,wrk0,wrk1,
                                     wrk2,wrk3);
 
@@ -4262,12 +4265,12 @@ C
 
                             if (iagflg[1] == 1) {
 
-                                Uncmin_f77.fstofd_f77(n,xpls,minclass,gpls,a,
+                                fstofd_f77(n,xpls,minclass,gpls,a,
                                         sx,rnf,wrk1);
 
                             } else {
 
-                                Uncmin_f77.sndofd_f77(n,xpls,minclass,fpls,a,
+                                sndofd_f77(n,xpls,minclass,fpls,a,
                                         sx,rnf,wrk1,wrk2);
 
                             }
@@ -4279,7 +4282,7 @@ C
 
                     if ((msg[1]/16)%2 == 1) {
 
-                        Uncmin_f77.result_f77(n,xpls,fpls,gpls,a,p,itncnt,1);
+                        result_f77(n,xpls,fpls,gpls,a,p,itncnt,1);
 
                     }
 
@@ -4322,7 +4325,7 @@ C
 
         if ((msg[1]/8)%2 == 0) {
 
-            Uncmin_f77.result_f77(n,xpls,fpls,gpls,a,p,itncnt,0);
+            result_f77(n,xpls,fpls,gpls,a,p,itncnt,0);
 
         }
 
@@ -4369,7 +4372,7 @@ C
      *
      */
 
-    public static void optstp_f77(int n, double xpls[], double fpls[],
+    public final void optstp_f77(int n, double xpls[], double fpls[],
                                   double gpls[], double x[], int itncnt[],
                                   int icscmx[], int itrmcd[], double gradtl[],
                                   double steptl[], double sx[], double fscale[],
@@ -4608,7 +4611,7 @@ C
      *
      */
 
-    public static void qraux1_f77(int n, double r[][], int i) {
+    public final void qraux1_f77(int n, double r[][], int i) {
 
 /*
 
@@ -4665,7 +4668,7 @@ C
      *
      */
 
-    public static void qraux2_f77(int n, double r[][], int i,
+    public final void qraux2_f77(int n, double r[][], int i,
                                   double a, double b) {
 
 /*
@@ -4732,7 +4735,7 @@ C
      *
      */
 
-    public static void qrupdt_f77(int n, double a[][],
+    public final void qrupdt_f77(int n, double a[][],
                                   double u[], double v[]) {
 
 /*
@@ -4784,12 +4787,12 @@ C
 
             if (u[i] == 0.0) {
 
-                Uncmin_f77.qraux1_f77(n,a,i);
+                qraux1_f77(n,a,i);
                 u[i] = u[i+1];
 
             } else {
 
-                Uncmin_f77.qraux2_f77(n,a,i,u[i],-u[i+1]);
+                qraux2_f77(n,a,i,u[i],-u[i+1]);
                 u[i] = Math.sqrt(u[i]*u[i] + u[i+1]*u[i+1]);
 
             }
@@ -4813,14 +4816,14 @@ C
 
             if (a[i][i] == 0.0) {
 
-                Uncmin_f77.qraux1_f77(n,a,i);
+                qraux1_f77(n,a,i);
 
             } else {
 
                 t1 = a[i][i];
                 t2 = -a[i+1][i];
 
-                Uncmin_f77.qraux2_f77(n,a,i,t1,t2);
+                qraux2_f77(n,a,i,t1,t2);
 
             }
 
@@ -4849,7 +4852,7 @@ C
      *
      */
 
-    public static void result_f77(int n, double x[], double f[],
+    public final void result_f77(int n, double x[], double f[],
                                   double g[], double a[][],
                                   double p[], int itncnt[], int iflg) {
 
@@ -5100,7 +5103,7 @@ C
      *
      */
 
-    public static void sclmul_f77(int n, double s, double v[],
+    public final void sclmul_f77(int n, double s, double v[],
                                   double z[]) {
 
 /*
@@ -5167,7 +5170,7 @@ C Z(N)        <--  RESULT VECTOR
      *
      */
 
-    public static void secfac_f77(int n, double x[], double g[],
+    public final void secfac_f77(int n, double x[], double g[],
                                   double a[][], double xpls[], double gpls[],
                                   double epsm, int itncnt[], double rnf,
                                   int iagflg[], boolean noupdt[], double s[],
@@ -5229,7 +5232,7 @@ C
 
         if (den1 >= Math.sqrt(epsm)*snorm2*ynrm2) {
 
-            Uncmin_f77.mvmltu_f77(n,a,s,u);
+            mvmltu_f77(n,a,s,u);
             den2 = Blas_f77.ddot_f77(n,u,1,u,1);
 
 // L <-- SQRT(DEN1/DEN2)*L
@@ -5260,7 +5263,7 @@ C
 
 // W = L(L+)S = HS
 
-            Uncmin_f77.mvmltl_f77(n,a,u,w);
+            mvmltl_f77(n,a,u,w);
 
             i = 1;
 
@@ -5328,7 +5331,7 @@ C
 
 // FIND Q, (L+) SUCH THAT  Q(L+) = (L+) + U(W+)
 
-                Uncmin_f77.qrupdt_f77(n,a,u,w);
+                qrupdt_f77(n,a,u,w);
 
 // UPPER TRIANGULAR PART AND DIAGONAL OF A NOW CONTAIN UPDATED
 // CHOLESKY DECOMPOSITION OF HESSIAN.  COPY BACK TO LOWER
@@ -5387,7 +5390,7 @@ C
      *
      */
 
-    public static void secunf_f77(int n, double x[], double g[], double
+    public final void secunf_f77(int n, double x[], double g[], double
             a[][], double udiag[], double xpls[],
                                   double gpls[], double epsm, int itncnt[],
                                   double rnf, int iagflg[], boolean noupdt[],
@@ -5468,7 +5471,7 @@ C
 
         if (den1 >= Math.sqrt(epsm)*snorm2*ynrm2) {
 
-            Uncmin_f77.mvmlts_f77(n,a,s,t);
+            mvmlts_f77(n,a,s,t);
 
             den2 = Blas_f77.ddot_f77(n,s,1,t,1);
 
@@ -5558,14 +5561,14 @@ C
      *                  1.) a method, f_to_minimize, to minimize.
      *                      f_to_minimize must have the form
      *
-     *                      public static double f_to_minimize(double x[])
+     *                      public double f_to_minimize(double x[])
      *
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
      *                  2.) a method, gradient, that has the form
      *
-     *                      public static void gradient(double x[],
+     *                      public void gradient(double x[],
      *                                                  double g[])
      *
      *                      where g is the gradient of f evaluated at x.  This
@@ -5574,7 +5577,7 @@ C
      *                      of the gradient.
      *                  3.) a method, hessian, that has the form
      *
-     *                      public static void hessian(double x[],
+     *                      public void hessian(double x[],
      *                                                 double h[][])
      *                      where h is the Hessian of f evaluated at x.  This
      *                      method will have an empty body if the user
@@ -5593,7 +5596,7 @@ C
      *
      */
 
-    public static void sndofd_f77(int n, double xpls[], Uncmin_methods minclass,
+    public final void sndofd_f77(int n, double xpls[], Uncmin_methods minclass,
                                   double fpls[], double a[][], double sx[],
                                   double rnoise, double stepsz[], double anbr[]) {
 
@@ -5715,14 +5718,14 @@ C
      *                  1.) a method, f_to_minimize, to minimize.
      *                      f_to_minimize must have the form
      *
-     *                      public static double f_to_minimize(double x[])
+     *                      public double f_to_minimize(double x[])
      *
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
      *                  2.) a method, gradient, that has the form
      *
-     *                      public static void gradient(double x[],
+     *                      public void gradient(double x[],
      *                                                  double g[])
      *
      *                      where g is the gradient of f evaluated at x.  This
@@ -5731,7 +5734,7 @@ C
      *                      of the gradient.
      *                  3.) a method, hessian, that has the form
      *
-     *                      public static void hessian(double x[],
+     *                      public void hessian(double x[],
      *                                                 double h[][])
      *                      where h is the Hessian of f evaluated at x.  This
      *                      method will have an empty body if the user
@@ -5775,7 +5778,7 @@ C
      */
 
 
-    public static void tregup_f77(int n, double x[], double f[], double g[],
+    public final void tregup_f77(int n, double x[], double f[], double g[],
                                   double a[][], Uncmin_methods minclass,
                                   double sc[], double sx[], boolean nwtake[],
                                   double stepmx[], double steptl[], double dlt[],

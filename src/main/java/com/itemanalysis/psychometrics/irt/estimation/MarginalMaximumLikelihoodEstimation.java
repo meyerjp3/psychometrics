@@ -15,7 +15,7 @@
  */
 package com.itemanalysis.psychometrics.irt.estimation;
 
-import com.itemanalysis.psychometrics.distribution.NormalDistributionApproximation;
+import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
 import com.itemanalysis.psychometrics.irt.model.Irm3PL;
 import com.itemanalysis.psychometrics.irt.model.IrmType;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
@@ -43,17 +43,20 @@ public class MarginalMaximumLikelihoodEstimation {
     private int nResponseVectors = 0;
     private int nPoints = 0;
     private EstepEstimates estepEstimates = null;
-    private NormalDistributionApproximation latentDistribution = null;
+    private DistributionApproximation latentDistribution = null;
     private static int PROCESSORS =  Runtime.getRuntime().availableProcessors();
     private ArrayList<EMStatusListener> emStatusListeners = new ArrayList<EMStatusListener>();
+    private ForkJoinPool pool = null;
+    private boolean verbose = false;
 
-    public MarginalMaximumLikelihoodEstimation(ItemResponseVector[] responseVector, ItemResponseModel[] irm, NormalDistributionApproximation latentDistribution){
+    public MarginalMaximumLikelihoodEstimation(ItemResponseVector[] responseVector, ItemResponseModel[] irm, DistributionApproximation latentDistribution){
         this.responseVector = responseVector;
         this.irm = irm;
         this.latentDistribution = latentDistribution;
         nPoints = latentDistribution.getNumberOfPoints();
         nItems = irm.length;
         nResponseVectors = responseVector.length;
+        pool = new ForkJoinPool(PROCESSORS);
     }
 
     /**
@@ -66,8 +69,9 @@ public class MarginalMaximumLikelihoodEstimation {
      */
     private void doEStep(){
         EstepParallel estepParallel = new EstepParallel(responseVector, irm, latentDistribution, 0, responseVector.length);
-        ForkJoinPool pool = new ForkJoinPool(PROCESSORS);
         estepEstimates = pool.invoke(estepParallel);
+
+//        System.out.println(estepEstimates.toString());
     }
 
     /**
@@ -84,7 +88,6 @@ public class MarginalMaximumLikelihoodEstimation {
         mstepParallel.addUncminStatusListener(uncminStatusListener);
 
         //start parallel processing
-        ForkJoinPool pool = new ForkJoinPool(PROCESSORS);
         pool.invoke(mstepParallel);
 
         //pass optimizer status to a log or something
@@ -93,8 +96,11 @@ public class MarginalMaximumLikelihoodEstimation {
         //update the item parameter estimates
         double maxChange = 0.0;
         for(int j=0;j<nItems;j++){
-            maxChange = irm[j].acceptAllProposalValues();
+            maxChange = Math.max(maxChange, irm[j].acceptAllProposalValues());
         }
+
+        //estimate latent distribution here
+//        latentDistribution = mstepParallel.getUpdatedLatentDistribution();//TODO make optional
 
         return maxChange;
 
@@ -112,11 +118,17 @@ public class MarginalMaximumLikelihoodEstimation {
      */
     public void estimateParameters(double converge, int maxIter){
         fireEMStatusEvent("STARTING EM CYCLES...");
-        fireEMStatusEvent("Number of available processors = " + PROCESSORS);
+//        fireEMStatusEvent("Number of available processors = " + PROCESSORS);
 
         StopWatch stopWatch = new StopWatch();
         double delta = 1.0+converge;
         int iter = 0;
+
+        //For debugging
+//        if(verbose){
+//            doEStep();
+//            fireEMStatusEvent(iter, delta, completeDataLogLikelihood());
+//        }
 
         while(delta > converge && iter < maxIter){
             doEStep();
@@ -124,8 +136,9 @@ public class MarginalMaximumLikelihoodEstimation {
             iter++;
 
             //Format and send EM cycle summary to EMStatusListeners
-            fireEMStatusEvent(iter, delta, completeDataLogLikelihood());
+           if(verbose)  fireEMStatusEvent(iter, delta, completeDataLogLikelihood());
         }
+        if(!verbose) fireEMStatusEvent(iter, delta, completeDataLogLikelihood());
         fireEMStatusEvent("Elapsed time: " + stopWatch.getElapsedTime());
         if(delta>converge) fireEMStatusEvent("WARNING: convergence criterion not met. Increase the maximum number of iterations.");
     }
@@ -140,22 +153,31 @@ public class MarginalMaximumLikelihoodEstimation {
     public double completeDataLogLikelihood(){
         double logLike = estepEstimates.getLoglikelihood();
         double priorProb = 0.0;
-
+        int nPar = 0;
         for(int j=0;j<nItems;j++){
             if(irm[j].getType()== IrmType.L3){
                 Irm3PL model = (Irm3PL)irm[j];
-                if(model.getDiscriminationPrior()!=null){
-                    priorProb = model.getDiscriminationPrior().logDensity(model.getDiscrimination());
-                    logLike+=priorProb;
+                nPar = model.getNumberOfParameters();
+
+                if(nPar==3){
+                    if(model.getGuessingPrior()!=null){
+                        priorProb = model.getGuessingPrior().logDensity(model.getGuessing());
+                        logLike+=priorProb;
+                    }
                 }
+
+                if(nPar>=2){
+                    if(model.getDiscriminationPrior()!=null){
+                        priorProb = model.getDiscriminationPrior().logDensity(model.getDiscrimination());
+                        logLike+=priorProb;
+                    }
+                }
+
                 if(model.getDifficultyPrior()!=null){
                     priorProb = model.getDifficultyPrior().logDensity(model.getDifficulty());
                     logLike+=priorProb;
                 }
-                if(model.getGuessingPrior()!=null){
-                    priorProb = model.getGuessingPrior().logDensity(model.getGuessing());
-                    logLike+=priorProb;
-                }
+
             }
         }
         return logLike;
@@ -167,6 +189,10 @@ public class MarginalMaximumLikelihoodEstimation {
            s += "Item" + (j+1) + irm[j].toString() + "\n";
         }
         return s;
+    }
+
+    public void setVerbose(boolean verbose){
+        this.verbose = verbose;
     }
 
 //=====================================================================================================================

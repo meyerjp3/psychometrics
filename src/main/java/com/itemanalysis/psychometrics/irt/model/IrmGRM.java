@@ -277,6 +277,10 @@ public class IrmGRM extends AbstractItemResponseModel {
         return IrmType.GRM;
     }
 
+    public double getScalingConstant(){
+        return D;
+    }
+
 
 //=====================================================================================================================//
 // GETTER AND SETTER METHODS MAINLY FOR USE WHEN ESTIMATING PARAMETERS                                                 //

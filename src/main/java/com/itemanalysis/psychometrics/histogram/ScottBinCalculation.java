@@ -20,23 +20,37 @@ package com.itemanalysis.psychometrics.histogram;
  *
  * @author J. Patrick Meyer
  */
-public class ScottBinCalculation extends AbstractBinCalculation{
+public class ScottBinCalculation implements BinCalculation{
 
-    public ScottBinCalculation(){
+    private double n = 0;
+    private double min = 0;
+    private double max = 0;
+    private double sd = 0;
+
+
+    public ScottBinCalculation(double n, double min, double max, double sd){
+        this.n = n;
+        this.min = min;
+        this.max = max;
+        this.sd = sd;
 
     }
 
     public int numberOfBins(){
         if(n==0.0) return 1;
-        double binWidth=3.5*sd.getResult()/Math.pow(n,1.0/3.0);
-        int numberOfBins=(int)Math.ceil((max.getResult()-min.getResult())/binWidth);
+        double binWidth=3.5*sd/Math.pow(n,1.0/3.0);
+        int numberOfBins=(int)Math.ceil((max-min)/binWidth);
         return numberOfBins;
     }
 
     public double binWidth(){
         if(n==0.0) return 1.0;
-        double binWidth=3.5*sd.getResult()/Math.pow(n,1.0/3.0);
+        double binWidth=3.5*sd/Math.pow(n,1.0/3.0);
         return binWidth;
+    }
+
+    public BinCalculationType getType(){
+        return BinCalculationType.SCOTT;
     }
 
 }

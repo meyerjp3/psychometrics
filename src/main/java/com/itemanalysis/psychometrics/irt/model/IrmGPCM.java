@@ -209,6 +209,10 @@ public class IrmGPCM extends AbstractItemResponseModel {
         return step.length+1;
     }
 
+    public double getScalingConstant(){
+        return D;
+    }
+
     /**
      * Returns the probability of a response with a linear transformatin of the parameters.
      * This transformation is such that Form X (New Form) is transformed to the scale of Form Y

@@ -134,5 +134,30 @@ public final class UserSuppliedDistributionApproximation implements Distribution
         return density[index];
     }
 
+    public void setDensityAt(int index, double value){
+        density[index] = value;
+    }
+
+    public void setPointAt(int index, double value){
+        points[index] = value;
+    }
+
+    public double getMean(){
+        double m = 0.0;
+        for(int i=0;i<numberOfPoints;i++){
+            m += points[i]*density[i];
+        }
+        return m;
+    }
+
+    public double getStandardDeviation(){
+        double m = getMean();
+        double m2 = 0;
+        for(int i=0;i<numberOfPoints;i++){
+            m2 += (points[i]-m)*(points[i]-m)*density[i];
+        }
+        return Math.sqrt(m2);
+    }
+
 
 }

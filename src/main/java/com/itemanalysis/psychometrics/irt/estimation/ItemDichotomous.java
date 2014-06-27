@@ -20,6 +20,12 @@ import com.itemanalysis.psychometrics.irt.model.Irm3PL;
 import com.itemanalysis.psychometrics.optimization.DiffFunction;
 import com.itemanalysis.psychometrics.uncmin.Uncmin_methods;
 
+/**
+ * This class contains contains methods for the loglikelihood function for an item, which is the
+ * value of teh objective function that is being minimized in the Mstep to obtain the maximum
+ * likelihood or Bayes modal estimates. See {@link com.itemanalysis.psychometrics.irt.estimation.MstepParallel}.
+ * This class is also used in computation of teh starting values. See {@link com.itemanalysis.psychometrics.irt.estimation.StartingValues}.
+ */
 public class ItemDichotomous implements DiffFunction, Uncmin_methods {
 
     private Irm3PL model = null;
@@ -34,6 +40,14 @@ public class ItemDichotomous implements DiffFunction, Uncmin_methods {
 
     }
 
+    /**
+     * Default constructor takes an item response model, latent distribution, and estimates from the Estep.
+     *
+     * @param model item response model for which new parameter estimates are computed
+     * @param latentDistribution quadrature points and weight for the latent distribution
+     * @param rjk expected number of correct responses at each quadrature point
+     * @param nk expected number of responses at each quadrature node
+     */
     public void setModel(Irm3PL model, DistributionApproximation latentDistribution, double[] rjk, double[] nk){
         this.model = model;
         this.rjk = rjk;
@@ -67,7 +81,7 @@ public class ItemDichotomous implements DiffFunction, Uncmin_methods {
 
         }
 
-        //add priors
+        //add item priors
         double priorProb = 0.0;
         ItemParamPrior prior = null;
 
@@ -78,6 +92,7 @@ public class ItemDichotomous implements DiffFunction, Uncmin_methods {
             ll += priorProb;
         }
 
+        //discrimination prior
         if(nPar>=2){
             prior = model.getDiscriminationPrior();
             if(prior!=null){
@@ -86,6 +101,7 @@ public class ItemDichotomous implements DiffFunction, Uncmin_methods {
             }
         }
 
+        //guessing prior
         if(nPar==3){
             prior = model.getGuessingPrior();
             if(prior!=null){
@@ -106,7 +122,6 @@ public class ItemDichotomous implements DiffFunction, Uncmin_methods {
         return nPar;
     }
 
-    //For QNMinimizer
 
     /**
      * Method required for DiffFunction interface to QNMinimizer
@@ -194,36 +209,35 @@ public class ItemDichotomous implements DiffFunction, Uncmin_methods {
         //add priors
         ItemParamPrior prior = null;
 
-        //difficulty prior
-        prior = model.getDifficultyPrior();
-        if(prior!=null){
-            for(int i=0;i<nPar;i++){
-                // subtract because function is to be minimized
-                loglikegrad[i] -= prior.logDensityDeriv1(model.getDifficulty());
-            }
-        }
-
-        //discrimination prior
-        if(nPar>=2){
-            prior = model.getDiscriminationPrior();
-            if(prior!=null){
-                for(int i=0;i<nPar;i++){
-                    // subtract because function is to be minimized
-                    loglikegrad[i] -= prior.logDensityDeriv1(model.getDiscrimination());
-                }
-            }
-        }
-
-        //guessing prior
         if(nPar==3){
+            prior = model.getDiscriminationPrior();
+            if(prior!=null) {
+                loglikegrad[0] -= prior.logDensityDeriv1(model.getDiscrimination());
+            }
+
+            prior = model.getDifficultyPrior();
+            if(prior!=null) {
+                loglikegrad[1] -= prior.logDensityDeriv1(model.getDifficulty());
+            }
+
             prior = model.getGuessingPrior();
-            if(prior!=null){
-                if(prior!=null){
-                    for(int i=0;i<nPar;i++){
-                        // subtract because function is to be minimized
-                        loglikegrad[i] -= prior.logDensityDeriv1(model.getGuessing());
-                    }
-                }
+            if(prior!=null) {
+                loglikegrad[2] -= prior.logDensityDeriv1(model.getGuessing());
+            }
+        }else if(nPar==2){
+            prior = model.getDiscriminationPrior();
+            if(prior!=null) {
+                loglikegrad[0] -= prior.logDensityDeriv1(model.getDiscrimination());
+            }
+
+            prior = model.getDifficultyPrior();
+            if(prior!=null) {
+                loglikegrad[1] -= prior.logDensityDeriv1(model.getDifficulty());
+            }
+        }else{
+            prior = model.getDifficultyPrior();
+            if(prior!=null) {
+                loglikegrad[0] -= prior.logDensityDeriv1(model.getDifficulty());
             }
         }
 
@@ -246,7 +260,6 @@ public class ItemDichotomous implements DiffFunction, Uncmin_methods {
         for(int i=0;i<nPar;i++){
             xx[i] = x[i+1];
         }
-
         return valueAt(xx);
     }
 

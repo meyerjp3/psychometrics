@@ -20,20 +20,29 @@ package com.itemanalysis.psychometrics.histogram;
  *
  * @author J. Patrick Meyer
  */
-public class SimpleBinCalculation extends AbstractBinCalculation{
+public class SimpleBinCalculation implements BinCalculation{
 
-    private int numberOfBins = 1;
+    private double numberOfBins = 1;
+    private double min = 0;
+    private double max = 0;
 
-    public SimpleBinCalculation(int numberOfBins){
-        this.numberOfBins = numberOfBins;
+
+    public SimpleBinCalculation(int numberOfBins, double min, double max){
+        this.numberOfBins = (double)numberOfBins;
+        this.min = min;
+        this.max = max;
     }
 
     public int numberOfBins(){
-        return numberOfBins;
+        return (int)numberOfBins;
     }
 
     public double binWidth(){
-        return (max.getResult()-min.getResult())/numberOfBins;
+        return (max-min)/numberOfBins;
+    }
+
+    public BinCalculationType getType(){
+        return BinCalculationType.SIMPLE;
     }
 
 }

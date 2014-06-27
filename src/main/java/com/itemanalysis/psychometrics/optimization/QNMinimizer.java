@@ -15,8 +15,6 @@
  */
 package com.itemanalysis.psychometrics.optimization;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -504,8 +502,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
                     if (gNormLast < EPS * Math.max(1.0, ArrayMath.norm(xLast))) {
                         // |g| < max(1,|x|)
                         // Now actually compare with the two norm if we have to.
-                        System.err
-                                .println("Gradient is numerically zero, stopped on machine epsilon.");
+//                        System.err.println("Gradient is numerically zero, stopped on machine epsilon.");
                         return eState.TERMINATE_GRADNORM;
                     }
                 }
@@ -779,8 +776,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
 
                         // If things have gone bad, just fill with the SCALAR approx.
                         if (minD <= 0 || Double.isInfinite(maxD) || maxD / minD > 1e12) {
-                            System.err
-                                    .println("QNInfo:update() : PROBLEM WITH DIAGONAL UPDATE");
+//                            System.err.println("QNInfo:update() : PROBLEM WITH DIAGONAL UPDATE");
                             double fill = yy / sy;
                             for (int i = 0; i < d.length; i++) {
                                 d[i] = fill;
@@ -1048,7 +1044,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
                 }
 
                 newValue = newPoint[f];
-                System.err.print(" " + nf.format(newPoint[a]));
+//                System.err.print(" " + nf.format(newPoint[a]));
                 say("] ");
 
                 // This shouldn't actually evaluate anything since that should have been
@@ -1081,7 +1077,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
                 System.arraycopy(newGrad, 0, grad, 0, newGrad.length);
 
                 if (quiet) {
-                    System.err.print(".");
+//                    System.err.print(".");
                 }
                 if (fevals > maxFevals) {
                     throw new MaxEvaluationsExceeded(" Exceeded in minimize() loop ");
@@ -1106,7 +1102,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
                     qn.y.remove(0);
                     qn.rho.remove(0);
                     qn.mem = qn.s.size();
-                    System.err.println("Caught OutOfMemoryError, changing m = " + qn.mem);
+//                    System.err.println("Caught OutOfMemoryError, changing m = " + qn.mem);
                 } else {
                     throw oome;
                 }
@@ -1123,36 +1119,31 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
         //
         // Announce the reason minimization has terminated.
         //
-        System.err.println();
+//        System.err.println();
         switch (state) {
             case TERMINATE_GRADNORM:
-                System.err
-                        .println("QNMinimizer terminated due to numerically zero gradient: |g| < EPS  max(1,|x|) ");
+//                System.err.println("QNMinimizer terminated due to numerically zero gradient: |g| < EPS  max(1,|x|) ");
                 success = true;
                 break;
             case TERMINATE_RELATIVENORM:
-                System.err
-                        .println("QNMinimizer terminated due to sufficient decrease in gradient norms: |g|/|g0| < TOL ");
+//                System.err.println("QNMinimizer terminated due to sufficient decrease in gradient norms: |g|/|g0| < TOL ");
                 success = true;
                 break;
             case TERMINATE_AVERAGEIMPROVE:
-                System.err
-                        .println("QNMinimizer terminated due to average improvement: | newest_val - previous_val | / |newestVal| < TOL ");
+//                System.err.println("QNMinimizer terminated due to average improvement: | newest_val - previous_val | / |newestVal| < TOL ");
                 success = true;
                 break;
             case TERMINATE_MAXITR:
-                System.err
-                        .println("QNMinimizer terminated due to reached max iteration " + maxItr );
+//                System.err.println("QNMinimizer terminated due to reached max iteration " + maxItr );
                 success = true;
                 break;
             case TERMINATE_EVALIMPROVE:
-                System.err
-                        .println("QNMinimizer terminated due to no improvement on eval ");
+//                System.err.println("QNMinimizer terminated due to no improvement on eval ");
                 success = true;
                 x = rec.getBest();
                 break;
             default:
-                System.err.println("QNMinimizer terminated without converging");
+//                System.err.println("QNMinimizer terminated without converging");
                 success = false;
                 break;
         }
@@ -1788,9 +1779,9 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
 
     public String printRecord(){
         String out = "";
-        for(String s:sayLine){
-            out+=s;
-        }
+//        for(String s:sayLine){
+//            out+=s;
+//        }
         return out;
     }
 

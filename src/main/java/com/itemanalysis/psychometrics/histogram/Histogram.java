@@ -17,70 +17,240 @@ package com.itemanalysis.psychometrics.histogram;
 
 
 import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
+import org.apache.commons.math3.stat.descriptive.rank.Max;
+import org.apache.commons.math3.stat.descriptive.rank.Min;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+import org.apache.commons.math3.util.ResizableDoubleArray;
 
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.Iterator;
 
 /**
- * Computes a histogram using two passes over the data. The first pass is needed for calculating the number of bins
- * (See {@link BinCalculation}, which is needed in the constructor of this class. A histogram provides midpoints and
- * frequencies, relative frequencies, or density values at the midpoints.
+ * A histogram involves an array of value for the x-axis (i.e. the points) and an array of values for the
+ * y-axis (i.e. the values). The type of y-axis values returned the evaluate methods are determined
+ * by the argument {@link #histogramType}.
+ *
+ * This class provides two different ways to create a histogram. One way involves passing an entire double array
+ * to {@link #evaluate(double[])} a second way requires that you first incrementally update the data with
+ * calls to {@link #increment(double)} or {@link #setData(double[])} and then call {@link #evaluate()}. If you
+ * call the method {@link #evaluate()} without first calling {@link #setData(double[])} or incrementally
+ * updating the data, you will get a null pointer exception.
  *
  * @author J. Patrick Meyer
  *
  */
 public class Histogram implements DistributionApproximation {
 
-    private double numberOfBins = 1;
+    private int numberOfBins = 1;
 
 	private double binWidth = 1.0;
 
+    private double n = 0;
+
 	private ArrayList<Bin> bins = new ArrayList<Bin>();
 
-    private BinCalculation binCalc = null;
+    private BinCalculationType binCalculationType = BinCalculationType.STURGES;
 
     private double[] points = null;
 
-    private double[] density = null;
-    
-    private HistogramType type = HistogramType.FREQUENCY;
+    private double[] value = null;
 
-    public enum HistogramType{
-        FREQUENCY, RELATIVE_FREQUENCY, DENSITY;
+    private ResizableDoubleArray data = null;
+
+    private boolean lowerInclusive = true;
+
+    private BinCalculation binCalc = null;
+    
+    private HistogramType histogramType = HistogramType.FREQUENCY;
+
+    public Histogram(HistogramType histogramType){
+        this(histogramType, BinCalculationType.STURGES, true);
     }
 
     /**
-     * Creates a histogram with a bin calculation and specified type of y-axis.
+     * This constructor is the most general. It can only use three of the four bin calculation classes. That is,
+     * the {@link #binCalculationType} must be a FreedmanDiaconisBinCalculation, ScottBinCalculation, or
+     * SturgesBinCalculation. A SimpleBinCalculation is not permitted.
      *
-     * @param binCalc a bin calculation.
-     * @param type type of values for the y-axis.
+     * @param histogramType indicates the type of y-axis values that will be returned when {@link #evaluate()}
+     *                      is called. It has no other effect.
+     * @param lowerInclusive true if the bins should be lower inclusive. If false, the bins will be upper inclusive.
      */
-	public Histogram(BinCalculation binCalc, HistogramType type){
-        this.binCalc = binCalc;
-        this.type = type;
-        createBins();
-	}
+    public Histogram(HistogramType histogramType, BinCalculationType binCalculationType, boolean lowerInclusive){
+        if(binCalculationType==BinCalculationType.SIMPLE) throw new IllegalArgumentException("Cannot use a SimpleBinCalculation with this constructor");
+        this.histogramType = histogramType;
+        this.binCalculationType = binCalculationType;
+        this.lowerInclusive = lowerInclusive;
+        data = new ResizableDoubleArray();
+        bins = new ArrayList<Bin>();
+    }
+
+    /**
+     * This constructor is for use with a {@link com.itemanalysis.psychometrics.histogram.SimpleBinCalculation}
+     * where the user provides the min, max, and number of points.
+     *
+     * @param histogramType type of histogram
+     * @param numberOfBins number of bins to include in histogram
+     * @param min minimum value
+     * @param max maximum value
+     * @param lowerInclusive true if lower bound is included in the interval but teh upper bound is not.
+     *                       If false lower bound not included but upper bound is included.
+     */
+    public Histogram(HistogramType histogramType, int numberOfBins, double min, double max, boolean lowerInclusive){
+        this.histogramType = histogramType;
+        this.binCalculationType = BinCalculationType.SIMPLE;
+        binCalc = new SimpleBinCalculation(numberOfBins, min, max);
+        this.lowerInclusive = lowerInclusive;
+        data = new ResizableDoubleArray();
+        bins = new ArrayList<Bin>();
+    }
+
+    private void createHistogram(double[] x){
+        n = x.length;
+        Min min = new Min();
+        Max max = new Max();
+        Mean mean = new Mean();
+        StandardDeviation sd = new StandardDeviation();
+
+        for(int i=0;i<x.length;i++){
+            min.increment(x[i]);
+            max.increment(x[i]);
+            mean.increment(x[i]);
+            sd.increment(x[i]);
+        }
+
+        double range = max.getResult() - min.getResult();
+        double lowestBoundary = min.getResult()-range/1000;
+        double largestBoundary = max.getResult()+range/1000;
+
+        if(binCalculationType== BinCalculationType.SCOTT){
+            binCalc = new ScottBinCalculation(n, min.getResult(), max.getResult(), sd.getResult());
+        }else if(binCalculationType== BinCalculationType.FREEDMAN_DIACONIS){
+            Percentile percentile = new Percentile();
+            double q1 = percentile.evaluate(x, 25);
+            double q3 = percentile.evaluate(x, 75);
+            binCalc = new FreedmanDiaconisBinCalculation(n, min.getResult(), max.getResult(), q1, q3);
+        }else if(binCalculationType==BinCalculationType.STURGES){
+            binCalc = new SturgesBinCalculation(n, min.getResult(), max.getResult());
+        }
+
+        numberOfBins = binCalc.numberOfBins();
+        binWidth = binCalc.binWidth();
+
+        //create bins
+        createBins(lowestBoundary, largestBoundary);
+
+        //count observations in each bin
+        for(int i=0;i<n;i++){
+            for(Bin b : bins){
+                b.increment(x[i]);
+            }
+        }
+    }
+
+    private double[] getFrequency(double[] x){
+        createHistogram(x);
+
+        int index = 0;
+        double sum = 0;
+        for(Bin b : bins){
+            points[index] = b.getMidPoint();
+            value[index] = b.getFrequency();
+            index++;
+        }
+        return value;
+    }
+
+    private double[] getRelativeFrequency(double[] x){
+        createHistogram(x);
+
+        int index = 0;
+        for(Bin b : bins){
+            points[index] = b.getMidPoint();
+            value[index] = b.getFrequency()/n;
+            index++;
+        }
+        return value;
+    }
+
+    private double[] getNormalizedRelativeFrequency(double[] x){
+        createHistogram(x);
+
+        int index = 0;
+        double sum = 0;
+        for(Bin b : bins){
+            points[index] = b.getMidPoint();
+            value[index] = b.getFrequency()/n;
+            index++;
+        }
+
+        for(int i=0;i<numberOfBins;i++){
+            value[i]/=sum;
+        }
+        return value;
+    }
+
+
+    private double[] getDensity(double[] x){
+        createHistogram(x);
+
+        int index = 0;
+        for(Bin b : bins){
+            points[index] = b.getMidPoint();
+            value[index] = b.getFrequency()/(n*binWidth);
+            index++;
+        }
+        return value;
+    }
+
+    private double[] getFrequency(){
+        return getFrequency(data.getElements());
+    }
+
+    private double[] getRelativeFrequency(){
+        return getRelativeFrequency(data.getElements());
+    }
+
+    private double[] getNormalizedRelativeFrequency(){
+        return getNormalizedRelativeFrequency(data.getElements());
+    }
+
+    private double[] getDensity(){
+        return getDensity(data.getElements());
+    }
+
+    public double getSumOfValues(){
+        double sum = 0;
+        for(int i=0;i<numberOfBins;i++){
+            sum+=value[i];
+        }
+        return sum;
+    }
+
 
     /**
      * Create the bins.
      */
-    private void createBins(){
+    private void createBins(double lowestBoundary, double largestBoundary){
+        if(bins!=null) bins.clear();
 		Bin bin=null;
-		double start=binCalc.min();
-        double max = binCalc.max();
-        numberOfBins = binCalc.numberOfBins();
-        binWidth = binCalc.binWidth();
-        double n = binCalc.sampleSize();
-        for(int i=0;i<numberOfBins;i++){
-            if(i<numberOfBins-1){
-                bin = new Bin(n, start, start+binWidth, true, false, type);
-            }else{
-                bin = new Bin(n, start, Math.min(max, start+binWidth), true, true, type);
-            }
-            start+=binWidth;
+        points = new double[numberOfBins];
+        value = new double[numberOfBins];
+
+        for(int i=1;i<numberOfBins;i++){
+            bin = new Bin(lowestBoundary+(i-1)*binWidth, lowestBoundary+i*binWidth, lowerInclusive);
             bins.add(bin);
         }
+        bin = new Bin(lowestBoundary+(numberOfBins-1)*binWidth, largestBoundary, lowerInclusive);
+        bins.add(bin);
+
+        for(int i=0;i<bins.size();i++){
+            points[i] = bins.get(i).getMidPoint();
+        }
+
 	}
 
     /**
@@ -90,10 +260,14 @@ public class Histogram implements DistributionApproximation {
      * @param value a value to be counted in a bin.
      */
 	public void increment(double value){
-		for(Bin b : bins){
-            b.increment(value);
-        }
+		data.addElement(value);
 	}
+
+    public void increment(double value, double frequency){
+        for(int w=0;w<frequency;w++){
+            data.addElement(value);
+        }
+    }
 
     /**
      * Gets the number of histogram bins.
@@ -101,7 +275,11 @@ public class Histogram implements DistributionApproximation {
      * @return number of bins.
      */
     public int getNumberOfBins(){
-        return bins.size();
+        return numberOfBins;
+    }
+
+    public double getSampleSize(){
+        return n;
     }
 
     /**
@@ -121,31 +299,48 @@ public class Histogram implements DistributionApproximation {
      * @return an array of evaluation points
      */
     public double[] getPoints(){
-        if(points!=null) return points;
-        points = new double[bins.size()];
-		int index=0;
-		for(Bin b : bins){
-			points[index]=b.getMidPoint();
-			index++;
-		}
 		return points;
     }
 
+    public void setData(double[] x){
+        if(data!=null)data.clear();
+
+        for(int i=0;i<x.length;i++){
+            data.addElement(x[i]);
+        }
+    }
+
     /**
-     * Gets an array of density values. This method is required by the {@link DistributionApproximation} interface.
+     * Gets an array of value values. This method is required by the {@link DistributionApproximation} interface.
      *
-     * @return an array of density values.
+     * @return an array of value values.
      */
     public double[] evaluate(){
-        if(points==null) getPoints();
-        if(density!=null) return density;
-        density = new double[bins.size()];
-        int index=0;
-        for(Bin b : bins){
-            density[index]=b.getValue();
-            index++;
+        if(value!=null) return value;
+
+        if(histogramType==HistogramType.FREQUENCY){
+            return getFrequency();
+        }else if(histogramType==HistogramType.RELATIVE_FREQUENCY){
+            return getRelativeFrequency();
+        }else if(histogramType==HistogramType.NORMALIZED_RELATIVE_FREQUENCY){
+            return getNormalizedRelativeFrequency();
+        }else{
+            return getDensity();
         }
-        return density;
+    }
+
+    public double[] evaluate(double[] x){
+        if(value!=null) return value;
+
+        if(histogramType==HistogramType.FREQUENCY){
+            return getFrequency(x);
+        }else if(histogramType==HistogramType.RELATIVE_FREQUENCY){
+            return getRelativeFrequency(x);
+        }else if(histogramType==HistogramType.NORMALIZED_RELATIVE_FREQUENCY){
+            return getNormalizedRelativeFrequency(x);
+        }else{
+            return getDensity(x);
+        }
     }
 
     /**
@@ -156,24 +351,53 @@ public class Histogram implements DistributionApproximation {
      * @return an evaluation point.
      */
     public double getPointAt(int index){
-        if(points==null) getPoints();
+        if(points==null) evaluate();
         return points[index];
     }
 
     /**
-     * Gets a density value at the specified index.  This method is required by the
+     * Gets a value value at the specified index.  This method is required by the
      * {@link DistributionApproximation} interface.
      *
-     * @param index array index of density value.
-     * @return density value.
+     * @param index array index of value value.
+     * @return value value.
      */
     public double getDensityAt(int index){
-        if(density==null) evaluate();
-        return density[index];
+        if(value==null) evaluate();
+        return value[index];
+    }
+
+    public void setDensityAt(int index, double value){
+        this.value[index] = value;
+    }
+
+    public void setPointAt(int index, double value){
+        points[index] = value;
+    }
+
+    public double getMean(){
+        double m = 0.0;
+        for(int i=0;i<numberOfBins;i++){
+            m += points[i]* value[i];
+        }
+        return m;
+    }
+
+    public double getStandardDeviation(){
+        double m = getMean();
+        double m2 = 0;
+        for(int i=0;i<numberOfBins;i++){
+            m2 += (points[i]-m)*(points[i]-m)* value[i];
+        }
+        return Math.sqrt(m2);
+    }
+
+    public double getBinWidth(){
+        return binWidth;
     }
 
     /**
-     * Gets the number of evaluation points (and corresponding number of density values).
+     * Gets the number of evaluation points (and corresponding number of value values).
      *  This method is required by the {@link DistributionApproximation} interface.
      *
      * @return number of evaluation points.
@@ -192,7 +416,7 @@ public class Histogram implements DistributionApproximation {
     }
 
     /**
-     * A string representation of the histogram. It lists the bin intervals, midpoints, and density values.
+     * A string representation of the histogram. It lists the bin intervals, midpoints, and value values.
      *
      * @return histogram values for display as plain text.
      */
@@ -206,20 +430,38 @@ public class Histogram implements DistributionApproximation {
 		f.format("%n");
 		f.format("%64s", "                        HISTOGRAM VALUES                        ");f.format("%n");
 		f.format("%64s", "================================================================");f.format("%n");
-		f.format("%16s","Lower Bound");f.format("%18s","Upper Bound"); f.format("%15s","MidPoint"); f.format("%15s","Density");f.format("%n");
+		f.format("%16s","Lower Bound");f.format("%18s","Upper Bound"); f.format("%15s","MidPoint");
+
+        if(histogramType==HistogramType.FREQUENCY){
+            f.format("%15s","Frequency");
+        }else if(histogramType==HistogramType.RELATIVE_FREQUENCY){
+            f.format("%15s","Rel. Freq.");
+        }else if(histogramType==HistogramType.NORMALIZED_RELATIVE_FREQUENCY){
+            f.format("%15s","Rel. Freq.");
+        }else {
+            f.format("%15s","Density");
+        }
+
+        f.format("%n");
 		f.format("%64s", "----------------------------------------------------------------"); f.format("%n");
 
-		for(Bin b : bins){
-			if(b.lowerInclusive()) li = "[";
-			else li = "(";
+        Bin b = null;
+        for(int i=bins.size()-1;i>-1;i--){
+            b = bins.get(i);
+//		for(Bin b : bins){
+			if(b.lowerInclusive()){
+                li = "[";
+                ui = ")";
+            }else{
+                li = "(";
+                ui = "]";
+            }
 
-			if(b.upperInclusive()) ui = "]";
-			else ui = ")";
-
-			f.format("%1s", li);f.format("% 15.5f, ",b.getLowerBound());f.format("% 15.5f",b.getUpperBound()); f.format("%1s", ui); f.format("% 15.5f",b.getMidPoint()); f.format("% 15.5f",b.getValue());
+			f.format("%1s", li);f.format("% 15.5f, ",b.getLowerBound());f.format("% 15.5f",b.getUpperBound()); f.format("%1s", ui); f.format("% 15.5f",points[i]); f.format("% 15.5f",value[i]);
 			f.format("%n");
 		}
-		f.format("%64s", "================================================================");f.format("%n");f.format("%n");
+		f.format("%64s", "================================================================");f.format("%n");
+        f.format("%11s", "Binwidth = "); f.format("% .4f", binWidth);f.format("%n");
 		return f.toString();
 	}
 
