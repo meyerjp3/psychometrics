@@ -15,7 +15,7 @@
  */
 package com.itemanalysis.psychometrics.irt.estimation;
 
-public class ItemPolytomous extends ItemLogLikelihoodFunction {
+public class ItemPolytomous  {
 
 
 
@@ -26,6 +26,8 @@ public class ItemPolytomous extends ItemLogLikelihoodFunction {
     public void setModel(){
 
     }
+
+
 
 
 }
