@@ -65,7 +65,7 @@ public interface ItemResponseModel {
      * @param theta person ability value
      * @return
      */
-    public double[] gradient(double theta);
+    public double[] gradient(double theta, int category);
 
     /**
      * Gets the number of item parameters in the response model.

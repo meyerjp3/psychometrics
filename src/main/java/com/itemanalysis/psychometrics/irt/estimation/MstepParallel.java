@@ -22,6 +22,7 @@ import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.uncmin.DefaultUncminOptimizer;
 import com.itemanalysis.psychometrics.uncmin.UncminException;
 import com.itemanalysis.psychometrics.uncmin.UncminStatusListener;
+import org.apache.commons.math3.distribution.NormalDistribution;
 
 import java.util.concurrent.RecursiveAction;
 
@@ -145,9 +146,13 @@ public class MstepParallel extends RecursiveAction {
     public DistributionApproximation getUpdatedLatentDistribution(){
         double sumNk = estepEstimates.getSumNk();
         double[] nk = estepEstimates.getNk();
+        double m = 0;
+        double s = 0;
         for(int k=0;k<nk.length;k++){
+            m += latentDistribution.getPointAt(k)*nk[k];
             latentDistribution.setDensityAt(k, nk[k]/sumNk);
         }
+
         return latentDistribution;
     }
 

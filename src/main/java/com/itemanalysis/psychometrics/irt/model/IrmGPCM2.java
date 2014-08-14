@@ -167,7 +167,7 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
         return ev;
     }
 
-    public double[] gradient(double theta){
+    public double[] gradient(double theta, int k){
         //empty method
         return null;
     }

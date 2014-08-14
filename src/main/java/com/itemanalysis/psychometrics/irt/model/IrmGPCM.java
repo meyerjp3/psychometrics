@@ -15,8 +15,6 @@
  */
 package com.itemanalysis.psychometrics.irt.model;
 
-import com.itemanalysis.psychometrics.data.VariableName;
-import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
@@ -39,6 +37,9 @@ public class IrmGPCM extends AbstractItemResponseModel {
     private double[] step;
     private double[] proposalStep;
     private double[] stepStdError;
+    private int ncatM1 = 0;
+
+    //TODO check the use of score weights. They might be conflated with the category index in some places.
 
     public IrmGPCM(double discrimination, double[] step, double D){
         this.discrimination = discrimination;
@@ -96,9 +97,89 @@ public class IrmGPCM extends AbstractItemResponseModel {
         return ev;
     }
 
-    public double[] gradient(double theta){
-        //empty method
-        return null;
+    /**
+     * Gradient of item response model with respect to (wrt) item parameters.
+     * The response categories are indexed k = 0, 1, 2, ..., m.
+     *
+     * @param theta person ability value
+     * @param k zero based index of teh response category i.e. k = 0, 1, 2, ..., m.
+     * @return gradient of response model wrt item parameters
+     */
+    public double[] gradient(double theta, int k){
+        double[] grad = new double[ncat+1];
+        double[] fk = new double[ncat];
+        double g = 0;
+
+        //Compute numerator values of irm and denominator of irm
+        for(int i=0;i<ncat;i++){
+            fk[i] = numer(theta, i);
+            g += fk[i];
+        }
+        double g2 = g*g;
+
+        double bsum = 0;
+        double dif = 0;
+        double p1 = 0;
+        double expP1 = 0;
+        double[] da = new double[ncat];//Holds first derivatives of response model numerator wrt discrimination.
+        double[] db = new double[ncat];//Holds first derivatives of response model numerator wrt steps.
+
+        //Compute first derivative of numerator of response model wrt discrimination (da)
+        //and wrt steps (db).
+        for(int kk=0;kk<ncat;kk++){
+            bsum = 0;
+            for(int j=0;j<kk;j++){
+                bsum += step[j];
+            }
+            dif = (kk+1)*theta-bsum;
+            p1 = D*discrimination*(dif);
+            expP1 = Math.exp(p1);
+            da[kk] = expP1*D*dif;
+            db[kk] = -D*discrimination*expP1;
+        }
+
+        //First partial derivative wrt discrimination parameter.
+        double gPrimeASum = 0;
+        for(int i=0;i<ncat;i++){
+            gPrimeASum += da[i];
+        }
+        grad[0] =  (g*da[k] - gPrimeASum*fk[k])/g2;
+
+        //First partial derivatives wrt step parameters
+        double gPrimeBkSum = 0;
+        double pd = 0;
+        for(int i=ncatM1; i>-1;i--){//Go backwards to avoid repetitive sums.
+            gPrimeBkSum += db[i];
+            pd = 0;
+            if(i<=k) pd = db[k];
+            grad[i+1] = (g*pd - gPrimeBkSum*fk[k])/g2;
+        }
+
+        return grad;
+    }
+
+    /**
+     * First derivative of item response model with respect to theta.
+     *
+     * @param theta a person ability value.
+     * @return first derivative
+     */
+    public double derivTheta(double theta){
+        double denom = denom(theta);
+        double denom2 = denom*denom;
+        double denomDeriv = denomDeriv(theta);
+        double numer = 0.0;
+        double p1 = 0.0;
+        double p2 = 0.0;
+        double deriv = 0.0;
+
+        for(int k=0;k<ncat;k++){
+            numer = numer(theta, k);
+            p1 = (D*numer*(1.0+k)*discrimination)/denom;
+            p2 = (numer*denomDeriv)/denom2;
+            deriv += scoreWeight[k]*(p1-p2);
+        }
+        return deriv;
     }
 
     public double itemInformationAt(double theta){
@@ -121,30 +202,12 @@ public class IrmGPCM extends AbstractItemResponseModel {
 
     }
 
-    public double derivTheta(double theta){
-        double denom = denom(theta);
-        double denom2 = denom*denom;
-        double denomDeriv = denomDeriv(theta);
-        double numer = 0.0;
-        double p1 = 0.0;
-        double p2 = 0.0;
-        double deriv = 0.0;
-
-        for(int k=0;k<ncat;k++){
-            numer = numer(theta, k);
-            p1 = (D*numer*(1.0+k)*discrimination)/denom;
-            p2 = (numer*denomDeriv)/denom2;
-            deriv += scoreWeight[k]*(p1-p2);
-        }
-        return deriv;
-    }
-
     private double numer(double theta, int category){
         double Zk = 0;
         double expZk = 0;
         double s = 0;
 
-        //first category
+        //first category uses a step parameter arbitrarily set to 0.
         Zk = D*discrimination*(theta-s);
 
         for(int k=0; k<category; k++){

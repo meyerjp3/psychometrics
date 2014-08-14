@@ -17,6 +17,8 @@ package com.itemanalysis.psychometrics.irt.model;
 
 import org.junit.Test;
 
+import java.util.Arrays;
+
 import static junit.framework.Assert.assertEquals;
 
 public class IrmGPCMTest {
@@ -147,6 +149,167 @@ public class IrmGPCMTest {
             assertEquals("Probability Test, Cat 3, at theta: " + (i+1), irm.tSharpProbability(theta1[i], response[2], 0.5, 1.2), prob3, 1e-6);
             assertEquals("Probability Test, Cat 4, at theta: " + (i+1), irm.tSharpProbability(theta1[i], response[3], 0.5, 1.2), prob4, 1e-6);
         }
+    }
+
+    /**
+     * True values of the gradient were computed numerically using the numDeriv package in R.
+     * The calls were made using the code below.
+     *
+     * library(numDeriv)
+     *
+     * probNumerator<-function(theta, a, b, D){
+     *     ncat<-length(b)
+     *     v<-vector(length=ncat)
+     *     for(k in 1:ncat){
+     *        v[k]<-exp(D*a*(k*theta-sum(b[1:k])))
+     *     }
+     *     v
+     * }
+     *
+     * gpcm<-function(theta, x, k, D){
+     *     a<-x[1]
+     *     b<-x[2:length(x)]
+     *     f<-probNumerator(theta, a, b, D)
+     *     bot<-sum(f)
+     *     prob<-f[k]/bot
+     *     prob
+     * }
+     *
+     * theta<-1
+     * a<-1.2
+     * b<-c(0, -0.5, 0.5)
+     * grad(gpcm, x=c(a,b), theta=theta, k=1, D=1.0)
+     * grad(gpcm, x=c(a,b), theta=theta, k=2, D=1.0)
+     * grad(gpcm, x=c(a,b), theta=theta, k=3, D=1.0)
+     *
+     */
+    @Test
+    public void gradientTest1(){
+        System.out.println("Gradient test 1: Three categories");
+        double[] step = {-0.5, 0.5};
+        IrmGPCM irm = new IrmGPCM(1.2, step, 1.0);
+
+        double[] grad = null;
+
+        //Gradient for first response category
+        grad = irm.gradient(1.0, 0);
+        //System.out.println(Arrays.toString(grad));
+        assertEquals("First category, Derivative wrt a", -9.527941e-02, grad[0], 1e-7);
+        assertEquals("First category, Derivative wrt b1", 8.595784e-13, grad[1], 1e-7);
+        assertEquals("First category, Derivative wrt b2", 6.272412e-02, grad[2], 1e-7);
+        assertEquals("First category, Derivative wrt b3", 4.049822e-02, grad[3], 1e-7);
+
+        //Gradient for second response category
+        grad = irm.gradient(1.0, 1);
+        //System.out.println(Arrays.toString(grad));
+        assertEquals("Second category, Derivative wrt  a", -7.430095e-02, grad[0], 1e-7);
+        assertEquals("Second category, Derivative wrt b1", -3.318921e-14, grad[1], 1e-7);
+        assertEquals("Second category, Derivative wrt b2", -2.222590e-02, grad[2], 1e-7);
+        assertEquals("Second category, Derivative wrt b3", 2.450000e-01, grad[3], 1e-7);
+
+        //Gradient for third response category
+        grad = irm.gradient(1.0, 2);
+        //System.out.println(Arrays.toString(grad));
+        assertEquals("Third category, Derivative wrt a", 1.695804e-01 , grad[0], 1e-7);
+        assertEquals("Third category, Derivative wrt b1", 3.328711e-14, grad[1], 1e-7);
+        assertEquals("Third category, Derivative wrt b2", -4.049822e-02, grad[2], 1e-7);
+        assertEquals("Third category, Derivative wrt b3", -2.854982e-01, grad[3], 1e-7);
+
+    }
+
+    /**
+     * True values of the gradient were computed numerically using the numDeriv package in R.
+     * The calls were made using the code below.
+     *
+     * library(numDeriv)
+     *
+     * probNumerator<-function(theta, a, b, D){
+     *     ncat<-length(b)
+     *     v<-vector(length=ncat)
+     *     for(k in 1:ncat){
+     *        v[k]<-exp(D*a*(k*theta-sum(b[1:k])))
+     *     }
+     *     v
+     * }
+     *
+     * gpcm<-function(theta, x, k, D){
+     *     a<-x[1]
+     *     b<-x[2:length(x)]
+     *     f<-probNumerator(theta, a, b, D)
+     *     bot<-sum(f)
+     *     prob<-f[k]/bot
+     *     prob
+     * }
+     *
+     * theta<- -0.5
+     * a<- 0.7
+     * b<-c(0, -1.2, -0.8, 0.2, -0.4)
+     * grad(gpcm, x=c(a,b), theta=theta, k=1, D=1.7)
+     * grad(gpcm, x=c(a,b), theta=theta, k=2, D=1.7)
+     * grad(gpcm, x=c(a,b), theta=theta, k=3, D=1.7)
+     * grad(gpcm, x=c(a,b), theta=theta, k=4, D=1.7)
+     * grad(gpcm, x=c(a,b), theta=theta, k=5, D=1.7)
+     *
+     */
+    @Test
+    public void gradientTest2(){
+        System.out.println("Gradient test 2: Five categories");
+        double[] step = {-1.2, -0.8, 0.2, -0.4};
+        IrmGPCM irm = new IrmGPCM(0.7, step, 1.7);
+
+        double theta = -0.5;
+        double[] grad = null;
+
+        //Gradient for first response category
+        grad = irm.gradient(theta, 0);
+//        System.out.println(Arrays.toString(grad));
+        assertEquals("First category, Derivative wrt a", -1.100249e-01, grad[0], 1e-7);
+        assertEquals("First category, Derivative wrt b1", 2.713634e-13, grad[1], 1e-7);
+        assertEquals("First category, Derivative wrt b2", 1.143600e-01, grad[2], 1e-7);
+        assertEquals("First category, Derivative wrt b3", 8.260977e-02, grad[3], 1e-7);
+        assertEquals("First category, Derivative wrt b4", 3.723752e-02, grad[4], 1e-7);
+        assertEquals("First category, Derivative wrt b5", 1.751225e-02, grad[5], 1e-7);
+
+        //Gradient for second response category
+        grad = irm.gradient(theta, 1);
+        //System.out.println(Arrays.toString(grad));
+        assertEquals("Second category, Derivative wrt  a", 4.172185e-02, grad[0], 1e-7);
+        assertEquals("Second category, Derivative wrt b1", -4.895163e-17, grad[1], 1e-7);
+        assertEquals("Second category, Derivative wrt b2", -3.175025e-02, grad[2], 1e-7);
+        assertEquals("Second category, Derivative wrt b3", 1.900197e-01, grad[3], 1e-7);
+        assertEquals("Second category, Derivative wrt b4", 8.565408e-02, grad[4], 1e-7);
+        assertEquals("Second category, Derivative wrt b5", 4.028183e-02, grad[5], 1e-7);
+
+        //Gradient for third response category
+        grad = irm.gradient(theta, 2);
+        //System.out.println(Arrays.toString(grad));
+        assertEquals("Third category, Derivative wrt a", 2.401718e-01, grad[0], 1e-7);
+        assertEquals("Third category, Derivative wrt b1", -5.096844e-13, grad[1], 1e-7);
+        assertEquals("Third category, Derivative wrt b2", -4.537225e-02, grad[2], 1e-7);
+        assertEquals("Third category, Derivative wrt b3", -1.497379e-01, grad[3], 1e-7);
+        assertEquals("Third category, Derivative wrt b4", 1.224028e-01, grad[4], 1e-7);
+        assertEquals("Third category, Derivative wrt b5", 5.756419e-02, grad[5], 1e-7);
+
+        //Gradient for fourth response category
+        grad = irm.gradient(theta, 3);
+        //System.out.println(Arrays.toString(grad));
+        assertEquals("Fourth category, Derivative wrt a", -0.07873679, grad[0], 1e-7);
+        assertEquals("Fourth category, Derivative wrt b1", 0.00000000, grad[1], 1e-7);
+        assertEquals("Fourth category, Derivative wrt b2", -0.01972527, grad[2], 1e-7);
+        assertEquals("Fourth category, Derivative wrt b3", -0.06509752, grad[3], 1e-7);
+        assertEquals("Fourth category, Derivative wrt b4", -0.12993608, grad[4], 1e-7);
+        assertEquals("Fourth category, Derivative wrt b5", 0.02502563, grad[5], 1e-7);
+
+        //Gradient for fifth response category
+        grad = irm.gradient(theta, 4);
+        //System.out.println(Arrays.toString(grad));
+        assertEquals("Fifth category, Derivative wrt a", -9.313197e-02, grad[0], 1e-7);
+        assertEquals("Fifth category, Derivative wrt b1", 4.895163e-17, grad[1], 1e-7);
+        assertEquals("Fifth category, Derivative wrt b2", -1.751225e-02, grad[2], 1e-7);
+        assertEquals("Fifth category, Derivative wrt b3", -5.779408e-02, grad[3], 1e-7);
+        assertEquals("Fifth category, Derivative wrt b4", -1.153583e-01, grad[4], 1e-7);
+        assertEquals("Fifth category, Derivative wrt b5", -1.403839e-01, grad[5], 1e-7);
+
     }
 
 //    @Test

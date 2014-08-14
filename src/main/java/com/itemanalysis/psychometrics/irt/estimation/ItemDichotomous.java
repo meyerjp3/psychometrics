@@ -17,16 +17,17 @@ package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
 import com.itemanalysis.psychometrics.irt.model.Irm3PL;
+import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.optimization.DiffFunction;
 import com.itemanalysis.psychometrics.uncmin.Uncmin_methods;
 
 /**
  * This class contains contains methods for the loglikelihood function for an item, which is the
- * value of teh objective function that is being minimized in the Mstep to obtain the maximum
+ * value of the objective function that is being minimized in the Mstep to obtain the maximum
  * likelihood or Bayes modal estimates. See {@link com.itemanalysis.psychometrics.irt.estimation.MstepParallel}.
- * This class is also used in computation of teh starting values. See {@link com.itemanalysis.psychometrics.irt.estimation.StartingValues}.
+ * This class is also used in computation of the starting values. See {@link com.itemanalysis.psychometrics.irt.estimation.StartingValues}.
  */
-public class ItemDichotomous implements DiffFunction, Uncmin_methods {
+public class ItemDichotomous implements ItemLogLikelihoodFunction {
 
     private Irm3PL model = null;
     private double[] rjk = null;
@@ -48,8 +49,8 @@ public class ItemDichotomous implements DiffFunction, Uncmin_methods {
      * @param rjk expected number of correct responses at each quadrature point
      * @param nk expected number of responses at each quadrature node
      */
-    public void setModel(Irm3PL model, DistributionApproximation latentDistribution, double[] rjk, double[] nk){
-        this.model = model;
+    public void setModel(ItemResponseModel model, DistributionApproximation latentDistribution, double[] rjk, double[] nk){
+        this.model = (Irm3PL)model;
         this.rjk = rjk;
         this.nk = nk;
         this.latentDistribution = latentDistribution;
@@ -163,7 +164,8 @@ public class ItemDichotomous implements DiffFunction, Uncmin_methods {
      * See ItemDichotomous.h in ETIRM
      *
      *
-     * @param point parameter values
+     * @param point parameter values. The order of the parameters must match the order in the gradient function in the
+     *              ItemResponseModel class.
      * @return gradient values
      */
     public double[] derivativeAt(double[] point){

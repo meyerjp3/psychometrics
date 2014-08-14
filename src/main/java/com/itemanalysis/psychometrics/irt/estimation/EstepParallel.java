@@ -17,6 +17,7 @@ package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
+import org.apache.commons.math3.distribution.NormalDistribution;
 
 import java.util.concurrent.RecursiveTask;
 

@@ -22,6 +22,9 @@ public class EstepEstimates {
     private int nItems = 0;
     private int nPoints = 0;
     private double loglikelihood = 0.0;
+    private String groupCode = "";
+    private double groupMean = 0;
+    private double groupSD = 0;
 
     public EstepEstimates(int nItems, int nPoints){
         this.nItems = nItems;

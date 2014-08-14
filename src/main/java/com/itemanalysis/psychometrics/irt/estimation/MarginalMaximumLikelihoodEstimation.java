@@ -48,6 +48,7 @@ public class MarginalMaximumLikelihoodEstimation {
     private ArrayList<EMStatusListener> emStatusListeners = new ArrayList<EMStatusListener>();
     private ForkJoinPool pool = null;
     private boolean verbose = false;
+    private boolean estimateLatentDistribution = false;
 
     public MarginalMaximumLikelihoodEstimation(ItemResponseVector[] responseVector, ItemResponseModel[] irm, DistributionApproximation latentDistribution){
         this.responseVector = responseVector;
@@ -68,6 +69,7 @@ public class MarginalMaximumLikelihoodEstimation {
      *
      */
     private void doEStep(){
+
         EstepParallel estepParallel = new EstepParallel(responseVector, irm, latentDistribution, 0, responseVector.length);
         estepEstimates = pool.invoke(estepParallel);
 
@@ -100,10 +102,18 @@ public class MarginalMaximumLikelihoodEstimation {
         }
 
         //estimate latent distribution here
-//        latentDistribution = mstepParallel.getUpdatedLatentDistribution();//TODO make optional
+        if(estimateLatentDistribution){
+            latentDistribution = mstepParallel.getUpdatedLatentDistribution();
+//        System.out.println("MEAN = " + latentDistribution.getMean() + " SD = " + latentDistribution.getStandardDeviation());
+        }
+
 
         return maxChange;
 
+    }
+
+    public void estimateParameters(double converge, int maxIter){
+        estimateParameters(converge, maxIter, false);
     }
 
     /**
@@ -116,7 +126,9 @@ public class MarginalMaximumLikelihoodEstimation {
      * @param converge maximum change in parameter estimate convergence criterion.
      * @param maxIter maximum number of EM cycles.
      */
-    public void estimateParameters(double converge, int maxIter){
+    public void estimateParameters(double converge, int maxIter, boolean estimateLatentDistribution){
+        this.estimateLatentDistribution = estimateLatentDistribution;
+
         fireEMStatusEvent("STARTING EM CYCLES...");
 //        fireEMStatusEvent("Number of available processors = " + PROCESSORS);
 
@@ -141,6 +153,7 @@ public class MarginalMaximumLikelihoodEstimation {
         if(!verbose) fireEMStatusEvent(iter, delta, completeDataLogLikelihood());
         fireEMStatusEvent("Elapsed time: " + stopWatch.getElapsedTime());
         if(delta>converge) fireEMStatusEvent("WARNING: convergence criterion not met. Increase the maximum number of iterations.");
+
     }
 
     /**

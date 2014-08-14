@@ -126,13 +126,22 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         return scoreWeight[1]*probRight(theta);
     }
 
+    public double[] gradient(double theta){
+        //Note: The second argument (-1) is not actually used by this class.
+        //It is here to satisfy the interface.
+        return gradient(theta, -1);
+    }
+
     /**
      * Computes the gradient (vector of first partial derivatives) with respect to the item parameters.
      *
+     * Note: The second argument (int k) is not actually used by this class. It is here to satisfy the interface.
+     *
      * @param theta person ability estimate.
+     * @param k response category - not needed for Irm3PL
      * @return an array of first partial derivatives (i.e. the gradient).
      */
-    public double[] gradient(double theta){
+    public double[] gradient(double theta, int k){
         double[] deriv = new double[numberOfParameters];
         double t = Math.exp(-discrimination*D*(theta-difficulty));
         double onept2 = 1.0 + t;

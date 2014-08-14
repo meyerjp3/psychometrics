@@ -127,7 +127,12 @@ public class IrmPCM extends AbstractItemResponseModel{
         return ev;
     }
 
-    public double[] gradient(double theta){
+    /**
+     * Computes the gradient of teh item response model with respect to the item parameters
+     * @param theta person ability value
+     * @return gradient
+     */
+    public double[] gradient(double theta, int k){
         //empty method
         return null;
     }
@@ -440,7 +445,7 @@ public class IrmPCM extends AbstractItemResponseModel{
 
     public double acceptAllProposalValues(){
         double max = Math.max(0, Math.abs(this.difficulty-this.proposalDifficulty));
-        for(int m=0;m<getNcat();m++){
+        for(int m=0;m<getNcat()-1;m++){
             max = Math.max(max, Math.abs(this.threshold[m]-this.proposalThreshold[m]));
         }
         this.difficulty = this.proposalDifficulty;

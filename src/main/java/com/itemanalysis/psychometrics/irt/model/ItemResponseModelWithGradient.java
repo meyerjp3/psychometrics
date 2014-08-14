@@ -23,6 +23,7 @@ public interface ItemResponseModelWithGradient extends ItemResponseModel {
      * @param theta person ability value.
      * @return first derivative wrt theta.
      */
+    @Deprecated
     public double[] firstDerivative(double theta);
 
     /**
@@ -31,6 +32,7 @@ public interface ItemResponseModelWithGradient extends ItemResponseModel {
      * @param theta person ability value.
      * @return a two-way array containing teh Hessian matrix values.
      */
+    @Deprecated
     public double[][] hessian(double theta);
 
 }

@@ -320,13 +320,13 @@ public class MarginalMaximumLikelihoodEstimationTest {
         }
 
 
-//        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
+        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
 
         //mirt R package default quadrature
-        double quadPoints = 41;
-        double min = -.8 * Math.sqrt(quadPoints);
-        double max = -1*min;
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(min, max, (int)quadPoints);
+//        double quadPoints = 41;
+//        double min = -.8 * Math.sqrt(quadPoints);
+//        double max = -1*min;
+//        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(min, max, (int)quadPoints);
 
         StartingValues startingValues = new StartingValues(responseData, irm);
         irm = startingValues.computeStartingValues();
@@ -341,7 +341,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         DefaultEMStatusListener emStatus = new DefaultEMStatusListener();
         mmle.addEMStatusListener(emStatus);
         mmle.setVerbose(true);
-        mmle.estimateParameters(1e-3, 250);
+        mmle.estimateParameters(1e-3, 150);
         System.out.println();
         System.out.println(mmle.printItemParameters());
     }
@@ -478,7 +478,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
      * >SCORE ;
      *
      */
-    @Test
+//    @Test
     public void binaryItems3plBILOGLtest(){
         System.out.println("Binary items - 3PL with Guessing Prior - Compare to BILOG");
 
@@ -577,9 +577,85 @@ public class MarginalMaximumLikelihoodEstimationTest {
 
     }
 
-//    @Test
+    /**
+     * ICL results obtained with the syntax below
+     *
+     * options -D 1.7
+     * options -default_prior_a none
+     * options -default_prior_b none
+     * options -default_prior_c none
+     * allocate_items_dist 50
+     *
+     * #2PL model
+     * for {set i 1} {$i <= 50} {incr i} {
+     *   item_set_model $i 2PL
+     * }
+     *
+     * read_examinees binary-items-for-ICL.txt 50i1
+     * output -log_file binary-items-ICL-results-2PL.log
+     * starting_values_dichotomous
+     *
+     * EM_steps -max_iter 500 -crit 0.0001
+     * print -item_param -latent_dist
+     * release_items_dist
+     *
+     */
+    @Test
     public void binaryItems2plICLtest(){
         System.out.println("Binary items - 2PL - Compare to ICL");
+
+        double[][] iclResults = {
+                {0.751109,-1.523248},
+                {0.538252,0.848959},
+                {0.435915,-0.119467},
+                {1.181007,-0.902456},
+                {0.777044,-0.653776},
+                {0.946688,-1.018769},
+                {0.849118,-1.054501},
+                {0.381066,0.322156},
+                {0.821167,-1.458939},
+                {1.930503,-1.787354},
+                {0.910643,-1.961909},
+                {0.426441,2.280098},
+                {0.591198,-0.204478},
+                {0.719904,-0.428744},
+                {0.588193,0.196856},
+                {1.309048,-1.712498},
+                {0.996928,-1.338184},
+                {0.680659,-0.619818},
+                {0.829899,-0.671139},
+                {0.728285,-0.436629},
+                {1.352144,-2.585487},
+                {0.834645,-1.827876},
+                {0.974762,-1.035047},
+                {0.529633,-0.584465},
+                {0.460035,0.845607},
+                {0.840473,-1.267442},
+                {0.135966,3.723481},
+                {0.815774,-0.454808},
+                {0.854626,-0.670895},
+                {0.77507,-0.1596},
+                {0.69961,-0.585164},
+                {0.797688,-0.920876},
+                {0.958384,-1.341814},
+                {0.421079,1.219961},
+                {0.961903,-1.416994},
+                {0.512207,-1.029688},
+                {0.85889,-0.360972},
+                {0.660225,-0.626941},
+                {0.672394,0.729608},
+                {0.192848,2.733837},
+                {0.727908,-1.031053},
+                {0.783747,-2.118898},
+                {0.630837,0.1525},
+                {1.353108,-0.85117},
+                {0.588214,0.39676},
+                {0.52289,-0.837342},
+                {0.946251,-1.044967},
+                {0.497776,1.615799},
+                {0.714291,-0.0189},
+                {0.73233,-0.111437}
+        };
 
         //Read file and create response vectors
         ItemResponseFileSummary fileSummary = new ItemResponseFileSummary();
@@ -604,9 +680,15 @@ public class MarginalMaximumLikelihoodEstimationTest {
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
         DefaultEMStatusListener emStatus = new DefaultEMStatusListener();
         mmle.addEMStatusListener(emStatus);
+        mmle.setVerbose(true);
         mmle.estimateParameters(1e-4, 250);
         System.out.println();
         System.out.println(mmle.printItemParameters());
+
+        for(int j=0;j<50;j++){
+            assertEquals("Binary items - discrimination test", iclResults[j][0], irm[j].getDiscrimination(), 1e-3);
+            assertEquals("Binary items - difficulty test", iclResults[j][1], irm[j].getDifficulty(), 1e-3);
+        }
 
     }
 

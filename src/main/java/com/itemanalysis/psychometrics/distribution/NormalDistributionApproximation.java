@@ -167,8 +167,10 @@ public final class NormalDistributionApproximation implements DistributionApprox
     public double getStandardDeviation(){
         double m = getMean();
         double m2 = 0;
+        double dev = 0;
         for(int i=0;i<numberOfPoints;i++){
-            m2 += (points[i]-m)*(points[i]-m)*density[i];
+            dev = (points[i]-m);
+            m2 += dev*dev*density[i];
         }
         return Math.sqrt(m2);
     }

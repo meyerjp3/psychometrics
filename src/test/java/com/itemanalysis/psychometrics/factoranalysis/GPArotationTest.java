@@ -43,8 +43,7 @@ public class GPArotationTest {
     };
 
 
-    @Ignore
-    @Test
+//    @Test
     public void genericTest(){
         //add test here
         double[][] x = {
