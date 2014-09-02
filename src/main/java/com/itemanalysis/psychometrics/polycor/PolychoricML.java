@@ -26,7 +26,7 @@ import java.util.Formatter;
 
 /**
  * this class implements the maximum likelihood approach to computing
- * the polychoric correlation. the gradient and hessian are computed 
+ * the polychoric correlation. the gradientAt and hessian are computed
  * numerically.
  *
  * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
@@ -126,7 +126,7 @@ public class PolychoricML extends AbstractPolychoricCorrelation{
     /**
      * Compute the maximum likelihood rho of the polychoric correlation.
      * Parameters from the two-step procedure are used as starting values.
-     * Minimization is done using a conjugate gradient method.
+     * Minimization is done using a conjugate gradientAt method.
      *
      * @param data two way array of frequency counts
      */

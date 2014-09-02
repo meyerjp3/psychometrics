@@ -16,13 +16,12 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
-import com.itemanalysis.psychometrics.irt.model.Irm3PL;
-import com.itemanalysis.psychometrics.irt.model.IrmType;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.tools.StopWatch;
 import com.itemanalysis.psychometrics.uncmin.DefaultUncminStatusListener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ForkJoinPool;
 
 /**
@@ -69,10 +68,8 @@ public class MarginalMaximumLikelihoodEstimation {
      *
      */
     private void doEStep(){
-
         EstepParallel estepParallel = new EstepParallel(responseVector, irm, latentDistribution, 0, responseVector.length);
         estepEstimates = pool.invoke(estepParallel);
-
 //        System.out.println(estepEstimates.toString());
     }
 
@@ -83,6 +80,7 @@ public class MarginalMaximumLikelihoodEstimation {
      * @return
      */
     private double doMStep(){
+
         MstepParallel mstepParallel = new MstepParallel(irm, latentDistribution, estepEstimates, 0, irm.length);
 
         //Optimizer termination status
@@ -104,7 +102,8 @@ public class MarginalMaximumLikelihoodEstimation {
         //estimate latent distribution here
         if(estimateLatentDistribution){
             latentDistribution = mstepParallel.getUpdatedLatentDistribution();
-//        System.out.println("MEAN = " + latentDistribution.getMean() + " SD = " + latentDistribution.getStandardDeviation());
+//          System.out.println("MEAN = " + latentDistribution.getMean() + " SD = " + latentDistribution.getStandardDeviation());
+
         }
 
 
@@ -130,7 +129,7 @@ public class MarginalMaximumLikelihoodEstimation {
         this.estimateLatentDistribution = estimateLatentDistribution;
 
         fireEMStatusEvent("STARTING EM CYCLES...");
-//        fireEMStatusEvent("Number of available processors = " + PROCESSORS);
+        fireEMStatusEvent("Number of available processors = " + PROCESSORS);
 
         StopWatch stopWatch = new StopWatch();
         double delta = 1.0+converge;
@@ -154,7 +153,24 @@ public class MarginalMaximumLikelihoodEstimation {
         fireEMStatusEvent("Elapsed time: " + stopWatch.getElapsedTime());
         if(delta>converge) fireEMStatusEvent("WARNING: convergence criterion not met. Increase the maximum number of iterations.");
 
+//        System.out.println(Arrays.toString(latentDistribution.getPoints()));
+//        System.out.println(Arrays.toString(latentDistribution.evaluate()));
+
+        computeItemStandardErrors();//TODO move elsewhere??
+
     }
+
+//    public DistributionApproximation getUpdatedLatentDistribution(){
+//        double sumNk = estepEstimates.getSumNt();
+//        double[] nk = estepEstimates.getNt();
+//
+//        //Compute posterior latent distribution
+//        for(int k=0;k<nk.length;k++){
+//            latentDistribution.setDensityAt(k, nk[k]/sumNk);
+//        }
+//
+//        return latentDistribution;
+//    }
 
     /**
      * Computes the complete data log-likelihood. The kernel of the log-likelihood is computed incrementally
@@ -165,41 +181,24 @@ public class MarginalMaximumLikelihoodEstimation {
      */
     public double completeDataLogLikelihood(){
         double logLike = estepEstimates.getLoglikelihood();
-        double priorProb = 0.0;
-        int nPar = 0;
         for(int j=0;j<nItems;j++){
-            if(irm[j].getType()== IrmType.L3){
-                Irm3PL model = (Irm3PL)irm[j];
-                nPar = model.getNumberOfParameters();
-
-                if(nPar==3){
-                    if(model.getGuessingPrior()!=null){
-                        priorProb = model.getGuessingPrior().logDensity(model.getGuessing());
-                        logLike+=priorProb;
-                    }
-                }
-
-                if(nPar>=2){
-                    if(model.getDiscriminationPrior()!=null){
-                        priorProb = model.getDiscriminationPrior().logDensity(model.getDiscrimination());
-                        logLike+=priorProb;
-                    }
-                }
-
-                if(model.getDifficultyPrior()!=null){
-                    priorProb = model.getDifficultyPrior().logDensity(model.getDifficulty());
-                    logLike+=priorProb;
-                }
-
-            }
+            irm[j].addPriorsToLogLikelihood(logLike, irm[j].getItemParameterArray());
         }
         return logLike;
+    }
+
+    public void computeItemStandardErrors(){
+        ItemLogLikelihood itemLogLikelihood = new ItemLogLikelihood();
+        for(int j=0;j<irm.length;j++){
+            itemLogLikelihood.setModel(irm[j], latentDistribution, estepEstimates.getRjkAt(j), estepEstimates.getNt());
+            itemLogLikelihood.stdError(irm[j]);
+        }
     }
 
     public String printItemParameters(){
         String s = "";
         for(int j=0;j<nItems;j++){
-           s += "Item" + (j+1) + irm[j].toString() + "\n";
+           s += irm[j].toString() + "\n";
         }
         return s;
     }

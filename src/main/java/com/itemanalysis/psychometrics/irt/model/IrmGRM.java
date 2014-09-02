@@ -19,6 +19,8 @@ import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
+import java.util.Arrays;
+
 /**
  * Samejima's graded response model.
  */
@@ -42,6 +44,20 @@ public class IrmGRM extends AbstractItemResponseModel {
         defaultScoreWeights();
     }
 
+    public double cumulativeProbability(double theta, double[] iparam, int category, double D){
+        if(category>maxCategory || category<minCategory) return 0;
+        if(category==minCategory) return 1.0;
+
+        double a = iparam[0];
+        double[] s = Arrays.copyOfRange(iparam, 1, iparam.length);
+
+        double Zk = D*a*(theta-s[category-1]);
+        double expZk = Math.exp(Zk);
+        double prob = expZk/(1+expZk);
+
+        return prob;
+    }
+
     /**
      * Compute cumulative probability of scoring at or above category.
      *
@@ -58,6 +74,14 @@ public class IrmGRM extends AbstractItemResponseModel {
         double prob = expZk/(1+expZk);
 
         return prob;
+    }
+
+    public double probability(double theta, double[] iparam, int response, double D){
+        if(response==minCategory)  return 1.0-cumulativeProbability(theta, iparam, response+1, D);
+        if(response==maxCategory) return cumulativeProbability(theta, iparam, response, D);
+        double prob1 = cumulativeProbability(theta, response+1);
+        double prob = cumulativeProbability(theta, response);
+        return prob - prob1;
     }
 
     /**
@@ -84,9 +108,23 @@ public class IrmGRM extends AbstractItemResponseModel {
         return ev;
     }
 
+    public double[] gradient(double theta, double[] iparam, int k, double D){
+        //empty method
+        return null;
+    }
+
     public double[] gradient(double theta, int k){
         //empty method
         return null;
+    }
+
+    public double addPriorsToLogLikelihood(double ll, double[] iparam){
+        return ll;
+    }
+
+    public double[] addPriorsToLogLikelihoodGradient(double[] loglikegrad, double[] iparam){
+        //empty method
+        return loglikegrad;
     }
 
     public void setScoreWeights(double[] scoreWeight)throws DimensionMismatchException {
@@ -173,7 +211,6 @@ public class IrmGRM extends AbstractItemResponseModel {
      * @return
      */
     public double itemInformationAt(double theta){
-        double info = 0.0;
         double dSum = 0.0;
         double top = 0.0;
         double bot = 0.0;
@@ -227,7 +264,7 @@ public class IrmGRM extends AbstractItemResponseModel {
      */
     public double tStarExpectedValue(double theta, double intercept, double slope){
         double ev = 0;
-        for(int i=1;i< ncat;i++){
+        for(int i=1;i<ncat;i++){
             ev += scoreWeight[i]*tStarProbability(theta, i, intercept, slope);
         }
         return ev;
@@ -257,7 +294,7 @@ public class IrmGRM extends AbstractItemResponseModel {
 
     public double tSharpExpectedValue(double theta, double intercept, double slope){
         double ev = 0;
-        for(int i=1;i< ncat;i++){
+        for(int i=1;i<ncat;i++){
             ev += scoreWeight[i]*tSharpProbability(theta, i, intercept, slope);
         }
         return ev;
@@ -285,6 +322,24 @@ public class IrmGRM extends AbstractItemResponseModel {
 //=====================================================================================================================//
 // GETTER AND SETTER METHODS MAINLY FOR USE WHEN ESTIMATING PARAMETERS                                                 //
 //=====================================================================================================================//
+
+    public double[] getItemParameterArray(){
+        double[] ip = new double[getNumberOfParameters()];
+        ip[0] = discrimination;
+        for(int k=0;k<ncatM1;k++){
+            ip[k+1] = step[k];
+        }
+        return ip;
+    }
+
+    public void setStandardErrors(double[] x){
+        discriminationStdError = x[0];
+        for(int k=0;k<ncat-1;k++){
+            stepStdError[k] = x[k+1];
+        }
+    }
+
+
     public double getDifficulty(){
         return 0.0;
     }
@@ -346,6 +401,26 @@ public class IrmGRM extends AbstractItemResponseModel {
     }
 
     public void setGuessingStdError(double stdError){
+        throw new UnsupportedOperationException();
+    }
+
+    public void setSlipping(double slipping){
+        throw new UnsupportedOperationException();
+    }
+
+    public void setProposalSlipping(double slipping){
+        throw new UnsupportedOperationException();
+    }
+
+    public void setSlippingStdError(double slipping){
+        throw new UnsupportedOperationException();
+    }
+
+    public double getSlipping(){
+        throw new UnsupportedOperationException();
+    }
+
+    public double getSlippingStdError(){
         throw new UnsupportedOperationException();
     }
 

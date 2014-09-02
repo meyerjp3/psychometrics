@@ -41,7 +41,7 @@ public class DefaultUncminStatusListener implements UncminStatusListener {
 
     public String terminationCodeString(int terminationCode){
         switch(terminationCode){
-            case 1: return "    UNCMIN TERM CODE =  1:  Terminated with gradient small, xpls is probably optimal";
+            case 1: return "    UNCMIN TERM CODE =  1:  Terminated with gradientAt small, xpls is probably optimal";
             case 2: return "    UNCMIN TERM CODE =  2:  Terminated with stepsize small, xpls is probably optimal";
             case 3: return "    UNCMIN TERM CODE =  3:  Lower point cannot be found, xpls is probably optimal";
             case 4: return "    UNCMIN TERM CODE =  4:  Iteration limit (150) exceeded";

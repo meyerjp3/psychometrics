@@ -225,7 +225,7 @@ public class GPArotation {
         RealMatrix TmatInv = new LUDecomposition(Tmat).getSolver().getInverse();
         RealMatrix L = A.multiply(TmatInv.transpose());
 
-        //compute gradient and function value
+        //compute gradientAt and function value
         gpFunction.computeValues(L);
         RealMatrix VgQ = gpFunction.getGradient();
         RealMatrix VgQt = VgQ;
@@ -273,7 +273,7 @@ public class GPArotation {
                 TinnerInv = new LUDecomposition(Tinner).getSolver().getInverse();
                 L = A.multiply(TinnerInv.transpose());
 
-                //compute new values of the gradient and the rotation criteria
+                //compute new values of the gradientAt and the rotation criteria
                 gpFunction.computeValues(L);
                 VgQt = gpFunction.getGradient();
                 ft = gpFunction.getValue();

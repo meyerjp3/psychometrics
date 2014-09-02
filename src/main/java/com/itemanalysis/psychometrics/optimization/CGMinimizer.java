@@ -19,7 +19,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 /**
- * Conjugate-gradient implementation based on the code in Numerical
+ * Conjugate-gradientAt implementation based on the code in Numerical
  * Recipes in C.  (See p. 423 and others.)  As of now, it requires a
  * differentiable function (DiffFunction) as input.  Equality
  * constraints are supported; inequality constraints may soon be
@@ -542,7 +542,7 @@ public class CGMinimizer implements Minimizer<DiffFunction> {
                 p[j] = p2[j];
             }
             fp = fp2;
-            // find the new gradient
+            // find the new gradientAt
             xi = copyArray(dfunction.derivativeAt(p));
             //System.err.print("mx "+arrayMax(xi)+" mn "+arrayMin(xi));
 

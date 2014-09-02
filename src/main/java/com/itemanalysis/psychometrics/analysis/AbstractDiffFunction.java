@@ -66,8 +66,8 @@ public abstract class AbstractDiffFunction implements DiffFunction {
     }
 
     /**
-     * Numerically compute gradient by the central difference method. Override this method
-     * when the analytic gradient is available.
+     * Numerically compute gradientAt by the central difference method. Override this method
+     * when the analytic gradientAt is available.
      *
      *
      * @param x

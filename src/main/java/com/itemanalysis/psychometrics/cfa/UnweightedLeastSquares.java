@@ -31,9 +31,9 @@ public class UnweightedLeastSquares extends AbstractConfirmatoryFactorAnalysisEs
         super(model, varcov, numberOfExaminees);
     }
 
-//    public double evaluate(double[] argument, double[] gradient)throws MathRuntimeException{
+//    public double evaluate(double[] argument, double[] gradientAt)throws MathRuntimeException{
 //        F = evaluate(argument);
-//        computeGradient(argument, gradient);
+//        computeGradient(argument, gradientAt);
 //        return F;
 //    }
 

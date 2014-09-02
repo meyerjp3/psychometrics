@@ -50,7 +50,7 @@ public class ItemResponseVector{
     protected double sumScore = 0.0;
 
     /**
-     * Number of items in teh response vector
+     * Number of items in the response vector
      */
     protected int nItems = 0;
 

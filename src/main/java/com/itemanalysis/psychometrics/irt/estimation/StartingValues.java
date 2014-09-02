@@ -17,7 +17,6 @@ package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.distribution.UserSuppliedDistributionApproximation;
 import com.itemanalysis.psychometrics.histogram.*;
-import com.itemanalysis.psychometrics.irt.model.Irm3PL;
 import com.itemanalysis.psychometrics.irt.model.IrmType;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.uncmin.DefaultUncminOptimizer;
@@ -25,6 +24,8 @@ import com.itemanalysis.psychometrics.uncmin.UncminException;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math3.util.Pair;
+
+import java.util.Arrays;
 
 /**
  * Computes starting values for binary item response models. It begins with PROX estimates of
@@ -38,6 +39,7 @@ public class StartingValues {
     private ItemResponseModel[] irm = null;
     private int nResponseVectors = 0;
     private int nItems = 0;
+    private int[] ncat = null;
     private double[] theta = null;
     private Histogram hist = null;
     private EstepEstimates estepEstimates = null;
@@ -54,6 +56,11 @@ public class StartingValues {
         nResponseVectors = responseVector.length;
         nItems = irm.length;
         theta = new double[responseVector.length];
+
+        ncat = new int[nItems];
+        for(int j=0;j<nItems;j++){
+            ncat[j] = irm[j].getNcat();
+        }
     }
 
     /**
@@ -69,7 +76,7 @@ public class StartingValues {
     public ItemResponseModel[] computeStartingValues(){
 
         DefaultUncminOptimizer optimizer = new DefaultUncminOptimizer();
-        ItemDichotomous itemDichotomous = new ItemDichotomous();
+        ItemLogLikelihood itemLogLikelihood = new ItemLogLikelihood();
         double[] initialValue = null;
         double[] param = null;
 
@@ -87,28 +94,29 @@ public class StartingValues {
             latentDistribution.increment(hist.getPointAt(k), hist.getDensityAt(k)/sum);
         }
 
-
         for(int j=0;j<nItems;j++){
-            int nPar = irm[j].getNumberOfParameters();
 
             //Compute start values for binary items only
-            if(irm[j].getType()== IrmType.L3){
-                initialValue = new double[nPar];
-                if(nPar==3){
-                    initialValue[0] = irm[j].getDiscrimination();
-                    initialValue[1] = irm[j].getDifficulty();
-                    initialValue[2] = irm[j].getGuessing();
-                }else if(nPar==2){
-                    initialValue[0] = irm[j].getDiscrimination();
-                    initialValue[1] = irm[j].getDifficulty();
-                }else{
-                    initialValue[0] = irm[j].getDifficulty();
-                }
+            if(irm[j].getType()== IrmType.L3 || irm[j].getType()==IrmType.L4){
+                int nPar = irm[j].getNumberOfParameters();
+                initialValue = irm[j].getItemParameterArray();
+
+//                initialValue = irm[j].getItemParameterArray();
+//                if(nPar==3){
+//                    initialValue[0] = irm[j].getDiscrimination();
+//                    initialValue[1] = irm[j].getDifficulty();
+//                    initialValue[2] = irm[j].getGuessing();
+//                }else if(nPar==2){
+//                    initialValue[0] = irm[j].getDiscrimination();
+//                    initialValue[1] = irm[j].getDifficulty();
+//                }else{
+//                    initialValue[0] = irm[j].getDifficulty();
+//                }
 
                 try{
                     //Using observed counts, find the item parameters that maximize the marginal likelihood
-                    itemDichotomous.setModel((Irm3PL) irm[j], latentDistribution, estepEstimates.getRjkAt(j), estepEstimates.getNk());
-                    optimizer.minimize(itemDichotomous, initialValue, true, false, 100);
+                    itemLogLikelihood.setModel(irm[j], latentDistribution, estepEstimates.getRjkAt(j), estepEstimates.getNt());
+                    optimizer.minimize(itemLogLikelihood, initialValue, true, false, 100);
                     param = optimizer.getParameters();
                 }catch(UncminException ex){
                     //TODO the exception will be lost in a non-console program because no stack trace will be shown.
@@ -116,7 +124,13 @@ public class StartingValues {
                 }
 
 
-                if(nPar==3){
+                if(nPar==4){
+                    irm[j].setDiscrimination(Math.min(3.0, Math.max(param[0], 0.3)));
+                    irm[j].setDifficulty(param[1]);
+                    irm[j].setGuessing(Math.min(1.000, Math.max(param[2], 0.05)));
+                    irm[j].setSlipping(Math.max(0.5, Math.min(param[3], 0.99)));
+
+                }else if(nPar==3){
                     //only accept discrimination parameter estimates between 0.3 and 3.0 inclusive.
                     irm[j].setDiscrimination(Math.min(3.0, Math.max(param[0], 0.3)));
                     irm[j].setDifficulty(param[1]);
@@ -166,21 +180,33 @@ public class StartingValues {
         double[] freq = hist.evaluate();
         int nBins = hist.getNumberOfBins();
 
-        estepEstimates = new EstepEstimates(nItems, nBins);
+        estepEstimates = new EstepEstimates(nItems, ncat, nBins);
 
         //compute number of examinees at each theta level
-        for(int k=0;k<nBins;k++){
-            estepEstimates.incrementNk(k, freq[k]);
+        for(int t=0;t<nBins;t++){
+            estepEstimates.incrementNt(t, freq[t]);
         }
+
+        int x = 0;
+        int value = 0;
+
 
         //count number correct at each theta level for each binary item
         for(int l=0;l<nResponseVectors;l++){
             for(int w=0;w<responseVector[l].getFrequency();w++){
-                for(int k=0;k<nBins;k++){
-                    if(hist.getBinAt(k).inBin(theta[l])){
+                for(int t=0;t<nBins;t++){
+                    if(hist.getBinAt(t).inBin(theta[l])){
                         for(int j=0;j<nItems;j++){
-                            if(irm[j].getType()==IrmType.L3){
-                                estepEstimates.incrementRjk(j, k, responseVector[l].getResponseAt(j));
+
+                            x = Byte.valueOf(responseVector[l].getResponseAt(j)).intValue();
+
+                            if(irm[j].getType()==IrmType.L3 || irm[j].getType()==IrmType.L4){
+                                for(int k=0;k<ncat[j];k++){
+                                    value = 0;
+                                    if(x==k) value = 1;
+                                    estepEstimates.incrementRjkt(j, k, t, value);
+                                }
+
                             }
                         }
                     }
@@ -188,6 +214,8 @@ public class StartingValues {
                 }
             }
         }
+        //For debugging
+        //System.out.println(estepEstimates.toString());
 
     }
 
@@ -201,7 +229,7 @@ public class StartingValues {
         double maxScore = 0.0;
         double sumScore = 0.0;
         for(int j=0;j<nItems;j++){
-            if(responseVector.getResponseAt(j)!=-1 && irm[j].getType()==IrmType.L3){
+            if(responseVector.getResponseAt(j)!=-1 && (irm[j].getType()==IrmType.L3 || irm[j].getType()==IrmType.L4)){
                 maxScore += irm[j].getMaxScoreWeight();
                 sumScore += responseVector.getResponseAt(j);
             }
@@ -254,7 +282,8 @@ public class StartingValues {
                 freq = responseVector[l].getFrequency();
 
                 for(int j=0;j<nItems;j++){
-                    if(irm[j].getType()==IrmType.L3){
+                    if(irm[j].getType()==IrmType.L3 || irm[j].getType()==IrmType.L4){
+
                         resp = responseVector[l].getResponseAt(j);
 
                         //initialize arrays
@@ -292,7 +321,7 @@ public class StartingValues {
             double pSd = 1e-8;
             double ni = 0;
             for(int j=0;j<nItems;j++){
-                if(irm[j].getType()==IrmType.L3){
+                if(irm[j].getType()==IrmType.L3 || irm[j].getType()==IrmType.L4){
                     pSd = sdPerson[j].getResult();
 
                     //adjust extreme person scores
@@ -310,7 +339,7 @@ public class StartingValues {
 
             //center difficulties about the mean item difficulty
             for(int j=0;j<nItems;j++){
-                if(irm[j].getType()==IrmType.L3){
+                if(irm[j].getType()==IrmType.L3 || irm[j].getType()==IrmType.L4){
                     iProx = irm[j].getDifficulty();
                     irm[j].setDifficulty(iProx-iMean);
                 }
@@ -355,7 +384,7 @@ public class StartingValues {
         double a = 1;
         double b = 0;
         for(int j=0;j<nItems;j++){
-            if(irm[j].getType()==IrmType.L3){
+            if(irm[j].getType()==IrmType.L3 || irm[j].getType()==IrmType.L3){
                 b = irm[j].getDifficulty();
                 irm[j].setDifficulty(b*A+B);
 

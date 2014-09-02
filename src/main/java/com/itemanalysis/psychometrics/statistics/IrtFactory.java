@@ -69,7 +69,7 @@ public class IrtFactory {
      * @param c pseudo guessing parameter
      * @param D scaling factor D = 1.7 or D = 1
      * @param theta person ability parameter
-     * @return gradient
+     * @return gradientAt
      */
     public IRTGradient p3plDeriv1(int numParam, double a, double b, double c, double D, double theta){
         IRTGradient gradient = new IRTGradient();

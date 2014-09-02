@@ -162,15 +162,15 @@ public class Uncmin {
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
-     *                  2.) a method, gradient, that has the form
+     *                  2.) a method, gradientAt, that has the form
      *
-     *                      public void gradient(double x[],
+     *                      public void gradientAt(double x[],
      *                                                  double g[])
      *
-     *                      where g is the gradient of f evaluated at x.  This
+     *                      where g is the gradientAt of f evaluated at x.  This
      *                      method will have an empty body if the user
      *                      does not wish to provide an analytic estimate
-     *                      of the gradient.
+     *                      of the gradientAt.
      *                  3.) a method, hessian, that has the form
      *
      *                      public void hessian(double x[],
@@ -184,10 +184,10 @@ public class Uncmin {
      *                      of h.
      *@param xpls       The final estimate of the minimum point
      *@param fpls       The value of f_to_minimize at xpls
-     *@param gpls       The gradient at the local minimum xpls
+     *@param gpls       The gradientAt at the local minimum xpls
      *@param itrmcd     Termination code
      *                      ITRMCD =  0:  Optimal solution found
-     *                      ITRMCD =  1:  Terminated with gradient small,
+     *                      ITRMCD =  1:  Terminated with gradientAt small,
      *                                    xpls is probably optimal
      *                      ITRMCD =  2:  Terminated with stepsize small,
      *                                    xpls is probably optimal
@@ -281,15 +281,15 @@ public class Uncmin {
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
-     *                  2.) a method, gradient, that has the form
+     *                  2.) a method, gradientAt, that has the form
      *
-     *                      public void gradient(double x[],
+     *                      public void gradientAt(double x[],
      *                                                  double g[])
      *
-     *                      where g is the gradient of f evaluated at x.  This
+     *                      where g is the gradientAt of f evaluated at x.  This
      *                      method will have an empty body if the user
      *                      does not wish to provide an analytic estimate
-     *                      of the gradient.
+     *                      of the gradientAt.
      *                  3.) a method, hessian, that has the form
      *
      *                      public void hessian(double x[],
@@ -314,20 +314,20 @@ public class Uncmin {
      *@param  msg       Message to inhibit certain automatic checks and output
      *@param  ndigit    Number of good digits in the minimization function
      *@param  itnlim    Maximum number of allowable iterations
-     *@param  iagflg    = 0 if an analytic gradient is not supplied
+     *@param  iagflg    = 0 if an analytic gradientAt is not supplied
      *@param  iahflg    = 0 if an analytic Hessian is not supplied
      *@param  dlt       Trust region radius
-     *@param  gradtl    Tolerance at which the gradient is considered close enough
+     *@param  gradtl    Tolerance at which the gradientAt is considered close enough
      *                  to zero to terminate the algorithm
      *@param  stepmx    Maximum allowable step size
      *@param  steptl    Relative step size at which successive iterates
      *                  are considered close enough to terminate the algorithm
      *@param xpls       The final estimate of the minimum point
      *@param fpls       The value of f_to_minimize at xpls
-     *@param gpls       The gradient at the local minimum xpls
+     *@param gpls       The gradientAt at the local minimum xpls
      *@param itrmcd     Termination code
      *                      ITRMCD =  0:  Optimal solution found
-     *                      ITRMCD =  1:  Terminated with gradient small,
+     *                      ITRMCD =  1:  Terminated with gradientAt small,
      *                                  X is probably optimal
      *                      ITRMCD =  2:  Terminated with stepsize small,
      *                                  X is probably optimal
@@ -433,7 +433,7 @@ C
         fireUncminStatusEvent(itrmcd[1]);
 
 //        if (itrmcd[1] == 1) {
-//            System.out.print("\nUncmin WARNING --- itrmcd = 1, probably converged, gradient small\n");
+//            System.out.print("\nUncmin WARNING --- itrmcd = 1, probably converged, gradientAt small\n");
 //        } else if (itrmcd[1] == 2) {
 //            System.out.print("\nUncmin WARNING --- itrmcd = 2, probably converged, stepsize small\n");
 //        } else if (itrmcd[1] == 3) {
@@ -985,10 +985,10 @@ C
 //     *@param  msg     Message to inhibit certain automatic checks and output
 //     *@param  ndigit  Number of good digits in the minimization function
 //     *@param  itnlim  Maximum number of allowable iterations
-//     *@param  iagflg  = 0 if an analytic gradient is not supplied
+//     *@param  iagflg  = 0 if an analytic gradientAt is not supplied
 //     *@param  iahflg  = 0 if an analytic Hessian is not supplied
 //     *@param  dlt     Trust region radius
-//     *@param  gradtl  Tolerance at which the gradient is considered close enough
+//     *@param  gradtl  Tolerance at which the gradientAt is considered close enough
 //     *                to zero to terminate the algorithm
 //     *@param  stepmx  "Value of zero to trip default maximum in optchk"
 //     *@param  steptl  Tolerance at which successive iterates are considered
@@ -1056,15 +1056,15 @@ C
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
-     *                  2.) a method, gradient, that has the form
+     *                  2.) a method, gradientAt, that has the form
      *
-     *                      public void gradient(double x[],
+     *                      public void gradientAt(double x[],
      *                                                  double g[])
      *
-     *                      where g is the gradient of f evaluated at x.  This
+     *                      where g is the gradientAt of f evaluated at x.  This
      *                      method will have an empty body if the user
      *                      does not wish to provide an analytic estimate
-     *                      of the gradient.
+     *                      of the gradientAt.
      *                  3.) a method, hessian, that has the form
      *
      *                      public void hessian(double x[],
@@ -1471,12 +1471,12 @@ C
      *
      *<p>
      *The fstocd_f77 method finds a central difference approximation to the
-     *gradient of the function to be minimized.
+     *gradientAt of the function to be minimized.
      *
      *Translated by Steve Verrill, April 21, 1998.
      *
      *@param n          The dimension of the problem
-     *@param x          The point at which the gradient is to be approximated
+     *@param x          The point at which the gradientAt is to be approximated
      *@param minclass   A class that implements the Uncmin_methods
      *                  interface (see the definition in
      *                  Uncmin_methods.java).  See UncminTest_f77.java for an
@@ -1489,15 +1489,15 @@ C
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
-     *                  2.) a method, gradient, that has the form
+     *                  2.) a method, gradientAt, that has the form
      *
-     *                      public void gradient(double x[],
+     *                      public void gradientAt(double x[],
      *                                                  double g[])
      *
-     *                      where g is the gradient of f evaluated at x.  This
+     *                      where g is the gradientAt of f evaluated at x.  This
      *                      method will have an empty body if the user
      *                      does not wish to provide an analytic estimate
-     *                      of the gradient.
+     *                      of the gradientAt.
      *                  3.) a method, hessian, that has the form
      *
      *                      public void hessian(double x[],
@@ -1511,7 +1511,7 @@ C
      *                      of h.
      *@param sx         Scaling vector for x
      *@param rnoise     Relative noise in the function to be minimized
-     *@param g          A central difference approximation to the gradient
+     *@param g          A central difference approximation to the gradientAt
      *
      *
      */
@@ -1597,15 +1597,15 @@ C
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
-     *                  2.) a method, gradient, that has the form
+     *                  2.) a method, gradientAt, that has the form
      *
-     *                      public void gradient(double x[],
+     *                      public void gradientAt(double x[],
      *                                                  double g[])
      *
-     *                      where g is the gradient of f evaluated at x.  This
+     *                      where g is the gradientAt of f evaluated at x.  This
      *                      method will have an empty body if the user
      *                      does not wish to provide an analytic estimate
-     *                      of the gradient.
+     *                      of the gradientAt.
      *                  3.) a method, hessian, that has the form
      *
      *                      public void hessian(double x[],
@@ -1617,7 +1617,7 @@ C
      *                      to check the Hessian, then the hessian method
      *                      should only fill the lower triangle (and diagonal)
      *                      of h.
-     *@param fpls       fpls[1] -- fpls[n] contains the gradient
+     *@param fpls       fpls[1] -- fpls[n] contains the gradientAt
      *                  of the function to minimize
      *@param a          "FINITE DIFFERENCE APPROXIMATION.  ONLY
      *                  LOWER TRIANGULAR MATRIX AND DIAGONAL ARE RETURNED"
@@ -1755,15 +1755,15 @@ C
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
-     *                  2.) a method, gradient, that has the form
+     *                  2.) a method, gradientAt, that has the form
      *
-     *                      public void gradient(double x[],
+     *                      public void gradientAt(double x[],
      *                                                  double g[])
      *
-     *                      where g is the gradient of f evaluated at x.  This
+     *                      where g is the gradientAt of f evaluated at x.  This
      *                      method will have an empty body if the user
      *                      does not wish to provide an analytic estimate
-     *                      of the gradient.
+     *                      of the gradientAt.
      *                  3.) a method, hessian, that has the form
      *
      *                      public void hessian(double x[],
@@ -1777,7 +1777,7 @@ C
      *                      of h.
      *@param fpls       fpls contains the value of the
      *                  function to minimize at the new iterate
-     *@param g          finite difference approximation to the gradient
+     *@param g          finite difference approximation to the gradientAt
      *@param sx         Scaling vector for x
      *@param rnoise     Relative noise in the function to be minimized
      *
@@ -1792,7 +1792,7 @@ C
 
 Here is a copy of the fstofd FORTRAN documentation.  It
 is not entirely relevant here as this particular
-Java method is only used for gradient calculations.
+Java method is only used for gradientAt calculations.
 
       SUBROUTINE FSTOFD(NR,M,N,XPLS,FCN,FPLS,A,SX,RNOISE,FHAT,ICASE)
 
@@ -1854,7 +1854,7 @@ C
 
         xmult = Math.sqrt(rnoise);
 
-// gradient
+// gradientAt
 
         for (j = 1; j <= n; j++) {
 
@@ -1878,13 +1878,13 @@ C
     /**
      *
      *<p>
-     *The grdchk_f77 method checks the analytic gradient supplied
+     *The grdchk_f77 method checks the analytic gradientAt supplied
      *by the user.
      *
      *Translated by Steve Verrill, April 22, 1998.
      *
      *@param n          The dimension of the problem
-     *@param x          The location at which the gradient is to be checked
+     *@param x          The location at which the gradientAt is to be checked
      *@param minclass   A class that implements the Uncmin_methods
      *                  interface (see the definition in
      *                  Uncmin_methods.java).  See UncminTest_f77.java for an
@@ -1897,15 +1897,15 @@ C
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
-     *                  2.) a method, gradient, that has the form
+     *                  2.) a method, gradientAt, that has the form
      *
-     *                      public void gradient(double x[],
+     *                      public void gradientAt(double x[],
      *                                                  double g[])
      *
-     *                      where g is the gradient of f evaluated at x.  This
+     *                      where g is the gradientAt of f evaluated at x.  This
      *                      method will have an empty body if the user
      *                      does not wish to provide an analytic estimate
-     *                      of the gradient.
+     *                      of the gradientAt.
      *                  3.) a method, hessian, that has the form
      *
      *                      public void hessian(double x[],
@@ -1918,14 +1918,14 @@ C
      *                      should only fill the lower triangle (and diagonal)
      *                      of h.
      *@param f          Function value
-     *@param g          Analytic gradient
+     *@param g          Analytic gradientAt
      *@param typsiz     Typical size for each component of x
      *@param sx         Scaling vector for x:  sx[i] = 1.0/typsiz[i]
      *@param fscale     Estimate of scale of f_to_minimize
      *@param rnf        Relative noise in f_to_minimize
      *@param analtl     Tolerance for comparison of estimated and
      *                  analytical gradients
-     *@param gest       Finite difference gradient
+     *@param gest       Finite difference gradientAt
      *
      */
 
@@ -1990,10 +1990,10 @@ C
 
         if (ker == 0) return;
 
-        String errorMessage = "There appears to be an error in the coding of the gradient method.\n" +
+        String errorMessage = "There appears to be an error in the coding of the gradientAt method.\n" +
                 "Component   Analytic   Finite Difference\n";
 //        System.out.print("\nThere appears to be an error in the coding");
-//        System.out.print(" of the gradient method.\n\n\n");
+//        System.out.print(" of the gradientAt method.\n\n\n");
 //        System.out.print("Component   Analytic   Finite Difference\n\n");
 
         for (i = 1; i <= n; i++) {
@@ -2031,15 +2031,15 @@ C
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
-     *                  2.) a method, gradient, that has the form
+     *                  2.) a method, gradientAt, that has the form
      *
-     *                      public void gradient(double x[],
+     *                      public void gradientAt(double x[],
      *                                                  double g[])
      *
-     *                      where g is the gradient of f evaluated at x.  This
+     *                      where g is the gradientAt of f evaluated at x.  This
      *                      method will have an empty body if the user
      *                      does not wish to provide an analytic estimate
-     *                      of the gradient.
+     *                      of the gradientAt.
      *                  3.) a method, hessian, that has the form
      *
      *                      public void hessian(double x[],
@@ -2059,7 +2059,7 @@ C
      *@param rnf        Relative noise in f_to_minimize
      *@param analtl     Tolerance for comparison of estimated and
      *                  analytic gradients
-     *@param iagflg     = 1 if an analytic gradient is supplied
+     *@param iagflg     = 1 if an analytic gradientAt is supplied
      *@param udiag      Workspace
      *@param wrk1       Workspace
      *@param wrk2       Workspace
@@ -2223,15 +2223,15 @@ C
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
-     *                  2.) a method, gradient, that has the form
+     *                  2.) a method, gradientAt, that has the form
      *
-     *                      public void gradient(double x[],
+     *                      public void gradientAt(double x[],
      *                                                  double g[])
      *
-     *                      where g is the gradient of f evaluated at x.  This
+     *                      where g is the gradientAt of f evaluated at x.  This
      *                      method will have an empty body if the user
      *                      does not wish to provide an analytic estimate
-     *                      of the gradient.
+     *                      of the gradientAt.
      *                  3.) a method, hessian, that has the form
      *
      *                      public void hessian(double x[],
@@ -2423,7 +2423,7 @@ C
      *Translated by Steve Verrill, April 24, 1998.
      *
      *@param n          The dimension of the problem
-     *@param g          The gradient at the current iterate
+     *@param g          The gradientAt at the current iterate
      *@param a          Cholesky decomposition of the Hessian in
      *                  the lower triangle and diagonal.  Hessian
      *                  or approximation in upper triangle (and udiag).
@@ -2816,15 +2816,15 @@ C
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
-     *                  2.) a method, gradient, that has the form
+     *                  2.) a method, gradientAt, that has the form
      *
-     *                      public void gradient(double x[],
+     *                      public void gradientAt(double x[],
      *                                                  double g[])
      *
-     *                      where g is the gradient of f evaluated at x.  This
+     *                      where g is the gradientAt of f evaluated at x.  This
      *                      method will have an empty body if the user
      *                      does not wish to provide an analytic estimate
-     *                      of the gradient.
+     *                      of the gradientAt.
      *                  3.) a method, hessian, that has the form
      *
      *                      public void hessian(double x[],
@@ -3256,7 +3256,7 @@ C
      *@param typsiz  Typical size of each component of x
      *@param sx      Scaling vector for x
      *@param fscale  Estimate of scale of objective function
-     *@param gradtl  Tolerance at which the gradient is considered
+     *@param gradtl  Tolerance at which the gradientAt is considered
      *               close enough to zero to terminate the algorithm
      *@param itnlim  Maximum number of allowable iterations
      *@param ndigit  Number of good digits in the optimization function
@@ -3264,7 +3264,7 @@ C
      *@param dlt     Trust region radius
      *@param method  Algorithm indicator
      *@param iexp    Expense flag
-     *@param iagflg  = 1 if an analytic gradient is supplied
+     *@param iagflg  = 1 if an analytic gradientAt is supplied
      *@param iahflg  = 1 if an analytic Hessian is supplied
      *@param stepmx  Maximum step size
      *@param msg     Message and error code
@@ -3329,16 +3329,16 @@ C
         if ((msg[1]/2)%2 == 1 && iagflg[1] == 0) {
 
             String errorMessage =
-                    "OPTCHK   User requests that analytic gradient  be accepted as properly coded,\n"+
+                    "OPTCHK   User requests that analytic gradientAt  be accepted as properly coded,\n"+
                             "OPTCHK   msg = " + msg + "\n," +
-                            "OPTCHK   but an analytic gradient is not  supplied," +
+                            "OPTCHK   but an analytic gradientAt is not  supplied," +
                             "OPTCHK   iagflg = " + iagflg[1] + ".";
             throw new UncminException(errorMessage);
 
-//            System.out.print("\n\nOPTCHK   User requests that analytic gradient");
+//            System.out.print("\n\nOPTCHK   User requests that analytic gradientAt");
 //            System.out.print(" be accepted as properly coded,\n");
 //            System.out.print("OPTCHK   msg = " + msg + ",\n");
-//            System.out.print("OPTCHK   but an analytic gradient is not");
+//            System.out.print("OPTCHK   but an analytic gradientAt is not");
 //            System.out.print(" supplied,\n");
 //            System.out.print("OPTCHK   iagflg = " + iagflg[1] + ".\n\n");
 //
@@ -3493,15 +3493,15 @@ C
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
-     *                  2.) a method, gradient, that has the form
+     *                  2.) a method, gradientAt, that has the form
      *
-     *                      public void gradient(double x[],
+     *                      public void gradientAt(double x[],
      *                                                  double g[])
      *
-     *                      where g is the gradient of f evaluated at x.  This
+     *                      where g is the gradientAt of f evaluated at x.  This
      *                      method will have an empty body if the user
      *                      does not wish to provide an analytic estimate
-     *                      of the gradient.
+     *                      of the gradientAt.
      *                  3.) a method, hessian, that has the form
      *
      *                      public void hessian(double x[],
@@ -3531,10 +3531,10 @@ C
      *                  On output: (< 0) error code (= 0, no error)
      *@param ndigit     Number of good digits in the optimization function
      *@param itnlim     Maximum number of allowable iterations
-     *@param iagflg     = 1 if an analytic gradient is supplied
+     *@param iagflg     = 1 if an analytic gradientAt is supplied
      *@param iahflg     = 1 if an analytic Hessian is supplied
      *@param dlt        Trust region radius
-     *@param gradtl     Tolerance at which the gradient is considered
+     *@param gradtl     Tolerance at which the gradientAt is considered
      *                  close enough to zero to terminate the algorithm
      *@param stepmx     Maximum step size
      *@param steptl     Relative step size at which successive iterates
@@ -3542,12 +3542,12 @@ C
      *                  algorithm
      *@param xpls       On exit: xpls is a local minimum
      *@param fpls       On exit: function value at xpls
-     *@param gpls       On exit: gradient at xpls
+     *@param gpls       On exit: gradientAt at xpls
      *@param itrmcd     Termination code
      *@param a          workspace for Hessian (or its approximation)
      *                  and its Cholesky decomposition
      *@param udiag      workspace (for diagonal of Hessian)
-     *@param g          workspace (for gradient at current iterate)
+     *@param g          workspace (for gradientAt at current iterate)
      *@param p          workspace for step
      *@param sx         workspace (for scaling vector)
      *@param wrk0       workspace
@@ -3994,7 +3994,7 @@ C
      *@param icscmx  Number of consecutive steps >= stepmx
      *               (retain between successive calls)
      *@param itrmcd  Termination code
-     *@param gradtl  Tolerance at which the relative gradient is considered
+     *@param gradtl  Tolerance at which the relative gradientAt is considered
      *               close enough to zero to terminate the algorithm
      *@param steptl  Relative step size at which successive iterates
      *               are considered close enough to terminate the algorithm
@@ -4048,7 +4048,7 @@ C
                 itrmcd[1] = 1;
                 if ((msg[1]/8)%2 == 0) {
                     fireUncminDetailsEvent(
-                            "OPTSTP    The relative gradient is close to zero.\n" +
+                            "OPTSTP    The relative gradientAt is close to zero.\n" +
                             "OPTSTP    The current iterate is probably a solution.");
                 }
                 return;
@@ -4266,7 +4266,7 @@ C
      *@param n       The dimension of the problem
      *@param x       Estimate of the location of a minimum at iteration k
      *@param f       function value at x
-     *@param g       gradient at x
+     *@param g       gradientAt at x
      *@param a       Hessian at x
      *@param p       Step taken
      *@param itncnt  Iteration number (k)
@@ -4472,7 +4472,7 @@ C
      *@param epsm    Machine epsilon
      *@param itncnt  Iteration count
      *@param rnf     Relative noise in optimization function f_to_minimize
-     *@param iagflg  1 if an analytic gradient is supplied, 0 otherwise
+     *@param iagflg  1 if an analytic gradientAt is supplied, 0 otherwise
      *@param noupdt  Boolean: no update yet (retain value between
      *               successive calls)
      *@param s       Workspace
@@ -4598,7 +4598,7 @@ C
      *
      *@param n       The dimension of the problem
      *@param x       The old iterate
-     *@param g       The gradient or an approximation at the old iterate
+     *@param g       The gradientAt or an approximation at the old iterate
      *@param a       On entry: Approximate Hessian at the old iterate
      *                         in the upper triangular part (and udiag)
      *               On exit:  Updated approximate Hessian at the new
@@ -4611,7 +4611,7 @@ C
      *@param itncnt  Iteration count
      *@param rnf     Relative noise in the optimization function,
      *               f_to_minimize
-     *@param iagflg  = 1 if an analytic gradient is supplied,
+     *@param iagflg  = 1 if an analytic gradientAt is supplied,
      *               = 0 otherwise
      *@param noupdt  Boolean: no update yet (retain value between calls)
      *@param s       workspace
@@ -4705,7 +4705,7 @@ C
      *approximations to the Hessian.  For optimization use this
      *method to estimate the Hessian of the optimization function
      *if no analytical user function has been supplied for either
-     *the gradient or the Hessian, and the optimization function
+     *the gradientAt or the Hessian, and the optimization function
      *is inexpensive to evaluate.
      *
      *Translated by Steve Verrill, May 8, 1998.
@@ -4724,15 +4724,15 @@ C
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
-     *                  2.) a method, gradient, that has the form
+     *                  2.) a method, gradientAt, that has the form
      *
-     *                      public void gradient(double x[],
+     *                      public void gradientAt(double x[],
      *                                                  double g[])
      *
-     *                      where g is the gradient of f evaluated at x.  This
+     *                      where g is the gradientAt of f evaluated at x.  This
      *                      method will have an empty body if the user
      *                      does not wish to provide an analytic estimate
-     *                      of the gradient.
+     *                      of the gradientAt.
      *                  3.) a method, hessian, that has the form
      *
      *                      public void hessian(double x[],
@@ -4832,15 +4832,15 @@ C
      *                      where x is the vector of arguments to the function
      *                      and the return value is the value of the function
      *                      evaluated at x.
-     *                  2.) a method, gradient, that has the form
+     *                  2.) a method, gradientAt, that has the form
      *
-     *                      public void gradient(double x[],
+     *                      public void gradientAt(double x[],
      *                                                  double g[])
      *
-     *                      where g is the gradient of f evaluated at x.  This
+     *                      where g is the gradientAt of f evaluated at x.  This
      *                      method will have an empty body if the user
      *                      does not wish to provide an analytic estimate
-     *                      of the gradient.
+     *                      of the gradientAt.
      *                  3.) a method, hessian, that has the form
      *
      *                      public void hessian(double x[],

@@ -19,6 +19,8 @@ import com.itemanalysis.psychometrics.analysis.AbstractMultivariateFunction;
 import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.scaling.LinearTransformation;
+import com.itemanalysis.psychometrics.uncmin.Uncmin_methods;
+import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.util.Pair;
 import org.apache.commons.math3.util.Precision;
@@ -26,7 +28,7 @@ import org.apache.commons.math3.util.Precision;
 import java.util.HashMap;
 import java.util.Set;
 
-public class HaebaraMethod extends AbstractMultivariateFunction implements LinearTransformation {
+public class HaebaraMethod extends AbstractMultivariateFunction implements LinearTransformation, Uncmin_methods, UnivariateFunction {
 
     private HashMap<String, ItemResponseModel> itemFormX = null;
     private HashMap<String, ItemResponseModel> itemFormY = null;
@@ -38,7 +40,8 @@ public class HaebaraMethod extends AbstractMultivariateFunction implements Linea
     private double intercept = 0.0;
     private double slope = 1.0;
     private int precision = 2;
-    Set<String> sY = null;
+    private Set<String> sY = null;
+    private boolean standardized = true;
 
     public HaebaraMethod(HashMap<String, ItemResponseModel> itemFormX, HashMap<String, ItemResponseModel> itemFormY,
                          DistributionApproximation xDistribution, DistributionApproximation yDistribution,
@@ -53,16 +56,16 @@ public class HaebaraMethod extends AbstractMultivariateFunction implements Linea
         checkDimensions();
     }
 
-    public HaebaraMethod(HashMap<String, ItemResponseModel> itemFormX, HashMap<String, ItemResponseModel> itemFormY,
-                         DistributionApproximation yDistribution, EquatingCriterionType criterion)throws DimensionMismatchException{
-        this.itemFormX = itemFormX;
-        this.itemFormY = itemFormY;
-        this.yDistribution = yDistribution;
-        this.criterion = EquatingCriterionType.Q1;
-        xDistributionSize = xDistribution.getNumberOfPoints();
-        yDistributionSize = yDistribution.getNumberOfPoints();
-        checkDimensions();
-    }
+//    public HaebaraMethod(HashMap<String, ItemResponseModel> itemFormX, HashMap<String, ItemResponseModel> itemFormY,
+//                         DistributionApproximation yDistribution, EquatingCriterionType criterion)throws DimensionMismatchException{
+//        this.itemFormX = itemFormX;
+//        this.itemFormY = itemFormY;
+//        this.yDistribution = yDistribution;
+//        this.criterion = EquatingCriterionType.Q1Q2;
+//        xDistributionSize = xDistribution.getNumberOfPoints();
+//        yDistributionSize = yDistribution.getNumberOfPoints();
+//        checkDimensions();
+//    }
 
     /**
      * For a common item linking design, both test form must have a set of items that are the same.
@@ -90,6 +93,16 @@ public class HaebaraMethod extends AbstractMultivariateFunction implements Linea
     }
 
     /**
+     * Flag to standardize criterion function. This will affect teh value of the crierion function but no the
+     * slope and intercept values.
+     *
+     * @param standardized if true the criterion function is standardized. If not, it is not standardized.
+     */
+    public void setStandardized(boolean standardized){
+        this.standardized = standardized;
+    }
+
+    /**
      * Function to be minimized by ConjugateGradientSearch
      *
      * Uncmin index starts at 1
@@ -106,6 +119,18 @@ public class HaebaraMethod extends AbstractMultivariateFunction implements Linea
         return F;
     }
 
+    /**
+     * Method needed for Brent optimizer when minimizing teh objective function for the Rasch family of models.
+     * This method is required by the UnivariateFunction interface.
+     *
+     * @param x intercept
+     * @return value of teh criterion function.
+     */
+    public double value(double x){
+        double[] p = {x};
+        return value(p);
+    }
+
     public double getQ1(double[] coefficient){
         double dif = 0.0;
         double dif2 = 0.0;
@@ -117,6 +142,12 @@ public class HaebaraMethod extends AbstractMultivariateFunction implements Linea
         double LW = 0;
         double LP = 0;
 
+        double slope = 1.0;
+        double intercept = coefficient[0];
+        if(coefficient.length>1){
+            slope = coefficient[1];//Non-Rasch family of models
+        }
+
         for(int i=0;i<yDistributionSize;i++){
             theta = yDistribution.getPointAt(i);
             weight = yDistribution.getDensityAt(i);
@@ -126,15 +157,20 @@ public class HaebaraMethod extends AbstractMultivariateFunction implements Linea
                 irmX = itemFormX.get(s);
                 ncat = irmY.getNcat();
                 for(int k=0;k<ncat;k++){
-                    dif = irmY.probability(theta, k) - irmX.tStarProbability(theta, k, coefficient[0], coefficient[1]);
+                    dif = irmY.probability(theta, k) - irmX.tStarProbability(theta, k, intercept, slope);
                     dif2 = dif*dif;
                     sum += dif2*weight;
                 }
                 if(i==0) LP += ncat;
             }
         }
+
         double L1 = LP*LW;
-        return sum/L1;
+        if(standardized){
+            return sum/L1;
+        }else{
+            return sum;
+        }
 
     }
 
@@ -143,12 +179,17 @@ public class HaebaraMethod extends AbstractMultivariateFunction implements Linea
         double dif2 = 0.0;
         double sum = 0.0;
         int ncat = 2;
-        Pair<Double, Double> dist;
         ItemResponseModel irmY = null;
         ItemResponseModel irmX = null;
         double theta = 0.0, weight = 1.0;
         double LP = 0;
         double LW = 0;
+
+        double slope = 1.0;
+        double intercept = coefficient[0];
+        if(coefficient.length>1){
+            slope = coefficient[1];//Non-Rasch family
+        }
 
         for(int i=0;i<xDistributionSize;i++){
             theta = xDistribution.getPointAt(i);
@@ -159,7 +200,7 @@ public class HaebaraMethod extends AbstractMultivariateFunction implements Linea
                 irmX = itemFormX.get(s);
                 ncat = irmY.getNcat();
                 for(int k=0;k<ncat;k++){
-                    dif = irmX.probability(theta, k) - irmY.tSharpProbability(theta, k, coefficient[0], coefficient[1]);
+                    dif = irmX.probability(theta, k) - irmY.tSharpProbability(theta, k, intercept, slope);
                     dif2 = dif*dif;
                     sum += dif2*weight;
                 }
@@ -168,7 +209,12 @@ public class HaebaraMethod extends AbstractMultivariateFunction implements Linea
         }
 
         double L2 = LP*LW;
-        return sum/L2;
+        if(standardized){
+            return sum/L2;
+        }else{
+            return sum;
+        }
+
     }
 
     public void setIntercept(double intercept){
@@ -193,6 +239,25 @@ public class HaebaraMethod extends AbstractMultivariateFunction implements Linea
 
     public double transform(double x){
         return slope*x+intercept;
+    }
+
+    public double f_to_minimize(double[] x){
+        double[] y = new double[x.length-1];
+        if(x.length==2){
+            y[0] = x[1];//Rasch family of models
+        }else{
+            y[0] = x[1];
+            y[1] = x[2];
+        }
+        return value(y);
+    }
+
+    public void hessian(double[] x, double[][] h){
+
+    }
+
+    public void gradient(double[] x, double[] g){
+
     }
 
 }

@@ -26,8 +26,9 @@ public class DefaultUncminOptimizer {
     private int[] itrmcd = null;//termination message
     private double[] xpls = null;//final parameter values
     private double[] fpls = null;//value of objective function
-    private double[] gpls = null;//gradient
+    private double[] gpls = null;//gradientAt
     private double[][] a = null;//hessian
+    double[] udiag = null;//hessian diagonal
     private Uncmin_f77 optimizer = null;//function to be minimized
     private int n = 0;
 
@@ -63,7 +64,7 @@ public class DefaultUncminOptimizer {
     /**
      * This wrapper will use the same configuration as Uncmin_f77.optif0_f77.
      *
-     * @param minclass a class that implements Uncmin_methods to provide the value of the objective funciton, gradient, and hessian.
+     * @param minclass a class that implements Uncmin_methods to provide the value of the objective funciton, gradientAt, and hessian.
      * @param initialValue initial value for the prameters. It should be an array of teh same size as the number of parameters.
      */
     public void minimize(Uncmin_methods minclass, double[] initialValue)throws UncminException{
@@ -75,9 +76,9 @@ public class DefaultUncminOptimizer {
      * Uncmin_f77.optif0_f77 but allows access to some additional options.
      *
      *
-     * @param minclass a class that implements Uncmin_methods to provide the value of the objective funciton, gradient, and hessian.
+     * @param minclass a class that implements Uncmin_methods to provide the value of the objective funciton, gradientAt, and hessian.
      * @param initialValue initial value for the prameters. It should be an array of teh same size as the number of parameters.
-     * @param analyticGradient true if analytic gradient is provided in minClass. False otherwise and will compute gradient numerically.
+     * @param analyticGradient true if analytic gradientAt is provided in minClass. False otherwise and will compute gradientAt numerically.
      * @param analyticHessian true if analytic Hessian is provided in minClass. False otherwise and will compute Hessian numerically.
      * @param maxIter maximum number of iterations.
      */
@@ -111,7 +112,7 @@ public class DefaultUncminOptimizer {
 
         gpls = new double[np1];
         a = new double[np1][np1];
-        double[] udiag = new double[np1];
+        udiag = new double[np1];
 
 
         //SET TYPICAL SIZE OF X AND MINIMIZATION FUNCTION
@@ -127,7 +128,7 @@ public class DefaultUncminOptimizer {
         msg[1] = messageLevel;//See information below for details about this argument.
         ndigit[1] = -1;
         itnlim[1] = maxIter;//maximum number of iterations
-        iagflg[1] = 0;//0 if numerical gradient, 1 if analytic gradient provided
+        iagflg[1] = 0;//0 if numerical gradientAt, 1 if analytic gradientAt provided
         iahflg[1] = 0;//0 if use numerical Hessian, 1 if analytic Hessian provided
 
         if(analyticGradient) iagflg[1] = 1;
@@ -188,9 +189,17 @@ public class DefaultUncminOptimizer {
         return param;
     }
 
+//    public double[] getHessianDiagonal(){
+//        return udiag;
+//    }
+//
+//    public double[][] getHessian(){
+//        return a;
+//    }
+
     /**
      * ITRMCD =  0:  Optimal solution found
-     * ITRMCD =  1:  Terminated with gradient small,
+     * ITRMCD =  1:  Terminated with gradientAt small,
      *               xpls is probably optimal
      * ITRMCD =  2:  Terminated with stepsize small,
      *               xpls is probably optimal
@@ -210,7 +219,7 @@ public class DefaultUncminOptimizer {
     public String getTerminationMessage(){
         switch(itrmcd[1]){
             case 0: return "Optimal solution found";
-            case 1: return "Terminated with gradient small, X is probably optimal";
+            case 1: return "Terminated with gradientAt small, X is probably optimal";
             case 2: return "Terminated with stepsize small, X is probably optimal";
             case 3: return "Lower point cannot be found, X is probably optimal";
             case 4: return "Iteration limit exceeded";
@@ -231,12 +240,12 @@ public class DefaultUncminOptimizer {
 
     = 1 Do not abort package for N=1.
 
-    = 2 Do not check user analytic gradient routine D1FN against
+    = 2 Do not check user analytic gradientAt routine D1FN against
         its ﬁnite difference estimate. This may be necessary if the
-        user knows his gradient function is properly coded, but the
+        user knows his gradientAt function is properly coded, but the
         program aborts because the comparative tolerance is too
-        tight. It is also efﬁcient if the gradient has previously been
-        checked. Do not use MSG=2 if the analytic gradient is not
+        tight. It is also efﬁcient if the gradientAt has previously been
+        checked. Do not use MSG=2 if the analytic gradientAt is not
         supplied.
 
     = 4 Do not check user analytic Hessian routine D2FN
@@ -267,16 +276,16 @@ public class DefaultUncminOptimizer {
     = 0 No error. (See ITRMCD for termination code)
     = -1 Illegal dimension, N≤0.
     = -2 Attempt to run program for N=1. (See N, MSG above)
-    = -3 Illegal tolerance on gradient, GRADTL<0.
+    = -3 Illegal tolerance on gradientAt, GRADTL<0.
     = -4 Iteration limit ITNLIM≤0.
     = -5 No good digitsin optimization function, NDIGIT=0.-9-
-    = -6 Program asked to override check of analytic gradient
+    = -6 Program asked to override check of analytic gradientAt
          against ﬁnite difference estimate, but routine D1FN not
          supplied. (Incompatible input: MSG=0 mod 2 and IAGFLG=0)
     = -7 Program asked to override check of analytic Hessian
          against ﬁnite difference estimate, but routine D2FN not
          supplied. (Incompatible input: MSG=0 mod 4 and IAGFLG=0)
-    = -21 Probable coding error in the user’s analytic gradient
+    = -21 Probable coding error in the user’s analytic gradientAt
          routine D1FN. Analytic and ﬁnite difference gradients do
          not agree within the assigned tolerance. (See computation
          of tolerance under D1FN)

@@ -23,12 +23,12 @@ public class ExampleMultivariateFunctionTest {
 
     @Test
     public void numericalGradientTest1(){
-        System.out.println("Exaple gradient test 1");
+        System.out.println("Exaple gradientAt test 1");
         ExampleMultivariateFunction function = new ExampleMultivariateFunction(1);
 
         double[] x = {5.0, 8.0};
 
-        double[] grad = function.gradient(x);
+        double[] grad = function.gradientAt(x);
 
         double[] exact = {2*x[0]+x[1],  x[0]};
 
@@ -39,12 +39,12 @@ public class ExampleMultivariateFunctionTest {
 
     @Test
     public void numericalGradientTest2(){
-        System.out.println("Exaple gradient test 2");
+        System.out.println("Exaple gradientAt test 2");
         ExampleMultivariateFunction function = new ExampleMultivariateFunction(2);
 
         double[] x = {5.0, 8.0};
 
-        double[] grad = function.gradient(x);
+        double[] grad = function.gradientAt(x);
 
         double[] exact = new double[2];
         exact[0] = -400*x[0]*(x[1]-x[0]*x[0]) - 2*(1-x[0]); // derivative of rosen() with respect to x

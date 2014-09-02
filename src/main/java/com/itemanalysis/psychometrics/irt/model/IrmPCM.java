@@ -19,6 +19,8 @@ import com.itemanalysis.psychometrics.data.VariableName;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
+import java.util.Arrays;
+
 /**
  * This version of the Partial Credit Model (GPCM) uses a difficulty parameter (b),
  * and one or more threshold parameters. For an item with M categories, there are
@@ -28,10 +30,10 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
  *
  * This form of the PCM is used in WINSTEPS and jMetrik Rasch estimation procedures.
  *
- * Note that it differs from IrmGPCM2 in that IrmPCM does not include a discriminaiton
- * parameters (i.e. a=1). It also differs in computation of the step parameters. This
+ * Note that it differs from IrmGPCM2 in that IrmPCM does not include a discrimination
+ * parameter (i.e. a=1). It also differs in computation of the step parameters. This
  * class uses b_v = (b+t_v), whereas IrmGPCM2 uses b_v = (b-t_v). The partial credit
- * model as used by PARSCALe can be obtained with IrmGPCM2
+ * model as used by PARSCALE can be obtained with IrmGPCM2
  *
  */
 public class IrmPCM extends AbstractItemResponseModel{
@@ -60,6 +62,12 @@ public class IrmPCM extends AbstractItemResponseModel{
         this.name = name;
     }
 
+    public double probability(double theta, double[] iparam, int category, double D){
+        double t = numer(theta, iparam, category, D);
+        double b = denom(theta, iparam, D);
+        return t/b;
+    }
+
     /**
      * Computes probability of a response using parameters stored in the object.
      *
@@ -71,6 +79,20 @@ public class IrmPCM extends AbstractItemResponseModel{
         double t = numer(theta, category);
         double b = denom(theta);
         return t/b;
+    }
+
+    private double numer(double theta, double[] iparam, int category, double D){
+        double Zk = 0;
+        double b = iparam[0];
+        double[] s = Arrays.copyOfRange(iparam, 1, iparam.length);
+
+        //first category
+        Zk = D*(theta-b);
+
+        for(int k=0; k<category; k++){
+            Zk += D*(theta-b-s[k]);
+        }
+        return Math.exp(Zk);
     }
 
     /**
@@ -93,6 +115,17 @@ public class IrmPCM extends AbstractItemResponseModel{
             Zk += D*(theta-difficulty-threshold[k]);
         }
         return Math.exp(Zk);
+    }
+
+    private double denom(double theta, double[] iparam, double D){
+        double denom = 0.0;
+        double expZk = 0.0;
+
+        for(int k=0;k<ncat;k++){
+            expZk = numer(theta, iparam, k, D);
+            denom += expZk;
+        }
+        return denom;
     }
 
     /**
@@ -127,14 +160,28 @@ public class IrmPCM extends AbstractItemResponseModel{
         return ev;
     }
 
+    public double[] gradient(double theta, double[] iparam, int k, double D){
+        //empty method
+        return null;
+    }
+
     /**
-     * Computes the gradient of teh item response model with respect to the item parameters
+     * Computes the gradientAt of teh item response model with respect to the item parameters
      * @param theta person ability value
-     * @return gradient
+     * @return gradientAt
      */
     public double[] gradient(double theta, int k){
         //empty method
         return null;
+    }
+
+    public double addPriorsToLogLikelihood(double ll, double[] iparam){
+        return ll;
+    }
+
+    public double[] addPriorsToLogLikelihoodGradient(double[] loglikegrad, double[] iparam){
+        //empty method
+        return loglikegrad;
     }
 
         /**
@@ -243,25 +290,32 @@ public class IrmPCM extends AbstractItemResponseModel{
     public double tStarProbability(double theta, int response, double intercept, double slope){
         if(response> maxWeight || response<minWeight) return 0;
 
-        double Zk = 0;
-        double expZk = 0;
-        double numer = 0;
-        double denom = 0;
-        double b = 0;
-        double t = 0;
-
-        for(int k=0;k<ncat;k++){
-            Zk = 0;
-            for(int v=1;v<(k+1);v++){
-                b = difficulty*slope+intercept;
-                t = threshold[v-1]*slope;
-                Zk += D*(theta-(b+t));
-            }
-            expZk = Math.exp(Zk);
-            if(scoreWeight[k]==response) numer = expZk;
-            denom += expZk;
+        double[] iparam = new double[getNumberOfParameters()];
+        iparam[0] = difficulty+intercept;
+        for(int i=0;i<threshold.length;i++){
+            iparam[i+1] = threshold[i];//TODO will need to change when first step is added to step array. First step should alway be zero.
         }
-        return numer/denom;
+        return probability(theta, iparam, response, D);
+
+//        double Zk = 0;
+//        double expZk = 0;
+//        double numer = 0;
+//        double denom = 0;
+//        double b = 0;
+//        double t = 0;
+//
+//        for(int k=0;k<ncat;k++){
+//            Zk = 0;
+//            for(int v=1;v<(k+1);v++){
+//                b = difficulty+intercept;
+//                t = threshold[v-1];
+//                Zk += D*(theta-(b+t));
+//            }
+//            expZk = Math.exp(Zk);
+//            if(scoreWeight[k]==response) numer = expZk;
+//            denom += expZk;
+//        }
+//        return numer/denom;
     }
 
     /**
@@ -272,7 +326,7 @@ public class IrmPCM extends AbstractItemResponseModel{
      */
     public double tStarExpectedValue(double theta, double intercept, double slope){
         double ev = 0;
-        for(int i=1;i< ncat;i++){
+        for(int i=0;i<ncat;i++){
             ev += scoreWeight[i]*tStarProbability(theta, i, intercept, slope);
         }
         return ev;
@@ -281,30 +335,37 @@ public class IrmPCM extends AbstractItemResponseModel{
     public double tSharpProbability(double theta, int response, double intercept, double slope){
         if(response> maxWeight || response<minWeight) return 0;
 
-        double Zk = 0;
-        double expZk = 0;
-        double numer = 0;
-        double denom = 0;
-        double b = 0;
-        double t = 0;
-
-        for(int k=0;k<ncat;k++){
-            Zk = 0;
-            for(int v=1;v<(k+1);v++){
-                b = (difficulty-intercept)/slope;
-                t = threshold[v-1]/slope;
-                Zk += D*(theta-(b+t));
-            }
-            expZk = Math.exp(Zk);
-            if(scoreWeight[k]==response) numer = expZk;
-            denom += expZk;
+        double[] iparam = new double[getNumberOfParameters()];
+        iparam[0] = (difficulty-intercept);
+        for(int i=0;i<threshold.length;i++){
+            iparam[i+1] = threshold[i];//TODO will need to change when first step is added to step array. First step should alway be zero.
         }
-        return numer/denom;
+        return probability(theta, iparam, response, D);
+
+//        double Zk = 0;
+//        double expZk = 0;
+//        double numer = 0;
+//        double denom = 0;
+//        double b = 0;
+//        double t = 0;
+//
+//        for(int k=0;k<ncat;k++){
+//            Zk = 0;
+//            for(int v=1;v<(k+1);v++){
+//                b = (difficulty-intercept);
+//                t = threshold[v-1];
+//                Zk += D*(theta-(b+t));
+//            }
+//            expZk = Math.exp(Zk);
+//            if(scoreWeight[k]==response) numer = expZk;
+//            denom += expZk;
+//        }
+//        return numer/denom;
     }
 
     public double tSharpExpectedValue(double theta, double intercept, double slope){
         double ev = 0;
-        for(int i=1;i< ncat;i++){
+        for(int i=0;i<ncat;i++){
             ev += scoreWeight[i]*tSharpProbability(theta, i, intercept, slope);
         }
         return ev;
@@ -327,6 +388,24 @@ public class IrmPCM extends AbstractItemResponseModel{
 //=====================================================================================================================//
 // GETTER AND SETTER METHODS MAINLY FOR USE WHEN ESTIMATING PARAMETERS                                                 //
 //=====================================================================================================================//
+    public double[] getItemParameterArray(){
+        double[] ip = new double[getNumberOfParameters()];
+        ip[0] = difficulty;
+        for(int k=0;k<ncatM1;k++){
+            ip[k+1] = threshold[k];
+        }
+        return ip;
+    }
+
+    public void setStandardErrors(double[] x){
+        difficultyStdError = x[0];
+        for(int k=0;k<ncat;k++){
+            thresholdStdError[k] = x[k+1];
+        }
+    }
+
+
+
     public double getDifficulty(){
         return difficulty;
     }
@@ -395,6 +474,26 @@ public class IrmPCM extends AbstractItemResponseModel{
         throw new UnsupportedOperationException();
     }
 
+    public void setSlipping(double slipping){
+        throw new UnsupportedOperationException();
+    }
+
+    public void setProposalSlipping(double slipping){
+        throw new UnsupportedOperationException();
+    }
+
+    public void setSlippingStdError(double slipping){
+        throw new UnsupportedOperationException();
+    }
+
+    public double getSlipping(){
+        throw new UnsupportedOperationException();
+    }
+
+    public double getSlippingStdError(){
+        throw new UnsupportedOperationException();
+    }
+
     public double[] getThresholdParameters(){
         return threshold;
     }
@@ -417,6 +516,14 @@ public class IrmPCM extends AbstractItemResponseModel{
 
     public void setThresholdStdError(double[] stdError){
         thresholdStdError = stdError;
+    }
+
+    public void setStepParameters(double[] step){
+        throw new UnsupportedOperationException();
+    }
+
+    public void setProposalStepParameters(double[] step){
+        throw new UnsupportedOperationException();
     }
 
     public double[] getStepParameters(){

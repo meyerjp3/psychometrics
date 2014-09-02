@@ -19,7 +19,9 @@ import com.itemanalysis.psychometrics.analysis.AbstractMultivariateFunction;
 import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.scaling.LinearTransformation;
+import com.itemanalysis.psychometrics.uncmin.Uncmin_methods;
 import org.apache.commons.math3.analysis.MultivariateFunction;
+import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
@@ -28,7 +30,7 @@ import org.apache.commons.math3.util.Precision;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
-public class StockingLordMethod extends AbstractMultivariateFunction implements LinearTransformation {
+public class StockingLordMethod extends AbstractMultivariateFunction implements LinearTransformation, Uncmin_methods, UnivariateFunction {
 
     private LinkedHashMap<String, ItemResponseModel> itemFormX = null;
     private LinkedHashMap<String, ItemResponseModel> itemFormY = null;
@@ -40,7 +42,8 @@ public class StockingLordMethod extends AbstractMultivariateFunction implements 
     private double intercept = 0.0;
     private double slope = 1.0;
     private int precision = 2;
-    Set<String> sY = null;
+    private Set<String> sY = null;
+    private boolean standardized = true;
 
     public StockingLordMethod(LinkedHashMap<String, ItemResponseModel> itemFormX, LinkedHashMap<String, ItemResponseModel> itemFormY,
                               DistributionApproximation xDistribution, DistributionApproximation yDistribution,
@@ -55,16 +58,16 @@ public class StockingLordMethod extends AbstractMultivariateFunction implements 
         checkDimensions();
     }
 
-    public StockingLordMethod(LinkedHashMap<String, ItemResponseModel> itemFormX, LinkedHashMap<String, ItemResponseModel> itemFormY,
-                              DistributionApproximation yDistribution, EquatingCriterionType criterion)throws DimensionMismatchException{
-        this.itemFormX = itemFormX;
-        this.itemFormY = itemFormY;
-        this.yDistribution = yDistribution;
-        this.criterion = EquatingCriterionType.Q1;
-        xDistributionSize = xDistribution.getNumberOfPoints();
-        yDistributionSize = yDistribution.getNumberOfPoints();
-        checkDimensions();
-    }
+//    public StockingLordMethod(LinkedHashMap<String, ItemResponseModel> itemFormX, LinkedHashMap<String, ItemResponseModel> itemFormY,
+//                              DistributionApproximation yDistribution, EquatingCriterionType criterion)throws DimensionMismatchException{
+//        this.itemFormX = itemFormX;
+//        this.itemFormY = itemFormY;
+//        this.yDistribution = yDistribution;
+//        this.criterion = EquatingCriterionType.Q1;
+//        xDistributionSize = xDistribution.getNumberOfPoints();
+//        yDistributionSize = yDistribution.getNumberOfPoints();
+//        checkDimensions();
+//    }
 
     /**
      * For a common item linking design, both test form must have a set of items that are the same.
@@ -92,6 +95,16 @@ public class StockingLordMethod extends AbstractMultivariateFunction implements 
     }
 
     /**
+     * Flag to standardize criterion function. This will affect teh value of the crierion function but no the
+     * slope and intercept values.
+     *
+     * @param standardized if true the criterion function is standardized. If not, it is not standardized.
+     */
+    public void setStandardized(boolean standardized){
+        this.standardized = standardized;
+    }
+
+    /**
      * Function to be minimized by optimization class
      *
      * Uncmin index starts at 1
@@ -106,6 +119,17 @@ public class StockingLordMethod extends AbstractMultivariateFunction implements 
             case Q1Q2: F = getF1(coefficient) + getF2(coefficient); break;
         }
         return F;
+    }
+
+    /**
+     * Method needed for Brent optimizer when minimizing teh objective function for the Rasch family of models.
+     * This method is required by the UnivariateFunction interface.
+     *
+     * @param x intercept
+     * @return value of teh criterion function.
+     */
+    public double value(double x){
+        return value(new double[] {x});
     }
 
     public ObjectiveFunction getObjectiveFunction(){
@@ -140,7 +164,12 @@ public class StockingLordMethod extends AbstractMultivariateFunction implements 
             dif2=Math.pow(dif,2);
             sum+=dif2*weight;
         }
-        return sum/L1;
+
+        if(standardized){
+            return sum/L1;
+        }else{
+            return sum;
+        }
     }
 
     /**
@@ -165,7 +194,12 @@ public class StockingLordMethod extends AbstractMultivariateFunction implements 
             dif2=Math.pow(dif,2);
             sum+=dif2*weight;
         }
-        return sum/L2;
+
+        if(standardized){
+            return sum/L2;
+        }else{
+            return sum;
+        }
     }
 
     public double getFormYTccAtTheta(double theta){
@@ -193,7 +227,12 @@ public class StockingLordMethod extends AbstractMultivariateFunction implements 
         ItemResponseModel m;
         for(String s : sY){
             m = itemFormX.get(s);
-            tStar += m.tStarExpectedValue(theta, coefficient[0], coefficient[1]);
+            if(coefficient.length==1){
+                tStar += m.tStarExpectedValue(theta, coefficient[0], 1.0);//For the Rasch family of models
+            }else{
+                tStar += m.tStarExpectedValue(theta, coefficient[0], coefficient[1]);
+            }
+//            tStar += m.tStarExpectedValue(theta, coefficient[0], coefficient[1]);
         }
         return tStar;
     }
@@ -203,7 +242,12 @@ public class StockingLordMethod extends AbstractMultivariateFunction implements 
         ItemResponseModel m;
         for(String s : sY){
             m = itemFormY.get(s);
-            tSharp += m.tSharpExpectedValue(theta, coefficient[0], coefficient[1]);
+            if(coefficient.length==1){
+                tSharp += m.tSharpExpectedValue(theta, coefficient[0], 1.0);//For the Rasch family of models
+            }else{
+                tSharp += m.tSharpExpectedValue(theta, coefficient[0], coefficient[1]);
+            }
+//            tSharp += m.tSharpExpectedValue(theta, coefficient[0], coefficient[1]);
         }
         return tSharp;
     }
@@ -230,6 +274,26 @@ public class StockingLordMethod extends AbstractMultivariateFunction implements 
 
     public double transform(double x){
         return slope*x+intercept;
+    }
+
+    public double f_to_minimize(double[] x){
+        double[] y = new double[x.length-1];
+        if(x.length==2){
+            y[0] = x[1];//Rasch family of models
+        }else{
+            y[0] = x[1];
+            y[1] = x[2];
+        }
+
+        return value(y);
+    }
+
+    public void hessian(double[] x, double[][] h){
+
+    }
+
+    public void gradient(double[] x, double[] g){
+
     }
 
 }

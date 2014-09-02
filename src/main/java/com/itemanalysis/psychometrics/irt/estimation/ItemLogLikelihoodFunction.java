@@ -23,7 +23,9 @@ import com.itemanalysis.psychometrics.uncmin.Uncmin_methods;
 public interface ItemLogLikelihoodFunction extends DiffFunction, Uncmin_methods {
 
 
-    public void setModel(ItemResponseModel model, DistributionApproximation latentDistribution, double[] rjk, double[] nk);
+//    public void setModel(ItemResponseModel model, DistributionApproximation latentDistribution, double[] rjk, double[] nk);
+
+    public void setModel(ItemResponseModel model, DistributionApproximation latentDistribution, EstepItemEstimates r, double[] nk);
 
     /**
      * Item loglikelihood function.
@@ -49,7 +51,7 @@ public interface ItemLogLikelihoodFunction extends DiffFunction, Uncmin_methods 
     public double valueAt(double[] point);
 
     /**
-     * Computes gradient of item likelihood function at item parameter values. For DiffFunction interface that
+     * Computes gradientAt of item likelihood function at item parameter values. For DiffFunction interface that
      * is used by QNMinimizer in the optimization package.
      *
      * @param point item parameter values.
@@ -72,15 +74,15 @@ public interface ItemLogLikelihoodFunction extends DiffFunction, Uncmin_methods 
     public double f_to_minimize(double x[]);
 
     /**
-     * Computes the gradient of the loglikelihood function for an item. For Uncmin_methods interface
+     * Computes the gradientAt of the loglikelihood function for an item. For Uncmin_methods interface
      * in the uncmin package. Note that the array indexing begins at 1. For example, a problem with two
      * paramters will require an input array x[] of length = 3. The first index 0 is not used. This
      * indexing is due to the translation of FORTRAN code in the Uncmin optimizer. If this method is
-     * empty, the gradient will be computed numerically by the Uncmin optimizer.
+     * empty, the gradientAt will be computed numerically by the Uncmin optimizer.
      *
      * @param x input array of item parameters that begins at 1. You must create a new array that begins
-     *          at 0 and then call derivativeAt(double[] point) to get the gradient.
-     * @param g gradient at x.
+     *          at 0 and then call derivativeAt(double[] point) to get the gradientAt.
+     * @param g gradientAt at x.
      */
     public void gradient(double[] x, double[] g);
 
@@ -92,7 +94,7 @@ public interface ItemLogLikelihoodFunction extends DiffFunction, Uncmin_methods 
      * empty, the Hessian will be computed numerically by the Uncmin optimizer.
      *
      * @param x input array of item parameters that begins at 1. You must create a new array that begins
-     *          at 0 and then call derivativeAt(double[] point) to get the gradient.
+     *          at 0 and then call derivativeAt(double[] point) to get the gradientAt.
      * @param a Hessian at x.
      */
     public void hessian(double[] x, double[][] a);

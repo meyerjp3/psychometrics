@@ -118,7 +118,7 @@ public class ExploratoryFactorAnalysisTest {
 
         //true values obtained from psych package in R
         //fa(r=Harman74.cor$cov, nf=4, fm="minres", rotate="none") but changed to
-        //use a conjugate gradient optimization method.
+        //use a conjugate gradientAt optimization method.
         double[][] true_loadings = {
                 {0.5540,  0.0540,  0.4504, -0.2163},
                 {0.3446, -0.0043,  0.2900, -0.1354},

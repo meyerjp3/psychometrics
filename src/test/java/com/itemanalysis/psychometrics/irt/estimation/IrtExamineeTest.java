@@ -336,9 +336,9 @@ public class IrtExamineeTest {
             String name = "V"+i;
             iName = new VariableName(name);
 
-            tempStepParam = new double[step_Parscale[i].length];
+            tempStepParam = new double[step_Parscale[i].length+1];
             for(int j=0;j<step_Parscale[i].length;j++){
-                tempStepParam[j] = bparam_parscale[i]-step_Parscale[i][j];
+                tempStepParam[j+1] = bparam_parscale[i]-step_Parscale[i][j];
             }
 
             irmArray[i] = new IrmGPCM(aparam_parscale[i], tempStepParam, 1.7);
@@ -455,8 +455,8 @@ public class IrtExamineeTest {
             0.11829606, 0.15408938, 0.13365926, 0.21462302, 0.15194013};
 
     private double[][] stepParam_mixed = {
-            {0.50768878, 1.37864855, 0.13240289},
-            {0.50140888, 1.65465213, 4.10892819} };
+            {0.0, 0.50768878, 1.37864855, 0.13240289},
+            {0.0, 0.50140888, 1.65465213, 4.10892819} };
 
 //============================================================================================================================================================================
 // These parameters come from example1 that comes with PARSCALE. However, the analysis uses a partial credit model for each item instead of a single rating scale.

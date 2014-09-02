@@ -343,7 +343,7 @@ public class BOBYQAOptimizer
      *       interpolation points relative to XBASE.
      *     FVAL holds the values of F at the interpolation points.
      *     XOPT is set to the displacement from XBASE of the trust region centre.
-     *     GOPT holds the gradient of the quadratic model at XBASE+XOPT.
+     *     GOPT holds the gradientAt of the quadratic model at XBASE+XOPT.
      *     HQ holds the explicit second derivatives of the quadratic model.
      *     PQ contains the parameters of the implicit second derivatives of the
      *       quadratic model.
@@ -1012,7 +1012,7 @@ public class BOBYQAOptimizer
             }
 
             // Calculate the parameters of the least Frobenius norm interpolant to
-            // the current data, the gradient of this interpolant at XOPT being put
+            // the current data, the gradientAt of this interpolant at XOPT being put
             // into VLAG(NPT+I), I=1,2,...,N.
 
             if (ntrits > 0) {
@@ -1240,7 +1240,7 @@ public class BOBYQAOptimizer
      *     CAUCHY will be set to the square of the KNEW-th Lagrange function at
      *       the step XALT-XOPT from XOPT for the vector XALT that is returned,
      *       except that CAUCHY is set to zero if XALT is not calculated.
-     *     GLAG is a working space vector of length N for the gradient of the
+     *     GLAG is a working space vector of length N for the gradientAt of the
      *       KNEW-th Lagrange function at XOPT.
      *     HCOL is a working space vector of length NPT for the second derivative
      *       coefficients of the KNEW-th Lagrange function.
@@ -1280,7 +1280,7 @@ public class BOBYQAOptimizer
         final double alpha = hcol.getEntry(knew);
         final double ha = HALF * alpha;
 
-        // Calculate the gradient of the KNEW-th Lagrange function at XOPT.
+        // Calculate the gradientAt of the KNEW-th Lagrange function at XOPT.
 
         for (int i = 0; i < n; i++) {
             glag.setEntry(i, bMatrix.getEntry(knew, i));
@@ -1569,8 +1569,8 @@ public class BOBYQAOptimizer
      *     The arguments XBASE, XPT, FVAL, HQ, PQ, BMAT, ZMAT, NDIM, SL and SU
      *       are the same as the corresponding arguments in BOBYQB, the elements
      *       of SL and SU being set in BOBYQA.
-     *     GOPT is usually the gradient of the quadratic model at XOPT+XBASE, but
-     *       it is set by PRELIM to the gradient of the quadratic model at XBASE.
+     *     GOPT is usually the gradientAt of the quadratic model at XOPT+XBASE, but
+     *       it is set by PRELIM to the gradientAt of the quadratic model at XBASE.
      *       If XOPT is nonzero, BOBYQB will change it to its usual value later.
      *     NF is maintaned as the number of calls of CALFUN so far.
      *     KOPT will be such that the least calculated value of F so far is at
@@ -1758,12 +1758,12 @@ public class BOBYQAOptimizer
     // ----------------------------------------------------------------------------------------
 
     /**
-     *     A version of the truncated conjugate gradient is applied. If a line
+     *     A version of the truncated conjugate gradientAt is applied. If a line
      *     search is restricted by a constraint, then the procedure is restarted,
      *     the values of the variables that are at their bounds being fixed. If
      *     the trust region boundary is reached, then further changes may be made
      *     to D, each one being in the two dimensional space that is spanned
-     *     by the current D and the gradient of Q at XOPT+D, staying on the trust
+     *     by the current D and the gradientAt of Q at XOPT+D, staying on the trust
      *     region boundary. Termination occurs when the reduction in Q seems to
      *     be close to the greatest reduction that can be achieved.
      *     The arguments N, NPT, XPT, XOPT, GOPT, HQ, PQ, SL and SU have the same
@@ -1777,7 +1777,7 @@ public class BOBYQAOptimizer
      *       as equations the bounds that become active during the calculation.
      *     D is the calculated trial step from XOPT, generated iteratively from an
      *       initial value of zero. Thus XNEW is XOPT+D after the final iteration.
-     *     GNEW holds the gradient of the quadratic model at XOPT+D. It is updated
+     *     GNEW holds the gradientAt of the quadratic model at XOPT+D. It is updated
      *       when D is updated.
      *     xbdi.get( is a working space vector. For I=1,2,...,N, the element xbdi.get((I) is
      *       set to -1.0, 0.0, or 1.0, the value being nonzero if and only if the
@@ -1785,13 +1785,13 @@ public class BOBYQAOptimizer
      *       SU(I) in the case xbdi.get((I)=-1.0 or xbdi.get((I)=1.0, respectively. This
      *       information is accumulated during the construction of XNEW.
      *     The arrays S, HS and HRED are also used for working space. They hold the
-     *       current search direction, and the changes in the gradient of Q along S
+     *       current search direction, and the changes in the gradientAt of Q along S
      *       and the reduced D, respectively, where the reduced D is the same as D,
      *       except that the components of the fixed variables are zero.
      *     DSQ will be set to the square of the length of XNEW-XOPT.
      *     CRVMIN is set to zero if D reaches the trust region boundary. Otherwise
      *       it is set to the least curvature of H that occurs in the conjugate
-     *       gradient searches that are not restricted by any constraints. The
+     *       gradientAt searches that are not restricted by any constraints. The
      *       value CRVMIN=-1.0D0 is set, however, if all of these searches are
      *       constrained.
      * @param delta
@@ -1867,11 +1867,11 @@ public class BOBYQAOptimizer
         qred = ZERO;
         crvmin = MINUS_ONE;
 
-        // Set the next search direction of the conjugate gradient method. It is
+        // Set the next search direction of the conjugate gradientAt method. It is
         // the steepest descent direction initially and when the iterations are
         // restarted because a variable has just been fixed by a bound, and of
         // course the components of the fixed variables are zero. ITERMAX is an
-        // upper bound on the indices of the conjugate gradient iterations.
+        // upper bound on the indices of the conjugate gradientAt iterations.
 
         int state = 20;
         for(;;) {
@@ -1990,7 +1990,7 @@ public class BOBYQAOptimizer
                 qred += sdec;
             }
 
-            // Restart the conjugate gradient method if it has hit a new bound.
+            // Restart the conjugate gradientAt method if it has hit a new bound.
 
             if (iact >= 0) {
                 ++nact;
@@ -2008,7 +2008,7 @@ public class BOBYQAOptimizer
             }
 
             // If STPLEN is less than BLEN, then either apply another conjugate
-            // gradient iteration or RETURN.
+            // gradientAt iteration or RETURN.
 
             if (stplen < blen) {
                 if (iterc == itermax) {

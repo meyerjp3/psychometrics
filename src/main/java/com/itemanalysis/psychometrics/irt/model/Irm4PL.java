@@ -1,12 +1,12 @@
-/*
- * Copyright 2012 J. Patrick Meyer
- *
+/**
+ * Copyright 2014 J. Patrick Meyer
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,32 +19,28 @@ import com.itemanalysis.psychometrics.irt.estimation.ItemParamPrior;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
-import java.util.Arrays;
 import java.util.Formatter;
 
-/**
- * An implementation of {@link AbstractItemResponseModel} that allows for the three-parameter logistic (3PL) model,
- * two-parameter logistic (2PL) model, one-parameter logistic (1PL) model, and the Rasch model. The particular
- * type of item response model is determined by the constructor used to create the object. See the constructors
- * for more details on which one to use for each type of model.
- */
-public class Irm3PL extends AbstractItemResponseModelWithGradient {
+public class Irm4PL extends AbstractItemResponseModel {
 
-    private double discrimination = 1.0;
-    private double difficulty = 0.0;
-    private double guessing = 0.0;
+    private int numberOfParameters = 4;
+    private double discrimination = 1;
+    private double difficulty = 0;
+    private double guessing = 0;
+    private double slipping = 0;
     private double D = 1.7;
-    private double discriminationStdError = 0.0;
-    private double difficultyStdError = 0.0;
-    private double guessingStdError = 0.0;
-    private int numberOfParameters = 1;
-    private double proposalDiscrimination = 1.0;
-    private double proposalDifficulty = 0.0;
-    private double proposalGuessing = 0.0;
+    private double proposalDiscrimination = 1;
+    private double proposalDifficulty = 0;
+    private double proposalGuessing = 0;
+    private double proposalSlipping = 0;
+    private double discriminationStdError = 1;
+    private double difficultyStdError = 0;
+    private double guessingStdError = 0;
+    private double slippingStdError = 0;
     private ItemParamPrior discriminationPrior = null;
     private ItemParamPrior difficultyPrior = null;
     private ItemParamPrior guessingPrior = null;
-
+    private ItemParamPrior slippingPrior = null;
 
     /**
      * Constructor for three parameter logistic model
@@ -52,78 +48,25 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      * @param discrimination item discrimination parameter
      * @param difficulty item difficulty parameter
      * @param guessing lower-asymptote parameter
+     * @param slipping upper-asymptote parameter
      * @param D scaling factor
      */
-    public Irm3PL(double discrimination, double difficulty, double guessing, double D){
+    public Irm4PL(double discrimination, double difficulty, double guessing, double slipping, double D){
         this.discrimination = discrimination;
         this.difficulty = difficulty;
         this.guessing = guessing;
+        this.slipping = slipping;
         this.proposalDiscrimination = discrimination;
         this.proposalDifficulty = difficulty;
         this.proposalGuessing = guessing;
+        this.proposalSlipping = slipping;
         this.D = D;
-        this.numberOfParameters = 3;
+        this.numberOfParameters = 4;
         this.ncat = 2;
         defaultScoreWeights();
     }
 
-    /**
-     * Constructor for two parameter logistic model.
-     *
-     * @param discrimination item discrimination parameter
-     * @param difficulty item difficulty parameter
-     * @param D scaling factor
-     */
-    public Irm3PL(double discrimination, double difficulty, double D){
-        this.discrimination = discrimination;
-        this.difficulty = difficulty;
-        this.proposalDiscrimination = discrimination;
-        this.proposalDifficulty = difficulty;
-        this.proposalGuessing = 0.0;
-        this.D = D;
-        numberOfParameters = 2;
-        this.ncat = 2;
-        defaultScoreWeights();
-    }
-
-    /**
-     * Constructor for one parameter logistic model
-     *
-     * @param difficulty item difficulty parameter
-     * @param D scaling factor
-     */
-    public Irm3PL(double difficulty, double D){
-        this.difficulty = difficulty;
-        this.proposalDiscrimination = 1.0;
-        this.proposalDifficulty = difficulty;
-        this.proposalGuessing = 0.0;
-        this.D = D;
-        numberOfParameters = 1;
-        this.ncat = 2;
-        defaultScoreWeights();
-    }
-
-    /**
-     * Comute the probability of a correct response. This method uses a combination of stored
-     * parameters and those passed in the iparam array. This arrangement allows for fixing
-     * some item parameters during estimation. For example, instantiating this object as a 2PL
-     * and setting the stored value of the guessing parameter will result in a 3PL with a fixed
-     * guessing parameter. If you do not want to use the stored values of any parameter, then
-     * the iparam array should be of length = 3 and contain the discrimination, difficulty,
-     * and guessing parameters, respectively.
-     *
-     * The order of parameters in iparam is as follows:
-     * 1. Rasch model: iparam[0] = difficulty
-     * 2. 2PL: iparam[0] = discrimination, iparam[1] = difficulty
-     * 3. 3PL: iparam[1] = discrimination, iparam[1] = difficulty, iparam[2] = guessing
-     *
-     * @param theta person ability parameter.
-     * @param iparam item parameter array that is one to three in length.
-     * @param D scaling constant.
-     * @return probability of a correct answer.
-     */
     public double probability(double theta, double[] iparam, int response, double D){
-        double prob = 0.0;
         if(response==1){
             return probRight(theta, iparam, D);
         }else{
@@ -141,39 +84,9 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         return Math.min(1.0, Math.max(0.0, prob)); //always return value between 0 and 1
     }
 
-    /**
-     * Comute the probability of a correct response. This method uses a combination of stored
-     * parameters and those passed in the iparam array. This arrangement allows for fixing
-     * some item parameters during estimation. For example, instantiating this object as a 2PL
-     * and setting the stored value of the guessing parameter will result in a 3PL with a fixed
-     * guessing parameter. If you do not want to use the stored values of any parameter, then
-     * the iparam array should be of length = 3 and contain the discrimination, difficulty,
-     * and guessing parameters, respectively.
-     *
-     * The order of parameters in iparam is as follows:
-     * 1. Rasch model: iparam[0] = difficulty
-     * 2. 2PL: iparam[0] = discrimination, iparam[1] = difficulty
-     * 3. 3PL: iparam[1] = discrimination, iparam[1] = difficulty, iparam[2] = guessing
-     *
-     * @param theta person ability parameter.
-     * @param iparam item parameter array that is one to three in length.
-     * @param D scaling constant.
-     * @return probability of a correct answer.
-     */
     private double probRight(double theta, double[] iparam, double D){
-        double z = 0;
-
-        if(iparam.length==1){
-            z = Math.exp(D*discrimination*(theta-iparam[0]));
-            return  guessing+(1-guessing)*z/(1+z);
-        }else if(iparam.length==2){
-            z = Math.exp(D*iparam[0]*(theta-iparam[1]));
-            return  guessing+(1-guessing)*z/(1+z);
-        }else{
-            z = Math.exp(D*iparam[0]*(theta-iparam[1]));
-            return  iparam[2]+(1-iparam[2])*z/(1+z);
-        }
-
+        double z = Math.exp(D*iparam[0]*(theta-iparam[1]));
+        return  iparam[2]+(iparam[3]-iparam[2])*z/(1+z);
     }
 
     private double probWrong(double theta, double[] iparam, double D){
@@ -182,7 +95,7 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
 
     private double probRight(double theta){
         double top = Math.exp(D*discrimination*(theta-difficulty));
-        double prob = guessing + (1.0-guessing)*top/(1+top);
+        double prob = guessing + (slipping-guessing)*top/(1+top);
         return prob;
     }
 
@@ -193,12 +106,6 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
     public double expectedValue(double theta){
         return scoreWeight[1]*probRight(theta);
     }
-
-//    public double[] gradientAt(double theta){
-//        //Note: The second argument (-1) is not actually used by this class.
-//        //It is here to satisfy the interface.
-//        return gradientAt(theta, -1);
-//    }
 
     /**
      * Computes the gradientAt (vector of first partial derivatives) with respect to the item parameters.
@@ -216,69 +123,30 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
     public double[] gradient(double theta, double[] iparam, int k, double D){
         double[] deriv = new double[numberOfParameters];
 
-        double a = 1;
-        double b = 0;
-        double c = 0;
-        if(numberOfParameters==3){
-            a = iparam[0];
-            b = iparam[1];
-            c = iparam[2];
-        }else if(numberOfParameters==2){
-            a = iparam[0];
-            b = iparam[1];
-            c = guessing;
-        }else{
-            a = discrimination;
-            b = iparam[0];
-            c = guessing;
-        }
+        double a = iparam[0];
+        double b = iparam[1];
+        double c = iparam[2];
+        double x = iparam[3];
+
+        double w = D*(theta-b);
+        double z = Math.exp(D*a*(theta-b));
+        double z2 = z*z;
+        double d = 1+z;
+        double d2 = d*d;
+        double xmc = x-c;
+
+        deriv[0] = xmc*z*w/d - xmc*z2*w/d2;
+        deriv[1] = -(xmc*z*D*a/d - xmc*z2*D*a/d2);
+        deriv[2] = 1.0 - z/d;
+        deriv[3] = z/d;
 
         if(k==0){
-            double z = Math.exp(D*a*(theta-b));
-            double g = 1 + z;
-            double g2 = g*g;
-            double db = (1-c)*z*D*a/g2;//first derivative wrt difficulty
-
-            if(numberOfParameters==1){
-                deriv[0] = db;
-                return deriv;
-            }
-
-            deriv[0] = -(1-c)*z*D*(theta-b)/g2;//first derivative wrt discrimination
-            deriv[1] = db;
-
-            if(numberOfParameters==3){
-                deriv[2] = -1/(1+z); //first derivative wrt guessing
-            }
-
-        }else{
-
-            double t = Math.exp(-a*D*(theta-b));
-            double onept2 = 1.0 + t;
-            onept2 *= onept2;
-
-            //derivative with respect to b parameter
-            double derivb = -a*(1.0-c)*D*t;
-            derivb /= onept2;
-
-            if(numberOfParameters==1){
-                deriv[0] = derivb;
-                return deriv;
-            }
-
-            deriv[1] = derivb;
-
-            //derivative with respect to the a parameter
-            deriv[0] = (1.0 - c)*(theta - b)*D*t;
-            deriv[0] /= onept2;
-
-            //derivative with respect to c parameter
-            if(numberOfParameters==3){
-                deriv[2] = -1.0/(1.0 + t);
-                deriv[2] += 1.0;
-            }
-
+            deriv[0] = -deriv[0];
+            deriv[1] = -deriv[1];
+            deriv[2] = -deriv[2];
+            deriv[3] = -deriv[3];
         }
+
         return deriv;
     }
 
@@ -290,119 +158,16 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      * @return gradientAt
      */
     public double[] gradient(double theta, int k){
-        double[] iparam = {discrimination, difficulty, guessing};
+        double[] iparam = {discrimination, difficulty, guessing, slipping};
         return gradient(theta, iparam, k, D);
     }
 
-    /**
-     * Hessian or matrix of second derivatives.
-     *
-     * @param theta person ability value.
-     * @return a two-way array containing the Hessian matrix values.
-     */
-    public double[][] hessian(double theta){
-        double[][] deriv = new double[numberOfParameters][numberOfParameters];
-        double e = Math.exp(discrimination*D*(theta-difficulty));
-        double onepe3 = 1.0 + e;
-        double onepe2 = onepe3*onepe3;
-        onepe3 *= onepe2;
-        double d2 = D*D;
-        double cm1 = guessing-1.0;
-        double em1 = e - 1.0;
-
-        //second derivative with respect to the b parameter
-        double derivt = discrimination*discrimination;
-        derivt *= cm1*d2;
-        derivt *= e*em1;
-        derivt /= onepe3;
-
-        if(numberOfParameters==1){
-            deriv[0][0] = derivt;
-            return deriv;
-        }
-        deriv[1][1] = derivt;
-
-        double bmt = difficulty - theta;
-
-        //second derivative with respect to the a parameter
-        derivt = cm1*d2;
-        derivt *= e*em1;
-        derivt *= bmt*bmt;
-        deriv[0][0] = derivt/onepe3;
-
-        //second derivative with respect to a and b
-        double t2 = 1 + e;
-        t2 += discrimination*D*em1*bmt;
-        derivt = t2*cm1;
-        derivt *= D*e;
-        deriv[1][0] = derivt / onepe3;
-        deriv[0][1] = deriv[1][0];
-
-        if(numberOfParameters==3){
-            //second derivative with respect to the c parameter
-            deriv[2][2] = 0.0;
-            double einv = 1.0/e;
-            double onepeinv2 = 1.0 + einv;
-            onepeinv2 *= onepeinv2;
-
-            //second derivative with respect to a and c
-            derivt = D * einv;
-            derivt *= bmt;
-            deriv[2][0] = derivt / onepeinv2;
-            deriv[0][2] = deriv[2][0];
-
-            //second derivative with respect to b and c
-            derivt = discrimination * D * einv;
-            deriv[2][1] = derivt / onepeinv2;
-        }
-        return deriv;
-    }
-
-    /**
-     * From Equating recipes. Computes the derivative with respect to person ability.
-     *
-     * @param theta person ability value.
-     * @param response item response value.
-     * @return derivative wrt theta.
-     */
-    public double derivTheta2(double theta, int response){
-        double z = Math.exp(D*discrimination*(theta-difficulty));
-
-        //incorrect response
-        if(response == 0) return ( -D*discrimination*(1.0-guessing)*z/((1.0+z)*(1.0+z)) );
-
-        //correct response
-        return ( D*discrimination*(1.0-guessing)*z/((1.0+z)*(1.0+z)) );
-    }
-
-    /**
-     * Derivative from Mathematica. First derivative with respect to person ability.
-     *
-     * @param theta person ability value.
-     * @return first derivative wrt theta.
-     */
     public double derivTheta(double theta){
-        double p1 = D*discrimination*(1-guessing)*Math.exp(2.0*D*discrimination*(theta-difficulty));
-        double p2 = Math.pow(1+Math.exp(D*discrimination*(theta-difficulty)),2);
-        double p3 = D*discrimination*(1.0-guessing)*Math.exp(D*discrimination*(theta-difficulty));
-        double p4 = 1+Math.exp(D*discrimination*(theta-difficulty));
-        double deriv = -p1/p2 + p3/p4;
-        return deriv;
+        throw new UnsupportedOperationException("Deriv theta not yet implemented");
     }
 
-    /**
-     * Computes the item information function at theta.
-     *
-     * @param theta person ability value.
-     * @return item information.
-     */
     public double itemInformationAt(double theta){
-        double p = probRight(theta);
-        double part1 = Math.pow(p - guessing, 2);
-        double part2 = Math.pow(1.0-guessing, 2);
-        double a2 = discrimination*discrimination;
-        double info = D*D*a2*(part1/part2)*((1.0-p)/p);
-        return info;
+        throw new UnsupportedOperationException("Item information not yet implemented");
     }
 
     public void setDiscriminationPrior(ItemParamPrior discriminationPrior){
@@ -417,6 +182,10 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         this.guessingPrior = guessingPrior;
     }
 
+    public void setSlippingPrior(ItemParamPrior slippingPrior){
+        this.slippingPrior = slippingPrior;
+    }
+
     public ItemParamPrior getDiscriminationPrior(){
         return discriminationPrior;
     }
@@ -429,66 +198,37 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         return guessingPrior;
     }
 
+    public ItemParamPrior getSlippingPrior(){
+        return slippingPrior;
+    }
+
     public double addPriorsToLogLikelihood(double loglike, double[] iparam){
-//        double priorProb = 0.0;
+        double priorProb = 0.0;
         double ll = loglike;
 
-        if(numberOfParameters==3){
-            if(discriminationPrior!=null){
-                ll += discriminationPrior.logDensity(iparam[0]);
-            }
-
-            if(difficultyPrior!=null){
-                ll += difficultyPrior.logDensity(iparam[1]);
-            }
-
-            if(guessingPrior!=null){
-                ll += guessingPrior.logDensity(iparam[2]);
-            }
-
-        }else if(numberOfParameters==2){
-            if(discriminationPrior!=null){
-                ll += discriminationPrior.logDensity(iparam[0]);
-            }
-
-            if(difficultyPrior!=null){
-                ll += difficultyPrior.logDensity(iparam[1]);
-            }
-        }else{
-            if(difficultyPrior!=null){
-                ll += difficultyPrior.logDensity(iparam[0]);
-            }
+        //discrimination prior
+        if(discriminationPrior!=null){
+            priorProb = discriminationPrior.logDensity(iparam[0]);
+            ll += priorProb;
         }
 
-//        //difficulty prior
-//        if(numberOfParameters==1){
-//            if(difficultyPrior!=null){
-//                priorProb = difficultyPrior.logDensity(iparam[0]);
-//                ll += priorProb;
-//            }
-//        }
-//
-//        //difficulty and discrimination prior
-//        if(numberOfParameters>=2){
-//
-//            if(discriminationPrior!=null){
-//                priorProb = discriminationPrior.logDensity(iparam[0]);
-//                ll += priorProb;
-//            }
-//
-//            if(difficultyPrior!=null){
-//                priorProb = difficultyPrior.logDensity(iparam[1]);
-//                ll += priorProb;
-//            }
-//        }
-//
-//        //guessing prior
-//        if(numberOfParameters==3){
-//            if(guessingPrior!=null){
-//                priorProb = guessingPrior.logDensity(iparam[2]);
-//                ll += priorProb;
-//            }
-//        }
+        //difficulty prior
+        if(difficultyPrior!=null){
+            priorProb = difficultyPrior.logDensity(iparam[1]);
+            ll += priorProb;
+        }
+
+        //guessing prior
+        if(guessingPrior!=null){
+            priorProb = guessingPrior.logDensity(iparam[2]);
+            ll += priorProb;
+        }
+
+        //slipping prior
+        if(slippingPrior!=null){
+            priorProb = slippingPrior.logDensity(iparam[3]);
+            ll += priorProb;
+        }
 
         return ll;
 
@@ -497,31 +237,22 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
     public double[] addPriorsToLogLikelihoodGradient(double[] loglikegrad, double[] iparam){
         double[] llg = loglikegrad;
 
-        if(numberOfParameters==3){
-            if(discriminationPrior!=null) {
-                llg[0] -= discriminationPrior.logDensityDeriv1(iparam[0]);
-            }
-
-            if(difficultyPrior!=null) {
-                llg[1] -= difficultyPrior.logDensityDeriv1(iparam[1]);
-            }
-
-            if(guessingPrior!=null) {
-                llg[2] -= guessingPrior.logDensityDeriv1(iparam[2]);
-            }
-        }else if(numberOfParameters==2){
-            if(discriminationPrior!=null) {
-                llg[0] -= discriminationPrior.logDensityDeriv1(iparam[0]);
-            }
-
-            if(difficultyPrior!=null) {
-                llg[1] -= difficultyPrior.logDensityDeriv1(iparam[1]);
-            }
-        }else{
-            if(difficultyPrior!=null) {
-                llg[0] -= difficultyPrior.logDensityDeriv1(iparam[0]);
-            }
+        if(discriminationPrior!=null) {
+            llg[0] -= discriminationPrior.logDensityDeriv1(iparam[0]);
         }
+
+        if(difficultyPrior!=null) {
+            llg[1] -= difficultyPrior.logDensityDeriv1(iparam[1]);
+        }
+
+        if(guessingPrior!=null) {
+            llg[2] -= guessingPrior.logDensityDeriv1(iparam[2]);
+        }
+
+        if(slippingPrior!=null) {
+            llg[3] -= slippingPrior.logDensityDeriv1(iparam[3]);
+        }
+
         return llg;
     }
 
@@ -538,7 +269,7 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      * @param mean item difficulty mean.
      * @param sd item difficulty standard deviation.
      */
-    public void incrementMeanSigma(Mean mean, StandardDeviation sd){
+    public void incrementMeanSigma(Mean mean, StandardDeviation sd){//TODO check for correctness
         mean.increment(difficulty);
         sd.increment(difficulty);
     }
@@ -551,7 +282,7 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      * @param meanDiscrimination item discrimination mean.
      * @param meanDifficulty item difficulty mean.
      */
-    public void incrementMeanMean(Mean meanDiscrimination, Mean meanDifficulty){
+    public void incrementMeanMean(Mean meanDiscrimination, Mean meanDifficulty){//TODO check for correctness
         meanDiscrimination.increment(discrimination);
         meanDifficulty.increment(difficulty);
     }
@@ -567,26 +298,21 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      * @param slope linking coefficient for slope
      * @return
      */
-    public double tStarProbability(double theta, int response, double intercept, double slope){
-        double[] iparam = new double[numberOfParameters];
-        if(numberOfParameters==3){
-            iparam[0] = discrimination/slope;
-            iparam[1] = difficulty*slope+intercept;
-            iparam[2] = guessing;
-        }else if(numberOfParameters==2){
-            iparam[0] = discrimination/slope;
-            iparam[1] = difficulty*slope+intercept;
-        }else{
-            iparam[0] = difficulty+intercept;//Rasch model
-        }
+    public double tStarProbability(double theta, int response, double intercept, double slope){//TODO check for correctness
+        if(response==1) return tStarProbRight(theta, intercept, slope);
+        return tStarProbWrong(theta, intercept, slope);
+    }
 
-        if(response==1){
-            return probRight(theta, iparam, D);
+    private double tStarProbRight(double theta, double intercept, double slope){//TODO check for correctness
+        double a = discrimination/slope;
+        double b = difficulty*slope+intercept;
+        double top = Math.exp(D*a*(theta-b));
+        double prob = slipping + (guessing-slipping)*top/(1+top);
+        return prob;
+    }
 
-        }else{
-            return 1.0-probRight(theta, iparam, D);
-        }
-
+    private double tStarProbWrong(double theta, double intercept, double slope){//TODO check for correctness
+        return 1.0-tStarProbRight(theta, intercept, slope);
     }
 
     /**
@@ -600,25 +326,21 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      * @param slope linking coefficient for slope
      * @return
      */
-    public double tSharpProbability(double theta, int response, double intercept, double slope){
-        double[] iparam = new double[numberOfParameters];
-        if(numberOfParameters==3){
-            iparam[0] = discrimination*slope;
-            iparam[1] = (difficulty - intercept)/slope;
-            iparam[2] = guessing;
-        }else if(numberOfParameters==2){
-            iparam[0] = discrimination*slope;
-            iparam[1] = (difficulty - intercept)/slope;
-        }else{
-            iparam[0] = (difficulty - intercept);//Rasch model
-        }
+    public double tSharpProbability(double theta, int response, double intercept, double slope){//TODO check for correctness
+        if(response==1) return tSharpProbRight(theta, intercept, slope);
+        return tSharpProbWrong(theta, intercept, slope);
+    }
 
-        if(response==1){
-            return probRight(theta, iparam, D);
-        }else{
-            return 1.0-probRight(theta, iparam, D);
-        }
+    private double tSharpProbRight(double theta, double intercept, double slope){//TODO check for correctness
+        double a = discrimination*slope;
+        double b = (difficulty - intercept)/slope;
+        double top = Math.exp(D*a*(theta-b));
+        double prob = slipping + (guessing-slipping)*top/(1+top);
+        return prob;
+    }
 
+    private double tSharpProbWrong(double theta, double intercept, double slope){//TODO check for correctness
+        return 1.0-tSharpProbRight(theta, intercept, slope);
     }
 
     /**
@@ -631,8 +353,8 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      * @param slope slope linking coefficient.
      * @return expected value under a linear transformation.
      */
-    public double tStarExpectedValue(double theta, double intercept, double slope){
-        return tStarProbability(theta, 1, intercept, slope);
+    public double tStarExpectedValue(double theta, double intercept, double slope){//TODO check for correctness
+        return tStarProbRight(theta, intercept, slope);
     }
 
     /**
@@ -645,8 +367,51 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      * @param slope linking coefficient for slope
      * @return expected value under a linear transformation.
      */
-    public double tSharpExpectedValue(double theta, double intercept, double slope){
-        return tSharpProbability(theta, 1, intercept, slope);
+    public double tSharpExpectedValue(double theta, double intercept, double slope){//TODO check for correctness
+        return tSharpProbRight(theta, intercept, slope);
+    }
+
+    /**
+     * Linear transformation of item parameters.
+     *
+     * @param intercept intercept transformation coefficient.
+     * @param slope slope transformation coefficient.
+     */
+    public void scale(double intercept, double slope){//TODO check for correctness
+        difficulty = intercept + slope*difficulty;
+        discrimination = discrimination/slope;
+        difficultyStdError *= slope;
+        discriminationStdError *= slope;
+    }
+
+
+//=====================================================================================================================//
+// GETTER AND SETTER METHODS MAINLY FOR USE WHEN ESTIMATING PARAMETERS                                                 //
+//=====================================================================================================================//
+
+    public double[] getItemParameterArray(){
+        double[] ip = new double[numberOfParameters];
+        ip[0] = discrimination;
+        ip[1] = difficulty;
+        ip[2] = guessing;
+        ip[3] = slipping;
+        return ip;
+    }
+
+    public void setStandardErrors(double[] x){
+        discriminationStdError = x[0];
+        difficultyStdError = x[1];
+        guessingStdError = x[2];
+        slippingStdError = x[3];
+    }
+
+    /**
+     * Gets the type of item response model.
+     *
+     * @return type of item response model.
+     */
+    public IrmType getType(){
+        return IrmType.L4;
     }
 
     /**
@@ -656,60 +421,6 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      */
     public int getNumberOfParameters(){
         return numberOfParameters;
-    }
-
-    /**
-     * Linear transformation of item parameters.
-     *
-     * @param intercept intercept transformation coefficient.
-     * @param slope slope transformation coefficient.
-     */
-    public void scale(double intercept, double slope){
-        difficulty = intercept + slope*difficulty;
-        discrimination = discrimination/slope;
-        difficultyStdError *= slope;
-        discriminationStdError *= slope;
-    }
-
-//=====================================================================================================================//
-// GETTER AND SETTER METHODS MAINLY FOR USE WHEN ESTIMATING PARAMETERS                                                 //
-//=====================================================================================================================//
-
-    public double[] getItemParameterArray(){
-        double[] ip = new double[numberOfParameters];
-        if(numberOfParameters==1){
-            ip[0] = difficulty;
-        }else if(numberOfParameters==2){
-            ip[0] = discrimination;
-            ip[1] = difficulty;
-        }else{
-            ip[0] = discrimination;
-            ip[1] = difficulty;
-            ip[2] = guessing;
-        }
-        return ip;
-    }
-
-    public void setStandardErrors(double[] x){
-        if(numberOfParameters==1){
-            difficultyStdError = x[0];
-        }else if(numberOfParameters==2){
-            discriminationStdError = x[0];
-            difficultyStdError = x[1];
-        }else{
-            discriminationStdError = x[0];
-            difficultyStdError = x[1];
-            guessingStdError = x[2];
-        }
-    }
-
-    /**
-     * Gets the type of item response model.
-     *
-     * @return type of item response model.
-     */
-    public IrmType getType(){
-        return IrmType.L3;
     }
 
     /**
@@ -865,24 +576,51 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         guessingStdError = stdError;
     }
 
-    public void setSlipping(double slipping){
-        throw new UnsupportedOperationException();
-    }
-
-    public void setProposalSlipping(double slipping){
-        throw new UnsupportedOperationException();
-    }
-
-    public void setSlippingStdError(double slipping){
-        throw new UnsupportedOperationException();
-    }
-
+    /**
+     * Gets the slipping (i.e. upper asymptote) parameter.
+     *
+     * @return guessing parameter.
+     */
     public double getSlipping(){
-        throw new UnsupportedOperationException();
+        return slipping;
     }
 
+    /**
+     * Set upper asymptote parameter to an existing value. If you are using this method to fix an item parameter
+     * during estimation, you must also set the proposal value in {@link #setProposalGuessing(double)}.
+     *
+     */
+    public void setSlipping(double slipping){
+        this.slipping = slipping;
+    }
+
+    /**
+     * A proposal slipping parameter value is obtained during each iteration of the estimation routine. This method
+     * sets the proposal value.
+     *
+     * @param slipping proposed slipping parameter estimate.
+     */
+    public void setProposalSlipping(double slipping){
+        if(!isFixed) this.proposalSlipping = slipping;
+    }
+
+    /**
+     * Gets the guessing parameter estimate standard error.
+     *
+     * @return guessing parameter estimate standard error.
+     */
     public double getSlippingStdError(){
-        throw new UnsupportedOperationException();
+        return slippingStdError;
+    }
+
+    /**
+     * The guessing parameter standard error may be computed external to the class. Use this method to set the
+     * standard error to a particular value.
+     *
+     * @param stdError standard error for the slipping parameter estimate.
+     */
+    public void setSlippingStdError(double stdError){
+        slippingStdError = stdError;
     }
 
     public double getScalingConstant(){
@@ -905,15 +643,14 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         max = Math.max(max, this.difficulty - proposalDifficulty);
         this.difficulty = proposalDifficulty;
 
-        if(numberOfParameters>=2){
-            max = Math.max(max, this.discrimination - proposalDiscrimination);
-            this.discrimination = proposalDiscrimination;
-        }
+        max = Math.max(max, this.discrimination - proposalDiscrimination);
+        this.discrimination = proposalDiscrimination;
 
-        if(numberOfParameters==3){
-            max = Math.max(max, Math.abs(this.guessing-proposalGuessing));
-            this.guessing = proposalGuessing;
-        }
+        max = Math.max(max, Math.abs(this.guessing-proposalGuessing));
+        this.guessing = proposalGuessing;
+
+        max = Math.max(max, Math.abs(this.slipping-proposalSlipping));
+        this.slipping = proposalSlipping;
 
         return max;
     }
@@ -963,7 +700,6 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
 // END GETTER AND SETTER METHODS                                                                                       //
 //=====================================================================================================================//
 
-
     /**
      * A string representaiton of the item parameters. Mainly used for printing and debugging.
      *
@@ -974,22 +710,19 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
 
-        String name = "";
-        if(getName()!=null){
-            name = getName().toString();
-        }
-
-        f.format("%10s", name);f.format("%2s", ": ");
+        f.format("%10s", getName().toString());f.format("%2s", ": ");
         f.format("%1s", "[");
         f.format("% .6f", getDiscrimination()); f.format("%2s", ", ");
         f.format("% .6f", getDifficulty()); f.format("%2s", ", ");
-        f.format("% .6f", getGuessing());f.format("%1s", "]");
+        f.format("% .6f", getGuessing()); f.format("%2s", ", ");
+        f.format("% .6f", getSlipping());f.format("%1s", "]");
         f.format("%n");
         f.format("%10s", "");f.format("%2s", "");
         f.format("%1s", "(");
         f.format("% .6f", getDiscriminationStdError()); f.format("%2s", ", ");
         f.format("% .6f", getDifficultyStdError()); f.format("%2s", ", ");
-        f.format("% .6f", getGuessingStdError());f.format("%1s", ")");
+        f.format("% .6f", getGuessingStdError()); f.format("%2s", ", ");
+        f.format("% .6f", getSlippingStdError());f.format("%1s", ")");
         return f.toString();
     }
 

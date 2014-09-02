@@ -16,14 +16,13 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
-import com.itemanalysis.psychometrics.irt.model.Irm3PL;
 import com.itemanalysis.psychometrics.irt.model.IrmType;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.uncmin.DefaultUncminOptimizer;
 import com.itemanalysis.psychometrics.uncmin.UncminException;
 import com.itemanalysis.psychometrics.uncmin.UncminStatusListener;
-import org.apache.commons.math3.distribution.NormalDistribution;
 
+import java.util.Arrays;
 import java.util.concurrent.RecursiveAction;
 
 /**
@@ -66,39 +65,22 @@ public class MstepParallel extends RecursiveAction {
      * the estimates that maximize the marginal likelihood.
      */
     protected void computeDirectly()throws IllegalArgumentException{
-        ItemDichotomous itemDichotomous = new ItemDichotomous();
+        ItemLogLikelihood itemLogLikelihood = new ItemLogLikelihood();
         double[] initialValue = null;
         int nPar = 1;
+        double[] param = null;
 
         for(int j=start;j<start+length;j++){
             nPar = irm[j].getNumberOfParameters();
 
-            if(irm[j].getType()==IrmType.L3){
-                itemDichotomous.setModel((Irm3PL)irm[j], latentDistribution, estepEstimates.getRjkAt(j), estepEstimates.getNk());
-                initialValue = new double[nPar];
-                if(nPar==3){
-                    initialValue[0] = irm[j].getDiscrimination();
-                    initialValue[1] = irm[j].getDifficulty();
-                    initialValue[2] = irm[j].getGuessing();
-                }else if(nPar==2){
-                    initialValue[0] = irm[j].getDiscrimination();
-                    initialValue[1] = irm[j].getDifficulty();
-                }else{
-                    initialValue[0] = irm[j].getDifficulty();
-                }
-
-            }else{
-                //add functionality for polytomous models
-            }
-
-
-            double[] param = null;
-
+            itemLogLikelihood.setModel(irm[j], latentDistribution, estepEstimates.getRjkAt(j), estepEstimates.getNt());
+            initialValue = irm[j].getItemParameterArray();  //TODO This initial value array should have teh same number of elements as the gradientAt. It should include the first step parameter that is fixed to 0.
             try{
 
-//            param = qn.minimize(itemDichotomous,1e-8,initialValue,500);
-                optimizer.minimize(itemDichotomous, initialValue, true, false, 150);
+                optimizer.minimize(itemLogLikelihood, initialValue, true, false, 150);
                 param = optimizer.getParameters();
+
+//                param = qn.minimize(itemDichotomous,1e-8,initialValue,500);
 //                double f = optimizer.getFunctionValue();
 //                double fTemp = 0.0;
 //
@@ -107,17 +89,25 @@ public class MstepParallel extends RecursiveAction {
                 ex.printStackTrace();
             }
 
-            if(irm[j].getType()==IrmType.L3){
-                if(nPar==3){
+            if(irm[j].getType()==IrmType.L3 || irm[j].getType()==IrmType.L4){
+                if(nPar==4){
                     irm[j].setProposalDiscrimination(param[0]);
                     irm[j].setProposalDifficulty(param[1]);
-                    irm[j].setProposalGuessing(Math.min(1.000, Math.max(param[2], 0.05)));//set negative estimates to just above zero
+                    irm[j].setProposalGuessing(Math.min(1.000, Math.max(param[2], 0.01)));//set negative estimates to just above zero
+                    irm[j].setProposalSlipping(Math.max(0.60, Math.min(param[3], 0.99)));//set negative estimates to just below 1.
+                }else if(nPar==3){
+                    irm[j].setProposalDiscrimination(param[0]);
+                    irm[j].setProposalDifficulty(param[1]);
+                    irm[j].setProposalGuessing(Math.min(1.000, Math.max(param[2], 0.01)));//set negative estimates to just above zero
                 }else if(nPar==2){
                     irm[j].setProposalDiscrimination(param[0]);
                     irm[j].setProposalDifficulty(param[1]);
                 }else{
                     irm[j].setProposalDifficulty(param[0]);
                 }
+            }else if(irm[j].getType()==IrmType.GPCM){
+                irm[j].setProposalDiscrimination(param[0]);
+                irm[j].setProposalStepParameters(Arrays.copyOfRange(param, 1, param.length));
             }
 
         }
@@ -138,18 +128,17 @@ public class MstepParallel extends RecursiveAction {
             mstep1.addUncminStatusListener(uncminStatusListener);
             MstepParallel mstep2 = new MstepParallel(irm, latentDistribution, estepEstimates, start+split, length-split);
             mstep2.addUncminStatusListener(uncminStatusListener);
-//
+
             invokeAll(mstep1, mstep2);
         }
     }
 
     public DistributionApproximation getUpdatedLatentDistribution(){
-        double sumNk = estepEstimates.getSumNk();
-        double[] nk = estepEstimates.getNk();
-        double m = 0;
-        double s = 0;
+        double sumNk = estepEstimates.getSumNt();
+        double[] nk = estepEstimates.getNt();
+
+        //Compute posterior latent distribution
         for(int k=0;k<nk.length;k++){
-            m += latentDistribution.getPointAt(k)*nk[k];
             latentDistribution.setDensityAt(k, nk[k]/sumNk);
         }
 

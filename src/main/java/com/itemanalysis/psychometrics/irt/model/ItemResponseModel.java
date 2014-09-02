@@ -41,6 +41,18 @@ public interface ItemResponseModel {
     public double probability(double theta, int response);
 
     /**
+     * Computes the probability of a response using item parameter values passed in iparam. It does
+     * NOT use the item parameters stored in the object.
+     *
+     * @param theta person ability parameter.
+     * @param iparam array of item parameters. The order is important and will be unique to each implementation of the interface.
+     * @param response an item response category.
+     * @param D a sclaing constant that is either 1 or 1.7.
+     * @return probability of a response.
+     */
+    public double probability(double theta, double[] iparam, int response, double D);
+
+    /**
      * For a binary item, {@link #probability(double, int)} and the excpected value returned by this method
      * are the same thing. For a polytomous item, the expected value ranges from the minimum possible
      * item score and the maximum possible item score.
@@ -58,9 +70,15 @@ public interface ItemResponseModel {
      */
     public void scale(double intercept, double slope);
 
+    /**
+     * Adds prior probabilities to the loglikelihood. This method
+     * is used in {@link com.itemanalysis.psychometrics.irt.estimation.MarginalMaximumLikelihoodEstimation
+     * @param ll loglikelihood value
+     */
+    public double addPriorsToLogLikelihood(double loglike, double[] iparam);
 
     /**
-     * Computes the gradient at theta
+     * Computes the gradientAt at theta. This method uses the item parameters stored in the object.
      *
      * @param theta person ability value
      * @return
@@ -68,11 +86,38 @@ public interface ItemResponseModel {
     public double[] gradient(double theta, int category);
 
     /**
+     * Computes the gradientAt (vector of first partial derivatives) with respect to the item parameters.
+     * This method uses item parameters passed to teh method. It does NOT use item parameters stored in the
+     * object.
+     *
+     * Note: The second argument (int k) is not actually used by this class. It is here to satisfy the interface.
+     *
+     * @param theta person ability estimate.
+     * @param iparam array of item parameters.
+     * @param category response category
+     * @param D scaling constant that is either 1 or 1.7
+     * @return an array of first partial derivatives (i.e. the gradientAt).
+     */
+    public double[] gradient(double theta, double[] iparam, int category, double D);
+
+    /**
+     * Adds log-prior probabilities to the item loglikelihood. This method
+     * is used in {@link com.itemanalysis.psychometrics.irt.estimation.MarginalMaximumLikelihoodEstimation}.
+     *
+     * @param loglikegrad
+     */
+    public double[] addPriorsToLogLikelihoodGradient(double[] loglikegrad, double[] iparam);
+
+    /**
      * Gets the number of item parameters in the response model.
      *
      * @return number of item parameters.
      */
     public int getNumberOfParameters();
+
+    public double[] getItemParameterArray();
+
+    public void setStandardErrors(double[] x);
 
     /**
      * Gets the number of response categories. This value is 2 for binary items and greater than 2 for polytomous
@@ -230,6 +275,47 @@ public interface ItemResponseModel {
      * @param StdError standard error for the guessing parameter estimate.
      */
     public void setGuessingStdError(double StdError);
+
+    /**
+     * Gets the slipping (i.e. upper asymptote) parameter.
+     *
+     * @return slipping parameter.
+     */
+    public double getSlipping();
+
+    /**
+     * Set upper asymptote parameter to an existing value. If you are using this method to fix an item parameter
+     * during estimation, you must also set the proposal value in {@link #setProposalSlipping(double)}.
+     *
+     */
+    public void setSlipping(double slipping);
+
+    /**
+     * A proposal slipping parameter value is obtained during each iteration of the estimation routine. This method
+     * sets the proposal value.
+     *
+     * @param slipping proposed slipping parameter estimate.
+     */
+    public void setProposalSlipping(double slipping);
+
+    /**
+     * Gets the slipping parameter estimate standard error.
+     *
+     * @return slipping parameter estimate standard error.
+     */
+    public double getSlippingStdError();
+
+    /**
+     * The slipping parameter standard error may be computed external to the class. Use this method to set the
+     * standard error to a particular value.
+     *
+     * @param StdError standard error for the slipping parameter estimate.
+     */
+    public void setSlippingStdError(double StdError);
+
+    public void setStepParameters(double[] step);
+
+    public void setProposalStepParameters(double[] step);
 
     /**
      * Polytomous item response models may have step parameters. Gets the array of step parameters. Model that

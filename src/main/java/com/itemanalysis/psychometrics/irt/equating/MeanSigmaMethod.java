@@ -15,6 +15,7 @@
  */
 package com.itemanalysis.psychometrics.irt.equating;
 
+import com.itemanalysis.psychometrics.irt.model.IrmType;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.scaling.LinearTransformation;
 import org.apache.commons.math3.exception.DimensionMismatchException;
@@ -86,9 +87,33 @@ public class MeanSigmaMethod implements LinearTransformation{
 
         }
 
-        slope = sdY.getResult() / sdX.getResult();
+        if(checkRaschModel()){
+            slope = 1.0;
+        }else{
+            slope = sdY.getResult() / sdX.getResult();
+        }
         intercept = mY.getResult()-slope*mX.getResult();
 
+
+    }
+
+    /**
+     * Check to see if all item response models are in teh Rasch family of models.
+     *
+     * @return true if all item response models are in the Rasch family. Otherwise, return false.
+     */
+    private boolean checkRaschModel(){
+        ItemResponseModel irm = null;
+        for(String s : itemFormY.keySet()){
+            irm = itemFormY.get(s);
+
+            if(irm.getType()== IrmType.L3){
+                if(irm.getNumberOfParameters()>1) return false;
+            }else if(irm.getType()!=IrmType.PCM){
+                return false;
+            }
+        }
+        return true;
     }
 
     public double getIntercept(){

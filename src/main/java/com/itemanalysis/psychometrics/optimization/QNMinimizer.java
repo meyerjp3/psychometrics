@@ -41,7 +41,7 @@ import java.util.*;
  *
  * MINPACK: This routine is based off of the implementation used in MINPACK.
  * This routine finds a point satisfying the Wolfe conditions, which state that
- * a point must have a sufficiently smaller function value, and a gradient of
+ * a point must have a sufficiently smaller function value, and a gradientAt of
  * smaller magnitude. This provides enough to prove theoretically quadratic
  * convergence. In order to find such a point the linesearch first finds an
  * interval which must contain a satisfying point, and then progressively
@@ -59,9 +59,9 @@ import java.util.*;
  * decrease per step dividing that by the current value and terminating when
  * that value because smaller than TOL. This method fails when the function
  * value approaches zero, so two other convergence criteria are used. The first
- * stores the initial gradient norm |g0|, then terminates when the new gradient
+ * stores the initial gradientAt norm |g0|, then terminates when the new gradientAt
  * norm, |g| is sufficiently smaller: i.e., |g| &lt; eps*|g0| the second checks if
- * |g| &lt; eps*max( 1 , |x| ) which is essentially checking to see if the gradient
+ * |g| &lt; eps*max( 1 , |x| ) which is essentially checking to see if the gradientAt
  * is numerically zero.
  * Another convergence criteria is added where termination is triggered if no
  * improvements are observed after X (set by terminateOnEvalImprovementNumOfEpoch)
@@ -304,7 +304,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     public class Record {
         // convergence options.
         // have average difference like before
-        // zero gradient.
+        // zero gradientAt.
 
         // for convergence test
         private final List<Double> evals = new ArrayList<Double>();
@@ -376,7 +376,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
         }
 
         /*
-         * Initialize the class, this starts the timer, and initiates the gradient
+         * Initialize the class, this starts the timer, and initiates the gradientAt
          * norm for use with convergence.
          */
         public void start(double val, double[] grad, double[] x) {
@@ -443,7 +443,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
         /**
          * This function checks for convergence through first
          * order optimality,  numerical convergence (i.e., zero numerical
-         * gradient), and also by checking the average improvement.
+         * gradientAt), and also by checking the average improvement.
          *
          * @return A value of the enumeration type <p>eState</p> which tells the
          *   state of the optimization routine indicating whether the routine should
@@ -488,13 +488,13 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
                 return eState.TERMINATE_AVERAGEIMPROVE;
             }
 
-            // Check to see if the gradient is sufficiently small
+            // Check to see if the gradientAt is sufficiently small
             if (useRelativeNorm && relNorm <= relativeTOL) {
                 return eState.TERMINATE_RELATIVENORM;
             }
 
             if (useNumericalZero) {
-                // This checks if the gradient is sufficiently small compared to x that
+                // This checks if the gradientAt is sufficiently small compared to x that
                 // it is treated as zero.
                 if (gNormLast < EPS * Math.max(1.0, ArrayMath.norm_1(xLast))) {
                     // |g| < |x|_1
@@ -923,13 +923,13 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
         // initialize weights
         x = initial;
 
-        // initialize gradient
+        // initialize gradientAt
         grad = new double[x.length];
         newGrad = new double[x.length];
         newX = new double[x.length];
         dir = new double[x.length];
 
-        // initialize function value and gradient (gradient is stored in grad inside
+        // initialize function value and gradientAt (gradientAt is stored in grad inside
         // evaluateFunction)
         value = evaluateFunction(dfunction, x, grad);
         if (useOWLQN) {
@@ -958,7 +958,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
 //        }
 
         Record rec = new Record(quiet, monitor, functionTolerance, outFile);
-        // sets the original gradient and x. Also stores the monitor.
+        // sets the original gradientAt and x. Also stores the monitor.
         rec.start(value, grad, x);
 
         // Check if max Evaluations and Iterations have been provided.
@@ -972,14 +972,14 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
         sayln("SCALING        <D> Diagonal scaling was used; <I> Scaled Identity");
         sayln("LINESEARCH     [## M steplength]  Minpack linesearch");
         sayln("                   1-Function value was too high");
-        sayln("                   2-Value ok, gradient positive, positive curvature");
-        sayln("                   3-Value ok, gradient negative, positive curvature");
-        sayln("                   4-Value ok, gradient negative, negative curvature");
+        sayln("                   2-Value ok, gradientAt positive, positive curvature");
+        sayln("                   3-Value ok, gradientAt negative, positive curvature");
+        sayln("                   4-Value ok, gradientAt negative, negative curvature");
         sayln("               [.. B]  Backtracking");
         sayln("VALUE          The current function value");
         sayln("TIME           Total elapsed time");
-        sayln("|GNORM|        The current norm of the gradient");
-        sayln("{RELNORM}      The ratio of the current to initial gradient norms");
+        sayln("|GNORM|        The current norm of the gradientAt");
+        sayln("{RELNORM}      The ratio of the current to initial gradientAt norms");
         sayln("AVEIMPROVE     The average improvement / current value");
         sayln("EVALSCORE      The last available eval score");
         sayln();
@@ -1055,7 +1055,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
                 qn.update(newX, x, newGrad, grad, newPoint[a]); // step (4) in Galen & Gao 2007
 
                 if (useOWLQN) {
-                    // pseudo gradient
+                    // pseudo gradientAt
                     newGrad = pseudoGradientOWL(newX, newGrad, dfunction);
                 }
 
@@ -1064,7 +1064,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
                     evalScore = doEvaluation(newX);
                 }
 
-                // Add the current value and gradient to the records, this also monitors
+                // Add the current value and gradientAt to the records, this also monitors
                 // X and writes to output
                 rec.add(newValue, newGrad, newX, fevals, evalScore);
 
@@ -1122,11 +1122,11 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
 //        System.err.println();
         switch (state) {
             case TERMINATE_GRADNORM:
-//                System.err.println("QNMinimizer terminated due to numerically zero gradient: |g| < EPS  max(1,|x|) ");
+//                System.err.println("QNMinimizer terminated due to numerically zero gradientAt: |g| < EPS  max(1,|x|) ");
                 success = true;
                 break;
             case TERMINATE_RELATIVENORM:
-//                System.err.println("QNMinimizer terminated due to sufficient decrease in gradient norms: |g|/|g0| < TOL ");
+//                System.err.println("QNMinimizer terminated due to sufficient decrease in gradientAt norms: |g|/|g0| < TOL ");
                 success = true;
                 break;
             case TERMINATE_AVERAGEIMPROVE:
@@ -1244,7 +1244,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
         Set<Integer> paramRange = initializeParamRange(func, x); // initialized below
         double[] newGrad = new double[grad.length];
 
-        // compute pseudo gradient
+        // compute pseudo gradientAt
         for (int i = 0; i < x.length; i++) {
             if (paramRange.contains(i)) {
                 if (x[i] < 0.0) {
@@ -1313,7 +1313,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
             // The current point is projected onto the orthant
             projectOWL(newX, orthant, func); // step (3) in Galen & Gao 2007
 
-            // Evaluate the function and gradient values
+            // Evaluate the function and gradientAt values
             double value  =  func.valueAt(newX);
 
             // Compute the L1 norm of the variables and add it to the object value
@@ -1364,7 +1364,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
         double normGradInDir = ArrayMath.innerProduct(dir, grad);
         say("(" + nf.format(normGradInDir) + ")");
         if (normGradInDir > 0) {
-            say("{WARNING--- direction of positive gradient chosen!}");
+            say("{WARNING--- direction of positive gradientAt chosen!}");
         }
 
         // c1 can be anything between 0 and 1, exclusive (usu. 1/10 - 1/2)
@@ -1427,7 +1427,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
 
         double g0 = ArrayMath.innerProduct(grad, dir);
         if (g0 >= 0) {
-            // We're looking in a direction of positive gradient. This won't work.
+            // We're looking in a direction of positive gradientAt. This won't work.
             // set dir = -grad
             for (int i = 0; i < x.length; i++) {
                 dir[i] = -grad[i];
@@ -1495,7 +1495,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
             }
             if (newPt[a] == aMax && newPt[f] <= fTest && newPt[g] <= gTest) {
                 info = 5;
-                say(" line search failure: sufficient decrease, but gradient is more negative ");
+                say(" line search failure: sufficient decrease, but gradientAt is more negative ");
             }
             if (newPt[a] == aMin && (newPt[f] > fTest || newPt[g] >= gTest)) {
                 info = 4;

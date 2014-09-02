@@ -41,10 +41,10 @@ public class MaximumLikelihoodEstimation extends AbstractConfirmatoryFactorAnaly
         detVc=CVLUD.getDeterminant();
     }
 
-//    public double evaluate(double[] argument, double[] gradient)throws MathRuntimeException{
+//    public double evaluate(double[] argument, double[] gradientAt)throws MathRuntimeException{
 //        System.out.println("1EVALS: " + eval++);
 //        F = evaluate(argument);
-//        computeGradient(argument, gradient);
+//        computeGradient(argument, gradientAt);
 //        return F;
 //    }
     
@@ -100,7 +100,7 @@ public class MaximumLikelihoodEstimation extends AbstractConfirmatoryFactorAnaly
         return fit;
     }
 
-    public double[] gradient(double[] x){
+    public double[] gradientAt(double[] x){
         model.setParameters(x);
         double[] g = null;
         SIGMA = model.getImpliedCovariance(x);
@@ -117,7 +117,7 @@ public class MaximumLikelihoodEstimation extends AbstractConfirmatoryFactorAnaly
     public MultivariateVectorFunction gradient() {
         return new MultivariateVectorFunction() {
             public double[] value(double[] point) {
-                return gradient(point);
+                return gradientAt(point);
             }
         };
     }
@@ -126,7 +126,7 @@ public class MaximumLikelihoodEstimation extends AbstractConfirmatoryFactorAnaly
     public MultivariateFunction partialDerivative(final int k) {
         return new MultivariateFunction() {
             public double value(double[] point){
-                return gradient(point)[k];
+                return gradientAt(point)[k];
             }
         };
     }

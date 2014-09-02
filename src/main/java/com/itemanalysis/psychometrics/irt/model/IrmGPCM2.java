@@ -18,6 +18,8 @@ package com.itemanalysis.psychometrics.irt.model;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
+import java.util.Arrays;
+
 /**
  * This version of the Generalized Partial Credit Model (GPCM) uses a discrimination
  * parameter, a difficulty parameter (b), and one or more threshold parameters. For an
@@ -60,6 +62,12 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
         defaultScoreWeights();
     }
 
+    public double probability(double theta, double[] iparam, int category, double D){
+        double t = numer(theta, iparam, category, D);
+        double b = denom(theta, iparam, D);
+        return t/b;
+    }
+
     /**
      * Computes probability of a response using parameters stored in the object.
      *
@@ -73,6 +81,21 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
         return t/b;
     }
 
+    private double numer(double theta, double[] iparam, int category, double D){
+        double Zk = 0;
+        double a = iparam[0];
+        double b = iparam[1];
+        double[] t = Arrays.copyOfRange(iparam, 2, iparam.length);
+
+        //first category
+        Zk = D*a*(theta-b);
+
+        for(int k=0; k<category; k++){
+            Zk += D*a*(theta-b+t[k]);
+        }
+        return Math.exp(Zk);
+    }
+
     /**
      * Computes the expression for responding in a category.
      * It is the numerator for the probability of observing a response.
@@ -83,8 +106,6 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
      */
     private double numer(double theta, int category){
         double Zk = 0;
-        double expZk = 0;
-        double s = 0;
 
         //first category
         Zk = D*discrimination*(theta-difficulty);
@@ -93,6 +114,17 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
             Zk += D*discrimination*(theta-difficulty+threshold[k]);
         }
         return Math.exp(Zk);
+    }
+
+    private double denom(double theta, double[] iparam, double D){
+        double denom = 0.0;
+        double expZk = 0.0;
+
+        for(int k=0;k<ncat;k++){
+            expZk = numer(theta, iparam, k, D);
+            denom += expZk;
+        }
+        return denom;
     }
 
     /**
@@ -167,9 +199,23 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
         return ev;
     }
 
+    public double[] gradient(double theta, double[] iparam, int k, double D){
+        //empty method
+        return null;
+    }
+
     public double[] gradient(double theta, int k){
         //empty method
         return null;
+    }
+
+    public double addPriorsToLogLikelihood(double ll, double[] iparam){
+        return ll;
+    }
+
+    public double[] addPriorsToLogLikelihoodGradient(double[] loglikegrad, double[] iparam){
+        //empty method
+        return loglikegrad;
     }
 
     public double itemInformationAt(double theta){
@@ -242,26 +288,34 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
     public double tStarProbability(double theta, int category, double intercept, double slope){
         if(category> maxCategory || category<minCategory) return 0;
 
-        double Zk = 0;
-        double expZk = 0;
-        double numer = 0;
-        double denom = 0;
-        double a = discrimination/slope;
-        double b = 0;
-        double t = 0;
-
-        for(int k=0;k<ncat;k++){
-            Zk = 0;
-            for(int v=1;v<(k+1);v++){
-                b = difficulty*slope+intercept;
-                t = threshold[v-1]*slope;
-                Zk += D*a*(theta-(b-t));
-            }
-            expZk = Math.exp(Zk);
-            if(k==category) numer = expZk;
-            denom += expZk;
+        double[] iparam = new double[getNumberOfParameters()];
+        iparam[0] = discrimination/slope;
+        iparam[1] = difficulty*slope+intercept;
+        for(int i=0;i<threshold.length;i++){
+            iparam[i+2] = threshold[i]*slope;
         }
-        return numer/denom;
+        return probability(theta, iparam, category, D);
+
+//        double Zk = 0;
+//        double expZk = 0;
+//        double numer = 0;
+//        double denom = 0;
+//        double a = discrimination/slope;
+//        double b = 0;
+//        double t = 0;
+
+//        for(int k=0;k<ncat;k++){
+//            Zk = 0;
+//            for(int v=1;v<(k+1);v++){
+//                b = difficulty*slope+intercept;
+//                t = threshold[v-1]*slope;
+//                Zk += D*a*(theta-(b-t));
+//            }
+//            expZk = Math.exp(Zk);
+//            if(k==category) numer = expZk;
+//            denom += expZk;
+//        }
+//        return numer/denom;
     }
 
     /**
@@ -272,7 +326,7 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
      */
     public double tStarExpectedValue(double theta, double intercept, double slope){
         double ev = 0;
-        for(int i=1;i< ncat;i++){
+        for(int i=0;i<ncat;i++){
             ev += scoreWeight[i]*tStarProbability(theta, i, intercept, slope);
         }
         return ev;
@@ -281,31 +335,39 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
     public double tSharpProbability(double theta, int category, double intercept, double slope){
         if(category>maxCategory || category<minCategory) return 0;
 
-        double Zk = 0;
-        double expZk = 0;
-        double numer = 0;
-        double denom = 0;
-        double a = discrimination*slope;
-        double b = 0;
-        double t = 0;
-
-        for(int k=0;k<ncat;k++){
-            Zk = 0;
-            for(int v=1;v<(k+1);v++){
-                b = (difficulty-intercept)/slope;
-                t = threshold[v-1]/slope;
-                Zk += D*a*(theta-(b-t));
-            }
-            expZk = Math.exp(Zk);
-            if(k==category) numer = expZk;
-            denom += expZk;
+        double[] iparam = new double[getNumberOfParameters()];
+        iparam[0] = discrimination*slope;
+        iparam[1] = (difficulty-intercept)/slope;
+        for(int i=0;i<threshold.length;i++){
+            iparam[i+2] = threshold[i]/slope;
         }
-        return numer/denom;
+        return probability(theta, iparam, category, D);
+
+//        double Zk = 0;
+//        double expZk = 0;
+//        double numer = 0;
+//        double denom = 0;
+//        double a = discrimination*slope;
+//        double b = 0;
+//        double t = 0;
+//
+//        for(int k=0;k<ncat;k++){
+//            Zk = 0;
+//            for(int v=1;v<(k+1);v++){
+//                b = (difficulty-intercept)/slope;
+//                t = threshold[v-1]/slope;
+//                Zk += D*a*(theta-(b-t));
+//            }
+//            expZk = Math.exp(Zk);
+//            if(k==category) numer = expZk;
+//            denom += expZk;
+//        }
+//        return numer/denom;
     }
 
     public double tSharpExpectedValue(double theta, double intercept, double slope){
         double ev = 0;
-        for(int i=1;i< ncat;i++){
+        for(int i=0;i<ncat;i++){
             ev += scoreWeight[i]*tSharpProbability(theta, i, intercept, slope);
         }
         return ev;
@@ -328,6 +390,24 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
 //=====================================================================================================================//
 // GETTER AND SETTER METHODS MAINLY FOR USE WHEN ESTIMATING PARAMETERS                                                 //
 //=====================================================================================================================//
+
+    public double[] getItemParameterArray(){
+        double[] ip = new double[getNumberOfParameters()];
+        ip[0] = discrimination;
+        ip[1] = difficulty;
+        for(int k=0;k<ncatM1;k++){
+            ip[k+2] = threshold[k];
+        }
+        return ip;
+    }
+
+    public void setStandardErrors(double[] x){
+        discriminationStdError = x[0];
+        difficultyStdError = x[1];
+        for(int k=0;k<ncatM1;k++){
+            thresholdStdError[k] = x[k+2];
+        }
+    }
 
     public double getDifficulty(){
         return difficulty;
@@ -393,6 +473,26 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
         throw new UnsupportedOperationException();
     }
 
+    public void setSlipping(double slipping){
+        throw new UnsupportedOperationException();
+    }
+
+    public void setProposalSlipping(double slipping){
+        throw new UnsupportedOperationException();
+    }
+
+    public void setSlippingStdError(double slipping){
+        throw new UnsupportedOperationException();
+    }
+
+    public double getSlipping(){
+        throw new UnsupportedOperationException();
+    }
+
+    public double getSlippingStdError(){
+        throw new UnsupportedOperationException();
+    }
+
     public double[] getThresholdParameters(){
         return threshold;
     }
@@ -422,6 +522,10 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
     }
 
     public void setStepParameters(double[] step){
+        throw new UnsupportedOperationException();
+    }
+
+    public void setProposalStepParameters(double[] step){
         throw new UnsupportedOperationException();
     }
 

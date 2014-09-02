@@ -17,7 +17,7 @@ package com.itemanalysis.psychometrics.analysis;
 
 /**
  * An instantiation of AbstractMultivariateFunction for testing purposes only.
- * It exists to check the accuracy of the numerical gradient methods.
+ * It exists to check the accuracy of the numerical gradientAt methods.
  *
  */
 public class ExampleMultivariateFunction extends AbstractMultivariateFunction {

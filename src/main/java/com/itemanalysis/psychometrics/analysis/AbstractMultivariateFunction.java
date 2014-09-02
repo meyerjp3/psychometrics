@@ -16,17 +16,15 @@
 package com.itemanalysis.psychometrics.analysis;
 
 
-import com.itemanalysis.psychometrics.optimization.DiffFunction;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
-import org.apache.commons.math3.analysis.differentiation.MultivariateDifferentiableFunction;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
 import java.util.Arrays;
 
 /**
- * Abstract class that includes methods for numeric computations of teh gradient, partial derivatives, and hessian.
+ * Abstract class that includes methods for numeric computations of teh gradientAt, partial derivatives, and hessian.
  * Extend this class with an implementation of the rho(double[] x) method as specified in the MultivariateRealFunction
  * interface.
  *
@@ -56,7 +54,7 @@ public abstract class AbstractMultivariateFunction implements MultivariateFuncti
     public MultivariateVectorFunction gradient() {
         return new MultivariateVectorFunction() {
             public double[] value(double[] point){
-                return gradient(point);
+                return gradientAt(point);
             }
         };
     }
@@ -64,20 +62,20 @@ public abstract class AbstractMultivariateFunction implements MultivariateFuncti
     public MultivariateFunction partialDerivative(final int k) {
         return new MultivariateFunction() {
             public double value(double[] point){
-                return gradient(point)[k];
+                return gradientAt(point)[k];
             }
         };
     }
 
     /**
-     * Numerically compute gradient by the central difference method. Override this method
-     * when the analytic gradient is available.
+     * Numerically compute gradientAt by the central difference method. Override this method
+     * when the analytic gradientAt is available.
      *
      *
      * @param x
      * @return
      */
-    public double[] gradient(double[] x){
+    public double[] gradientAt(double[] x){
         int n = x.length;
         double[] grd = new double[n];
         double[] u1 = new double[n];
@@ -112,7 +110,7 @@ public abstract class AbstractMultivariateFunction implements MultivariateFuncti
         int n = x.length;
         double[][] hessian = new double[n][n];
         double[] gradientAtXpls = null;
-        double[] gradientAtX = gradient(x);
+        double[] gradientAtX = gradientAt(x);
         double xtemp = 0.0;
         double stepSize = 0.0001;
 
@@ -121,7 +119,7 @@ public abstract class AbstractMultivariateFunction implements MultivariateFuncti
             xtemp = x[j];
             x[j] = xtemp + stepSize;
             double [] x_copy = Arrays.copyOfRange(x, 0, x.length);
-            gradientAtXpls = gradient(x_copy);
+            gradientAtXpls = gradientAt(x_copy);
             x[j] = xtemp;
             for(int i=0;i<n;i++){
                 hessian[i][j] = (gradientAtXpls[i]-gradientAtX[i])/stepSize;

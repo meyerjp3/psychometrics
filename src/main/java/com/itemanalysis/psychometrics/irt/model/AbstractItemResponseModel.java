@@ -76,7 +76,7 @@ public abstract class AbstractItemResponseModel implements ItemResponseModel{
     }
 
     public void setScoreWeights(double[] scoreWeight)throws DimensionMismatchException {
-        if(scoreWeight.length!=ncat) throw new DimensionMismatchException(scoreWeight.length, 2);
+        if(scoreWeight.length!=ncat) throw new DimensionMismatchException(scoreWeight.length, ncat);
         this.scoreWeight = scoreWeight;
         for(int i=0;i<scoreWeight.length;i++){
             minWeight = Math.min(minWeight, scoreWeight[i]);

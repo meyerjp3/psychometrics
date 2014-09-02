@@ -217,7 +217,7 @@ public class MINRESmethod extends AbstractFactorMethod {
          * @return
          */
         @Override
-        public double[] gradient(double[] x){
+        public double[] gradientAt(double[] x){
             double[] sqrtPsi = new double[nVariables];
             double[] invSqrtPsi = new double[nVariables];
             for(int i=0;i<nVariables;i++){
@@ -264,7 +264,7 @@ public class MINRESmethod extends AbstractFactorMethod {
         public ObjectiveFunctionGradient getObjectiveFunctionGradient() {
             return new ObjectiveFunctionGradient(new MultivariateVectorFunction() {
                 public double[] value(double[] point) {
-                    return gradient(point);
+                    return gradientAt(point);
                 }
             });
         }

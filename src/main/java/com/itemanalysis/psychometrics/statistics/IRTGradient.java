@@ -17,7 +17,7 @@
 package com.itemanalysis.psychometrics.statistics;
 
 /**
- * This class is used for holding gradient values for IRT models.
+ * This class is used for holding gradientAt values for IRT models.
  *
  * @author J. Patrick Meyer
  * @since November 22, 2008

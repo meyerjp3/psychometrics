@@ -16,36 +16,45 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
 /**
- * Stores the count of the expected number of responses at each item score level for item j.
- * For k = 0, 1, 2, ..., ncat categories and l = 0, 1, 2, ..., nPoints quadrature points.
+ * Stores the count of the expected number of responses to category k for item j.
+ * For k = 0, 1, 2, ..., ncat categories and t = 0, 1, 2, ..., nPoints quadrature points.
  *
  */
 public class EstepItemEstimates {
 
     private int ncat = 2;
     private int nPoints = 0;
-    private double[][] rjkl = null;
+    private double[][] rjkt = null;
 
     public EstepItemEstimates(int ncat, int nPoints){
         this.ncat = ncat;
         this.nPoints = nPoints;
-        rjkl = new double[ncat][nPoints];
+        rjkt = new double[ncat][nPoints];
     }
 
-    public void incrementRjkl(int k, int l, double value){
-        rjkl[k][l]+=value;
+//    public int getNumberOfCategories(){
+//        return ncat;
+//    }
+
+    public void incrementRjkt(int k, int t, double value){
+        rjkt[k][t]+=value;
     }
 
-    public double[][] getRjkl(){
-        return rjkl;
-    }
+//    public void incrementRj(double[][] value){
+//        for(int k=0;k<value.length;k++){
+//            for(int t=0;t<value[0].length;t++){
+//                rjkt[k][t] += value[k][t];
+//            }
+//        }
+//
+//    }
 
-    public double[] getRjklAt(int k){
-        return rjkl[k];
-    }
+//    public double[][] getRjkt(){
+//        return rjkt;
+//    }
 
-    public double getRjklAt(int k, int l){
-        return rjkl[k][l];
+    public double getRjktAt(int k, int t){
+        return rjkt[k][t];
     }
 
 

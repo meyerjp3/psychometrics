@@ -21,6 +21,7 @@ package com.itemanalysis.psychometrics.irt.model;
 public enum IrmType {
 
     L3,     //to indicate use of the object Irm3PL
+    L4,     //to indicate use of Irm4PL
     GPCM,   //to indicate use of the object IrmGPCM
     GPCM2,  //to indicate use of the object IrmGPCM2
     PCM,     //to indicate use of the object IrmPCM

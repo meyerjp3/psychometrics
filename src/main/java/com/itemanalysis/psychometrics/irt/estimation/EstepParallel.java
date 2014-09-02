@@ -17,8 +17,8 @@ package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
-import org.apache.commons.math3.distribution.NormalDistribution;
 
+import java.util.Arrays;
 import java.util.concurrent.RecursiveTask;
 
 /**
@@ -31,13 +31,14 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
     private int length = 0;
     private int nItems = 0;
     private int nPoints = 0;
+    private int[] ncat = null;
     private ItemResponseVector[] responseVector = null;
     private DistributionApproximation latentDistribution = null;
     private ItemResponseModel[] irm = null;
-    private static int PARALLEL_THRESHOLD = 250;
+    private static int PARALLEL_THRESHOLD = 250;//TODO change back to 250
 
     /**
-     * Default constructoir may be called recursively for parallel compuations.
+     * Default constructor may be called recursively for parallel computations.
      *
      * @param responseVector response vectors for a given set of data
      * @param irm an array of item response models whose parameters are being estimated
@@ -54,6 +55,12 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
         this.nItems = irm.length;
         this.start = start;
         this.length = length;
+
+        ncat = new int[nItems];
+        for(int j=0;j<nItems;j++){
+            ncat[j] = irm[j].getNcat();
+        }
+
     }
 
     /**
@@ -67,33 +74,52 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
         double response = 0;
         double point = 0.0;
         double density = 0.0;
-        double mlike = 0.0;
         double value = 0.0;
-        double clike = 0.0;
         double freq = 0.0;
-        EstepEstimates estepEstimates = new EstepEstimates(nItems, nPoints);
+        EstepEstimates estepEstimates = new EstepEstimates(nItems, ncat, nPoints);
+
+        double[] conditionalLikelihood = new double[nPoints];
+        double marginalLikelihood = 0;
 
         for(int l=start;l<(start+length);l++){
-            mlike = computeMarginalLikelihood(responseVector[l]);
+
+            marginalLikelihood = 0;
+            for(int t=0;t<nPoints;t++){
+                point = latentDistribution.getPointAt(t);
+                density = latentDistribution.getDensityAt(t);
+                conditionalLikelihood[t] = conditionalLikelihood(point, responseVector[l]);
+                marginalLikelihood += conditionalLikelihood[t]*density;
+            }
+
             freq = responseVector[l].getFrequency();
-            for(int k=0;k<nPoints;k++){
-                point = latentDistribution.getPointAt(k);
-                density = latentDistribution.getDensityAt(k);
-                clike = conditionalLikelihood(point, responseVector[l]);
+            for(int t=0;t<nPoints;t++){
+                density = latentDistribution.getDensityAt(t);
 
                 //nk
-                value = freq*clike*density/mlike;
-                estepEstimates.incrementNk(k, value);
+                value = freq*conditionalLikelihood[t]*density/marginalLikelihood;
+                estepEstimates.incrementNt(t, value);
 
-                //rjk
+                //rjkt
                 for(int j=0;j<nItems;j++){
                     response = Byte.valueOf(responseVector[l].getResponseAt(j)).doubleValue();
-                    value = response*freq*clike*density/mlike;
-                    estepEstimates.incrementRjk(j, k, value);
+
+                    for(int k=0;k<irm[j].getNcat();k++){
+
+                        //TODO might need to change k to the item score weight??
+                        value = 0;
+                        if((int)response==k) value = freq*conditionalLikelihood[t]*density/marginalLikelihood; //value = freq*clike*density/mlike;
+
+                        estepEstimates.incrementRjkt(j, k, t, value);
+                    }
+
+
                 }
             }
-            estepEstimates.incrementLoglikelihood(freq*Math.log(mlike));
-        }
+
+            estepEstimates.incrementLoglikelihood(freq*Math.log(marginalLikelihood));
+
+        }//end l loop over response vectors
+
         return estepEstimates;
     }
 
@@ -125,23 +151,22 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
      * @param responseVector a response vector
      */
     private double conditionalLikelihood(double quadPoint, ItemResponseVector responseVector){
+        int x = 0;
+        int u = 0;
         double value = 1.0;
         for(int j=0;j<nItems;j++){
-            value *= irm[j].probability(quadPoint, responseVector.getResponseAt(j));
+
+            x = Byte.valueOf(responseVector.getResponseAt(j)).intValue();
+
+            for(int k=0;k<ncat[j];k++){
+
+                //TODO might need to change  k to the item score weight
+                if(x==k) value *= irm[j].probability(quadPoint, k);
+
+            }
+
         }
         return value;
-    }
-
-    /**
-     * Computes the marginal likelihood of a response vector.
-     *
-     */
-    private double computeMarginalLikelihood(ItemResponseVector itemResponseVector){
-        double mlike = 0.0;
-        for(int k=0;k<nPoints;k++){
-            mlike += conditionalLikelihood(latentDistribution.getPointAt(k), itemResponseVector)*latentDistribution.getDensityAt(k);
-        }
-        return mlike;
     }
 
 }
