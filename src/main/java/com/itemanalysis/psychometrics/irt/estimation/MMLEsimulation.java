@@ -50,7 +50,7 @@ public class MMLEsimulation {
 
 //            pl3.setDiscriminationPrior(new ItemParamPriorBeta4(1.75, 3.0, 0.0, 3.0));//ICL default
 //            pl3.setDifficultyPrior(new ItemParamPriorBeta4(1.01, 1.01, -6.0, 6.0));//default ICL prior
-            pl3.setguessingPrior(new ItemParamPriorBeta4(3.75, 4, 0.0, 0.5));//default ICL prior
+            pl3.setGuessingPrior(new ItemParamPriorBeta4(3.75, 4, 0.0, 0.5));//default ICL prior
             irm[j] = pl3;
         }
 

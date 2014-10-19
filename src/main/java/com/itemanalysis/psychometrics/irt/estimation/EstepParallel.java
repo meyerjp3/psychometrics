@@ -35,7 +35,7 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
     private ItemResponseVector[] responseVector = null;
     private DistributionApproximation latentDistribution = null;
     private ItemResponseModel[] irm = null;
-    private static int PARALLEL_THRESHOLD = 250;//TODO change back to 250
+    private static int PARALLEL_THRESHOLD = 250;//Use default of 250
 
     /**
      * Default constructor may be called recursively for parallel computations.
@@ -103,14 +103,17 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
                 for(int j=0;j<nItems;j++){
                     response = Byte.valueOf(responseVector[l].getResponseAt(j)).doubleValue();
 
-                    for(int k=0;k<irm[j].getNcat();k++){
+                    if(response!=-1){//Do not count missing responses
+                        for(int k=0;k<irm[j].getNcat();k++){
 
-                        //TODO might need to change k to the item score weight??
-                        value = 0;
-                        if((int)response==k) value = freq*conditionalLikelihood[t]*density/marginalLikelihood; //value = freq*clike*density/mlike;
+                            //TODO might need to change k to the item score weight??
+                            value = 0;
+                            if((int)response==k) value = freq*conditionalLikelihood[t]*density/marginalLikelihood; //value = freq*clike*density/mlike;
 
-                        estepEstimates.incrementRjkt(j, k, t, value);
+                            estepEstimates.incrementRjkt(j, k, t, value);
+                        }
                     }
+
 
 
                 }
@@ -151,19 +154,19 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
      * @param responseVector a response vector
      */
     private double conditionalLikelihood(double quadPoint, ItemResponseVector responseVector){
-        int x = 0;
-        int u = 0;
+        int response = 0;
         double value = 1.0;
         for(int j=0;j<nItems;j++){
 
-            x = Byte.valueOf(responseVector.getResponseAt(j)).intValue();
+            response = Byte.valueOf(responseVector.getResponseAt(j)).intValue();
+            if(response!=-1){
+                for(int k=0;k<ncat[j];k++){
+                    //TODO might need to change  k to the item score weight
+                    if(response==k) value *= irm[j].probability(quadPoint, k);
 
-            for(int k=0;k<ncat[j];k++){
-
-                //TODO might need to change  k to the item score weight
-                if(x==k) value *= irm[j].probability(quadPoint, k);
-
+                }
             }
+
 
         }
         return value;

@@ -65,6 +65,10 @@ public interface DistributionApproximation {
 
     public void setDensityAt(int index, double density);
 
+    public double getMinimum();
+
+    public double getMaximum();
+
     public double getMean();
 
     public double getStandardDeviation();

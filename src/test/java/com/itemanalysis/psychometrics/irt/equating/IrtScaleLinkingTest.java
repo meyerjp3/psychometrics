@@ -2,10 +2,7 @@ package com.itemanalysis.psychometrics.irt.equating;
 
 import com.itemanalysis.psychometrics.distribution.UniformDistributionApproximation;
 import com.itemanalysis.psychometrics.distribution.UserSuppliedDistributionApproximation;
-import com.itemanalysis.psychometrics.irt.model.Irm3PL;
-import com.itemanalysis.psychometrics.irt.model.IrmGPCM2;
-import com.itemanalysis.psychometrics.irt.model.IrmPCM;
-import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
+import com.itemanalysis.psychometrics.irt.model.*;
 import org.junit.Test;
 
 import java.util.LinkedHashMap;
@@ -556,11 +553,135 @@ public class IrtScaleLinkingTest {
         assertEquals("  Stocking-Lord Scale test", 1.0, sl.getScale(), 1e-4);
         assertEquals("  Stocking-Lord objective function value test", 0.0032013068, irtScaleLinking.getStockingLordObjectiveFunctionValue(), 1e-5);
 
+    }
 
 
+    /**
+     * Item parameters for Form X and Form Y were obtained using ICL. True linking results obtained with
+     * STUIRT using teh following syntax on 10/18/2014.
+     *
+     * NE 13
+     *   1  L3 2 DW  1.0  0.762370  1.009476 0.109968
+     *   2  L3 2 DW  1.0  1.336925 -0.437730 0.157718
+     *   3  L3 2 DW  1.0  1.876282  1.093312 0.135095
+     *   4  L3 2 DW  1.0  0.830231 -1.502055 0.227047
+     *   5  L3 2 DW  1.0  1.274011  1.029875 0.280884
+     *   6  L3 2 DW  1.0  1.139027 -0.142340 0.132300
+     *   7  L3 2 DW  1.0  0.645040  0.785645 0.176663
+     *   8  L3 2 DW  1.0  1.099075 -1.501227 0.183540
+     *   9  L3 2 DW  1.0  1.173436 -0.055542 0.247029
+     *   10 L3 2 DW  1.0  0.855866  1.022627 0.209809
+     *   11 PC 4 DW  1.0  0.871415 IS 0.0 -0.765898 -0.262353 1.077962
+     *   12 PC 4 DW  1.0  0.978374 IS 0.0 -0.837283 -0.275441 1.136771
+     *   13 PC 4 DW  1.0  0.856862 IS 0.0 -1.194004  0.318944 1.059092
+     *
+     *   OL 13
+     *   1  L3 2 DW  1.0  1.053310  1.280453 0.220378
+     *   2  L3 2 DW  1.0  1.525842 -0.384423 0.166410
+     *   3  L3 2 DW  1.0  1.943304  1.073916 0.131654
+     *   4  L3 2 DW  1.0  0.788018 -1.637711 0.248980
+     *   5  L3 2 DW  1.0  1.005941  0.930207 0.216200
+     *   6  L3 2 DW  1.0  1.230981 -0.224566 0.150033
+     *   7  L3 2 DW  1.0  1.105784  1.082957 0.278372
+     *   8  L3 2 DW  1.0  1.108659 -1.358290 0.192793
+     *   9  L3 2 DW  1.0  1.122514 -0.130496 0.214603
+     *   10 L3 2 DW  1.0  0.777442  1.077921 0.228847
+     *   11 PC 4 DW  1.0  0.840509 IS 0.0 -0.681719 -0.412208 1.126726
+     *   12 PC 4 DW  1.0  0.968292 IS 0.0 -0.717030 -0.332964 1.010151
+     *   13 PC 4 DW  1.0  0.809768 IS 0.0 -1.360084  0.274189 1.085692
+     *
+     *   CI 13 AO
+     *
+     *   OP
+     *   SY BI BI
+     *   FS DO DO
+     *   LM 1.0 0.0 / 10 3.0 0.0001 IN
+     *   BY
+     *
+     */
+    @Test
+    public void mixedFormatTestSTUIRT(){
+        System.out.println("MIXED-MISSING STUIRT COMPARISON");
+        LinkedHashMap<String, ItemResponseModel> irmX = new LinkedHashMap<String, ItemResponseModel>();
+        LinkedHashMap<String, ItemResponseModel> irmY = new LinkedHashMap<String, ItemResponseModel>();
 
+        //Form X
+        irmX.put("v1", new Irm3PL(0.76237,1.009476,0.109968, 1.0));
+        irmX.put("v2", new Irm3PL(1.336925,-0.43773,0.157718, 1.0));
+        irmX.put("v3", new Irm3PL(1.876282,1.093312,0.135095, 1.0));
+        irmX.put("v4", new Irm3PL(0.830231,-1.502055,0.227047, 1.0));
+        irmX.put("v5", new Irm3PL(1.274011,1.029875,0.280884, 1.0));
+        irmX.put("v6", new Irm3PL(1.139027,-0.14234,0.1323, 1.0));
+        irmX.put("v7", new Irm3PL(0.64504,0.785645,0.176663, 1.0));
+        irmX.put("v8", new Irm3PL(1.099075,-1.501227,0.18354, 1.0));
+        irmX.put("v9", new Irm3PL(1.173436,-0.055542,0.247029, 1.0));
+        irmX.put("v10", new Irm3PL(0.855866,1.022627,0.209809, 1.0));
+
+        double[] step1 = {0.0, -0.765898,-0.262353,1.077962};
+        irmX.put("v11", new IrmGPCM(0.871415, step1, 1.0));
+
+        double[] step2 = {0.0, -0.837283,-0.275441,1.136771};
+        irmX.put("v12", new IrmGPCM(0.978374, step2, 1.0));
+
+        double[] step3 = {0.0, -1.194004,0.318944,1.059092};
+        irmX.put("v13", new IrmGPCM(0.856862, step3, 1.0));
+
+
+        //Form Y
+        irmY.put("v1", new Irm3PL(1.05331,1.280453,0.220378, 1.0));
+        irmY.put("v2", new Irm3PL(1.525842,-0.384423,0.16641, 1.0));
+        irmY.put("v3", new Irm3PL(1.943304,1.073916,0.131654, 1.0));
+        irmY.put("v4", new Irm3PL(0.788018,-1.637711,0.24898, 1.0));
+        irmY.put("v5", new Irm3PL(1.005941,0.930207,0.2162, 1.0));
+        irmY.put("v6", new Irm3PL(1.230981,-0.224566,0.150033, 1.0));
+        irmY.put("v7", new Irm3PL(1.105784,1.082957,0.278372, 1.0));
+        irmY.put("v8", new Irm3PL(1.108659,-1.35829,0.192793, 1.0));
+        irmY.put("v9", new Irm3PL(1.122514,-0.130496,0.214603, 1.0));
+        irmY.put("v10", new Irm3PL(0.777442,1.077921,0.228847, 1.0));
+
+        double[] step1Y = {0.0, -0.681719,-0.412208,1.126726};
+        irmY.put("v11", new IrmGPCM(0.840509, step1Y, 1.0));
+
+        double[] step2Y = {0.0, -0.71703,-0.332964,1.010151};
+        irmY.put("v12", new IrmGPCM(0.968292, step2Y, 1.0));
+
+        double[] step3Y = {0.0, -1.360084,0.274189,1.085692};
+        irmY.put("v13", new IrmGPCM(0.809768, step3Y, 1.0));
+
+        //STUIRT default
+        UniformDistributionApproximation uniform = new UniformDistributionApproximation(-3.0, 3.0, 25);
+
+        IrtScaleLinking irtScaleLinking = new IrtScaleLinking(irmX, irmY, uniform, uniform);
+        irtScaleLinking.setPrecision(6);
+        irtScaleLinking.computeCoefficients();
+
+        System.out.println(irtScaleLinking.toString());
+
+        MeanMeanMethod mm = irtScaleLinking.getMeanMeanMethod();
+        MeanSigmaMethod ms = irtScaleLinking.getMeanSigmaMethod();
+        HaebaraMethod hb = irtScaleLinking.getHaebaraMethod();
+        StockingLordMethod sl = irtScaleLinking.getStockingLordMethod();
+
+        //Test Mean/mean results
+        assertEquals("  Mean/mean Intercept test", 0.010863, mm.getIntercept(), 1e-5);
+        assertEquals("  Mean/mean Scale test", 0.959283, mm.getScale(), 1e-5);
+
+        //Test Mean/sigma results
+        assertEquals("  Mean/sigma Intercept test", 0.004596, ms.getIntercept(), 1e-5);
+        assertEquals("  Mean/sigma Scale test", 1.035626, ms.getScale(), 1e-5);
+
+        //Test Haebara results
+        assertEquals("  Haebara Intercept test", -0.022233, hb.getIntercept(), 1e-4);
+        assertEquals("  Haebara Scale test", 0.996992, hb.getScale(), 1e-4);
+        assertEquals("  Haebara objective function value test", 0.000954, irtScaleLinking.getHaebaraObjectiveFunctionValue(), 1e-6);
+
+        //Test Stocking-Lord results
+        assertEquals("  Stocking-Lord Intercept test", -0.026322, sl.getIntercept(), 1e-4);
+        assertEquals("  Stocking-Lord Scale test", 1.001785, sl.getScale(), 1e-4);
+        assertEquals("  Stocking-Lord objective function value test", 0.004053, irtScaleLinking.getStockingLordObjectiveFunctionValue(), 1e-6);
 
     }
+
 
 
 }

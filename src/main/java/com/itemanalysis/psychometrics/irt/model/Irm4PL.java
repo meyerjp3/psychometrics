@@ -19,6 +19,7 @@ import com.itemanalysis.psychometrics.irt.estimation.ItemParamPrior;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
+import java.util.Arrays;
 import java.util.Formatter;
 
 public class Irm4PL extends AbstractItemResponseModel {
@@ -85,21 +86,25 @@ public class Irm4PL extends AbstractItemResponseModel {
     }
 
     private double probRight(double theta, double[] iparam, double D){
+        if(iparam[0]<0) return 0;
         double z = Math.exp(D*iparam[0]*(theta-iparam[1]));
         return  iparam[2]+(iparam[3]-iparam[2])*z/(1+z);
     }
 
     private double probWrong(double theta, double[] iparam, double D){
+        if(iparam[0]<0) return 0;
         return 1.0 - probRight(theta, iparam, D);
     }
 
     private double probRight(double theta){
+        if(guessing < 0) return 0;
         double top = Math.exp(D*discrimination*(theta-difficulty));
         double prob = guessing + (slipping-guessing)*top/(1+top);
         return prob;
     }
 
     private double probWrong(double theta){
+        if(guessing < 0) return 0;
         return 1.0-probRight(theta);
     }
 
@@ -163,11 +168,20 @@ public class Irm4PL extends AbstractItemResponseModel {
     }
 
     public double derivTheta(double theta){
-        throw new UnsupportedOperationException("Deriv theta not yet implemented");
+        return Double.NaN;
     }
 
     public double itemInformationAt(double theta){
-        throw new UnsupportedOperationException("Item information not yet implemented");
+        return Double.NaN;
+    }
+
+    public double[] nonZeroPrior(double[] param){
+        double[] p = Arrays.copyOf(param, param.length);
+        if(discriminationPrior!=null) p[0] = discriminationPrior.nearestNonZero(param[0]);
+        if(difficultyPrior!=null) p[1] = difficultyPrior.nearestNonZero(param[1]);
+        if(guessingPrior!=null) p[2] = guessingPrior.nearestNonZero(param[2]);
+        if(slippingPrior!=null) p[3] = slippingPrior.nearestNonZero(param[3]);
+        return p;
     }
 
     public void setDiscriminationPrior(ItemParamPrior discriminationPrior){
@@ -178,13 +192,18 @@ public class Irm4PL extends AbstractItemResponseModel {
         this.difficultyPrior = difficultyPrior;
     }
 
-    public void setguessingPrior(ItemParamPrior guessingPrior){
+    public void setGuessingPrior(ItemParamPrior guessingPrior){
         this.guessingPrior = guessingPrior;
     }
 
     public void setSlippingPrior(ItemParamPrior slippingPrior){
         this.slippingPrior = slippingPrior;
     }
+
+    public void setStepPriorAt(ItemParamPrior prior, int index){
+
+    }
+
 
     public ItemParamPrior getDiscriminationPrior(){
         return discriminationPrior;
@@ -639,17 +658,26 @@ public class Irm4PL extends AbstractItemResponseModel {
      */
     public double acceptAllProposalValues(){
         double max = 0;
+        double delta = 0;
 
-        max = Math.max(max, this.difficulty - proposalDifficulty);
-        this.difficulty = proposalDifficulty;
-
-        max = Math.max(max, this.discrimination - proposalDiscrimination);
+        delta = Math.abs(this.discrimination - proposalDiscrimination);
+        if(proposalDiscrimination>=1) delta /= proposalDiscrimination;
+        max = Math.max(max, delta);
         this.discrimination = proposalDiscrimination;
 
-        max = Math.max(max, Math.abs(this.guessing-proposalGuessing));
+        delta = Math.abs(this.difficulty - proposalDifficulty);
+        if(proposalDifficulty>=1) delta /= proposalDifficulty;
+        max = Math.max(max, delta);
+        this.difficulty = proposalDifficulty;
+
+        delta = Math.abs(this.guessing-proposalGuessing);
+        if(proposalGuessing>=1) delta /= proposalGuessing;
+        max = Math.max(max, delta);
         this.guessing = proposalGuessing;
 
-        max = Math.max(max, Math.abs(this.slipping-proposalSlipping));
+        delta = Math.abs(this.slipping-proposalSlipping);
+        if(proposalSlipping>=1) delta /= proposalSlipping;
+        max = Math.max(max, delta);
         this.slipping = proposalSlipping;
 
         return max;
@@ -657,15 +685,23 @@ public class Irm4PL extends AbstractItemResponseModel {
 
 
     public double[] getStepParameters(){
-        throw new UnsupportedOperationException();
+        double[] sp = new double[ncat];
+        for(int k=0;k<ncat;k++){
+            sp[k] = Double.NaN;
+        }
+        return sp;
     }
 
     public void setStepStdError(double[] stdError){
-        throw new UnsupportedOperationException();
+
     }
 
     public double[] getStepStdError(){
-        throw new UnsupportedOperationException();
+        double[] sp = new double[ncat];
+        for(int k=0;k<ncat;k++){
+            sp[k] = Double.NaN;
+        }
+        return sp;
     }
 
     public double[] getThresholdParameters(){
@@ -674,27 +710,31 @@ public class Irm4PL extends AbstractItemResponseModel {
     }
 
     public double[] getThresholdStdError(){
-        throw new UnsupportedOperationException();
+        double[] sp = new double[ncat];
+        for(int k=0;k<ncat;k++){
+            sp[k] = Double.NaN;
+        }
+        return sp;
     }
 
     public void setThresholdStdError(double[] stdError){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setStepParameters(double[] step){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setProposalStepParameters(double[] step){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setThresholdParameters(double[] thresholdParameters){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setProposalThresholds(double[] thresholds){
-        throw new UnsupportedOperationException();
+
     }
 //=====================================================================================================================//
 // END GETTER AND SETTER METHODS                                                                                       //
@@ -710,20 +750,47 @@ public class Irm4PL extends AbstractItemResponseModel {
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
 
-        f.format("%10s", getName().toString());f.format("%2s", ": ");
-        f.format("%1s", "[");
-        f.format("% .6f", getDiscrimination()); f.format("%2s", ", ");
-        f.format("% .6f", getDifficulty()); f.format("%2s", ", ");
-        f.format("% .6f", getGuessing()); f.format("%2s", ", ");
-        f.format("% .6f", getSlipping());f.format("%1s", "]");
-        f.format("%n");
-        f.format("%10s", "");f.format("%2s", "");
-        f.format("%1s", "(");
-        f.format("% .6f", getDiscriminationStdError()); f.format("%2s", ", ");
-        f.format("% .6f", getDifficultyStdError()); f.format("%2s", ", ");
-        f.format("% .6f", getGuessingStdError()); f.format("%2s", ", ");
-        f.format("% .6f", getSlippingStdError());f.format("%1s", ")");
+        String name = "";
+        if(getName()!=null){
+            name = getName().toString();
+        }
+        f.format("%-18s", name);f.format("%2s", "");
+
+        f.format("%-3s", "L4");f.format("%4s", "");
+
+        f.format("% 4.2f", getDiscrimination()); f.format("%1s", "");
+        f.format("(%4.2f)", getDiscriminationStdError()); f.format("%4s", "");
+
+        f.format("% 4.2f", getDifficulty()); f.format("%1s", "");
+        f.format("(%4.2f)", getDifficultyStdError()); f.format("%4s", "");
+
+        f.format("% 4.2f", getGuessing()); f.format("%1s", "");
+        f.format("(%4.2f)", getGuessingStdError()); f.format("%4s", "");
+
+        f.format("% 4.2f", getSlipping());  f.format("%1s", "");
+        f.format("(%4.2f)", getSlippingStdError());  f.format("%4s", "");
+
         return f.toString();
+
+//
+//
+//        StringBuilder sb = new StringBuilder();
+//        Formatter f = new Formatter(sb);
+//
+//        f.format("%10s", getName().toString());f.format("%2s", ": ");
+//        f.format("%1s", "[");
+//        f.format("% .6f", getDiscrimination()); f.format("%2s", ", ");
+//        f.format("% .6f", getDifficulty()); f.format("%2s", ", ");
+//        f.format("% .6f", getGuessing()); f.format("%2s", ", ");
+//        f.format("% .6f", getSlipping());f.format("%1s", "]");
+//        f.format("%n");
+//        f.format("%10s", "");f.format("%2s", "");
+//        f.format("%1s", "(");
+//        f.format("% .6f", getDiscriminationStdError()); f.format("%2s", ", ");
+//        f.format("% .6f", getDifficultyStdError()); f.format("%2s", ", ");
+//        f.format("% .6f", getGuessingStdError()); f.format("%2s", ", ");
+//        f.format("% .6f", getSlippingStdError());f.format("%1s", ")");
+//        return f.toString();
     }
 
 

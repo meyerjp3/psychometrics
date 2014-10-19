@@ -22,9 +22,10 @@ public enum IrmType {
 
     L3,     //to indicate use of the object Irm3PL
     L4,     //to indicate use of Irm4PL
-    GPCM,   //to indicate use of the object IrmGPCM
-    GPCM2,  //to indicate use of the object IrmGPCM2
-    PCM,     //to indicate use of the object IrmPCM
+    GPCM,   //to indicate use of the object IrmGPCM (step parameterization of GPCM)
+    GPCM2,  //to indicate use of the object IrmGPCM2 (difficulty plus threshold  parameterization of GPCM as in PARSCALE)
+    PCM,     //to indicate use of the object IrmPCM (difficulty plus threshold parameterization of PCM)
+    PCM2,   //to indicate use of the object IrmPCM (step parameterization of PCM)
     GRM     //o indicate use of the object IrmGRM
 
 }

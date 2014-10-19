@@ -27,7 +27,7 @@ import java.util.Arrays;
  * a missing response.
  *
  */
-public class ItemResponseVector{
+public class ItemResponseVector implements Comparable<ItemResponseVector>{
 
     /**
      * The item response vector.
@@ -59,6 +59,8 @@ public class ItemResponseVector{
      */
     private String groupID = "";
 
+    private String responseString = "";
+
     /**
      * A constructor that is designed for storing all response vectors during MML estimation.
      *
@@ -75,6 +77,7 @@ public class ItemResponseVector{
                 sumScore += response[i];
                 validResponses++;
             }
+            responseString += response[i];
         }
     }
 
@@ -113,6 +116,7 @@ public class ItemResponseVector{
         response = new byte[nItems];
         sumScore = 0;
         validResponses = 0;
+        responseString = "";
     }
 
     /**
@@ -132,6 +136,7 @@ public class ItemResponseVector{
                 sumScore += response[i];
                 validResponses++;
             }
+            responseString += response[i];
         }
     }
 
@@ -181,6 +186,10 @@ public class ItemResponseVector{
         return freq;
     }
 
+    public void setFrequency(double freq){
+        this.freq = freq;
+    }
+
     public double getSumScore(){
         return sumScore;
     }
@@ -203,6 +212,11 @@ public class ItemResponseVector{
         return s;
     }
 
+    public String printResponseVector(){
+        String s = this.toString() + "  FREQ: " + getFrequency();
+        return s;
+    }
+
     @Override
     public boolean equals(Object o){
         if(o instanceof byte[]){
@@ -216,6 +230,11 @@ public class ItemResponseVector{
     @Override
     public int hashCode(){
         return Arrays.hashCode(this.response);
+    }
+
+    @Override
+    public int compareTo(ItemResponseVector other){
+        return responseString.compareTo(other.responseString);
     }
 
 

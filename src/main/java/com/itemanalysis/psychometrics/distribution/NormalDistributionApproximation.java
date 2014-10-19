@@ -156,12 +156,22 @@ public final class NormalDistributionApproximation implements DistributionApprox
         points[index] = value;
     }
 
+    public double getMinimum(){
+        return points[0];
+    }
+
+    public double getMaximum(){
+        return points[numberOfPoints-1];
+    }
+
     public double getMean(){
         double m = 0.0;
+        double denom = 0.0;
         for(int i=0;i<numberOfPoints;i++){
             m += points[i]*density[i];
+            denom += density[i];
         }
-        return m;
+        return m/denom;
     }
 
     public double getStandardDeviation(){

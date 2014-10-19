@@ -23,8 +23,6 @@ package com.itemanalysis.psychometrics.irt.estimation;
 public class ItemParamPriorBeta4 implements ItemParamPrior {
 
     private double[] parameters = null;
-    private static double LOG_ZERO = Math.log(1e-8);//log of a number close to zero.
-//    private final double LOG_ZERO = Math.log(Precision.EPSILON);//log of a number close to zero.
 
     public ItemParamPriorBeta4(){
         this(1.0, 1.0, 0.0, 1.0);
@@ -50,16 +48,18 @@ public class ItemParamPriorBeta4 implements ItemParamPrior {
         // density, so return a value that is offset
         // from the lower and upper limits by the following amount
         double offset = 0.001;
+        double pp = 0;
 
         if (x <= parameters[2]){
-            return parameters[2]+offset;
+            pp = parameters[2]+offset;
         }
         else if (x >= parameters[3]){
-            return parameters[3]-offset;
+            pp = parameters[3]-offset;
         }else{
-            return x;
+            pp = x;
         }
 
+        return pp;
     }
 
     /**
@@ -80,8 +80,7 @@ public class ItemParamPriorBeta4 implements ItemParamPrior {
     public double logDensity(double p){
 	    //Check for value outside limits of distribution
         if (zeroDensity(p)){
-            //Return 0 for log of zero density - value should not be included in loglikelihood
-            return LOG_ZERO;
+            return Double.MIN_VALUE;
         }
         double value = (parameters[0] - 1.0) * Math.log(p - parameters[2]);
         value += (parameters[1] - 1.0) * Math.log(parameters[3] - p);

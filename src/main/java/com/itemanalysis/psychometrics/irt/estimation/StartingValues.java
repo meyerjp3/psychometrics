@@ -25,6 +25,7 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math3.util.Pair;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -43,6 +44,8 @@ public class StartingValues {
     private double[] theta = null;
     private Histogram hist = null;
     private EstepEstimates estepEstimates = null;
+    private int binaryItemCount = 0;
+    private ArrayList<EMStatusListener> emStatusListeners = new ArrayList<EMStatusListener>();
 
     /**
      * Default constructor takes an array of item response vectors and an array of item response models.
@@ -60,6 +63,7 @@ public class StartingValues {
         ncat = new int[nItems];
         for(int j=0;j<nItems;j++){
             ncat[j] = irm[j].getNcat();
+            if(ncat[j]==2) binaryItemCount++;
         }
     }
 
@@ -74,6 +78,7 @@ public class StartingValues {
      * @return
      */
     public ItemResponseModel[] computeStartingValues(){
+        if(binaryItemCount==0) return irm;//DO not compute prox estimates if data only have polytomous items
 
         DefaultUncminOptimizer optimizer = new DefaultUncminOptimizer();
         ItemLogLikelihood itemLogLikelihood = new ItemLogLikelihood();
@@ -99,19 +104,9 @@ public class StartingValues {
             //Compute start values for binary items only
             if(irm[j].getType()== IrmType.L3 || irm[j].getType()==IrmType.L4){
                 int nPar = irm[j].getNumberOfParameters();
-                initialValue = irm[j].getItemParameterArray();
 
 //                initialValue = irm[j].getItemParameterArray();
-//                if(nPar==3){
-//                    initialValue[0] = irm[j].getDiscrimination();
-//                    initialValue[1] = irm[j].getDifficulty();
-//                    initialValue[2] = irm[j].getGuessing();
-//                }else if(nPar==2){
-//                    initialValue[0] = irm[j].getDiscrimination();
-//                    initialValue[1] = irm[j].getDifficulty();
-//                }else{
-//                    initialValue[0] = irm[j].getDifficulty();
-//                }
+                initialValue = irm[j].nonZeroPrior(irm[j].getItemParameterArray());
 
                 try{
                     //Using observed counts, find the item parameters that maximize the marginal likelihood
@@ -119,30 +114,15 @@ public class StartingValues {
                     optimizer.minimize(itemLogLikelihood, initialValue, true, false, 100);
                     param = optimizer.getParameters();
                 }catch(UncminException ex){
-                    //TODO the exception will be lost in a non-console program because no stack trace will be shown.
+                    fireEMStatusEvent("UNCMIN exception: Starting values nonlinear regression failed. Using defaults instead." );
                     ex.printStackTrace();
                 }
 
+//                setParameters(j, param, initialValue);
 
-                if(nPar==4){
-                    irm[j].setDiscrimination(Math.min(3.0, Math.max(param[0], 0.3)));
-                    irm[j].setDifficulty(param[1]);
-                    irm[j].setGuessing(Math.min(1.000, Math.max(param[2], 0.05)));
-                    irm[j].setSlipping(Math.max(0.5, Math.min(param[3], 0.99)));
-
-                }else if(nPar==3){
-                    //only accept discrimination parameter estimates between 0.3 and 3.0 inclusive.
-                    irm[j].setDiscrimination(Math.min(3.0, Math.max(param[0], 0.3)));
-                    irm[j].setDifficulty(param[1]);
-
-                    //only accept guessing parameter estimates between 0.05 and 1 inclusive.
-                    irm[j].setGuessing(Math.min(1.000, Math.max(param[2], 0.05)));
-                }else if(nPar==2){
-                    irm[j].setDiscrimination(param[0]);
-                    irm[j].setDifficulty(param[1]);
-                }else{
-                    irm[j].setDifficulty(param[0]);
-                }
+                //Make sure start values have nonzero density
+                double[] finalStarts = irm[j].nonZeroPrior(param);
+                setParameters(j, finalStarts, initialValue);
 
 
             }
@@ -155,6 +135,52 @@ public class StartingValues {
 //        }
 
         return irm;
+
+    }
+
+    private void setParameters(int j, double[] param, double[] initialValue){
+
+        int nPar = irm[j].getNumberOfParameters();
+        if(nPar==4){
+            if(param!=null){
+                irm[j].setDiscrimination(param[0]);
+                irm[j].setDifficulty(param[1]);
+                irm[j].setGuessing(param[2]);
+                irm[j].setSlipping(param[3]);
+            }else{
+                irm[j].setDiscrimination(initialValue[0]);
+                irm[j].setDifficulty(initialValue[1]);
+                irm[j].setGuessing(0.1);
+                irm[j].setSlipping(0.9);
+            }
+
+        }else if(nPar==3){
+            if(param!=null){
+                irm[j].setDiscrimination(param[0]);
+                irm[j].setDifficulty(param[1]);
+                irm[j].setGuessing(param[2]);
+            }else{
+                irm[j].setDiscrimination(initialValue[0]);
+                irm[j].setDifficulty(initialValue[1]);
+                irm[j].setGuessing(0.1);
+            }
+
+        }else if(nPar==2){
+            if(param!=null){
+                irm[j].setDiscrimination(param[0]);
+                irm[j].setDifficulty(param[1]);
+            }else{
+                irm[j].setDiscrimination(initialValue[0]);
+                irm[j].setDifficulty(initialValue[1]);
+            }
+
+        }else{
+            if(param!=null){
+                irm[j].setDifficulty(param[0]);
+            }else{
+                irm[j].setDifficulty(initialValue[0]);
+            }
+        }
 
     }
 
@@ -199,15 +225,17 @@ public class StartingValues {
                         for(int j=0;j<nItems;j++){
 
                             x = Byte.valueOf(responseVector[l].getResponseAt(j)).intValue();
-
-                            if(irm[j].getType()==IrmType.L3 || irm[j].getType()==IrmType.L4){
-                                for(int k=0;k<ncat[j];k++){
-                                    value = 0;
-                                    if(x==k) value = 1;
-                                    estepEstimates.incrementRjkt(j, k, t, value);
+                            if(x!=-1){
+                                if(irm[j].getType()==IrmType.L3 || irm[j].getType()==IrmType.L4){
+                                    for(int k=0;k<ncat[j];k++){
+                                        value = 0;
+                                        if(x==k) value = 1;
+                                        estepEstimates.incrementRjkt(j, k, t, value);
+                                    }
                                 }
-
                             }
+
+
                         }
                     }
 
@@ -282,20 +310,21 @@ public class StartingValues {
                 freq = responseVector[l].getFrequency();
 
                 for(int j=0;j<nItems;j++){
+
+                    //initialize arrays
+                    if(l==0){
+                        mPerson[j] = new Mean();
+                        sdPerson[j] = new StandardDeviation();
+                    }
+
+                    if(j==0){
+                        mItem[l] = new Mean();
+                        sdItem[l] = new StandardDeviation();
+                    }
+
                     if(irm[j].getType()==IrmType.L3 || irm[j].getType()==IrmType.L4){
 
                         resp = responseVector[l].getResponseAt(j);
-
-                        //initialize arrays
-                        if(l==0){
-                            mPerson[j] = new Mean();
-                            sdPerson[j] = new StandardDeviation();
-                        }
-
-                        if(j==0){
-                            mItem[l] = new Mean();
-                            sdItem[l] = new StandardDeviation();
-                        }
 
                         //increment item and person summary statistics
                         if(resp!=-1){
@@ -306,7 +335,7 @@ public class StartingValues {
 
                                 mPerson[j].increment(theta[l]);
                                 sdPerson[j].increment(theta[l]);
-                                Si[j] += resp;//TODO compute Si from the expected values of the irm to allow for missing data.
+                                Si[j] += resp;
                                 Ni[j]++;
                             }
 
@@ -324,7 +353,7 @@ public class StartingValues {
                 if(irm[j].getType()==IrmType.L3 || irm[j].getType()==IrmType.L4){
                     pSd = sdPerson[j].getResult();
 
-                    //adjust extreme person scores
+                    //adjust extreme item scores
                     if(Si[j]==0) Si[j]+=0.3;
                     if(Si[j]==Ni[j]) Si[j]-=0.3;
 
@@ -367,8 +396,12 @@ public class StartingValues {
                 personGrandSd.increment(pProx);
             }
 
+
+
             delta = maxChange;
             iter++;
+
+            fireEMStatusEvent(iter, delta, Double.NaN);
 
         }//end while
 
@@ -401,6 +434,39 @@ public class StartingValues {
 //            System.out.println("PROX: " + irm[j].toString());
 //        }
 
+    }
+
+    public String printItemParameters(){
+        String s = "";
+        for(int j=0;j<nItems;j++){
+           s += irm[j].toString() + "\n";
+        }
+        return s;
+    }
+
+    //=====================================================================================================================
+// METHOD FOR HANDLING THE EMSTATUS LISTENER
+// These methods have nothnig to do with estimation. They only pertain to the publication of intermediate results.
+//=====================================================================================================================
+
+    public void addEMStatusListener(EMStatusListener listener){
+        emStatusListeners.add(listener);
+    }
+
+    public void removeEMStatusListener(EMStatusListener listener){
+        emStatusListeners.remove(listener);
+    }
+
+    public void fireEMStatusEvent(String message){
+        for(EMStatusListener l : emStatusListeners){
+            l.handleEMStatusEvent(new EMStatusEventObject(this, message));
+        }
+    }
+
+    public void fireEMStatusEvent(int iteration, double delta, double loglikelihood){
+        for(EMStatusListener l : emStatusListeners){
+            l.handleEMStatusEvent(new EMStatusEventObject(this, "PROX CYCLE: ", iteration, delta, loglikelihood));
+        }
     }
 
 

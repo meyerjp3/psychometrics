@@ -16,6 +16,8 @@
 package com.itemanalysis.psychometrics.irt.model;
 
 import com.itemanalysis.psychometrics.data.VariableName;
+import com.itemanalysis.psychometrics.irt.estimation.ItemParamPrior;
+import com.itemanalysis.psychometrics.measurement.ItemScoring;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
@@ -61,6 +63,25 @@ public interface ItemResponseModel {
      * @return a person's expected score on the item.
      */
     public double expectedValue(double theta);
+
+    public void setDiscriminationPrior(ItemParamPrior prior);
+
+    public void setDifficultyPrior(ItemParamPrior prior);
+
+    public void setGuessingPrior(ItemParamPrior prior);
+
+    public void setSlippingPrior(ItemParamPrior prior);
+
+    public void setStepPriorAt(ItemParamPrior prior, int index);
+
+    public void setItemScoring(ItemScoring itemScoring);
+
+    /**
+     * If the prior density for a parameter is zero, adjust parameter to the nearest non zero value.
+     */
+    public double[] nonZeroPrior(double[] param);
+
+    public ItemScoring getItemScoring();
 
     /**
      * Performs a linear transformation of item parameters and standard errors.

@@ -16,6 +16,7 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
 import org.apache.commons.math3.distribution.BetaDistribution;
+import org.apache.commons.math3.util.Precision;
 
 public class ItemParamPriorBeta implements ItemParamPrior {
 
@@ -24,6 +25,8 @@ public class ItemParamPriorBeta implements ItemParamPrior {
     private double beta = 1;
 
     private BetaDistribution betaDistribution = null;
+
+    private final double EPSILON = Precision.EPSILON;
 
     public ItemParamPriorBeta(double alpha, double beta){
         this.alpha = alpha;
@@ -37,14 +40,14 @@ public class ItemParamPriorBeta implements ItemParamPrior {
     }
 
     public double nearestNonZero(double x){
-        if(x>1) return x = 0.9999;
-        if(x<0) return x = 0.0001;
+        if(x>1) return 1.0-EPSILON;
+        if(x<0) return EPSILON;
         return x;
     }
 
     public double logDensity(double x){
-        if(x<0) return Math.log(1e-8);
-        if(x>1) return Math.log(1e-8);
+        if(x<0) return Double.MIN_VALUE;
+        if(x>1) return Double.MIN_VALUE;
         return betaDistribution.logDensity(x);
     }
 

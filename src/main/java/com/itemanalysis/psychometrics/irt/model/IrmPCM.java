@@ -16,6 +16,7 @@
 package com.itemanalysis.psychometrics.irt.model;
 
 import com.itemanalysis.psychometrics.data.VariableName;
+import com.itemanalysis.psychometrics.irt.estimation.ItemParamPrior;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
@@ -404,6 +405,35 @@ public class IrmPCM extends AbstractItemResponseModel{
         }
     }
 
+    public double[] nonZeroPrior(double[] param){
+//        double[] p = Arrays.copyOf(param, param.length);
+//        if(discriminationPrior!=null) p[0] = discriminationPrior.nearestNonZero(param[0]);
+//        if(difficultyPrior!=null) p[1] = difficultyPrior.nearestNonZero(param[1]);
+//        for(int k=2;k<param.length;k++){
+//            if(stepPrior[k-2]!=null) p[k] = stepPrior[k-2].nearestNonZero(param[k]);
+//        }
+        return param;
+    }
+
+    public void setDiscriminationPrior(ItemParamPrior prior){
+
+    }
+
+    public void setStepPriorAt(ItemParamPrior prior, int k){
+
+    }
+
+    public void setDifficultyPrior(ItemParamPrior difficultyPrior){
+
+    }
+
+    public void setGuessingPrior(ItemParamPrior guessingPrior){
+
+    }
+
+    public void setSlippingPrior(ItemParamPrior slippingPrior){
+
+    }
 
 
     public double getDifficulty(){
@@ -435,7 +465,7 @@ public class IrmPCM extends AbstractItemResponseModel{
     }
 
     public void setDiscrimination(double discrimination){
-        throw new UnsupportedOperationException();
+
     }
 
     public double getProposalDiscrimination(){
@@ -443,15 +473,15 @@ public class IrmPCM extends AbstractItemResponseModel{
     }
 
     public void setProposalDiscrimination(double discrimination){
-        throw new UnsupportedOperationException();
+
     }
 
     public double getDiscriminationStdError(){
-        throw new UnsupportedOperationException();
+        return Double.NaN;
     }
 
     public void setDiscriminationStdError(double stdError){
-        throw new UnsupportedOperationException();
+
     }
 
     public double getGuessing(){
@@ -459,39 +489,39 @@ public class IrmPCM extends AbstractItemResponseModel{
     }
 
     public void setGuessing(double guessing){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setProposalGuessing(double guessing){
-        throw new UnsupportedOperationException();
+
     }
 
     public double getGuessingStdError(){
-        throw new UnsupportedOperationException();
+        return Double.NaN;
     }
 
     public void setGuessingStdError(double StdError){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setSlipping(double slipping){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setProposalSlipping(double slipping){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setSlippingStdError(double slipping){
-        throw new UnsupportedOperationException();
+
     }
 
     public double getSlipping(){
-        throw new UnsupportedOperationException();
+        return Double.NaN;
     }
 
     public double getSlippingStdError(){
-        throw new UnsupportedOperationException();
+        return Double.NaN;
     }
 
     public double[] getThresholdParameters(){
@@ -519,11 +549,11 @@ public class IrmPCM extends AbstractItemResponseModel{
     }
 
     public void setStepParameters(double[] step){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setProposalStepParameters(double[] step){
-        throw new UnsupportedOperationException();
+
     }
 
     public double[] getStepParameters(){
@@ -535,19 +565,23 @@ public class IrmPCM extends AbstractItemResponseModel{
     }
 
     public void setStepParameters(){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setProposalStepParameters(){
-        throw new UnsupportedOperationException();
+
     }
 
     public double[] getStepStdError(){
-        throw new UnsupportedOperationException();
+        double[] sp = new double[ncat];
+        for(int k=0;k<ncat;k++){
+            sp[k] = Double.NaN;
+        }
+        return sp;
     }
 
     public void setStepStdError(double[] stdError){
-        throw new UnsupportedOperationException();
+
     }
 
     public double acceptAllProposalValues(){

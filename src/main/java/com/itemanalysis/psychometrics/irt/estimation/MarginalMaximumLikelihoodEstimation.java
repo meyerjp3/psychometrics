@@ -19,9 +19,12 @@ import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.tools.StopWatch;
 import com.itemanalysis.psychometrics.uncmin.DefaultUncminStatusListener;
+import org.apache.commons.math3.stat.Frequency;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Formatter;
+import java.util.Iterator;
 import java.util.concurrent.ForkJoinPool;
 
 /**
@@ -49,6 +52,19 @@ public class MarginalMaximumLikelihoodEstimation {
     private boolean verbose = false;
     private boolean estimateLatentDistribution = false;
 
+    /**
+     * Stores counts of the number of error codes encountered during he Mstep.
+     * codeCount[0] = number of bad termination codes from UNCMIN
+     * codeCount[1] = number of times a negative discrimination parameter occurred
+     * codeCount[2] = number of times a negative guessing parameter occured
+     * codeCount[3] = number of times a slipping parameter was greater than 1.
+     *
+     * The values should be 0 <= codeCount[i] <= nItems. Any nonzero value should be a concern.
+     *
+     *
+     */
+    private int[] codeCount = null;
+
     public MarginalMaximumLikelihoodEstimation(ItemResponseVector[] responseVector, ItemResponseModel[] irm, DistributionApproximation latentDistribution){
         this.responseVector = responseVector;
         this.irm = irm;
@@ -70,7 +86,6 @@ public class MarginalMaximumLikelihoodEstimation {
     private void doEStep(){
         EstepParallel estepParallel = new EstepParallel(responseVector, irm, latentDistribution, 0, responseVector.length);
         estepEstimates = pool.invoke(estepParallel);
-//        System.out.println(estepEstimates.toString());
     }
 
     /**
@@ -83,12 +98,16 @@ public class MarginalMaximumLikelihoodEstimation {
 
         MstepParallel mstepParallel = new MstepParallel(irm, latentDistribution, estepEstimates, 0, irm.length);
 
-        //Optimizer termination status
-        DefaultUncminStatusListener uncminStatusListener = new DefaultUncminStatusListener();
-        mstepParallel.addUncminStatusListener(uncminStatusListener);
-
         //start parallel processing
         pool.invoke(mstepParallel);
+
+        //Count error codes
+        codeCount = new int[4];
+        int[] tc = mstepParallel.getCodeCount();
+        for(int i=0;i<4;i++){
+            codeCount[i]+=tc[i];
+        }
+
 
         //pass optimizer status to a log or something
 //        fireEMStatusEvent(uncminStatusListener.toString());
@@ -99,13 +118,11 @@ public class MarginalMaximumLikelihoodEstimation {
             maxChange = Math.max(maxChange, irm[j].acceptAllProposalValues());
         }
 
+        //TODO activate this option when fully tested
         //estimate latent distribution here
-        if(estimateLatentDistribution){
-            latentDistribution = mstepParallel.getUpdatedLatentDistribution();
-//          System.out.println("MEAN = " + latentDistribution.getMean() + " SD = " + latentDistribution.getStandardDeviation());
-
-        }
-
+//        if(estimateLatentDistribution){
+//            latentDistribution = mstepParallel.updateLatentDistribution();
+//        }
 
         return maxChange;
 
@@ -147,30 +164,24 @@ public class MarginalMaximumLikelihoodEstimation {
             iter++;
 
             //Format and send EM cycle summary to EMStatusListeners
-           if(verbose)  fireEMStatusEvent(iter, delta, completeDataLogLikelihood());
+           if(verbose)  fireEMStatusEvent(iter, delta, completeDataLogLikelihood(), codeToString());
         }
-        if(!verbose) fireEMStatusEvent(iter, delta, completeDataLogLikelihood());
+
+        if(!verbose) fireEMStatusEvent(iter, delta, completeDataLogLikelihood(), codeToString());
         fireEMStatusEvent("Elapsed time: " + stopWatch.getElapsedTime());
         if(delta>converge) fireEMStatusEvent("WARNING: convergence criterion not met. Increase the maximum number of iterations.");
 
-//        System.out.println(Arrays.toString(latentDistribution.getPoints()));
-//        System.out.println(Arrays.toString(latentDistribution.evaluate()));
-
-        computeItemStandardErrors();//TODO move elsewhere??
-
     }
 
-//    public DistributionApproximation getUpdatedLatentDistribution(){
-//        double sumNk = estepEstimates.getSumNt();
-//        double[] nk = estepEstimates.getNt();
-//
-//        //Compute posterior latent distribution
-//        for(int k=0;k<nk.length;k++){
-//            latentDistribution.setDensityAt(k, nk[k]/sumNk);
-//        }
-//
-//        return latentDistribution;
-//    }
+    private String codeToString(){
+        String s = "[";
+        for(int i=0;i<4;i++){
+            s+= codeCount[i];
+            if(i<3) s += " ";
+        }
+        s += "]";
+        return s;
+    }
 
     /**
      * Computes the complete data log-likelihood. The kernel of the log-likelihood is computed incrementally
@@ -196,11 +207,51 @@ public class MarginalMaximumLikelihoodEstimation {
     }
 
     public String printItemParameters(){
-        String s = "";
+        StringBuilder sb = new StringBuilder();
+        Formatter f = new Formatter(sb);
+
+        f.format("%58s", "MMLE ITEM PARAMETER ESTIMATES");f.format("%n");
+        f.format("%87s", "======================================================================================="); f.format("%n");
+        f.format("%-18s", "Item");
+        f.format("%5s", "Code");
+        f.format("%9s", "Apar");
+        f.format("%7s", "(SE)");
+        f.format("%9s", "Bpar"); f.format("%1s", "");
+        f.format("%6s", "(SE)");
+        f.format("%9s", "Cpar"); f.format("%1s", "");
+        f.format("%6s", "(SE)");
+        f.format("%9s", "Upar"); f.format("%1s", "");
+        f.format("%6s", "(SE)"); f.format("%n");
+        f.format("%87s", "---------------------------------------------------------------------------------------"); f.format("%n");
+
         for(int j=0;j<nItems;j++){
-           s += irm[j].toString() + "\n";
+           sb.append(irm[j].toString() + "\n");
         }
-        return s;
+
+        f.format("%87s", "======================================================================================="); f.format("%n");
+
+        return f.toString();
+    }
+
+    public String printLatentDistribution(){
+        StringBuilder sb = new StringBuilder();
+        Formatter f = new Formatter(sb);
+
+        f.format("%30s", "     Latent Distribution      ");f.format("%n");
+        f.format("%30s", "==============================");
+        f.format("%n");
+        f.format("%10s", "Point");f.format("%4s", "");f.format("%16s", "Density");f.format("%n");
+        f.format("%30s", "------------------------------");f.format("%n");
+        for(int k=0;k<latentDistribution.getNumberOfPoints();k++){
+            f.format("% 10.8f", latentDistribution.getPointAt(k));
+            f.format("%4s", "");
+            f.format("% 10.8e", latentDistribution.getDensityAt(k));//15 wide
+            f.format("%n");
+        }
+        f.format("%30s", "==============================");f.format("%n");
+        f.format("%12s", "Mean = "); f.format("%8.4f", latentDistribution.getMean()); f.format("%n");
+        f.format("%12s", "Std. Dev. = "); f.format("%8.4f", latentDistribution.getStandardDeviation()); f.format("%n");
+        return f.toString();
     }
 
     public void setVerbose(boolean verbose){
@@ -226,9 +277,9 @@ public class MarginalMaximumLikelihoodEstimation {
         }
     }
 
-    public void fireEMStatusEvent(int iteration, double delta, double loglikelihood){
+    public void fireEMStatusEvent(int iteration, double delta, double loglikelihood, String termCode){
         for(EMStatusListener l : emStatusListeners){
-            l.handleEMStatusEvent(new EMStatusEventObject(this, iteration, delta, loglikelihood));
+            l.handleEMStatusEvent(new EMStatusEventObject(this, iteration, delta, loglikelihood, termCode));
         }
     }
 

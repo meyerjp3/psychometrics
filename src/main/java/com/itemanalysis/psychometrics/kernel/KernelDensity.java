@@ -190,6 +190,14 @@ public class KernelDensity implements DistributionApproximation {
         points[index] = value;
     }
 
+    public double getMinimum(){
+        return points[0];
+    }
+
+    public double getMaximum(){
+        return points[numPoints-1];
+    }
+
     public double getMean(){
         double m = 0.0;
         for(int i=0;i<numPoints;i++){

@@ -15,6 +15,7 @@
  */
 package com.itemanalysis.psychometrics.irt.model;
 
+import com.itemanalysis.psychometrics.irt.estimation.ItemParamPrior;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
@@ -33,6 +34,9 @@ public class IrmGRM extends AbstractItemResponseModel {
     private double[] step;
     private double[] proposalStep;
     private double[] stepStdError;
+
+    private ItemParamPrior discriminationPrior = null;
+    private ItemParamPrior[] stepPrior = null;
 
     public IrmGRM(double discrimination, double[] step, double D){
         this.discrimination = discrimination;
@@ -106,6 +110,35 @@ public class IrmGRM extends AbstractItemResponseModel {
             ev += scoreWeight[i]*probability(theta, i);
         }
         return ev;
+    }
+
+    public double[] nonZeroPrior(double[] param){
+        double[] p = Arrays.copyOf(param, param.length);
+        if(discriminationPrior!=null) p[0] = discriminationPrior.nearestNonZero(param[0]);
+        for(int k=1;k<param.length;k++){
+            if(stepPrior[k-1]!=null) p[k] = stepPrior[k-1].nearestNonZero(param[k]);
+        }
+        return p;
+    }
+
+    public void setDiscriminationPrior(ItemParamPrior prior){
+        discriminationPrior = prior;
+    }
+
+    public void setStepPriorAt(ItemParamPrior prior, int k){
+        stepPrior[k] = prior;
+    }
+
+    public void setDifficultyPrior(ItemParamPrior difficultyPrior){
+
+    }
+
+    public void setGuessingPrior(ItemParamPrior guessingPrior){
+
+    }
+
+    public void setSlippingPrior(ItemParamPrior slippingPrior){
+
     }
 
     public double[] gradient(double theta, double[] iparam, int k, double D){
@@ -345,7 +378,7 @@ public class IrmGRM extends AbstractItemResponseModel {
     }
 
     public void setDifficulty(double difficulty){
-        throw new UnsupportedOperationException();
+
     }
 
     public double getProposalDifficulty(){
@@ -353,15 +386,15 @@ public class IrmGRM extends AbstractItemResponseModel {
     }
 
     public void setProposalDifficulty(double difficulty){
-        throw new UnsupportedOperationException();
+
     }
 
     public double getDifficultyStdError(){
-        throw new UnsupportedOperationException();
+        return Double.NaN;
     }
 
     public void setDifficultyStdError(double stdError){
-        throw new UnsupportedOperationException();
+
     }
 
     public double getDiscrimination(){
@@ -389,39 +422,39 @@ public class IrmGRM extends AbstractItemResponseModel {
     }
 
     public void setGuessing(double guessing){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setProposalGuessing(double guessing){
-        throw new UnsupportedOperationException();
+
     }
 
     public double getGuessingStdError(){
-        throw new UnsupportedOperationException();
+        return Double.NaN;
     }
 
     public void setGuessingStdError(double stdError){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setSlipping(double slipping){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setProposalSlipping(double slipping){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setSlippingStdError(double slipping){
-        throw new UnsupportedOperationException();
+
     }
 
     public double getSlipping(){
-        throw new UnsupportedOperationException();
+        return Double.NaN;
     }
 
     public double getSlippingStdError(){
-        throw new UnsupportedOperationException();
+        return Double.NaN;
     }
 
     public double[] getStepParameters(){
@@ -449,29 +482,38 @@ public class IrmGRM extends AbstractItemResponseModel {
     }
 
     public void setThresholdParameters(double[] thresholds){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setProposalThresholds(double[] thresholds){
-        throw new UnsupportedOperationException();
+
     }
 
     public double[] getThresholdStdError(){
-        throw new UnsupportedOperationException();
+        double[] sp = new double[ncat];
+        for(int k=0;k<ncat;k++){
+            sp[k] = Double.NaN;
+        }
+        return sp;
     }
 
     public void setThresholdStdError(double[] stdError){
-        throw new UnsupportedOperationException();
+
     }
 
     public double acceptAllProposalValues(){
-        double max = 0.0;
+        double max = 0;
         if(!isFixed){
-            max = Math.max(0, Math.abs(this.discrimination-proposalDiscrimination));
-            for(int m=0;m<this.getNcat();m++){
-                max = Math.max(max, Math.abs(this.step[m]-proposalStep[m]));
-            }
+            double delta = Math.abs(this.discrimination-proposalDiscrimination);
+            if(proposalDiscrimination>=1) delta /= proposalDiscrimination;
+            max = Math.max(max, delta);
             this.discrimination = this.proposalDiscrimination;
+
+            for(int m=0;m<ncat;m++){
+                delta = Math.abs(this.step[m]-proposalStep[m]);
+                if(proposalStep[m]>=1) delta /= proposalStep[m];
+                max = Math.max(max, delta);
+            }
             this.step = this.proposalStep;
         }
         return max;

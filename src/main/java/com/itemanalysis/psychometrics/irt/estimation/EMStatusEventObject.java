@@ -20,9 +20,11 @@ import java.util.EventObject;
 public class EMStatusEventObject extends EventObject {
 
     private String status = "";
+    private String title = "EM CYCLE: ";
     private int iteration = 0;
     private double delta = 0.0;
     private double loglikelihood = 0.0;
+    private String termCode = "";
 
     public EMStatusEventObject(Object source){
         super(source);
@@ -33,6 +35,40 @@ public class EMStatusEventObject extends EventObject {
         this.status = status;
     }
 
+    /**
+     * Used for EM and start value cycle information
+     *
+     * @param source
+     * @param title
+     * @param iteration
+     * @param delta
+     * @param loglikelihood
+     */
+    public EMStatusEventObject(Object source, String title, int iteration, double delta, double loglikelihood, String termCode){
+        super(source);
+        this.title = title;
+        this.iteration = iteration;
+        this.delta = delta;
+        this.loglikelihood = loglikelihood;
+        this.termCode = termCode;
+    }
+
+    public EMStatusEventObject(Object source, String title, int iteration, double delta, double loglikelihood){
+        super(source);
+        this.title = title;
+        this.iteration = iteration;
+        this.delta = delta;
+        this.loglikelihood = loglikelihood;
+    }
+
+    /**
+     * Use for EM cycle information only
+     *
+     * @param source
+     * @param iteration
+     * @param delta
+     * @param loglikelihood
+     */
     public EMStatusEventObject(Object source, int iteration, double delta, double loglikelihood){
         super(source);
         this.iteration = iteration;
@@ -40,8 +76,20 @@ public class EMStatusEventObject extends EventObject {
         this.loglikelihood = loglikelihood;
     }
 
+    public EMStatusEventObject(Object source, int iteration, double delta, double loglikelihood, String termCode){
+        super(source);
+        this.iteration = iteration;
+        this.delta = delta;
+        this.loglikelihood = loglikelihood;
+        this.termCode = termCode;
+    }
+
     public String getStatus(){
         return status;
+    }
+
+    public String getTitle(){
+        return title;
     }
 
     public int getIteration(){
@@ -54,6 +102,10 @@ public class EMStatusEventObject extends EventObject {
 
     public double getLoglikelihood(){
         return loglikelihood;
+    }
+
+    public String getTermCode(){
+        return termCode;
     }
 
 }

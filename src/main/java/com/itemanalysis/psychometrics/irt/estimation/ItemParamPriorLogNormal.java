@@ -15,6 +15,8 @@
  */
 package com.itemanalysis.psychometrics.irt.estimation;
 
+import org.apache.commons.math3.util.Precision;
+
 /**
  * Implementation of an ItemParamPrior for the LogNormal distribution. This class is a translation
  * of ItemParamPriorLogNormal.cpp in Brad Hanson's ETIRM library, Copyright (c) 2000, Bradley A. Hanson.
@@ -23,7 +25,6 @@ public class ItemParamPriorLogNormal implements ItemParamPrior {
 
     private double[] parameters = null;
     private double variance = 0.0;
-    private static double LOG_ZERO = Math.log(1e-8);
 
 
     /**
@@ -58,7 +59,7 @@ public class ItemParamPriorLogNormal implements ItemParamPrior {
      * @return
      */
     public double nearestNonZero(double x){
-        return (x <= 0.0) ? 0.001 : x;
+        return (x <= 0.0) ? Precision.EPSILON : x;
     }
 
     /**
@@ -82,8 +83,7 @@ public class ItemParamPriorLogNormal implements ItemParamPrior {
     public double logDensity(double p){
         //Check for value outside limits of distribution
         if (zeroDensity(p)){
-		    //Return minus infinity to represent log of zero density
-            return LOG_ZERO;
+            return Double.MIN_VALUE;
         }
         double value = Math.log(p) - parameters[0];
         value *= value;

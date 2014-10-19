@@ -28,6 +28,7 @@ import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.univariate.*;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 
 /**

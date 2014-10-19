@@ -33,10 +33,14 @@ public class DefaultEMStatusListener implements EMStatusListener {
         if(!"".equals(s)){
             System.out.println(eventObject.getStatus());
         }else{
-            f.format("%10s", "EM CYCLE: ");
+            f.format("%10s", eventObject.getTitle());
             f.format("%5d", eventObject.getIteration()); f.format("%4s", "");
             f.format("%.10f", eventObject.getDelta()); f.format("%4s", "");
             f.format("%.10f", eventObject.getLoglikelihood()); f.format("%4s", "");
+
+            String tc = eventObject.getTermCode();
+
+            if(!"".equals(tc)) f.format("%10s", tc); f.format("%4s", "");
             System.out.println(f.toString());
         }
 

@@ -33,6 +33,7 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
     private double discrimination = 1.0;
     private double difficulty = 0.0;
     private double guessing = 0.0;
+    private double slipping = 1.0;
     private double D = 1.7;
     private double discriminationStdError = 0.0;
     private double difficultyStdError = 0.0;
@@ -41,6 +42,7 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
     private double proposalDiscrimination = 1.0;
     private double proposalDifficulty = 0.0;
     private double proposalGuessing = 0.0;
+    private double proposalSlipping = 1.0;
     private ItemParamPrior discriminationPrior = null;
     private ItemParamPrior difficultyPrior = null;
     private ItemParamPrior guessingPrior = null;
@@ -138,7 +140,7 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         }else{
             prob = probWrong(theta);
         }
-        return Math.min(1.0, Math.max(0.0, prob)); //always return value between 0 and 1
+        return prob;
     }
 
     /**
@@ -165,24 +167,25 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
 
         if(iparam.length==1){
             z = Math.exp(D*discrimination*(theta-iparam[0]));
-            return  guessing+(1-guessing)*z/(1+z);
+            return  guessing+(slipping-guessing)*z/(1+z);
         }else if(iparam.length==2){
             z = Math.exp(D*iparam[0]*(theta-iparam[1]));
-            return  guessing+(1-guessing)*z/(1+z);
+            return  guessing+(slipping-guessing)*z/(1+z);
         }else{
             z = Math.exp(D*iparam[0]*(theta-iparam[1]));
-            return  iparam[2]+(1-iparam[2])*z/(1+z);
+            return  iparam[2]+(slipping-iparam[2])*z/(1+z);
         }
 
     }
 
     private double probWrong(double theta, double[] iparam, double D){
+        if(iparam.length==3 && iparam[2]<0) return 0;
         return 1.0 - probRight(theta, iparam, D);
     }
 
     private double probRight(double theta){
-        double top = Math.exp(D*discrimination*(theta-difficulty));
-        double prob = guessing + (1.0-guessing)*top/(1+top);
+        double z = Math.exp(D*discrimination*(theta-difficulty));
+        double prob = guessing + (slipping-guessing)*z/(1+z);
         return prob;
     }
 
@@ -214,11 +217,78 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      * @return an array of first partial derivatives (i.e. the gradientAt).
      */
     public double[] gradient(double theta, double[] iparam, int k, double D){
-        double[] deriv = new double[numberOfParameters];
-
         double a = 1;
         double b = 0;
         double c = 0;
+        double u = slipping;
+        double[] deriv = new double[numberOfParameters];
+
+        //This gradient is based on the 3PL only
+//        if(numberOfParameters==3){
+//            a = iparam[0];
+//            b = iparam[1];
+//            c = iparam[2];
+//        }else if(numberOfParameters==2){
+//            a = iparam[0];
+//            b = iparam[1];
+//            c = guessing;
+//        }else{
+//            a = discrimination;
+//            b = iparam[0];
+//            c = guessing;
+//        }
+//
+//        if(k==0){
+//            double z = Math.exp(D*a*(theta-b));
+//            double g = 1 + z;
+//            double g2 = g*g;
+//            double db = (1-c)*z*D*a/g2;//first derivative wrt difficulty
+//
+//            if(numberOfParameters==1){
+//                deriv[0] = db;
+//                return deriv;
+//            }
+//
+//            deriv[0] = -(1-c)*z*D*(theta-b)/g2;//first derivative wrt discrimination
+//            deriv[1] = db;
+//
+//            if(numberOfParameters==3){
+//                deriv[2] = -1/(1+z); //first derivative wrt guessing
+//            }
+//
+//        }else{
+//
+//            double t = Math.exp(-a*D*(theta-b));
+//            double onept2 = 1.0 + t;
+//            onept2 *= onept2;
+//
+//            //derivative with respect to b parameter
+//            double derivb = -a*(1.0-c)*D*t;
+//            derivb /= onept2;
+//
+//            if(numberOfParameters==1){
+//                deriv[0] = derivb;
+//                return deriv;
+//            }
+//
+//            deriv[1] = derivb;
+//
+//            //derivative with respect to the a parameter
+//            deriv[0] = (1.0 - c)*(theta - b)*D*t;
+//            deriv[0] /= onept2;
+//
+//            //derivative with respect to c parameter
+//            if(numberOfParameters==3){
+//                deriv[2] = -1.0/(1.0 + t);
+//                deriv[2] += 1.0;
+//            }
+//
+//        }
+//        return deriv;
+
+        //=======================================================================
+        //This gradient is based on teh gradient for the 4PL. See Irm4PL.java
+
         if(numberOfParameters==3){
             a = iparam[0];
             b = iparam[1];
@@ -233,51 +303,34 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
             c = guessing;
         }
 
-        if(k==0){
-            double z = Math.exp(D*a*(theta-b));
-            double g = 1 + z;
-            double g2 = g*g;
-            double db = (1-c)*z*D*a/g2;//first derivative wrt difficulty
+        double w = D*(theta-b);
+        double z = Math.exp(D*a*(theta-b));
+        double z2 = z*z;
+        double d = 1+z;
+        double d2 = d*d;
+        double xmc = u-c;
 
-            if(numberOfParameters==1){
-                deriv[0] = db;
-                return deriv;
+        if(numberOfParameters==3){
+            deriv[0] = xmc*z*w/d - xmc*z2*w/d2;
+            deriv[1] = -(xmc*z*D*a/d - xmc*z2*D*a/d2);
+            deriv[2] = 1.0 - z/d;
+            if(k==0){
+                deriv[0] = -deriv[0];
+                deriv[1] = -deriv[1];
+                deriv[2] = -deriv[2];
             }
-
-            deriv[0] = -(1-c)*z*D*(theta-b)/g2;//first derivative wrt discrimination
-            deriv[1] = db;
-
-            if(numberOfParameters==3){
-                deriv[2] = -1/(1+z); //first derivative wrt guessing
+        }else if(numberOfParameters==2){
+            deriv[0] = xmc*z*w/d - xmc*z2*w/d2;
+            deriv[1] = -(xmc*z*D*a/d - xmc*z2*D*a/d2);
+            if(k==0){
+                deriv[0] = -deriv[0];
+                deriv[1] = -deriv[1];
             }
-
         }else{
-
-            double t = Math.exp(-a*D*(theta-b));
-            double onept2 = 1.0 + t;
-            onept2 *= onept2;
-
-            //derivative with respect to b parameter
-            double derivb = -a*(1.0-c)*D*t;
-            derivb /= onept2;
-
-            if(numberOfParameters==1){
-                deriv[0] = derivb;
-                return deriv;
+            deriv[0] = -(xmc*z*D*a/d - xmc*z2*D*a/d2);
+            if(k==0){
+                deriv[0] = -deriv[0];
             }
-
-            deriv[1] = derivb;
-
-            //derivative with respect to the a parameter
-            deriv[0] = (1.0 - c)*(theta - b)*D*t;
-            deriv[0] /= onept2;
-
-            //derivative with respect to c parameter
-            if(numberOfParameters==3){
-                deriv[2] = -1.0/(1.0 + t);
-                deriv[2] += 1.0;
-            }
-
         }
         return deriv;
     }
@@ -399,10 +452,26 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
     public double itemInformationAt(double theta){
         double p = probRight(theta);
         double part1 = Math.pow(p - guessing, 2);
-        double part2 = Math.pow(1.0-guessing, 2);
+        double part2 = Math.pow(slipping-guessing, 2);
         double a2 = discrimination*discrimination;
-        double info = D*D*a2*(part1/part2)*((1.0-p)/p);
+        double info = D*D*a2*(part1/part2)*((slipping-p)/p);
         return info;
+    }
+
+    public double[] nonZeroPrior(double[] param){
+        double[] p = Arrays.copyOf(param, param.length);
+
+        if(numberOfParameters==1){
+            if(difficultyPrior!=null) p[0] = difficultyPrior.nearestNonZero(param[0]);
+        }else if(numberOfParameters==2){
+            if(discriminationPrior!=null) p[0] = discriminationPrior.nearestNonZero(param[0]);
+            if(difficultyPrior!=null) p[1] = difficultyPrior.nearestNonZero(param[1]);
+        }else{
+            if(discriminationPrior!=null) p[0] = discriminationPrior.nearestNonZero(param[0]);
+            if(difficultyPrior!=null) p[1] = difficultyPrior.nearestNonZero(param[1]);
+            if(guessingPrior!=null) p[2] = guessingPrior.nearestNonZero(param[2]);
+        }
+        return p;
     }
 
     public void setDiscriminationPrior(ItemParamPrior discriminationPrior){
@@ -413,8 +482,16 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         this.difficultyPrior = difficultyPrior;
     }
 
-    public void setguessingPrior(ItemParamPrior guessingPrior){
+    public void setGuessingPrior(ItemParamPrior guessingPrior){
         this.guessingPrior = guessingPrior;
+    }
+
+    public void setSlippingPrior(ItemParamPrior slippingPrior){
+
+    }
+
+    public void setStepPriorAt(ItemParamPrior prior, int index){
+
     }
 
     public ItemParamPrior getDiscriminationPrior(){
@@ -866,23 +943,23 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
     }
 
     public void setSlipping(double slipping){
-        throw new UnsupportedOperationException();
+        this.slipping = slipping;
     }
 
     public void setProposalSlipping(double slipping){
-        throw new UnsupportedOperationException();
+        this.proposalSlipping = slipping;
     }
 
     public void setSlippingStdError(double slipping){
-        throw new UnsupportedOperationException();
+
     }
 
     public double getSlipping(){
-        throw new UnsupportedOperationException();
+        return slipping;
     }
 
     public double getSlippingStdError(){
-        throw new UnsupportedOperationException();
+        return Double.NaN;
     }
 
     public double getScalingConstant(){
@@ -898,20 +975,28 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      * values for every item on the test, the proposal values can be accepted as the new parameter estimates. This
      * method must be called to accept the proposal values as the new estimates.
      *
+     * Returns teh maximum relative absolute difference between existing parameters and new parameters.
+     *
      */
     public double acceptAllProposalValues(){
         double max = 0;
 
-        max = Math.max(max, this.difficulty - proposalDifficulty);
+        double delta = Math.abs(this.difficulty - proposalDifficulty);
+        if(proposalDifficulty>=1) delta /= proposalDifficulty;
+        max = Math.max(max, delta);
         this.difficulty = proposalDifficulty;
 
         if(numberOfParameters>=2){
-            max = Math.max(max, this.discrimination - proposalDiscrimination);
+            delta = Math.abs(this.discrimination - proposalDiscrimination);
+            if(proposalDiscrimination>=1) delta /= proposalDiscrimination;
+            max = Math.max(max, delta);
             this.discrimination = proposalDiscrimination;
         }
 
         if(numberOfParameters==3){
-            max = Math.max(max, Math.abs(this.guessing-proposalGuessing));
+            delta = Math.abs(this.guessing-proposalGuessing);
+            if(proposalGuessing>=1) delta /= proposalGuessing;
+            max = Math.max(max, delta);
             this.guessing = proposalGuessing;
         }
 
@@ -920,15 +1005,23 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
 
 
     public double[] getStepParameters(){
-        throw new UnsupportedOperationException();
+        double[] sp = new double[ncat];
+        for(int k=0;k<ncat;k++){
+            sp[k] = Double.NaN;
+        }
+        return sp;
     }
 
     public void setStepStdError(double[] stdError){
-        throw new UnsupportedOperationException();
+
     }
 
     public double[] getStepStdError(){
-        throw new UnsupportedOperationException();
+        double[] sp = new double[ncat];
+        for(int k=0;k<ncat;k++){
+            sp[k] = Double.NaN;
+        }
+        return sp;
     }
 
     public double[] getThresholdParameters(){
@@ -937,27 +1030,31 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
     }
 
     public double[] getThresholdStdError(){
-        throw new UnsupportedOperationException();
+        double[] sp = new double[ncat];
+        for(int k=0;k<ncat;k++){
+            sp[k] = Double.NaN;
+        }
+        return sp;
     }
 
     public void setThresholdStdError(double[] stdError){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setStepParameters(double[] step){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setProposalStepParameters(double[] step){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setThresholdParameters(double[] thresholdParameters){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setProposalThresholds(double[] thresholds){
-        throw new UnsupportedOperationException();
+
     }
 //=====================================================================================================================//
 // END GETTER AND SETTER METHODS                                                                                       //
@@ -965,7 +1062,7 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
 
 
     /**
-     * A string representaiton of the item parameters. Mainly used for printing and debugging.
+     * A string representation of the item parameters. Mainly used for printing and debugging.
      *
      * @return a string of item parameters.
      */
@@ -974,23 +1071,75 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
 
-        String name = "";
+        String name = getName().toString();
         if(getName()!=null){
-            name = getName().toString();
+            name = getName().toString().substring(0, Math.min(18, name.length()));
+        }else{
+            name = "";
+        }
+        f.format("%-18s", name);f.format("%2s", "");
+
+        String m = "";
+        if(numberOfParameters==3){
+            m = "L3";
+        }else if(numberOfParameters==2){
+            m = "L2";
+        }else{
+            m = "L1";
+        }
+        f.format("%-3s", m);f.format("%4s", "");
+
+        f.format("% 4.2f", getDiscrimination()); f.format("%1s", "");
+        f.format("(%4.2f)", getDiscriminationStdError()); f.format("%4s", "");
+
+        f.format("% 4.2f", getDifficulty()); f.format("%1s", "");
+        f.format("(%4.2f)", getDifficultyStdError()); f.format("%4s", "");
+
+        if((numberOfParameters<3 && getGuessing()>0) || numberOfParameters==3){
+            f.format("% 4.2f", getGuessing()); f.format("%1s", "");
+            f.format("(%4.2f)", getGuessingStdError()); f.format("%4s", "");
+        }else{
+            f.format("%13s", "");
         }
 
-        f.format("%10s", name);f.format("%2s", ": ");
-        f.format("%1s", "[");
-        f.format("% .6f", getDiscrimination()); f.format("%2s", ", ");
-        f.format("% .6f", getDifficulty()); f.format("%2s", ", ");
-        f.format("% .6f", getGuessing());f.format("%1s", "]");
-        f.format("%n");
-        f.format("%10s", "");f.format("%2s", "");
-        f.format("%1s", "(");
-        f.format("% .6f", getDiscriminationStdError()); f.format("%2s", ", ");
-        f.format("% .6f", getDifficultyStdError()); f.format("%2s", ", ");
-        f.format("% .6f", getGuessingStdError());f.format("%1s", ")");
+
+        if(getSlipping()<1) {
+            f.format("% 4.2f", getSlipping());  f.format("%1s", "");
+            f.format("(%4.2f)", getSlippingStdError());  f.format("%4s", "");
+        }
         return f.toString();
+
+
+//        //OLD==================================================================
+//        String name = "";
+//        if(getName()!=null){
+//            name = getName().toString();
+//        }
+//
+//        f.format("%10s", name);f.format("%2s", ": ");
+//        f.format("%1s", "[");
+//        f.format("% .6f", getDiscrimination()); f.format("%2s", ", ");
+//        f.format("% .6f", getDifficulty()); f.format("%2s", ", ");
+//        f.format("% .6f", getGuessing());
+//
+//        if(getSlipping()<1) {
+//            f.format("%2s", ", ");
+//            f.format("% .6f", getSlipping());
+//        }
+//        f.format("%1s", "]");
+//        f.format("%n");
+//        f.format("%10s", "");f.format("%2s", "");
+//        f.format("%1s", "(");
+//        f.format("% .6f", getDiscriminationStdError()); f.format("%2s", ", ");
+//        f.format("% .6f", getDifficultyStdError()); f.format("%2s", ", ");
+//        f.format("% .6f", getGuessingStdError());
+//        if(getSlipping()<1){
+//            f.format("%2s", ", ");
+//            f.format("% .6f", getSlippingStdError());
+//        }
+//        f.format("%1s", ")");
+//
+//        return f.toString();
     }
 
 

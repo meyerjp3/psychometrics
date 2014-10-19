@@ -230,6 +230,10 @@ public class Histogram implements DistributionApproximation {
         return sum;
     }
 
+    public double getValueAt(int index){
+        return value[index];
+    }
+
 
     /**
      * Create the bins.
@@ -373,6 +377,14 @@ public class Histogram implements DistributionApproximation {
 
     public void setPointAt(int index, double value){
         points[index] = value;
+    }
+
+    public double getMinimum(){
+        return points[0];
+    }
+
+    public double getMaximum(){
+        return points[numberOfBins-1];
     }
 
     public double getMean(){

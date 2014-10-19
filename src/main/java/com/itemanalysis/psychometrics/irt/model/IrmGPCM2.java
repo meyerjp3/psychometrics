@@ -15,6 +15,7 @@
  */
 package com.itemanalysis.psychometrics.irt.model;
 
+import com.itemanalysis.psychometrics.irt.estimation.ItemParamPrior;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
@@ -49,6 +50,10 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
     private double[] threshold;
     private double[] proposalThreshold;
     private double[] thresholdStdError;
+
+    private ItemParamPrior discriminationPrior = null;
+    private ItemParamPrior difficultyPrior = null;
+    private ItemParamPrior[] stepPrior = null;
 
     public IrmGPCM2(double discrimination, double difficulty, double[] threshold, double D){
         this.discrimination = discrimination;
@@ -197,6 +202,36 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
             ev += scoreWeight[i]*probability(theta, i);
         }
         return ev;
+    }
+
+    public double[] nonZeroPrior(double[] param){
+        double[] p = Arrays.copyOf(param, param.length);
+        if(discriminationPrior!=null) p[0] = discriminationPrior.nearestNonZero(param[0]);
+        if(difficultyPrior!=null) p[1] = difficultyPrior.nearestNonZero(param[1]);
+        for(int k=2;k<param.length;k++){
+            if(stepPrior[k-2]!=null) p[k] = stepPrior[k-2].nearestNonZero(param[k]);
+        }
+        return p;
+    }
+
+    public void setDiscriminationPrior(ItemParamPrior discriminationPrior){
+        this.discriminationPrior = discriminationPrior;
+    }
+
+    public void setDifficultyPrior(ItemParamPrior difficultyPrior){
+        this.difficultyPrior = difficultyPrior;
+    }
+
+    public void setGuessingPrior(ItemParamPrior guessingPrior){
+
+    }
+
+    public void setSlippingPrior(ItemParamPrior slippingPrior){
+
+    }
+
+    public void setStepPriorAt(ItemParamPrior prior, int index){
+        this.stepPrior[index] = prior;
     }
 
     public double[] gradient(double theta, double[] iparam, int k, double D){
@@ -458,39 +493,39 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
     }
 
     public void setGuessing(double guessing){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setProposalGuessing(double guessing){
-        throw new UnsupportedOperationException();
+
     }
 
     public double getGuessingStdError(){
-        throw new UnsupportedOperationException();
+        return Double.NaN;
     }
 
     public void setGuessingStdError(double stdError){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setSlipping(double slipping){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setProposalSlipping(double slipping){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setSlippingStdError(double slipping){
-        throw new UnsupportedOperationException();
+
     }
 
     public double getSlipping(){
-        throw new UnsupportedOperationException();
+        return Double.NaN;
     }
 
     public double getSlippingStdError(){
-        throw new UnsupportedOperationException();
+        return Double.NaN;
     }
 
     public double[] getThresholdParameters(){
@@ -522,28 +557,40 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
     }
 
     public void setStepParameters(double[] step){
-        throw new UnsupportedOperationException();
+
     }
 
     public void setProposalStepParameters(double[] step){
-        throw new UnsupportedOperationException();
+
     }
 
     public double[] getStepStdError(){
-        throw new UnsupportedOperationException();
+        double[] sp = new double[ncat];
+        for(int k=0;k<ncat;k++){
+            sp[k] = Double.NaN;
+        }
+        return sp;
     }
 
     public void setStepStdError(double[] stdError){
-        throw new UnsupportedOperationException();
+
     }
 
     public double acceptAllProposalValues(){
         double max = 0;
         if(!isFixed){
-            max = Math.max(max, Math.abs(this.difficulty-this.proposalDifficulty));
-            max = Math.max(max, Math.abs(this.discrimination-this.proposalDiscrimination));
+            double delta = Math.abs(this.difficulty-this.proposalDifficulty);
+            if(proposalDifficulty>=1) delta /= proposalDifficulty;
+            max = Math.max(max, delta);
+
+            delta = Math.abs(this.discrimination-this.proposalDiscrimination);
+            if(proposalDiscrimination>=1) delta /= proposalDiscrimination;
+            max = Math.max(max, delta);
+
             for(int m=0;m<getNcat();m++){
-                max = Math.max(max, Math.abs(this.threshold[m]-this.proposalThreshold[m]));
+                delta = Math.abs(this.threshold[m]-this.proposalThreshold[m]);
+                if(proposalThreshold[m]>=1) delta /= proposalThreshold[m];
+                max = Math.max(max, delta);
             }
             this.difficulty = this.proposalDifficulty;
             this.discrimination = this.proposalDiscrimination;

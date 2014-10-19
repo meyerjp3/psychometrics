@@ -142,6 +142,14 @@ public final class UserSuppliedDistributionApproximation implements Distribution
         points[index] = value;
     }
 
+    public double getMinimum(){
+        return points[0];
+    }
+
+    public double getMaximum(){
+        return  points[numberOfPoints-1];
+    }
+
     public double getMean(){
         double m = 0.0;
         for(int i=0;i<numberOfPoints;i++){

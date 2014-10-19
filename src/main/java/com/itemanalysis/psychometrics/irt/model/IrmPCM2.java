@@ -1,18 +1,3 @@
-/*
- * Copyright 2012 J. Patrick Meyer
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.itemanalysis.psychometrics.irt.model;
 
 import com.itemanalysis.psychometrics.irt.estimation.ItemParamPrior;
@@ -22,47 +7,24 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import java.util.Arrays;
 import java.util.Formatter;
 
-
 /**
- * This version of the Generalized Partial Credit Model (GPCM) uses a discrimination
- * parameter and two or more step parameters. For an item with m categories, there
- * are m step parameters with teh firsr step parameter fixed to zero. For k = 1,..., m,
- * Let Zk = sum_{v=1}^k {D*a*(theta-b_v)}, then the probability of a response of k is given by,
- * exp(Zk)/(sum_{c=1}^m {exp(Zc)}).
- *
- * This form of the GPCM is used in Brad Hanson's ICL program and jMetrik.
- *
- * Since 8/17/2014: This class allows the computation of the probability of a response using
- * item parameter values that are not stored in the object. You must use an array of item
- * parameters that has a specific order to the values. The order is
- * iparam[0] = discrimination,
- * iparam[1] = step1 (always fixed to zero),
- * iparam[2] = step 2,
- * iparam[3] = step 3,
- *  ...
- * iparam[m+1] = step m.
- *
+ * Class that implements the partial credit model. This version is different from {@link com.itemanalysis.psychometrics.irt.model.IrmPCM}
+ * in that it uses step parameters only. It does not use the difficulty plus threshold parameters.
  *
  */
-public class IrmGPCM extends AbstractItemResponseModel {
+public class IrmPCM2 extends AbstractItemResponseModel  {
 
-    private double discrimination = 1.0;
-    private double discriminationStandardError = 0.0;
-    private double proposalDiscrimination = 1.0;
-    protected double D = 1.7;
-    protected double[] step;
-    protected double[] proposalStep;
-    protected double[] stepStdError;
-    private ItemParamPrior discriminationPrior = null;
-    protected ItemParamPrior[] stepPrior = null;
+    private double D = 1.7;
+    private double[] step;
+    private double[] proposalStep;
+    private double[] stepStdError;
+    private ItemParamPrior[] stepPrior = null;
 
-
-    public IrmGPCM(double discrimination, double[] step, double D){
-
+    public IrmPCM2(double[] step, double D){
         ncat = step.length;
         ncatM1 = ncat-1;
         this.step = step;
-        this.discrimination = discrimination;
+//        this.proposalStep = step;
         this.stepStdError = new double[ncat];
         this.D = D;
 
@@ -129,9 +91,8 @@ public class IrmGPCM extends AbstractItemResponseModel {
      */
     private double numer(double theta, double[] iparam, int category, double D){
         double Zk = 0;
-        double a = iparam[0];
         for(int k=0; k<=category; k++){
-            Zk += D*a*(theta-iparam[k+1]);
+            Zk += D*(theta-iparam[k]);
         }
         return Math.exp(Zk);
     }
@@ -147,7 +108,7 @@ public class IrmGPCM extends AbstractItemResponseModel {
     private double numer(double theta, int category){
         double Zk = 0;
         for(int k=0; k<=category; k++){
-            Zk += D*discrimination*(theta-step[k]);
+            Zk += D*(theta-step[k]);
         }
         return Math.exp(Zk);
     }
@@ -203,10 +164,9 @@ public class IrmGPCM extends AbstractItemResponseModel {
      */
     public double[] gradient(double theta, int category){
         double[] iparam = new double[getNumberOfParameters()];
-        iparam[0] = discrimination;
 
         for(int k=0;k<ncat;k++){
-            iparam[k+1] = step[k];
+            iparam[k] = step[k];
         }
         return gradient(theta, iparam, category, D);
     }
@@ -224,14 +184,12 @@ public class IrmGPCM extends AbstractItemResponseModel {
      */
     public double[] gradient(double theta, double[] iparam, int k, double D){
         int nPar = iparam.length;
-        int ncat = iparam.length-1;//Number of categories is length of parameter array minus 1 to account for the discrimination parameter.
+        int ncat = nPar;
 
         int ncatM1 = ncat-1;
         double[] grad = new double[nPar];
         double[] fk = new double[ncat];
         double g = 0;
-
-        double a = iparam[0];
 
         //Compute numerator values of irm and denominator of irm
         for(int i=0;i<ncat;i++){
@@ -244,29 +202,19 @@ public class IrmGPCM extends AbstractItemResponseModel {
         double dif = 0;
         double p1 = 0;
         double expP1 = 0;
-        double[] da = new double[ncat];//Holds first derivatives of response model numerator wrt discrimination.
         double[] db = new double[ncat];//Holds first derivatives of response model numerator wrt steps.
 
-        //Compute first derivative of numerator of response model wrt discrimination (da)
-        //and wrt steps (db).
+        //Compute first derivative of numerator of response model wrt steps (db).
         for(int kk=0;kk<ncat;kk++){
             bsum = 0;
             for(int j=0;j<=kk;j++){
-                bsum += iparam[j+1];
+                bsum += iparam[j];
             }
             dif = (kk+1)*theta-bsum;
-            p1 = D*a*(dif);
+            p1 = D*(dif);
             expP1 = Math.exp(p1);
-            da[kk] = expP1*D*dif;
-            db[kk] = -D*a*expP1;
+            db[kk] = -D*expP1;
         }
-
-        //First partial derivative wrt discrimination parameter.
-        double gPrimeASum = 0;
-        for(int i=0;i<ncat;i++){
-            gPrimeASum += da[i];
-        }
-        grad[0] =  (g*da[k] - gPrimeASum*fk[k])/g2;
 
         //First partial derivatives wrt step parameters
         double gPrimeBkSum = 0;
@@ -275,7 +223,7 @@ public class IrmGPCM extends AbstractItemResponseModel {
             gPrimeBkSum += db[i];
             pd = 0;
             if(i<=k) pd = db[k];
-            grad[i+1] = (g*pd - gPrimeBkSum*fk[k])/g2;
+            grad[i] = (g*pd - gPrimeBkSum*fk[k])/g2;
         }
 
         return grad;
@@ -293,7 +241,7 @@ public class IrmGPCM extends AbstractItemResponseModel {
 
         for(int k=0;k<ncat;k++){
             expZk = numer(theta, k);
-            denom += expZk*(1.0+k)*discrimination;
+            denom += expZk*(1.0+k);
         }
         return denom;
     }
@@ -315,7 +263,7 @@ public class IrmGPCM extends AbstractItemResponseModel {
 
         for(int k=0;k<ncat;k++){
             numer = numer(theta, k);
-            p1 = (D*numer*(1.0+k)*discrimination)/denom;
+            p1 = (D*numer*(1.0+k))/denom;
             p2 = (numer*denomDeriv)/denom2;
             deriv += scoreWeight[k]*(p1-p2);
         }
@@ -327,7 +275,6 @@ public class IrmGPCM extends AbstractItemResponseModel {
         double prob = 0.0;
         double sum1 = 0.0;
         double sum2 = 0.0;
-        double a2 = discrimination*discrimination;
 
         for(int i=0;i< ncat;i++){
             prob = probability(theta, i);
@@ -336,7 +283,7 @@ public class IrmGPCM extends AbstractItemResponseModel {
             sum2 += T*prob;
         }
 
-        double info = D*D*a2*(sum1 - Math.pow(sum2, 2));
+        double info = D*D*(sum1 - Math.pow(sum2, 2));
         return info;
 
     }
@@ -347,20 +294,14 @@ public class IrmGPCM extends AbstractItemResponseModel {
 
     public double[] nonZeroPrior(double[] param){
         double[] p = Arrays.copyOf(param, param.length);
-        if(discriminationPrior!=null) p[0] = discriminationPrior.nearestNonZero(param[0]);
         for(int k=1;k<param.length;k++){
             if(stepPrior[k-1]!=null) p[k] = stepPrior[k-1].nearestNonZero(param[k]);
         }
         return p;
     }
 
+    public void setDiscriminationPrior(ItemParamPrior discriminationPrior){
 
-    public void setDiscriminationPrior(ItemParamPrior prior){
-        discriminationPrior = prior;
-    }
-
-    public void setStepPriorAt(ItemParamPrior prior, int k){
-        stepPrior[k] = prior;
     }
 
     public void setDifficultyPrior(ItemParamPrior difficultyPrior){
@@ -375,21 +316,21 @@ public class IrmGPCM extends AbstractItemResponseModel {
 
     }
 
+    public void setStepPriorAt(ItemParamPrior prior, int k){
+        stepPrior[k] = prior;
+    }
+
     public double addPriorsToLogLikelihood(double ll, double[] iparam){
         return ll;
     }
 
     public double[] addPriorsToLogLikelihoodGradient(double[] loglikegrad, double[] iparam){
-        int ncat = iparam.length-1;
+        int ncat = iparam.length;
 
         double[] llg = loglikegrad;
-        if(discriminationPrior!=null){
-            llg[0] -= discriminationPrior.logDensityDeriv1(iparam[0]);
-        }
-
         for(int k=0;k<ncat;k++){
             if(stepPrior[k]!=null){
-                llg[k+1] -= stepPrior[k].logDensityDeriv1(iparam[k+1]);
+                llg[k] -= stepPrior[k].logDensityDeriv1(iparam[k]);
             }
         }
         return llg;
@@ -407,7 +348,7 @@ public class IrmGPCM extends AbstractItemResponseModel {
     }
 
     public void incrementMeanMean(Mean meanDiscrimination, Mean meanDifficulty){
-        meanDiscrimination.increment(discrimination);
+        meanDiscrimination.increment(1.0);
         for(int i=1;i<ncat;i++){//Start at 1 because first step is fixed to zero. Do not count it here.
             meanDifficulty.increment(step[i]);
         }
@@ -420,7 +361,6 @@ public class IrmGPCM extends AbstractItemResponseModel {
      * @param slope slope transformation coefficient.
      */
     public void scale(double intercept, double slope){
-        discrimination /= slope;
         for(int k=1;k<ncat;k++){//start at 1 because first step is fixed to zero. Do not rescale it.
             step[k] = step[k]*slope + intercept;
             stepStdError[k] = stepStdError[k]*slope;
@@ -443,34 +383,14 @@ public class IrmGPCM extends AbstractItemResponseModel {
         if(category> maxCategory || category<minCategory) return 0;
 
         double[] iparam = new double[getNumberOfParameters()];
-        iparam[0] = discrimination/slope;
         for(int i=0;i<step.length;i++){
             if(i==0){
-                iparam[i+1] = step[i];//first step fixed to zero and not transformed
+                iparam[i] = step[i];//first step fixed to zero and not transformed
             }else{
-                iparam[i+1] = step[i]*slope+intercept;
+                iparam[i] = step[i]*slope+intercept;
             }
         }
         return probability(theta, iparam, category, D);
-
-//        double Zk = 0;
-//        double expZk = 0;
-//        double numer = 0;
-//        double denom = 0;
-//        double a = discrimination/slope;
-//        double b = 0;
-//
-//        for(int k=0;k<ncat;k++){
-//            Zk = D*a*(theta-0.0);//First step fixed to zero and not transformed
-//            for(int v=1;v<=k;v++){
-//                b = step[v]*slope+intercept;
-//                Zk += D*a*(theta-b);
-//            }
-//            expZk = Math.exp(Zk);
-//            if(k==category) numer = expZk;
-//            denom += expZk;
-//        }
-//        return numer/denom;
     }
 
     /**
@@ -504,35 +424,15 @@ public class IrmGPCM extends AbstractItemResponseModel {
         if(category> maxCategory || category<minCategory) return 0;
 
         double[] iparam = new double[getNumberOfParameters()];
-        iparam[0] = discrimination*slope;
         for(int i=0;i<step.length;i++){
             if(i==0){
-                iparam[i+1] = step[i];//first step fixed to zero and not transformed
+                iparam[i] = step[i];//first step fixed to zero and not transformed
             }else{
-                iparam[i+1] = (step[i]-intercept)/slope;
+                iparam[i] = (step[i]-intercept)/slope;
             }
 
         }
         return probability(theta, iparam, category, D);
-
-//        double Zk = 0;
-//        double expZk = 0;
-//        double numer = 0;
-//        double denom = 0;
-//        double a = discrimination*slope;
-//        double b = 0;
-//
-//        for(int k=0;k<ncat;k++){
-//            Zk = D*a*(theta-0.0);//First step is always zero. Do not rescale it.
-//            for(int v=1;v<=k;v++){
-//                b = (step[v]-intercept)/slope;
-//                Zk += D*a*(theta-b);
-//            }
-//            expZk = Math.exp(Zk);
-//            if(k==category) numer = expZk;
-//            denom += expZk;
-//        }
-//        return numer/denom;
     }
 
     /**
@@ -558,26 +458,24 @@ public class IrmGPCM extends AbstractItemResponseModel {
 
     public double[] getItemParameterArray(){
         double[] ip = new double[getNumberOfParameters()];
-        ip[0] = discrimination;
         for(int k=0;k<ncat;k++){
-            ip[k+1] = step[k];
+            ip[k] = step[k];
         }
         return ip;
     }
 
     public void setStandardErrors(double[] x){
-        discriminationStandardError = x[0];
         for(int k=0;k<ncat;k++){
-            stepStdError[k] = x[k+1];
+            stepStdError[k] = x[k];
         }
     }
 
     public IrmType getType(){
-        return IrmType.GPCM;
+        return IrmType.PCM2;
     }
 
     public int getNumberOfParameters(){
-        return ncat+1;
+        return ncat;
     }
 
     public double getScalingConstant(){
@@ -609,23 +507,23 @@ public class IrmGPCM extends AbstractItemResponseModel {
     }
 
     public double getDiscrimination(){
-        return discrimination;
+        return 1.0;
     }
 
     public void setDiscrimination(double discrimination){
-        this.discrimination = discrimination;
+
     }
 
     public void setProposalDiscrimination(double discrimination){
-        this.proposalDiscrimination = discrimination;
+
     }
 
     public double getDiscriminationStdError(){
-        return discriminationStandardError;
+        return Double.NaN;
     }
 
     public void setDiscriminationStdError(double stdError){
-        discriminationStandardError = stdError;
+
     }
 
     public double getGuessing(){
@@ -715,15 +613,11 @@ public class IrmGPCM extends AbstractItemResponseModel {
     }
 
     public double acceptAllProposalValues(){
+        double delta = 0;
         double max = 0;
         if(!isFixed){
-            double delta = Math.abs(this.discrimination-proposalDiscrimination);
-            if(proposalDiscrimination>=1) delta /= proposalDiscrimination;
-            max = Math.max(max, delta);
-            this.discrimination = this.proposalDiscrimination;
-
             for(int m=0;m<ncat;m++){
-                delta = Math.abs(this.step[m]-proposalStep[m]);
+                delta = Math.abs(this.step[m]-this.proposalStep[m]);
                 if(proposalStep[m]>=1) delta /= proposalStep[m];
                 max = Math.max(max, delta);
             }
@@ -734,6 +628,7 @@ public class IrmGPCM extends AbstractItemResponseModel {
 //=====================================================================================================================//
 // END GETTER AND SETTER METHODS                                                                                       //
 //=====================================================================================================================//
+
 
     /**
      * Displays the item parameter values and standard errors.
@@ -752,10 +647,12 @@ public class IrmGPCM extends AbstractItemResponseModel {
         }
         f.format("%-18s", name);f.format("%2s", "");
 
-        f.format("%-3s", "PC1");f.format("%4s", "");
+        f.format("%-3s", "PC4");f.format("%4s", "");
 
-        f.format("% 4.2f", getDiscrimination()); f.format("%1s", "");
-        f.format("(%4.2f)", getDiscriminationStdError()); f.format("%4s", "");
+        f.format("%16s", "");
+
+//        f.format("% 4.2f", getDiscrimination()); f.format("%1s", "");
+//        f.format("(%4.2f)", getDiscriminationStdError()); f.format("%4s", "");
 
         double[] step = getStepParameters();
         double[] stepSe = getStepStdError();
@@ -767,14 +664,13 @@ public class IrmGPCM extends AbstractItemResponseModel {
         }
 
         return f.toString();
-//
-//
+
+
 //        StringBuilder sb = new StringBuilder();
 //        Formatter f = new Formatter(sb);
 //
 //        f.format("%10s", getName().toString());f.format("%2s", ": ");
 //        f.format("%1s", "[");
-//        f.format("% .6f", getDiscrimination()); f.format("%2s", ", ");
 //        for(int k=1;k<ncat;k++){
 //            f.format("% .6f", step[k]);//Do not print first step parameter because fixed to zero.
 //            if(k<ncatM1) f.format("%2s", ", ");
@@ -783,7 +679,6 @@ public class IrmGPCM extends AbstractItemResponseModel {
 //        f.format("%n");
 //        f.format("%10s", "");f.format("%2s", "");
 //        f.format("%1s", "(");
-//        f.format("% .6f", getDiscriminationStdError()); f.format("%2s", ", ");
 //        for(int k=1;k<ncat;k++){
 //            f.format("% .6f", stepStdError[k]);//Do not print first step parameter because fixed to zero.
 //            if(k<ncatM1) f.format("%2s", ", ");

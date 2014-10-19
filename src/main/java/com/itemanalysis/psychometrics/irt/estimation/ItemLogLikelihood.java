@@ -22,6 +22,8 @@ import com.itemanalysis.psychometrics.uncmin.Uncmin_methods;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.SingularMatrixException;
+import org.apache.commons.math3.util.Precision;
 
 import java.util.Arrays;
 
@@ -40,7 +42,8 @@ public class ItemLogLikelihood implements DiffFunction, Uncmin_methods{
     private DistributionApproximation latentDistribution = null;
     private int nPar = 1;
     private int nPoints = 0;
-    private static double LOG_ZERO = Math.log(1e-8);
+//    private static double LOG_ZERO = Math.log(1e-8);
+    private final double EPSILON = Precision.EPSILON;
 
     public ItemLogLikelihood(){
 
@@ -67,7 +70,7 @@ public class ItemLogLikelihood implements DiffFunction, Uncmin_methods{
         for(int t=0;t<nPoints;t++){
             for(int k=0;k<model.getNcat();k++){
                 p = model.probability(latentDistribution.getPointAt(t), iparam, k, model.getScalingConstant());//assumes item uses the default score weights that start at zero.
-                p = Math.min(0.99999999, Math.max(0.00000001, p)); //always use value strictly between 0 and 1
+                p = Math.min(1.0-EPSILON, Math.max(EPSILON, p)); //always use value strictly between 0 and 1
                 ll += r.getRjktAt(k,t)*Math.log(p);
             }
         }
@@ -126,7 +129,7 @@ public class ItemLogLikelihood implements DiffFunction, Uncmin_methods{
                 for(int k=0;k<model.getNcat();k++){
                     igrad = model.gradient(quad, point, k, model.getScalingConstant());
                     p = model.probability(quad, point, k, model.getScalingConstant());
-                    p = Math.min(0.99999999, Math.max(0.00000001, p)); //Always use value strictly between 0 and 1.
+                    p = Math.min(1.0-EPSILON, Math.max(EPSILON, p)); //Always use value strictly between 0 and 1.
                     x = r.getRjktAt(k,t)/p * igrad[i];
                     loglikegrad[i] += -x;
                 }
@@ -190,7 +193,7 @@ public class ItemLogLikelihood implements DiffFunction, Uncmin_methods{
      * @return
      */
     private double[][] numericHessian(double[] x){
-        double EPSILON = 1e-8;
+//        double EPSILON = 1e-8;
         int n = x.length;
         double[][] hessian = new double[n][n];
         double[] gradientAtXpls = null;
@@ -219,13 +222,22 @@ public class ItemLogLikelihood implements DiffFunction, Uncmin_methods{
      * @return array of item parameter standard errors
      */
     public double[] stdError(double[] x){
-        RealMatrix m = new Array2DRowRealMatrix(numericHessian(x));
-        RealMatrix info = new LUDecomposition(m).getSolver().getInverse();
-
         double[] se = new double[x.length];
-        for(int i=0;i<info.getRowDimension();i++){
-            se[i] = Math.sqrt(info.getEntry(i,i));
+        try{
+            RealMatrix m = new Array2DRowRealMatrix(numericHessian(x));
+            RealMatrix info = new LUDecomposition(m).getSolver().getInverse();
+
+
+            for(int i=0;i<info.getRowDimension();i++){
+                se[i] = Math.sqrt(info.getEntry(i,i));
+            }
+        }catch(SingularMatrixException ex){
+            for(int i=0;i<se.length;i++){
+                se[i] = Double.NaN;
+            }
+            ex.printStackTrace();
         }
+
         return  se;
     }
 

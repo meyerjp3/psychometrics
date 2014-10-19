@@ -147,7 +147,7 @@ public final class UniformDistributionApproximation implements DistributionAppro
      *
      * @return minimum evaluation point.
      */
-    public double getMin(){
+    public double getMinimum(){
         return points[0];
     }
 
@@ -156,7 +156,7 @@ public final class UniformDistributionApproximation implements DistributionAppro
      *
      * @return largest evaluation point.
      */
-    public double getMax(){
+    public double getMaximum(){
         return points[numberOfPoints-1];
     }
 
