@@ -16,7 +16,7 @@
 package com.itemanalysis.psychometrics.cfa;
 
 import com.itemanalysis.psychometrics.analysis.AbstractMultivariateFunction;
-import com.itemanalysis.psychometrics.data.VariableInfo;
+import com.itemanalysis.psychometrics.data.VariableAttributes;
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -46,7 +46,7 @@ public abstract class AbstractConfirmatoryFactorAnalysisEstimator extends Abstra
 
     protected int nItems = 0;
 
-    protected ArrayList<VariableInfo> items = null;
+    protected ArrayList<VariableAttributes> items = null;
 
     public AbstractConfirmatoryFactorAnalysisEstimator(ConfirmatoryFactorAnalysisModel model, RealMatrix varcov, double numberOfExaminees){
         this.model = model;
@@ -168,7 +168,7 @@ public abstract class AbstractConfirmatoryFactorAnalysisEstimator extends Abstra
         return df;
     }
 
-    public String printEstimates(ArrayList<VariableInfo> items){
+    public String printEstimates(ArrayList<VariableAttributes> items){
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
         double[] fl = model.getFactorLoading();

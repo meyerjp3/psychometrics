@@ -71,7 +71,7 @@ public class MstepParallel extends RecursiveAction {
             initialValue = irm[j].getItemParameterArray();
 
             try{
-                optimizer.minimize(itemLogLikelihood, initialValue, true, false, 500);
+                optimizer.minimize(itemLogLikelihood, initialValue, true, false, 500, 1);//Last paramter, 1, could also be 2
                 param = optimizer.getParameters();
 
                 if(optimizer.getTerminationCode()>3) codeCount[0]++;
@@ -97,7 +97,7 @@ public class MstepParallel extends RecursiveAction {
                     if(param[2]<0) codeCount[2]++;
                     irm[j].setProposalDiscrimination(param[0]);
                     irm[j].setProposalDifficulty(param[1]);
-                    irm[j].setProposalGuessing(param[2]);
+//                    irm[j].setProposalGuessing(param[2]);
                     irm[j].setProposalGuessing(Math.min(1.000, Math.max(param[2], 0.001)));//set negative estimates to just above zero
                 }else if(nPar==2){
                     if(param[0]<0) codeCount[1]++;

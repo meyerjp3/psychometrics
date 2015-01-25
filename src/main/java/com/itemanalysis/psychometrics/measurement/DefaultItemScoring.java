@@ -15,10 +15,10 @@
  */
 package com.itemanalysis.psychometrics.measurement;
 
-import com.itemanalysis.psychometrics.data.Category;
-import com.itemanalysis.psychometrics.data.VariableType;
+import com.itemanalysis.psychometrics.data.*;
 import org.apache.commons.math3.stat.descriptive.rank.Max;
 import org.apache.commons.math3.stat.descriptive.rank.Min;
+import org.apache.commons.math3.util.Pair;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -33,8 +33,8 @@ import java.util.regex.Pattern;
  *
  */
 public class DefaultItemScoring implements ItemScoring{
-    
-    public TreeMap<Object, Category> categories = null;
+
+    public TreeMap<Object, Category> categoryMap = null;
 
     /**
      * Largest obtainable score on the item
@@ -46,128 +46,52 @@ public class DefaultItemScoring implements ItemScoring{
      */
     private Min minimumPossibleScore = null;
 
-    /**
-     * True if item is scored in one of only two possible ways.
-     */
-    private int binaryScoring = 0;
+    private TreeSet<Double> scoreLevels = null;
 
-    /**
-     * Code that represents an omitted item response
-     */
-    private Object omitCode = null;
+    private SpecialDataCodes specialDataCodes = null;
 
-    /**
-     * Code that represents an item that was not reached by an examinees.
-     * an item is not reached if the item before it has a response but
-     * no item after it has a response.
-     *
-     */
-    private Object notReachedCode = null;
+    private boolean isContinuous = false;
 
     public DefaultItemScoring(){
-        categories = new TreeMap<Object, Category>();
+        this(false);
+    }
+
+    public DefaultItemScoring(boolean isContinuous){
+        this.isContinuous = isContinuous;
+        categoryMap = new TreeMap<Object, Category>(new ItemResponseComparator());
         maximumPossibleScore = new Max();
         minimumPossibleScore = new Min();
+        specialDataCodes = new SpecialDataCodes();
+        scoreLevels = new TreeSet<Double>();
     }
 
     public void addCategory(Category cat){
-        categories.put(cat.responseValue(), cat);
+        categoryMap.put(cat.responseValue(), cat);
         maximumPossibleScore.increment(cat.scoreValue());
         minimumPossibleScore.increment(cat.scoreValue());
+        scoreLevels.add(cat.scoreValue());
     }
 
     public void removeCategory(Category cat){
-        categories.remove(cat);
+        categoryMap.remove(cat);
+        scoreLevels.remove(cat.scoreValue());
+    }
+
+    public void addCategory(Object categoryID, double scoreValue){
+        System.out.println(categoryID instanceof Double);
+        categoryMap.put(categoryID, new Category(categoryID, scoreValue));
+        maximumPossibleScore.increment(scoreValue);
+        minimumPossibleScore.increment(scoreValue);
+        scoreLevels.add(scoreValue);
+
     }
 
     public void clearCategory(){
-        this.categories = null;
-        binaryScoring = 0;
+        this.categoryMap.clear();
+        this.scoreLevels.clear();
+        this.categoryMap.clear();
         maximumPossibleScore = new Max();
         minimumPossibleScore = new Min();
-        categories = new TreeMap<Object, Category>();
-    }
-
-    /**
-     * Sets the omit code. The code will be set to null if
-     * (a) the omit code is an empty string, or
-     * (b) the code is a string when the data type is double.
-     *
-     * @param omitCode
-     * @param type
-     */
-    public void setOmitCode(Object omitCode, VariableType type){
-        String s = omitCode.toString();
-        if("".equals(s)){
-            this.omitCode = null;
-            return;
-        }
-
-        try{
-            Double d = Double.valueOf(s);
-
-            //code is double
-            if(type.getDataType()==VariableType.DOUBLE){
-                this.omitCode = d;
-            }else{
-                this.omitCode = s;
-            }
-        }catch(NumberFormatException ex){
-            //code is string
-            if(type.getDataType()==VariableType.DOUBLE){
-                this.omitCode = null;
-            }else{
-                this.omitCode = s;
-            }
-        }
-
-    }
-
-    /**
-     * Sets the not reached code. The code will be set to null if
-     * (a) the code is an empty string, or
-     * (b) the code is a string when the data type is double.
-     *
-     * @param notReachedCode
-     * @param type
-     */
-    public void setNotReachedCode(Object notReachedCode, VariableType type){
-        String s = notReachedCode.toString();
-        if("".equals(s)){
-            this.notReachedCode = null;
-            return;
-        }
-
-        try{
-            Double d = Double.valueOf(s);
-
-            //code is double
-            if(type.getDataType()==VariableType.DOUBLE){
-                this.notReachedCode = d;
-            }else{
-                this.notReachedCode = s;
-            }
-        }catch(NumberFormatException ex){
-            //code is string
-            if(type.getDataType()==VariableType.DOUBLE){
-                this.notReachedCode = null;
-            }else{
-                this.notReachedCode = s;
-            }
-        }
-    }
-
-    public Object getOmitCode(){
-        return omitCode;
-    }
-
-    public Object getNotReachedCode(){
-        return notReachedCode;
-    }
-
-    public void clearOmittedAndNotReachedCodes(){
-        this.omitCode = null;
-        this.notReachedCode = null;
     }
 
     /**
@@ -176,18 +100,26 @@ public class DefaultItemScoring implements ItemScoring{
      * @return number of response options.
      */
     public int numberOfCategories(){
-        return categories.size();
+        return categoryMap.size();
+    }
+
+    public void isContinuous(boolean isContinuous){
+        this.isContinuous = isContinuous;
+    }
+
+    public boolean isContinuous(){
+        return isContinuous;
     }
 
     /**
-     * Gets teh number of score levels. For a polytomous item, this number will be the same as teh value returned by
+     * Gets the number of score levels. For a polytomous item, this number will be the same as the value returned by
      * {@link #numberOfCategories()} unless the score categories are collapsed. With collapsed score categories,
      * the number of score levels will be less than the number of response options.
      *
      * @return number of score levels.
      */
     public int numberOfScoreLevels(){
-        return (int)(maximumPossibleScore()-minimumPossibleScore())+1;
+        return scoreLevels.size();
     }
 
     public double maximumPossibleScore(){
@@ -205,71 +137,46 @@ public class DefaultItemScoring implements ItemScoring{
      * @return
      */
     public Iterator<Object> categoryIterator(){
-        return categories.keySet().iterator();
+        return categoryMap.keySet().iterator();
     }
 
     public String getCategoryScoreString(Object response){
-        Category c = categories.get(response);
+        Category c = categoryMap.get(response);
         if(c==null) return "";
         String s = c.responseValue().toString() + "(" + c.scoreValue() + ")";
         return s;
     }
 
+    public void setSpecialDataCodes(SpecialDataCodes specialDataCodes){
+        this.specialDataCodes = specialDataCodes;
+    }
+
     /**
-     * Missing responses, omitted responses, and not reached responses are scored as 0 points.
+     * Missing responses, omitted responses, and not reached responses are scored according to the value in
+     * the SepcialDataCodes object.
      *
-     * @param response item response
+     * @param response an item response that is either a Double or String
      * @return item score
      */
     public double computeItemScore(Object response){
-        return computeItemScore(response, true, true, true);
-    }
-
-    /**
-     * Missing responses, omitted responses, and not reached responses are treated the same way.
-     *
-     *
-     * @param response item response
-     * @param scoreAsZero Score all special codes as 0 points if true. Score as Double.NaN otherwise.
-     * @return item score
-     */
-    public double computeItemScore(Object response, boolean scoreAsZero){
-        return computeItemScore(response, scoreAsZero, scoreAsZero, scoreAsZero);
-    }
-
-    /**
-     * Main item score method. It handles missing data, omitted, and not reached responses
-     * differently depending on user options. The value Double.NaN is used to indicate missing data.
-     * This value must be handled by the calling method.
-     *
-     * @param response item response
-     * @param missingZero score missing responses as zero points if true. Otherwise, score as Double.NaN.
-     * @param omitZero  score omitted responses as zero points if true. Otherwise, score as Double.NaN.
-     * @param notreachedZero  score not reached responses as zero points if true. Otherwise, score as Double.NaN.
-     * @return item score.
-     */
-    public double computeItemScore(Object response, boolean missingZero, boolean omitZero, boolean notreachedZero){
         if(response==null){
-            if(missingZero) return 0.0;
-            else return Double.NaN;
+            return specialDataCodes.computeMissingScore(SpecialDataCodes.PERMANENT_MISSING_DATA_CODE);
         }
 
-        if(omitCode!=null && omitCode.equals(response)){
-            if(omitZero) return 0.0;
-            else return Double.NaN;
+        if(specialDataCodes.isMissing(response)){
+            return specialDataCodes.computeMissingScore(response);
         }
 
-        if(notReachedCode!=null && notReachedCode.equals(response)){
-            if(notreachedZero) return 0.0;
-            else return Double.NaN;
+        if(isContinuous){
+            return Double.parseDouble(response.toString());
         }
 
         double score = Double.NaN;
-        Category temp = categories.get(response);
+        Category temp = categoryMap.get(response);
+
         if(temp==null){
             //undefined categories scored same as missing data
-            if(missingZero) return 0.0;
-            else return Double.NaN;
+            return specialDataCodes.computeMissingScore(SpecialDataCodes.PERMANENT_MISSING_DATA_CODE);//return missing score
         }else{
             score = temp.scoreValue();
         }
@@ -277,52 +184,24 @@ public class DefaultItemScoring implements ItemScoring{
     }
 
     /**
-     * Computes the item score such that missing data and special codes are scored as zero points.
+     * Creates an array of category keys and their corresponding score for the response.
+     * They are stored in an array of Pairs so that the category ID and score are kept together.
      *
-     * @param response examinee response
-     * @param type variable type is either string or double.
-     * @return item score
+     * @param response an item response
+     * @return
      */
-    public double computeItemScore(Object response, VariableType type){
-        return computeItemScore(response, type, true, true, true);
-    }
-
-    /**
-     * Computes the item score. If scoreAsZero is false and the response is null or
-     * is one of the special codes (i.e. omitted or not reached) then this method
-     * will return Double.NaN. If scoreAsZero is true, then this method will return
-     * a value of 0 for a null response or a response that equals on of the special
-     * codes.
-     *
-     * @param response examinee response.
-     * @param type variable type is either double or string.
-     * @param scoreAsZero true if missing data and special codes should be scored as zero points.
-     * @return item score.
-     */
-    public double computeItemScore(Object response, VariableType type, boolean scoreAsZero){
-        return computeItemScore(response, type, scoreAsZero, scoreAsZero, scoreAsZero);
-    }
-
-    /**
-     * Primary method for scoring an item. It allows each special code (missing, omitted, and not reached)
-     * to be handled differently. The method will handle continuous items and make the appropriate data
-     * conversion first. If the item is not continuous, it will call the item scoring method.
-     *
-     * @param response item response
-     * @param type type of variable
-     * @param missingZero Score missing response as zero points if true. Score as Double.NaN otherwise.
-     * @param omitZero  Score omitted response as zero points if true. Score as Double.NaN otherwise.
-     * @param notreachedZero  Score not reached response as zero points if true. Score as Double.NaN otherwise.
-     * @return item score.
-     */
-    public double computeItemScore(Object response, VariableType type, boolean missingZero, boolean omitZero, boolean notreachedZero){
-        if(type.getItemType()== VariableType.CONTINUOUS_ITEM && type.getDataType()==VariableType.DOUBLE){
-            return Double.parseDouble(response.toString());
+    public Pair[] computeScoreVector(Object response){
+        Pair[] pair = new Pair[this.numberOfCategories()];
+        Pair tempPair = null;
+        double score = 0;
+        int index = 0;
+        for(Object obj : categoryMap.keySet()){
+            score = computeCategoryScore(obj, response);
+            tempPair = new Pair(obj, score);
+            pair[index] = tempPair;
+            index++;
         }
-        if(type.getItemType()==VariableType.BINARY_ITEM || type.getItemType()==VariableType.POLYTOMOUS_ITEM){
-            return computeItemScore(response, missingZero, omitZero, notreachedZero);
-        }
-        return Double.NaN;
+        return pair;
     }
 
     /**
@@ -333,8 +212,10 @@ public class DefaultItemScoring implements ItemScoring{
      * @return
      */
     public double computeCategoryScore(Object categoryId, Object response){
-        Category temp = categories.get(categoryId);
-        return temp.categoryScore(response);
+        if(categoryId.equals(response)) return 1.0;
+        return 0.0;
+//        Category temp = categories.get(categoryId);
+//        return temp.categoryScore(response);
     }
 
     /**
@@ -349,14 +230,16 @@ public class DefaultItemScoring implements ItemScoring{
      * @return answer key
      */
     public String getAnswerKey(){
-        Category cat;
+//        Category cat;
         double scoreValue = 0;
         double maxScore = Double.NEGATIVE_INFINITY;
         String answerKey = "";
         if(binaryScoring()){
-            for(Object o : categories.keySet()){
-                cat = categories.get(o);
-                scoreValue = cat.scoreValue();
+//            for(Object o : categories.keySet()){
+//                cat = categories.get(o);
+//                scoreValue = cat.scoreValue();
+            for(Object o : categoryMap.keySet()){
+                scoreValue = categoryMap.get(o).scoreValue();
                 if(scoreValue>maxScore){
                     maxScore = scoreValue;
                     answerKey = o.toString();
@@ -364,12 +247,12 @@ public class DefaultItemScoring implements ItemScoring{
             }
         }else{
             //determine if polytomous item is in ascending order or reverse order
-            Set<Object> keySet = categories.keySet();
+            Set<Object> keySet = categoryMap.keySet();
             Object[] obj = keySet.toArray();
             Arrays.sort(obj);
 
-            Category cat1 = categories.get(obj[0]);
-            Category cat2 = categories.get(obj[obj.length-1]);
+            Category cat1 = categoryMap.get(obj[0]);
+            Category cat2 = categoryMap.get(obj[obj.length-1]);
 
             if(cat1.scoreValue()<=cat2.scoreValue()){
                 answerKey = "+";//ascending order
@@ -419,12 +302,13 @@ public class DefaultItemScoring implements ItemScoring{
      *
      *
      */
-    public int addAllCategories(String optionScoreKey, VariableType type){
-        if(type.getItemType()==VariableType.CONTINUOUS_ITEM && optionScoreKey.trim().equals("")) {
+    public ItemType addAllCategories(String optionScoreKey, VariableType type){
+        if(type.getItemType()==ItemType.CONTINUOUS_ITEM && optionScoreKey.trim().equals("")) {
             clearCategory();
-            return VariableType.CONTINUOUS_ITEM;
+            isContinuous = true;
+            return ItemType.CONTINUOUS_ITEM;
         }
-        if(optionScoreKey.trim().equals("")) return VariableType.NOT_ITEM;
+        if(optionScoreKey.trim().equals("")) return ItemType.NOT_ITEM;
         /**
          * regular expression for (A,B,C,D) (0,1,0,0)
          * Careful it erroneously also matches trailing commas (A,B,C,D,) (0,1,0,0,)
@@ -446,11 +330,11 @@ public class DefaultItemScoring implements ItemScoring{
             scoring = matcher.group(2);
             matchCount++;
         }
-        if(matchCount!=1) return VariableType.NOT_ITEM;//none or multiple matches found - should only be one match - format problem
+        if(matchCount!=1) return ItemType.NOT_ITEM;//none or multiple matches found - should only be one match - format problem
 
         if(original.trim().equals("") || scoring.trim().equals("")){
             clearCategory();
-            return VariableType.NOT_ITEM;
+            return ItemType.NOT_ITEM;
         }
 
         String[] orig = original.split(",");
@@ -500,7 +384,7 @@ public class DefaultItemScoring implements ItemScoring{
         for(int i=0;i<maxLength;i++){
             Category cat = null;
             Double cScore = null;
-            if(type.getDataType()==VariableType.DOUBLE && !newOrig[i].equals("")){
+            if(type.getDataType()==DataType.DOUBLE && !newOrig[i].equals("")){
                 cScore = Double.parseDouble(newScor[i]);
                 cat = new Category(Double.parseDouble(newOrig[i]), cScore);
             }else{
@@ -508,15 +392,17 @@ public class DefaultItemScoring implements ItemScoring{
                 cat = new Category(newOrig[i], cScore);
             }
             this.addCategory(cat);
-            if(cScore==0 || cScore==1){
-                binaryScoring+=0;
-            }else{
-                binaryScoring++;
-            }
+
+//            if(cScore==0 || cScore==1){
+//                binaryScoring+=0;
+//            }else{
+//                binaryScoring++;
+//            }
 
         }
-        if(binaryScoring==0)return VariableType.BINARY_ITEM;
-        return VariableType.POLYTOMOUS_ITEM;
+//        if(binaryScoring==0)return ItemType.BINARY_ITEM;
+//        return ItemType.POLYTOMOUS_ITEM;
+        return getItemType();
     }
 
     private int charaterCount(String text, char target){
@@ -534,7 +420,33 @@ public class DefaultItemScoring implements ItemScoring{
      * @return true if binary scoring, false otherwise.
      */
     public boolean binaryScoring(){
-        return binaryScoring==0;
+//        return binaryScoring==0;
+        return getItemType()==ItemType.BINARY_ITEM;
+    }
+
+    /**
+     * An item type is defined by its scoring.
+     * A NOT_ITEM has no scoring assigned to the category.
+     * A BINARY_ITEM has only two score levels with values 0 and 1.
+     * A POLYTOMOUS_ITEM has more than two levels and each level is an integer.
+     * A CONTINUOUS_ITEM has more than two levels and each level is a real number. Or, it is an item
+     * set as continuous in the constructor or parsing of a score string.
+     *
+     * @return
+     */
+    public ItemType getItemType(){
+//        if(categories==null || categories.size()==0){
+        if(categoryMap==null || categoryMap.size()==0){
+            return ItemType.NOT_ITEM;
+        }else if(minimumPossibleScore()==0 && maximumPossibleScore()==1 && scoreLevels.size()==2) {
+            return ItemType.BINARY_ITEM;
+        }else{
+            if(isContinuous) return ItemType.CONTINUOUS_ITEM;
+            for(Double d : scoreLevels){
+                if(d!= Math.floor(d)) return ItemType.CONTINUOUS_ITEM;
+            }
+            return ItemType.POLYTOMOUS_ITEM;
+        }
     }
 
     /**
@@ -544,22 +456,29 @@ public class DefaultItemScoring implements ItemScoring{
      * @return
      */
     public String printOptionScoreKey(){
-        if(categories.size()==0) return "";
-        String tempCat = "";
+//        if(categories.size()==0) return "";
+        if(categoryMap.size()==0) return "";
+//        String tempCat = "";
         String catOrig = "(";
         String catScor = "(";
         String finString = "";
-        Iterator<Object> iter = categories.keySet().iterator();
+        Iterator<Object> iter = categoryMap.keySet().iterator();
         Object obj = null;
         Category temp = null;
+        String tempCat = "";
         int nullCategory = 0;
         while(iter.hasNext()){
             obj = iter.next();
-            temp = categories.get(obj);
+            temp = categoryMap.get(obj);
             tempCat = temp.responseValue().toString();
+
             if(tempCat == null || tempCat.equals("")) nullCategory++;
+//            if(temp == null || Double.isNaN(temp)) nullCategory++;
+//            catOrig += obj.toString();
+//            catScor += temp.toString();
             catOrig += tempCat;
             catScor += Double.valueOf(temp.scoreValue()).toString();
+
             if(iter.hasNext()){
                 catOrig += ",";
                 catScor += ",";
@@ -579,20 +498,37 @@ public class DefaultItemScoring implements ItemScoring{
      *
      * @return array of options scores.
      */
-    public Double[] scoreArray(){
-        Double[] s = new Double[categories.size()];
-        Iterator<Object> iter = categories.keySet().iterator();
-        Object obj = null;
+    public double[] scoreArray(){
+
+        double[] s = new double[categoryMap.size()];
+        Iterator<Object> iter = categoryMap.keySet().iterator();
         Category temp = null;
         int index=0;
         while(iter.hasNext()){
-            obj = iter.next();
-            temp = categories.get(obj);
+            temp = categoryMap.get(iter.next());
             s[index] = temp.scoreValue();
             index++;
         }
         Arrays.sort(s);
         return s;
     }
+
+    /**
+     * Sort Strings before Doubles.
+     */
+    public class ItemResponseComparator implements Comparator<Object>{
+        public int compare(Object obj1, Object obj2){
+            if(obj1 instanceof Double && obj2 instanceof Double){
+                return ((Double)obj1).compareTo((Double)obj2);
+            }else if(obj1 instanceof String && obj2 instanceof Double){
+                return 1;
+            }else if(obj1 instanceof Double && obj2 instanceof String){
+                return -1;
+            }else{
+                return obj1.toString().compareTo(obj2.toString());
+            }
+        }
+    }
+
 
 }

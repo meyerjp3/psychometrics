@@ -39,7 +39,7 @@ public class DefaultUncminOptimizer {
     private int messageLevel = 0;
 
     public DefaultUncminOptimizer(){
-        this(0);
+        this(8);
     }
 
     public DefaultUncminOptimizer(int messageLevel){
@@ -68,7 +68,7 @@ public class DefaultUncminOptimizer {
      * @param initialValue initial value for the prameters. It should be an array of teh same size as the number of parameters.
      */
     public void minimize(Uncmin_methods minclass, double[] initialValue)throws UncminException{
-        this.minimize(minclass, initialValue, false, false, 150);
+        this.minimize(minclass, initialValue, false, false, 150, 2);
     }
 
     /**
@@ -82,7 +82,7 @@ public class DefaultUncminOptimizer {
      * @param analyticHessian true if analytic Hessian is provided in minClass. False otherwise and will compute Hessian numerically.
      * @param maxIter maximum number of iterations.
      */
-    public void minimize(Uncmin_methods minclass, double[] initialValue, boolean analyticGradient, boolean analyticHessian, int maxIter)throws UncminException{
+    public void minimize(Uncmin_methods minclass, double[] initialValue, boolean analyticGradient, boolean analyticHessian, int maxIter, double maxStep)throws UncminException{
         n = initialValue.length;//should be the actual size of the array, not arrySize+1. It will be resized later
         int np1 = n+1;
 
@@ -140,7 +140,7 @@ public class DefaultUncminOptimizer {
         dlt[1] = -1.0;
         gradtl[1] = Math.pow(epsm,1.0/3.0);
         steptl[1] = Math.sqrt(epsm);
-        stepmx[1] = 2;//should be greater than 0. Values between 0.1 and 3 work well for IRT estimation.
+        stepmx[1] = maxStep;//should be greater than 0. Values between 0.1 and 3 work well for IRT estimation (using 2).
 
         //For debugging
 //        optimizer.showDetails(true);
@@ -187,6 +187,25 @@ public class DefaultUncminOptimizer {
             param[i] = xpls[i+1];
         }
         return param;
+    }
+
+    public double[] getGradient(){
+        double[] grad = new double[gpls.length-1];
+        for(int i=0;i<grad.length;i++){
+            grad[i] = gpls[i+1];
+        }
+        return grad;
+    }
+
+    public double[][] getHessian(){
+        int n = a.length-1;
+        double[][] H = new double[n][n];
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+                H[i][j] = a[i+1][j+1];
+            }
+        }
+        return H;
     }
 
 //    public double[] getHessianDiagonal(){
@@ -241,7 +260,7 @@ public class DefaultUncminOptimizer {
     = 1 Do not abort package for N=1.
 
     = 2 Do not check user analytic gradientAt routine D1FN against
-        its ﬁnite difference estimate. This may be necessary if the
+        its finite difference estimate. This may be necessary if the
         user knows his gradientAt function is properly coded, but the
         program aborts because the comparative tolerance is too
         tight. It is also efﬁcient if the gradientAt has previously been

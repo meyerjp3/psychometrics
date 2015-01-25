@@ -16,15 +16,14 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
+import com.itemanalysis.psychometrics.histogram.*;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
+import com.itemanalysis.psychometrics.scaling.DefaultLinearTransformation;
 import com.itemanalysis.psychometrics.tools.StopWatch;
-import com.itemanalysis.psychometrics.uncmin.DefaultUncminStatusListener;
-import org.apache.commons.math3.stat.Frequency;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Formatter;
-import java.util.Iterator;
 import java.util.concurrent.ForkJoinPool;
 
 /**
@@ -41,6 +40,8 @@ public class MarginalMaximumLikelihoodEstimation {
 
     private ItemResponseModel[] irm = null;
     private ItemResponseVector[] responseVector = null;
+    private ItemFitStatistic[] itemFit = null;
+    private boolean g2ItemFit = true;
     private int nItems = 0;
     private int nResponseVectors = 0;
     private int nPoints = 0;
@@ -206,6 +207,135 @@ public class MarginalMaximumLikelihoodEstimation {
         }
     }
 
+    public void computeSX2ItemFit(int minExpectedCount){
+        g2ItemFit = false;
+        itemFit = new ItemFitGeneralizedSX2[nItems];
+
+        IrtObservedScoreDistribution irtObservedScoreDistribution = new IrtObservedScoreDistribution(irm, latentDistribution);
+        irtObservedScoreDistribution.compute();
+
+        //Observed score distributions without studied item (item at given index)
+        IrtObservedScoreDistribution[] irtObservedScoreWithout = new IrtObservedScoreDistribution[nItems];
+        ItemResponseModel[] tempIrm = new ItemResponseModel[nItems-1];
+        int maxTestScore = 0;
+
+        //Compute IRT observed score distribution for each item by excluding studied item. (Could be done in parallel)
+        int offset = 0;
+        for(int j=0;j<nItems;j++){
+            offset = 0;
+            //Exclude item j from array of item response models.
+            for(int k=0;k<nItems;k++){
+                if(k!=j){
+                    tempIrm[offset] = irm[j];
+                    offset++;
+                }
+            }
+            irtObservedScoreWithout[j] = new IrtObservedScoreDistribution(tempIrm, latentDistribution);
+            irtObservedScoreWithout[j].compute();
+            maxTestScore += irm[j].getMaxScoreWeight();
+        }
+
+        int summedScore = 0;
+        double theta = 0;
+        for(int i=0;i<responseVector.length;i++){
+            summedScore = (int)responseVector[i].getSumScore();
+            theta = irtObservedScoreDistribution.getEAP(summedScore);
+
+            for(int j=0;j<nItems;j++){
+                if(i==0) itemFit[j] = new ItemFitGeneralizedSX2(irtObservedScoreDistribution, irtObservedScoreWithout[j],
+                        irm[j], maxTestScore+1, minExpectedCount);
+                ((ItemFitGeneralizedSX2)itemFit[j]).increment(summedScore, theta, responseVector[i].getResponseAt(j));
+            }
+        }
+
+        //Compute Item Fit
+        for(int j=0;j<nItems;j++){
+            itemFit[j].compute();
+        }
+
+    }
+
+    /**
+     *
+     */
+    public void computeG2ItemFit(int nbins, int minExpectedCount){
+        IrtExaminee irtExaminee = new IrtExaminee("", irm);
+        double[] eapEstimate = new double[responseVector.length];
+        SummaryStatistics stats = new SummaryStatistics();
+
+        //First loop over response vectors
+        for(int i=0;i<responseVector.length;i++){
+            //EAP estimate of ability
+            irtExaminee.setResponseVector(responseVector[i]);
+            eapEstimate[i] = irtExaminee.eapEstimate(latentDistribution);
+
+            for(int N=0;N<responseVector[i].getFrequency();N++){//Expand response vectors
+                stats.addValue(eapEstimate[i]);
+            }
+        }
+
+        DefaultLinearTransformation linearTransformation = new DefaultLinearTransformation(
+                stats.getMean(),
+                latentDistribution.getMean(),
+                stats.getStandardDeviation(),
+                latentDistribution.getStandardDeviation());
+
+        //Create fit statistic objects
+        itemFit = new ItemFitG2[nItems];
+
+        double lower = linearTransformation.transform(stats.getMin())-.01;//Subtract a small number to ensure lowest theta is counted
+        double upper = linearTransformation.transform(stats.getMax())+.01;//Add a small number to ensure largest theta is counted
+        Cut thetaCut = new Cut(lower, upper, nbins);
+
+        for(int j=0;j<nItems;j++){
+            itemFit[j] = new ItemFitG2(irm[j], thetaCut, minExpectedCount);
+        }
+
+        //Second loop over response vectors
+        //Increment fit statistics
+        double A = linearTransformation.getScale();
+        for(int i=0;i<responseVector.length;i++){
+            //Estimate EAP standard deviation should be the same as the standard deviation
+            //of the latent distribution used to estimate the item parameters.
+            eapEstimate[i] = eapEstimate[i]*A;
+
+            for(int N=0;N<responseVector[i].getFrequency();N++) {//Expand table
+                for(int j=0;j<nItems;j++){
+                    ((ItemFitG2)itemFit[j]).increment(eapEstimate[i], responseVector[i].getResponseAt(j));
+                }
+            }
+        }
+
+//        System.out.println(thetaCut.toString());
+
+        //Compute Item Fit
+        for(int j=0;j<nItems;j++){
+            itemFit[j].compute();
+        }
+
+    }
+
+    public void computeRaschItemFit(){
+        RaschFitStatistics[] raschFit = new RaschFitStatistics[nItems];
+        IrtExaminee irtExaminee = new IrtExaminee(irm);
+        IrtObservedScoreDistribution irtObservedScoreDistribution = new IrtObservedScoreDistribution(irm, latentDistribution);
+        irtObservedScoreDistribution.compute();
+
+        double theta = 0;
+        for(int i=0;i<responseVector.length;i++){
+            for(int j=0;j<nItems;j++){
+                if(i==0) raschFit[j] = new RaschFitStatistics();
+                theta = irtObservedScoreDistribution.getEAP((int)responseVector[i].getSumScore());
+                raschFit[j].increment(irm[j], theta, responseVector[i].getResponseAt(j));
+            }
+        }
+
+        for(int j=0;j<nItems;j++){
+            System.out.println(raschFit[j].getWeightedMeanSquare() + "  " + raschFit[j].getUnweightedMeanSquare());
+        }
+
+    }
+
     public String printItemParameters(){
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
@@ -251,6 +381,35 @@ public class MarginalMaximumLikelihoodEstimation {
         f.format("%30s", "==============================");f.format("%n");
         f.format("%12s", "Mean = "); f.format("%8.4f", latentDistribution.getMean()); f.format("%n");
         f.format("%12s", "Std. Dev. = "); f.format("%8.4f", latentDistribution.getStandardDeviation()); f.format("%n");
+        return f.toString();
+    }
+
+    public String printItemFitStatistics(){
+        StringBuilder sb = new StringBuilder();
+        Formatter f = new Formatter(sb);
+
+        f.format("%34s", "ITEM FIT STATISTIC"); f.format("%n");
+        f.format("%50s", "=================================================="); f.format("%n");
+        f.format("%-18s", "Item"); f.format("%2s", "");
+        if(g2ItemFit){
+            f.format("%8s", "G2");
+        }else{
+            f.format("%8s", "S-X2");
+        }
+        f.format("%2s", "");
+        f.format("%8s", "df");f.format("%2s", "");
+        f.format("%8s", "p-value"); f.format("%n");
+        f.format("%50s", "--------------------------------------------------"); f.format("%n");
+
+        for(int j=0;j<nItems;j++){
+            f.format("%-18s", irm[j].getName());f.format("%2s", "");
+            f.format("%8.4f", itemFit[j].getValue());f.format("%2s", "");
+            f.format("%8.4f", itemFit[j].getDegreesOfFreedom());f.format("%2s", "");
+            f.format("%8.4f", itemFit[j].getPValue());f.format("%n");
+        }
+
+        f.format("%50s", "=================================================="); f.format("%n");
+
         return f.toString();
     }
 

@@ -15,6 +15,8 @@
  */
 package com.itemanalysis.psychometrics.histogram;
 
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
+
 import java.io.Serializable;
 
 /**

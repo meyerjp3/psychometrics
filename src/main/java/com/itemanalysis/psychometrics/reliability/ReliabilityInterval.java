@@ -33,16 +33,17 @@ public class ReliabilityInterval {
 	private double sampleSize=0;
 	private int precision=4;
 	private double numberOfVariables=0;
-
     private ScoreReliability reliability = null;
+    private boolean unbiased = false;
 	
-	public ReliabilityInterval(ScoreReliability reliability, double sampleSize, double numberOfVariables){
+	public ReliabilityInterval(ScoreReliability reliability, double sampleSize, double numberOfVariables, boolean unbiased){
 		this.reliability=reliability;
 		this.sampleSize=Double.valueOf(sampleSize).intValue();
 		this.numberOfVariables=numberOfVariables;
+        this.unbiased = unbiased;
 	}
 	
-	public double[] confidenceInterval(boolean unbiased){
+	public double[] confidenceInterval(){
 		double N=sampleSize;
 		double nI = numberOfVariables;
 		double df1=N-1.0;
@@ -50,8 +51,8 @@ public class ReliabilityInterval {
 		double[] ci=new double[2];
         FDistribution fDist = new FDistribution(df1, df2);
         try{
-            ci[0] = 1.0-((1.0-reliability.value(unbiased))*fDist.inverseCumulativeProbability(0.975));
-            ci[1] = 1.0-((1.0-reliability.value(unbiased))*fDist.inverseCumulativeProbability(0.025));
+            ci[0] = 1.0-((1.0-reliability.value())*fDist.inverseCumulativeProbability(0.975));
+            ci[1] = 1.0-((1.0-reliability.value())*fDist.inverseCumulativeProbability(0.025));
         }catch(Exception ex){
             ci[0] = Double.NaN;
             ci[1] = Double.NaN;
@@ -61,7 +62,7 @@ public class ReliabilityInterval {
 		return ci;
 	}
 
-	public String print(boolean unbiased){
+	public String print(){
 		StringBuilder builder = new StringBuilder();
 		Formatter f = new Formatter(builder);
 		String f2="";
@@ -72,9 +73,9 @@ public class ReliabilityInterval {
 		}
 
         f.format("%18s", "95% Confidence Interval: (");
-        f.format(f2,this.confidenceInterval(unbiased)[0]);
+        f.format(f2,this.confidenceInterval()[0]);
         f.format("%2s", ", ");
-        f.format(f2,this.confidenceInterval(unbiased)[1]);
+        f.format(f2,this.confidenceInterval()[1]);
         f.format("%1s", ")");
 		
 		return f.toString();

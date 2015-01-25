@@ -15,7 +15,7 @@
  */
 package com.itemanalysis.psychometrics.cfa;
 
-import com.itemanalysis.psychometrics.data.VariableInfo;
+import com.itemanalysis.psychometrics.data.VariableAttributes;
 import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.log4j.Logger;
@@ -34,11 +34,11 @@ public class CfaSummary{
     
     private double numberOfExaminees = 0.0;
 
-    private ArrayList<VariableInfo> items = null;
+    private ArrayList<VariableAttributes> items = null;
 
     static Logger logger = Logger.getLogger("jmetrik-logger");
 
-    public CfaSummary(ArrayList<VariableInfo> items, CovarianceMatrix matrix, double numberOfExaminees){
+    public CfaSummary(ArrayList<VariableAttributes> items, CovarianceMatrix matrix, double numberOfExaminees){
         this.items = items;
         cfaMatrix = new Array2DRowRealMatrix(matrix.value(true));
 //        cfaMatrix = new Array2DRowRealMatrix(matrix.correlation(true));

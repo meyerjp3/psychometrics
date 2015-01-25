@@ -15,7 +15,7 @@
  */
 package com.itemanalysis.psychometrics.reliability;
 
-import com.itemanalysis.psychometrics.data.VariableInfo;
+import com.itemanalysis.psychometrics.data.VariableAttributes;
 
 import java.util.ArrayList;
 
@@ -24,28 +24,71 @@ import java.util.ArrayList;
  * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
  */
 public interface ScoreReliability {
-	
-    public static final String GUTTMAN_LAMBDA = "LAMBDA";
-	public static final String CRONBACH_ALPHA = "ALPHA";
-	public static final String FELDT_GILMER = "FG";
-	public static final String FELDT_CLASSICAL_CONGENERIC = "FB";
-    public static final String RAJU_BETA = "RAJU";
-    public static final String STRATIFIED_ALPHA = "STRAT";
-	
-	public double[] valueIfItemDeleted();
 
-    public void incrementValueIfItemDeleted(int index, double value);
+    /**
+     * An array of reliability estimates without the item indexed by the position in the array.
+     * For example, rel[0] = is the reliability estimate without the item at position 0.
+     * Similarly, rel[1] = is the reliability estimate without the item at position 1.
+     *
+     * @return
+     */
+    public double[] itemDeletedReliability();
 
-    public double value(boolean unbiased);
+    /**
+     * Estimates reliability.
+     *
+     * @return estimate of reliability
+     */
+    public double value();
 
-    public String ifDeletedToString(ArrayList<VariableInfo> var);
-	
-	public double sem(boolean unbiased);
+    /**
+     * A String representation of all item deleted reliability estimates.
+     *
+     * @param var VariableAttributes that provide the variable names.
+     * @return
+     */
+    public String ifDeletedToString(ArrayList<VariableAttributes> var);
 
-    public String name();
-    
-    public double[] confidenceInterval(double numberOfExaminees, boolean unbiased);
+    /**
+     * Type of reliability estimate
+     *
+     * @return type of reliability estimate.
+     */
+    public ScoreReliabilityType getType();
 
-    public String confidenceIntervalToString();
+    /**
+     * Confidence interval for the reliability estimate computed using the F-distribution.
+     * This computation is only correct for Coefficient Alpha because the sampling
+     * distribution for other reliability estimates is unknown. As such, this method
+     * returns an approximation, at best, of the reliability estimate for all reliability
+     * estimates other than coefficient alpha. Note that the confidence interval is computed
+     * using the largest sample size in the covariance matrix. This value would be the sample
+     * size for pairwise deletion.
+     *
+     * @return a confidence interval for the reliability estimate.
+     */
+    public double[] confidenceInterval();
+
+    /**
+     * Creates a String representation of the confidence interval. It is used for 
+     * displaying results.
+     * 
+     * @param confidenceInterval an array with the lower [0] and upper [1] bounds of the confidence interval 
+     * @return a String representation of the confidence interval.
+     */
+    public String confidenceIntervalToString(double[] confidenceInterval);
+
+    /**
+     * Set the unbiased flag. 
+     * 
+     * @param unbiased true if variance calculations should use N-1 in the denominator, and false otherwise.
+     */
+    public void isUnbiased(boolean unbiased);
+
+    /**
+     * Total observed score variance. It is the sum of all values in the covariance matrix.
+     * @return
+     */
+    public double totalVariance();
 
 }

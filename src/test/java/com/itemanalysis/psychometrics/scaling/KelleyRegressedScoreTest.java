@@ -16,10 +16,9 @@
 package com.itemanalysis.psychometrics.scaling;
 
 import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
-import com.itemanalysis.psychometrics.reliability.CronbachAlpha;
+import com.itemanalysis.psychometrics.reliability.CoefficientAlpha;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
-import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -57,7 +56,7 @@ public class KelleyRegressedScoreTest {
             }
         }
 
-        CronbachAlpha alpha = new CronbachAlpha(S);
+        CoefficientAlpha alpha = new CoefficientAlpha(S, false);
         KelleyRegressedScore kscore = new KelleyRegressedScore(mean.evaluate(sum), alpha);
 
         double[] kscores = this.getKelleyScores();

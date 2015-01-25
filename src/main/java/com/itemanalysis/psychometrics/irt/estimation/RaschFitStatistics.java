@@ -137,6 +137,9 @@ public class RaschFitStatistics {
 
     /**
      * Variance of response Xni. This method is needed for computation of fit statistics.
+     *
+     * NOTE: This value is the same as item information. Perhaps only for Rasch model??
+     *
      * @param theta examinee ability
      * @return
      */
@@ -146,6 +149,9 @@ public class RaschFitStatistics {
         for(int m=0;m<irm.getNcat();m++){
             Wni += Math.pow(m-Eni, 2)*irm.probability(theta, m);
         }
+
+//        System.out.println("VAR: " + Wni + "  INFO: " + irm.itemInformationAt(theta));
+
         return Wni;
     }
 

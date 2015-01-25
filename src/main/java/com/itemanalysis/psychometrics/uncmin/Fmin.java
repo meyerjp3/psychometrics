@@ -355,7 +355,6 @@ c
 
 // brace below corresponds to statement 190
         }
-
         return x;
 
     }

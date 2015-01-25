@@ -61,6 +61,8 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
 
     private String responseString = "";
 
+//    private double eapEstimate = Double.NaN;
+
     /**
      * A constructor that is designed for storing all response vectors during MML estimation.
      *
@@ -197,6 +199,20 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
     public int getNumberOfItems(){
         return nItems;
     }
+
+    public int getValidResponseCount(){
+        return (int)validResponses;
+    }
+
+//    public double computeEap(ItemResponseModel[] irm, DistributionApproximation latentDistribution){
+//        IrtExaminee irtExaminee = new IrtExaminee(groupID, irm, this);
+//        eapEstimate = irtExaminee.eapEstimate(latentDistribution);
+//        return eapEstimate;
+//    }
+//
+//    public double getEapEstimate(){
+//        return eapEstimate;
+//    }
 
     /**
      * A string representation of the response string.

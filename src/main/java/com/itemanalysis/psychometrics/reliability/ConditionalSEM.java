@@ -33,21 +33,24 @@ public class ConditionalSEM implements Comparable<ConditionalSEM>{
 
     private KR21 kr = null;
 
-	public ConditionalSEM(Integer[] cutScore, double maximumPossibleScore, ScoreReliability reliability, KR21 kr21){
+    private boolean unbiased = false;
+
+	public ConditionalSEM(Integer[] cutScore, double maximumPossibleScore, ScoreReliability reliability, KR21 kr21, boolean unbiased){
 		cut=cutScore;
 		MPS=maximumPossibleScore;
 		this.reliability=reliability;
 		kr=kr21;
+        this.unbiased = unbiased;
         CSEM = new double[cut.length];
 	}
 
-	public double[] value(boolean unbiased){
+	public double[] value(){
         double[] first = new double[cut.length];
         double[] second = new double[cut.length];
         double tempCut = 0.0;
         for(int i=0;i<first.length;i++){
             tempCut = (double)cut[i];
-            first[i]=(1.0-reliability.value(unbiased))/(1.0-kr.value(unbiased));
+            first[i]=(1.0-reliability.value())/(1.0-kr.value());
             second[i]=(tempCut*(MPS-tempCut))/(MPS-1.0);
             CSEM[i]=Math.sqrt(first[i]*second[i]);
         }
@@ -73,10 +76,10 @@ public class ConditionalSEM implements Comparable<ConditionalSEM>{
 		return v.hashCode();
 	}
 
-    public String print(boolean unbiased){
+    public String print(){
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
-        this.value(unbiased);
+        this.value();
 
         f.format("%n");
         f.format("%45s", "CONDITIONAL STANDARD ERROR OF MEASUREMENT    "); f.format("%n");

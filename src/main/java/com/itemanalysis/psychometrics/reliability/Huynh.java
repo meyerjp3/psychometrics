@@ -58,7 +58,7 @@ public class Huynh {
 	double[] DA;
 	double[] DB;
 	
-	public Huynh(int aN, int aM, int aK, double aMean, double aSd, Integer[] aCutScores){
+	public Huynh(int aN, int aM, int aK, double aMean, double aSd, int[] aCutScores){
 		N=aN;
 		M=aM;
 		K=aK+1;

@@ -15,7 +15,7 @@
  */
 package com.itemanalysis.psychometrics.statistics;
 
-import com.itemanalysis.psychometrics.data.VariableInfo;
+import com.itemanalysis.psychometrics.data.VariableAttributes;
 import org.apache.commons.math3.stat.Frequency;
 
 import java.util.Iterator;
@@ -26,8 +26,8 @@ public class TwoWayTable {
 	
 	private TreeMap<Comparable<?>, Frequency> tableRows; //holds the FrequencyTables for each row
 	private Frequency colMargin, rowMargin;
-    private VariableInfo rowVariable = null;
-    private VariableInfo colVariable = null;
+    private VariableAttributes rowVariable = null;
+    private VariableAttributes colVariable = null;
 	private double totalCount=0;
 	
 	public TwoWayTable(){
@@ -36,11 +36,11 @@ public class TwoWayTable {
 		rowMargin=new Frequency();
 	}
 
-    public void setRowVariable(VariableInfo rowVariable){
+    public void setRowVariable(VariableAttributes rowVariable){
         this.rowVariable = rowVariable;
     }
 
-    public void setColVariable(VariableInfo colVariable){
+    public void setColVariable(VariableAttributes colVariable){
         this.colVariable = colVariable;
     }
 	

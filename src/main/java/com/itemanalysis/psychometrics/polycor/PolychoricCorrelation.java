@@ -22,18 +22,12 @@ package com.itemanalysis.psychometrics.polycor;
  */
 public interface PolychoricCorrelation {
 
-    public void compute(double[][] data);
-
     public double value();
-
-    public void addValue(int x, int y);
-
-    public double getResult();
 
     public double[] getRowThresholds();
 
     public double[] getColumnThresholds();
 
-    public String printVerbose();
+    public String print();
 
 }

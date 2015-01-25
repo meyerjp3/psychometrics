@@ -442,6 +442,11 @@ public class Irm4PL extends AbstractItemResponseModel {
         return numberOfParameters;
     }
 
+    public int getNumberOfEstimatedParameters(){
+        if(isFixed) return 0;
+        return numberOfParameters;
+    }
+
     /**
      * Gets the item difficulty parameter.
      *

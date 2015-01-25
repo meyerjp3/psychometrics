@@ -136,6 +136,12 @@ public interface ItemResponseModel {
      */
     public int getNumberOfParameters();
 
+    /**
+     * Number of estimated parameters does not count any values fixed during estimation.
+     * @return
+     */
+    public int getNumberOfEstimatedParameters();
+
     public double[] getItemParameterArray();
 
     public void setStandardErrors(double[] x);

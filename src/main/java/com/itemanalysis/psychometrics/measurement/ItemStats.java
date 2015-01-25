@@ -19,6 +19,8 @@ import com.itemanalysis.psychometrics.polycor.PearsonCorrelation;
 import com.itemanalysis.psychometrics.polycor.PolyserialPlugin;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+import org.apache.commons.math3.util.ResizableDoubleArray;
 
 import java.util.Formatter;
 
@@ -60,16 +62,33 @@ public class ItemStats {
      */
     private boolean biasCorrection = true;
 
+    private boolean dIndex = false;
+
+    private Mean upper = null;
+
+    private Mean lower = null;
+
     /**
      * Use a Pearson type of correlation if true. Otherwise use a polyserial type of correlation.
      */
     private boolean pearson = true;
 
     public ItemStats(Object id, boolean biasCorrection, boolean pearson, boolean continuousItem){
+        this(id, biasCorrection, pearson, continuousItem, false);
+    }
+
+    public ItemStats(Object id, boolean biasCorrection, boolean pearson, boolean continuousItem, boolean dIndex){
         this.biasCorrection = biasCorrection;
         this.pearson = pearson;
+        this.dIndex = dIndex;
         mean = new Mean();
         sd = new StandardDeviation();
+
+        if(dIndex){
+            upper = new Mean();
+            lower = new Mean();
+        }
+
 
         if(continuousItem) this.pearson = true;
 
@@ -93,6 +112,26 @@ public class ItemStats {
             pointBiserial.increment(testScore, itemScore);
         }else{
             polyserial.increment(testScore, (int)itemScore);
+        }
+    }
+
+    /**
+     * The D index must be incremented in a second loop after test scores have been computed and
+     * percentiles computed. Use this method to increment the D index.
+     *
+     * @param itemScore
+     * @param testScore
+     * @param lowCut
+     * @param upperCut
+     */
+    public void incrementDindex(double itemScore, double testScore, double lowCut, double upperCut){
+
+        if(dIndex){
+            if(testScore <= lowCut){
+                lower.increment(itemScore);
+            }else if (testScore >= upperCut){
+                upper.increment(itemScore);
+            }
         }
     }
 
@@ -121,6 +160,30 @@ public class ItemStats {
             return polyserial.value();
         }
 
+    }
+
+    public double getDindexLower(){
+        if(dIndex){
+            return lower.getResult();
+        }else{
+            return Double.NaN;
+        }
+    }
+
+    public double getDindexUpper(){
+        if(dIndex){
+            return upper.getResult();
+        }else{
+            return Double.NaN;
+        }
+    }
+
+    public double getDIndex(){
+        if(dIndex){
+            return upper.getResult()/-lower.getResult();
+        }else{
+            return Double.NaN;
+        }
     }
 
     /**

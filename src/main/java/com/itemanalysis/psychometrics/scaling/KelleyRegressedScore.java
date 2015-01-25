@@ -15,8 +15,6 @@
  */
 package com.itemanalysis.psychometrics.scaling;
 
-import com.itemanalysis.psychometrics.reliability.CronbachAlpha;
-import com.itemanalysis.psychometrics.reliability.GuttmanLambda;
 import com.itemanalysis.psychometrics.reliability.ScoreReliability;
 
 /**
@@ -42,7 +40,7 @@ public class KelleyRegressedScore {
     }
 
     public double value(double score, LinearTransformation linearTransformation){
-        double r = reliability.value(false);
+        double r = reliability.value();//unbiased = false
         double ks = r*score+(1.0-r)*mean;
         ks = linearTransformation.transform(ks);
         return ks;

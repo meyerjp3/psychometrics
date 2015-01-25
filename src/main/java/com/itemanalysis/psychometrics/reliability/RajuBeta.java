@@ -15,46 +15,46 @@
  */
 package com.itemanalysis.psychometrics.reliability;
 
-import com.itemanalysis.psychometrics.data.VariableInfo;
+import com.itemanalysis.psychometrics.data.VariableAttributes;
 import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
-import org.apache.commons.math3.distribution.FDistribution;
 
 import java.util.ArrayList;
 import java.util.Formatter;
 
 
 
-public class RajuBeta implements ScoreReliability{
+public class RajuBeta extends AbstractScoreReliability{
+
+	private double[] lambda;
 	
-	private CovarianceMatrix matrix = null;
-	private double[]lambda;
-	private int precision=4, n=0;
-	private double raju = 0.0;
-    private double[] confidenceInterval = {0.0,0.0};
-    private double[] cdel = null;
-    private static final String name = "RAJU";
-	
-	public RajuBeta(CovarianceMatrix matrix){
-		this.matrix=matrix;
-        n=matrix.getNumberOfVariables();
-        cdel = new double[n];
-		double ni=this.matrix.getNumberOfVariables();
-		int Ni=Double.valueOf(ni).intValue();
+	public RajuBeta(CovarianceMatrix matrix, boolean unbiased){
+		this.matrix = matrix;
+        this.unbiased = unbiased;
+        nItems = matrix.getNumberOfVariables();
+		double ni=(double)nItems;
 		
-		lambda = new double[Ni];
-		for(int i=0;i<Ni;i++){
+		lambda = new double[nItems];
+		for(int i=0;i<nItems;i++){
 			lambda[i]=1/ni;
 		}
 	}
+
+    public RajuBeta(CovarianceMatrix matrix){
+        this(matrix, false);
+    }
 	
-	public RajuBeta(CovarianceMatrix matrix, double[] numberOfItems){
+	public RajuBeta(CovarianceMatrix matrix, double[] numberOfItems, boolean unbiased){
 		this.matrix=matrix;
-		double ni=this.matrix.getNumberOfVariables();
-		int Ni=Double.valueOf(ni).intValue();
-		for(int i=0;i<Ni;i++){
+        this.unbiased = unbiased;
+		nItems = matrix.getNumberOfVariables();
+		for(int i=0;i<nItems;i++){
 			lambda[i]=1/numberOfItems[i];
 		}
 	}
+
+    public ScoreReliabilityType getType(){
+        return ScoreReliabilityType.RAJU_BETA;
+    }
 	
 	private double sumLambdaSquared(){
 		double sumLambda=0.0;
@@ -65,65 +65,39 @@ public class RajuBeta implements ScoreReliability{
 		return sumLambda;
 	}
 	
-	public double[] valueIfItemDeleted(){
-		return cdel;
+	public double value(){
+		double sumLambda2 = sumLambdaSquared();
+		double observedScoreVariance = matrix.totalVariance(unbiased);
+		double componentVariance = matrix.diagonalSum(unbiased);
+		double raju=(1/(1-sumLambda2))*((observedScoreVariance-componentVariance)/observedScoreVariance);
+		return raju;
 	}
 
-    public void incrementValueIfItemDeleted(int index, double value){
-        cdel[index]=value;
-    }
-	
-	public double sem(boolean unbiased){
-		return Math.sqrt(matrix.totalVariance(unbiased)*(1-this.value(unbiased)));
-	}
-
-    public String name(){
-        return name;
-    }
-
-    public double[] confidenceInterval(double numberOfExaminees, boolean unbiased){
-        double numberOfItems = (double)matrix.getNumberOfVariables();
-		double df1=numberOfExaminees-1.0;
-		double df2=(numberOfExaminees-1.0)*(numberOfItems-1.0);
-        FDistribution fDist = new FDistribution(df1, df2);
-        try{
-            confidenceInterval[0] = 1.0-((1.0-this.value(unbiased))*fDist.inverseCumulativeProbability(0.975));
-            confidenceInterval[1] = 1.0-((1.0-this.value(unbiased))*fDist.inverseCumulativeProbability(0.025));
-        }catch(Exception ex){
-            confidenceInterval[0] = Double.NaN;
-            confidenceInterval[1] = Double.NaN;
+    public double[] itemDeletedReliability(){
+        double[] rel = new double[nItems];
+        CovarianceMatrix cm = null;
+        RajuBeta rb = null;
+        for(int i=0;i<nItems;i++){
+            cm = matrix.matrixSansVariable(i, unbiased);
+            rb = new RajuBeta(cm, unbiased);
+            rel[i] = rb.value();
         }
+        return rel;
+    }
 
-
-		return confidenceInterval;
-	}
-
-    public String confidenceIntervalToString(){
+    @Override
+	public String toString(){
 		StringBuilder builder = new StringBuilder();
 		Formatter f = new Formatter(builder);
-        f.format("(%6.4f, ",confidenceInterval[0]);
-        f.format("%6.4f)",confidenceInterval[1]);
+		String f2="%.2f";
+		f.format("%14s", "Raju's Beta = "); f.format(f2,this.value());
 		return f.toString();
 	}
 
-	public String print(boolean unbiased){
-		StringBuilder builder = new StringBuilder();
-		Formatter f = new Formatter(builder);
-		String f2="";
-		if(precision==2){
-			f2="%.2f";
-		}else if(precision==4){
-			f2="%.4f";
-		}
-		
-		f.format("%14s", "Raju's Beta = "); f.format(f2,this.value(unbiased));
-		return f.toString();
-	}
-
-    public String ifDeletedToString(ArrayList<VariableInfo> var){
+    public String ifDeletedToString(ArrayList<VariableAttributes> var){
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
-        double[] del = valueIfItemDeleted();
+        double[] del = itemDeletedReliability();
         f.format("%-55s", " Raju's Beta (SEM in Parentheses) if Item Deleted"); f.format("%n");
 		f.format("%-55s", "======================================================="); f.format("%n");
         for(int i=0;i<del.length;i++){
@@ -132,31 +106,5 @@ public class RajuBeta implements ScoreReliability{
         }
         return f.toString();
     }
-	
-	public double value(boolean unbiased){
-		double sumLambda2=sumLambdaSquared();
-		double observedScoreVariance = matrix.totalVariance(unbiased);
-		double componentVariance = matrix.diagonalSum(unbiased);
-		raju=(1/(1-sumLambda2))*((observedScoreVariance-componentVariance)/observedScoreVariance);
-		return raju;
-	}
-	
-	public int compareTo(RajuBeta that){
-		if(this.raju>that.raju) return 1;
-		if(this.raju<that.raju) return -1;
-		return 0;
-	}
-	
-	public boolean equals(Object obj){
-		if(this==obj)return true;
-		if((obj == null) || (obj.getClass() != this.getClass())) return false;
-		Double v = new Double(raju);
-		return ((Double)obj)==v;
-	}
-	
-	public int hashCode(){
-		Double v = new Double(raju);
-		return v.hashCode();
-	}
 
 }

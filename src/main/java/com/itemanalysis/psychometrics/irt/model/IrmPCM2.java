@@ -20,6 +20,12 @@ public class IrmPCM2 extends AbstractItemResponseModel  {
     private double[] stepStdError;
     private ItemParamPrior[] stepPrior = null;
 
+    /**
+     * Default constructor for an m category item.
+     *
+     * @param step an array of m step parameters. The first step parameter should be fixed to 0.
+     * @param D scaling constant tha is either 1 or 1.7 (or 1.712)
+     */
     public IrmPCM2(double[] step, double D){
         ncat = step.length;
         ncatM1 = ncat-1;
@@ -476,6 +482,11 @@ public class IrmPCM2 extends AbstractItemResponseModel  {
 
     public int getNumberOfParameters(){
         return ncat;
+    }
+
+    public int getNumberOfEstimatedParameters(){
+        if(isFixed) return 0;
+        return ncat-1;//Do not count first steps which is fixed to zero
     }
 
     public double getScalingConstant(){

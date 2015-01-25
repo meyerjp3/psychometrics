@@ -19,10 +19,12 @@ import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.measurement.ItemScoring;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 
+import java.util.Formatter;
+
 public abstract class AbstractItemResponseModelWithGradient implements ItemResponseModel {
 
     protected String groupId = "";
-    protected VariableName name = null;
+    protected VariableName name = new VariableName("");
     protected double[] scoreWeight;
     protected int ncat = 0;
     protected int minCategory = 0;

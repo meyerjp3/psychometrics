@@ -735,6 +735,11 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         return numberOfParameters;
     }
 
+    public int getNumberOfEstimatedParameters(){
+        if(isFixed) return 0;
+        return numberOfParameters;
+    }
+
     /**
      * Linear transformation of item parameters.
      *

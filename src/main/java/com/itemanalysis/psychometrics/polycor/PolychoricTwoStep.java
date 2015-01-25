@@ -1,129 +1,128 @@
-/*
- * Copyright 2012 J. Patrick Meyer
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.itemanalysis.psychometrics.polycor;
 
-
-
-import org.apache.commons.math3.exception.util.DummyLocalizable;
-import org.apache.commons.math3.optimization.GoalType;
-import org.apache.commons.math3.optimization.PointValuePair;
-import org.apache.commons.math3.optimization.univariate.BrentOptimizer;
-import org.apache.commons.math3.optimization.univariate.UnivariatePointValuePair;
+import com.itemanalysis.psychometrics.statistics.TwoWayTable;
+import com.itemanalysis.psychometrics.uncmin.Fmin;
+import com.itemanalysis.psychometrics.uncmin.Fmin_methods;
 
 import java.util.Formatter;
 
-/**
- *
- * @author J. Patrick Meyer
- */
 public class PolychoricTwoStep extends AbstractPolychoricCorrelation{
-    
-    PolychoricLogLikelihoodTwoStep loglik = null;
-
-    public PolychoricTwoStep(){
-        super();
-    }
 
     /**
-     * Compute the two-step approximation to the polychoric correlation.
+     * Constructor for use when data have been summarized in an row x column frequency
+     * table.
      *
-     * @param data two way array of frequency counts
+     * @param data a row by column table of frequencies.
      */
-    public void compute(double[][] data){
-        loglik = new PolychoricLogLikelihoodTwoStep(data);
-        BrentOptimizer brent = new BrentOptimizer(1e-10, 1e-14);
-        UnivariatePointValuePair result = brent.optimize(200, loglik, GoalType.MINIMIZE, -1.0, 1.0);
-        rhoComputed = true;
-        rho = result.getPoint();
+    public PolychoricTwoStep(double[][] data){
+        this.data = data;
+        nrow = data.length;
+        ncol = data[0].length;
+        initialize();
     }
 
     /**
+     * Constructor for use when data have been summarized in a TwoWayTable.
      *
-     * @return polychoric correlation
+     * @param table a TwoWayTable.
+     */
+    public PolychoricTwoStep(TwoWayTable table){
+        this(table.getTable());
+    }
+
+    /**
+     * Constructor for incrementally updating the data. Must call increment(x, y)
+     * to add data to object before calling value().
+     */
+    public PolychoricTwoStep(){
+        incremental = true;
+        table = new TwoWayTable();
+    }
+
+    /**
+     * Two-step estimate of the polychoric correlation.
+     *
+     * @return a correlation
      */
     public double value(){
+        if(incremental){
+            this.data = table.getTable();
+            this.nrow = data.length;
+            this.ncol = data[0].length;
+            initialize();
+        }
+
+        rowThresholds = new double[nrow-1];
+        columnThresholds = new double[ncol-1];
+        double[] rSum = cumulativeRowSums();
+        double[] cSum = cumulativeColumnSums();
+
+        double prob = 0;
+        for(int i=0;i<rowThresholds.length;i++){
+            prob = rSum[i]/N;
+            rowThresholds[i] = norm.inverseCumulativeProbability(prob);
+        }
+
+        for(int j=0;j<columnThresholds.length;j++){
+            prob = cSum[j]/N;
+            columnThresholds[j] = norm.inverseCumulativeProbability(prob);
+        }
+
+        TwoStepLikelihoodFunction likelihoodFunction = new TwoStepLikelihoodFunction(rowThresholds, columnThresholds);
+        double[] initial = {0};
+        Fmin optimizer = new Fmin();
+        rho = optimizer.fmin(-1.0, 1.0, likelihoodFunction, 1e-6);
+        rho = Math.max(-1, Math.min(rho, 1));//ensure that correlation is between -1 and 1.
+
         return rho;
     }
 
-    public double getCorrelationStandardError(){
-        double[] x = {value()};
-        return loglik.getStandardError(x);
-    }
-
-    /**
-     *
-     * @return row thresholds
-     */
-    public double[] getRowThresholds(){
-        return loglik.getRowThresholds();
-    }
-
-    public double[] getValidRowThresholds(){
-        return loglik.getValidRowThresholds();
-    }
-
-    /**
-     *
-     * @return column thresholds
-     */
-    public double[] getColumnThresholds(){
-        return loglik.getColumnThresholds();
-    }
-
-    public double[] getValidColumnThresholds(){
-        return loglik.getValidColumnThresholds();
-    }
-
-    public int getNumberOfValidRowThresholds(){
-        return loglik.getNumberOfValidRowThresholds();
-    }
-
-    public int getNumberOfValidColumnThresholds(){
-        return loglik.getNumberOfValidColumnThresholds();
-    }
-
-    /**
-     * Returns an array of all parameters. This method is primarily
-     * used to provide starting values for the maximum likelihood
-     * method of computing the polychoric correlation.
-     * 
-     * @return
-     */
-    public double[] getParameterArray(){
-        return loglik.getParameterArray(rho);
-    }
-
-    public String printVerbose(){
-        double[] x = {rho};
-        String s =loglik.print(x);
-        return s;
-    }
-
-    public String printThresholds(){
+    public String print(){
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
+        int am1 = rowThresholds.length;
+        int bm1 = columnThresholds.length;
 
-        double r = this.value();
-        double[] t = this.getRowThresholds();
+        f.format("%34s", "Polychoric correlation, Two-Step est. = "); f.format("%6.4f", rho); f.format("%n");
+        f.format("%n");
+        f.format("%-18s", "Row Thresholds"); f.format("%n");
 
-        for(int i=0;i<t.length-1;i++){
-            f.format("% 6.4f", t[i]); f.format("%2s", "");
+        for(int i=0;i<rowThresholds.length;i++){
+            f.format("%6.4f", rowThresholds[i]); f.format("%n");
         }
+
+        f.format("%n");
+        f.format("%n");
+        f.format("%-19s", "Column Thresholds"); f.format("%n");
+
+        for(int i=0;i<columnThresholds.length;i++){
+            f.format("% 6.4f", columnThresholds[i]); f.format("%n");
+        }
+
+        f.format("%n");
         return f.toString();
 
+    }
+
+    /**
+     * Likelihood function for the two-step approximation. Thresholds are obtained from the inverse
+     * cumulative normal distribution, and teh correlation is found by Brent's method.
+     */
+    public class TwoStepLikelihoodFunction implements Fmin_methods {
+        private double maxCorrelation = 0.9999;
+        private double[] rc = null;
+        private double[] cc = null;
+
+        public TwoStepLikelihoodFunction(double[] rc, double[] cc){
+            this.rc = rc;
+            this.cc = cc;
+        }
+
+        public double f_to_minimize(double x){
+            double rho = x;
+            if(Math.abs(rho) > maxCorrelation) rho = Math.signum(rho)*maxCorrelation;
+            return logLikelihood(rc, cc, rho);
+        }
     }
 
 }

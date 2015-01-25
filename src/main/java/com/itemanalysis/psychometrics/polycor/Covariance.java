@@ -32,10 +32,17 @@ public class Covariance implements Comparable<Covariance>{
 	private Double covarianceNumerator=0.0;
     private double varNumeratorX = 0.0;
     private double varNumeratorY = 0.0;
+    private double covariance = 0;
+    boolean fixedValue = false;
 
 	public Covariance(){
         
 	}
+
+    public Covariance(double covariance){
+        this.covariance = covariance;
+        fixedValue = true;
+    }
 
 	public Covariance(Covariance cov){
         this.N = cov.N;
@@ -76,6 +83,7 @@ public class Covariance implements Comparable<Covariance>{
     }
 
     public Double value(boolean unbiased){
+        if(fixedValue) return covariance;
         if(N<1) return Double.NaN;
         if(unbiased){
             return covarianceNumerator/(N-1.0);

@@ -15,7 +15,8 @@
  */
 package com.itemanalysis.psychometrics.scaling;
 
-import com.itemanalysis.psychometrics.data.VariableInfo;
+import com.itemanalysis.psychometrics.data.ItemType;
+import com.itemanalysis.psychometrics.data.VariableAttributes;
 import com.itemanalysis.psychometrics.data.VariableType;
 import org.apache.commons.math3.util.Precision;
 
@@ -83,7 +84,7 @@ public class ScoreBounds {
         this.precision = precision;
     }
 
-    public ScoreBounds(ArrayList<VariableInfo> variables, int precision){
+    public ScoreBounds(ArrayList<VariableAttributes> variables, int precision){
         minPossibleScore = 0.0;
         maxPossibleScore = 0.0;
         this.precision = precision;
@@ -106,9 +107,9 @@ public class ScoreBounds {
         }
     }
 
-    public final void incrementByItemScores(ArrayList<VariableInfo> variables){
-        for(VariableInfo v : variables){
-            if(v.getType().getItemType()== VariableType.BINARY_ITEM || v.getType().getItemType()==VariableType.POLYTOMOUS_ITEM){
+    public final void incrementByItemScores(ArrayList<VariableAttributes> variables){
+        for(VariableAttributes v : variables){
+            if(v.getType().getItemType()== ItemType.BINARY_ITEM || v.getType().getItemType()==ItemType.POLYTOMOUS_ITEM){
                 minPossibleScore+=v.getMinimumPossibleItemScore();
                 maxPossibleScore+=v.getMaximumPossibleItemScore();
             }

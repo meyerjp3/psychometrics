@@ -17,12 +17,15 @@ package com.itemanalysis.psychometrics.polycor;
 
 import com.itemanalysis.psychometrics.analysis.AbstractMultivariateFunction;
 import com.itemanalysis.psychometrics.distribution.BivariateNormalDistributionImpl;
+import com.itemanalysis.psychometrics.uncmin.Uncmin_methods;
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 
+import java.util.Arrays;
 import java.util.Formatter;
 
 /**
@@ -31,24 +34,39 @@ import java.util.Formatter;
  *
  * @author J. Patrick Meyer
  */
-public class PolychoricLogLikelihoodML extends AbstractMultivariateFunction {
+@Deprecated
+public class PolychoricLogLikelihoodML extends AbstractMultivariateFunction implements Uncmin_methods {
 
     private double[][] data = null; //a k x k matrix of frequencies
-    private int nrow = 0;
-    private int ncol = 0;
+    private int nrow = 0;//number of rows
+    private int ncol = 0;//number of columns
     private int validNrow = 0; //nrow-1 the highest category is not estimable and is not part of optimization parameters
     private int validNcol = 0;//ncol-1  the highest category is not estimable and is not part of optimization parameters
     private double[] alpha = null;//
     private double[] beta = null;
     private double rho = 0.0;
-    private double[][] Pd = null;
-    private double[][] Pc = null;
     private double[][] variance = null;
     private double chiSquare = 0.0;
     private double df = 0.0;
     private double probChiSquare = 0.0;
     private double maxcor = 0.9999;
     BivariateNormalDistributionImpl bvnorm = null;
+
+    public void hessian(double[] x, double[][] y){
+
+    }
+
+    public void gradient(double[] x, double[] y){
+
+    }
+
+    public double f_to_minimize(double[] x){
+        double[] shortX = new double[x.length-1];
+        for(int i=0;i<shortX.length;i++){
+            shortX[i] = x[i+1];
+        }
+        return value(x);
+    }
 
     /**
      *
@@ -62,8 +80,6 @@ public class PolychoricLogLikelihoodML extends AbstractMultivariateFunction {
         this.validNcol = this.ncol - 1;
         this.alpha = new double[nrow];
         this.beta = new double[ncol];
-        this.Pd = new double[nrow][ncol];
-        this.Pc = new double[nrow][ncol];
         bvnorm = new BivariateNormalDistributionImpl();
     }
 
@@ -77,7 +93,11 @@ public class PolychoricLogLikelihoodML extends AbstractMultivariateFunction {
     }
 
     /**
-     * Loglikelihood function to be minimized
+     * Loglikelihood function to be minimized.
+     *
+     * Parameters are stored such that x[0] is the correlation
+     * x[1:validNrow] are the row thresholds
+     * x[validNrow:(1+validNrow+validNcol] are the column thresholds
      *
      * @param x
      * @return
@@ -100,6 +120,9 @@ public class PolychoricLogLikelihoodML extends AbstractMultivariateFunction {
             beta[i]=x[i+1+validNrow];
         }
         beta[validNcol]=10;
+
+        double[][] Pd = new double[nrow][ncol];
+        double[][] Pc = new double[nrow][ncol];
         
         for(int i=0;i<nrow;i++){
             for(int j=0;j<ncol;j++){

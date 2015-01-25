@@ -145,7 +145,7 @@ public class Uncmin_f77 extends Object {
     }
 
     /**
-     * Show detailed information about teh optimizer. This is mainly available for debugging.
+     * Show detailed information about the optimizer. This is mainly available for debugging.
      * It could be extended to allow for other listeners if additional processing were needed.
      * The details provided by fireUncminDetailsEvent are extensive and could lead to overflow
      * for large optimization problems. Therefore, better to just show the message when debugging

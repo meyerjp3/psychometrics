@@ -221,10 +221,11 @@ public class ItemLogLikelihood implements DiffFunction, Uncmin_methods{
      * @param x array of item parameter estimates
      * @return array of item parameter standard errors
      */
-    public double[] stdError(double[] x){
+    public double[] stdError(double[] x, double[][] hessian){
         double[] se = new double[x.length];
         try{
-            RealMatrix m = new Array2DRowRealMatrix(numericHessian(x));
+//            RealMatrix m = new Array2DRowRealMatrix(numericHessian(x));
+            RealMatrix m = new Array2DRowRealMatrix(hessian);
             RealMatrix info = new LUDecomposition(m).getSolver().getInverse();
 
 
@@ -243,7 +244,7 @@ public class ItemLogLikelihood implements DiffFunction, Uncmin_methods{
 
     public void stdError(ItemResponseModel irm){
         double[] x = irm.getItemParameterArray();
-        irm.setStandardErrors(stdError(x));
+        irm.setStandardErrors(stdError(x, numericHessian(x)));
     }
 
 }

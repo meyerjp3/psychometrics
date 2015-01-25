@@ -47,6 +47,13 @@ public class IrmPCM extends AbstractItemResponseModel{
     private double[] proposalThreshold;
     private double[] thresholdStdError;
 
+    /**
+     * Default constructor
+     *
+     * @param difficulty item difficulty parameter
+     * @param threshold an array of m-1 threshold parameters for an m category item
+     * @param D a scaling constant that is either 1.0, 1.7, or 1.712
+     */
     public IrmPCM(double difficulty, double[] threshold, double D){
         this.difficulty = difficulty;
         this.proposalDifficulty = difficulty;
@@ -269,6 +276,11 @@ public class IrmPCM extends AbstractItemResponseModel{
     }
 
     public int getNumberOfParameters(){
+        return threshold.length+1;
+    }
+
+    public int getNumberOfEstimatedParameters(){
+        if(isFixed) return 0;
         return threshold.length+1;
     }
 

@@ -48,14 +48,14 @@ public class Category implements Comparable<Object>{
         return responseValue;
     }
 
-    public boolean isInCategory(Object response){
-        return responseValue.equals(response);
-    }
-
-    public double categoryScore(Object response){
-        if(responseValue.equals(response)) return 1.0;
-        return 0.0;
-    }
+//    public boolean isInCategory(Object response){
+//        return responseValue.equals(response);
+//    }
+//
+//    public double categoryScore(Object response){
+//        if(responseValue.equals(response)) return 1.0;
+//        return 0.0;
+//    }
 
     @Override
     public String toString(){
@@ -89,5 +89,7 @@ public class Category implements Comparable<Object>{
     public int hashCode(){
 		return responseValue.hashCode();
 	}
+
+
 
 }

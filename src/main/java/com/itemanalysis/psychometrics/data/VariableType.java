@@ -30,78 +30,102 @@ package com.itemanalysis.psychometrics.data;
  */
 public class VariableType {
 
-    public final static int NO_FILTER=-1;		//no filter
-        
-    public final static int NOT_ITEM=1;			//variable that is not a test item
-    public final static int BINARY_ITEM=2; 		//binary test item
-    public final static int POLYTOMOUS_ITEM=3; 	//polytomous test item
-    public final static int DOUBLE=4;			//double data type
-    public final static int STRING=5;           //string data type
-    public final static int CONTINUOUS_ITEM=6;  //continuous item - scoring not needed
+//NOTE: The static values below are not part of DataType and ItemType Enums.
+//    public final static int NO_FILTER=-1;		//no filter
+//
+//    public final static int NOT_ITEM=1;			//variable that is not a test item
+//    public final static int BINARY_ITEM=2; 		//binary test item
+//    public final static int POLYTOMOUS_ITEM=3; 	//polytomous test item
+//    public final static int DOUBLE=4;			//double data type
+//    public final static int STRING=5;           //string data type
+//    public final static int CONTINUOUS_ITEM=6;  //continuous item - scoring not needed
+//    public final static int INTEGER = 7;
+//
+//    public final static String NOT_ITEM_STRING="Not Item";			//variable that is not a test item
+//    public final static String BINARY_ITEM_STRING="Binary Item"; 		//binary test item
+//    public final static String POLYTOMOUS_ITEM_STRING="Polytomous Item"; 	//polytomous test item
+//    public final static String DOUBLE_STRING="Double";			//double data type
+//    public final static String STRING_STRING="String";           //string data type
+//    public final static String CONTINUOUS_ITEM_STRING="Continuous Item";  //continuous item - scoring not needed
+//
+//    private int itemType = NOT_ITEM;
+//
+//    private int dataType = DOUBLE;
 
-    public final static String NOT_ITEM_STRING="Not Item";			//variable that is not a test item
-    public final static String BINARY_ITEM_STRING="Binary Item"; 		//binary test item
-    public final static String POLYTOMOUS_ITEM_STRING="Polytomous Item"; 	//polytomous test item
-    public final static String DOUBLE_STRING="Double";			//double data type
-    public final static String STRING_STRING="String";           //string data type
-    public final static String CONTINUOUS_ITEM_STRING="Continuous Item";  //continuous item - scoring not needed
+    private ItemType itemType = ItemType.NOT_ITEM;
+    private DataType dataType = DataType.INTEGER;
     
-    private int itemType = NOT_ITEM;
-    
-    private int dataType = DOUBLE;
-
-    /**
-     * Constructor needed for importing data files. Uses default types.
-     */
-    public VariableType(){
-
-    }
-    
-    public VariableType(int itemType, int dataType){
+    public VariableType(ItemType itemType, DataType dataType){
         this.itemType = itemType;
         this.dataType = dataType;
     }
 
-    public int getItemType(){
+    /**
+     * In jMetrik, item types are stored in database as integers. This constructor covnerts the integers to their Enums.
+     * @param itemType
+     * @param dataType
+     */
+    public VariableType(int itemType, int dataType){
+        if(1==itemType){
+            this.itemType = ItemType.NOT_ITEM;
+        }else if(2==itemType){
+            this.itemType = ItemType.BINARY_ITEM;
+        }else if(3==itemType){
+            this.itemType = ItemType.POLYTOMOUS_ITEM;
+        }else if(6==itemType){
+            this.itemType = ItemType.CONTINUOUS_ITEM;
+        }
+
+        if(4==dataType){
+            this.dataType = DataType.DOUBLE;
+        }else if(5==dataType){
+            this.dataType = DataType.STRING;
+        }
+
+    }
+
+    public VariableType(DataType dataType){
+        this.dataType = dataType;
+    }
+
+    public ItemType getItemType(){
         return itemType;
     }
 
     public String getItemTypeString(){
         switch(this.itemType){
-            case NOT_ITEM: return "Not Item";
-            case BINARY_ITEM: return "Binary Item";
-            case POLYTOMOUS_ITEM: return "Polytomous Item";
-            case CONTINUOUS_ITEM: return "Continuous Item";
+            case NOT_ITEM: return ItemType.NOT_ITEM.toString();
+            case BINARY_ITEM: return ItemType.BINARY_ITEM.toString();
+            case POLYTOMOUS_ITEM: return ItemType.POLYTOMOUS_ITEM.toString();
         }
-        return "Not Item";
+        return ItemType.NOT_ITEM.toString();
     }
 
-    public void setItemType(int itemType){
+    public void setItemType(ItemType itemType){
         this.itemType = itemType;
 
-        //continuous item type must be double data type
-        if(CONTINUOUS_ITEM==itemType){
-            if(DOUBLE==dataType){
-                this.itemType = itemType;
-            }else{
-                this.itemType = NOT_ITEM;
-            }
-        }
+//        //continuous item type must be double data type
+//        if(CONTINUOUS_ITEM==itemType){
+//            if(DOUBLE==dataType){
+//                this.itemType = itemType;
+//            }else{
+//                this.itemType = NOT_ITEM;
+//            }
+//        }
     }
     
     public void setItemType(String itemType){
-        if(NOT_ITEM_STRING.equals(itemType)){
-            setItemType(NOT_ITEM);
-        }else if(BINARY_ITEM_STRING.equals(itemType)){
-            setItemType(BINARY_ITEM);
-        }else if(POLYTOMOUS_ITEM_STRING.equals(itemType)){
-            setItemType(POLYTOMOUS_ITEM);
-        }else if(CONTINUOUS_ITEM_STRING.equals(itemType)){
-            setItemType(CONTINUOUS_ITEM);
+        if(ItemType.NOT_ITEM.toString().equals(itemType)){
+            setItemType(ItemType.NOT_ITEM);
+        }else if(ItemType.BINARY_ITEM.toString().equals(itemType)){
+            setItemType(ItemType.BINARY_ITEM);
+        }else if(ItemType.POLYTOMOUS_ITEM.toString().equals(itemType)){
+            setItemType(ItemType.POLYTOMOUS_ITEM);
         }
+        setItemType(ItemType.NOT_ITEM);
     }
 
-    public int getDataType(){
+    public DataType getDataType(){
         return dataType;
     }
     
@@ -113,7 +137,7 @@ public class VariableType {
         return "Double";
     }
 
-    public void setDataType(int dataType){
+    public void setDataType(DataType dataType){
         this.dataType = dataType;
     }
 

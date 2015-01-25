@@ -15,8 +15,9 @@
  */
 package com.itemanalysis.psychometrics.polycor;
 
-import com.itemanalysis.psychometrics.data.VariableInfo;
-import com.itemanalysis.psychometrics.data.VariableType;
+import com.itemanalysis.psychometrics.data.DataType;
+import com.itemanalysis.psychometrics.data.ItemType;
+import com.itemanalysis.psychometrics.data.VariableAttributes;
 import com.itemanalysis.psychometrics.texttable.TextTable;
 import com.itemanalysis.psychometrics.texttable.TextTablePosition;
 import com.itemanalysis.psychometrics.texttable.TextTableColumnFormat;
@@ -31,7 +32,7 @@ import java.util.ArrayList;
  */
 public class MixedCorrelationMatrix {
 
-    private ArrayList<VariableInfo> variables = null;
+    private ArrayList<VariableAttributes> variables = null;
 
     private Object[][] matrix = null;
 
@@ -48,7 +49,7 @@ public class MixedCorrelationMatrix {
         POLYCHORIC      //polychoric correlation
     }
 
-    public MixedCorrelationMatrix(ArrayList<VariableInfo> variables, boolean maximumLikelihood){
+    public MixedCorrelationMatrix(ArrayList<VariableAttributes> variables, boolean maximumLikelihood){
         this.variables = variables;
         this.maximumLikelihood = maximumLikelihood;
         this.numberOfVariables = variables.size();
@@ -66,31 +67,31 @@ public class MixedCorrelationMatrix {
     private void initializeMatrix(){
         for(int i=0;i<numberOfVariables;i++){
             for(int j=i;j<numberOfVariables;j++){
-                if((variables.get(i).getType().getItemType()== VariableType.BINARY_ITEM || variables.get(i).getType().getItemType()==VariableType.POLYTOMOUS_ITEM) &&
-                        (variables.get(j).getType().getItemType()== VariableType.BINARY_ITEM || variables.get(j).getType().getItemType()==VariableType.POLYTOMOUS_ITEM)){
+                if((variables.get(i).getType().getItemType()== ItemType.BINARY_ITEM || variables.get(i).getType().getItemType()==ItemType.POLYTOMOUS_ITEM) &&
+                        (variables.get(j).getType().getItemType()== ItemType.BINARY_ITEM || variables.get(j).getType().getItemType()==ItemType.POLYTOMOUS_ITEM)){
                     if(maximumLikelihood){
                         matrix[i][j] = new PolychoricML();
                     }else{
-                        matrix[i][j] = new PolychoricTwoStep();
+                        matrix[i][j] = new PolychoricTwoStepOLD();
                     }
                     corTypes[i][j] = CorrelationType.POLYCHORIC;
-                }else if((variables.get(i).getType().getItemType()== VariableType.BINARY_ITEM || variables.get(i).getType().getItemType()==VariableType.POLYTOMOUS_ITEM) &&
-                        (variables.get(j).getType().getItemType()==VariableType.CONTINUOUS_ITEM)){
+                }else if((variables.get(i).getType().getItemType()== ItemType.BINARY_ITEM || variables.get(i).getType().getItemType()==ItemType.POLYTOMOUS_ITEM) &&
+                        (variables.get(j).getType().getItemType()==ItemType.CONTINUOUS_ITEM)){
                     matrix[i][j] = new PolyserialPlugin();
                     corTypes[i][j] = CorrelationType.POLYSERIAL2;//indicates the continuous variable is Y when it should be X
-                }else if((variables.get(i).getType().getItemType()==VariableType.CONTINUOUS_ITEM) &&
-                        (variables.get(j).getType().getItemType()== VariableType.BINARY_ITEM || variables.get(j).getType().getItemType()==VariableType.POLYTOMOUS_ITEM)){
+                }else if((variables.get(i).getType().getItemType()==ItemType.CONTINUOUS_ITEM) &&
+                        (variables.get(j).getType().getItemType()== ItemType.BINARY_ITEM || variables.get(j).getType().getItemType()==ItemType.POLYTOMOUS_ITEM)){
                     matrix[i][j] = new PolyserialPlugin();
                     corTypes[i][j] = CorrelationType.POLYSERIAL1;//indicates teh continuous variable is X as it should be
-                }else if((variables.get(i).getType().getItemType()== VariableType.BINARY_ITEM || variables.get(i).getType().getItemType()==VariableType.POLYTOMOUS_ITEM) &&
-                        (variables.get(j).getType().getItemType()== VariableType.NOT_ITEM && variables.get(j).getType().getDataType()== VariableType.DOUBLE)){
+                }else if((variables.get(i).getType().getItemType()== ItemType.BINARY_ITEM || variables.get(i).getType().getItemType()==ItemType.POLYTOMOUS_ITEM) &&
+                        (variables.get(j).getType().getItemType()== ItemType.NOT_ITEM && variables.get(j).getType().getDataType()== DataType.DOUBLE)){
                     matrix[i][j] = new PolyserialPlugin();
                     corTypes[i][j] = CorrelationType.POLYSERIAL2;//indicates the continuous variable is Y when it should be X
-                }else if((variables.get(i).getType().getItemType()== VariableType.NOT_ITEM && variables.get(i).getType().getDataType()==VariableType.DOUBLE) &&
-                        (variables.get(j).getType().getItemType()== VariableType.BINARY_ITEM || variables.get(j).getType().getItemType()==VariableType.POLYTOMOUS_ITEM)){
+                }else if((variables.get(i).getType().getItemType()== ItemType.NOT_ITEM && variables.get(i).getType().getDataType()==DataType.DOUBLE) &&
+                        (variables.get(j).getType().getItemType()== ItemType.BINARY_ITEM || variables.get(j).getType().getItemType()==ItemType.POLYTOMOUS_ITEM)){
                     matrix[i][j] = new PolyserialPlugin();
                     corTypes[i][j] = CorrelationType.POLYSERIAL1;//indicates teh continuous variable is X as it should be
-                }else if(variables.get(i).getType().getItemType()== VariableType.NOT_ITEM && variables.get(j).getType().getDataType()==VariableType.DOUBLE){
+                }else if(variables.get(i).getType().getItemType()== ItemType.NOT_ITEM && variables.get(j).getType().getDataType()==DataType.DOUBLE){
                     matrix[i][j] = new PearsonCorrelation();
                     corTypes[i][j] = CorrelationType.PEARSON;
                 }
@@ -127,7 +128,7 @@ public class MixedCorrelationMatrix {
             if(maximumLikelihood){
                 ((PolychoricML)o).addValue((int)x, (int)y);
             }else{
-                ((PolychoricTwoStep)o).addValue((int)x, (int)y);
+                ((PolychoricTwoStepOLD)o).addValue((int)x, (int)y);
             }
         }
     }
@@ -152,7 +153,7 @@ public class MixedCorrelationMatrix {
                         r[i][j] = ((PolychoricML)o).getResult();
                         if(i!=j) r[j][i] = r[i][j];
                     }else{
-                        r[i][j] = ((PolychoricTwoStep)o).getResult();
+                        r[i][j] = ((PolychoricTwoStepOLD)o).getResult();
                         if(i!=j) r[j][i] = r[i][j];
                     }
                 }
@@ -179,7 +180,7 @@ public class MixedCorrelationMatrix {
             if(maximumLikelihood){
                 r = ((PolychoricML)o).getResult();
             }else{
-                r = ((PolychoricTwoStep)o).getResult();
+                r = ((PolychoricTwoStepOLD)o).getResult();
             }
         }
         return r;
@@ -199,7 +200,7 @@ public class MixedCorrelationMatrix {
             if(maximumLikelihood){
                 r = ((PolychoricML)o).getCorrelationStandardError();
             }else{
-                r = ((PolychoricTwoStep)o).getCorrelationStandardError();
+                r = ((PolychoricTwoStepOLD)o).getCorrelationStandardError();
             }
         }
         return r;
@@ -283,7 +284,7 @@ public class MixedCorrelationMatrix {
 
     public String printPolychoricThresholds(){
         PolychoricML ml = null;
-        PolychoricTwoStep ts = null;
+        PolychoricTwoStepOLD ts = null;
         int nPolychoric = 0;
         for(int i=0;i<corTypes.length;i++){
             if(corTypes[i][i]==CorrelationType.POLYCHORIC) nPolychoric++;
@@ -297,7 +298,7 @@ public class MixedCorrelationMatrix {
         Max max = new Max();
         int index=0;
         int pIndex=0;
-        for(VariableInfo v : variables){
+        for(VariableAttributes v : variables){
             o = matrix[index][index];
             if(corTypes[index][index]==CorrelationType.POLYCHORIC){
                 if(maximumLikelihood){
@@ -306,7 +307,7 @@ public class MixedCorrelationMatrix {
                     t[pIndex] = ml.getValidRowThresholds();
                     se[pIndex] = ml.getValidRowThresholdStandardErrors();
                 }else{
-                    ts = (PolychoricTwoStep)o;
+                    ts = (PolychoricTwoStepOLD)o;
                     max.increment(ts.getNumberOfValidRowThresholds());
                     t[pIndex] = ts.getValidRowThresholds();
                 }

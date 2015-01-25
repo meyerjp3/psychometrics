@@ -24,6 +24,8 @@ import java.util.Arrays;
 
 /**
  * Samejima's graded response model.
+ *
+ * TODO currently uses an array of m-1 step parameters for an item with m categories. Change to array of m steps when use this for estimation.
  */
 public class IrmGRM extends AbstractItemResponseModel {
 
@@ -38,6 +40,13 @@ public class IrmGRM extends AbstractItemResponseModel {
     private ItemParamPrior discriminationPrior = null;
     private ItemParamPrior[] stepPrior = null;
 
+    /**
+     * Default constructor
+     *
+     * @param discrimination item discrimination parameter
+     * @param step an array of m-1 step parameters for an m category item
+     * @param D a scaling constant that is either 1.0, 1.7, or 1.712.
+     */
     public IrmGRM(double discrimination, double[] step, double D){
         this.discrimination = discrimination;
         this.step = step;
@@ -234,6 +243,11 @@ public class IrmGRM extends AbstractItemResponseModel {
     }
 
     public int getNumberOfParameters(){
+        return step.length+1;
+    }
+
+    public int getNumberOfEstimatedParameters(){
+        if(isFixed) return 0;
         return step.length+1;
     }
 

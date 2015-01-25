@@ -15,21 +15,20 @@
  */
 package com.itemanalysis.psychometrics.measurement;
 
-import com.itemanalysis.psychometrics.data.VariableInfo;
+import com.itemanalysis.psychometrics.data.VariableAttributes;
+import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
 import com.itemanalysis.psychometrics.reliability.*;
 import com.itemanalysis.psychometrics.scaling.RawScore;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
-import java.util.ArrayList;
-import java.util.Formatter;
-import java.util.Iterator;
-import java.util.Set;
-
+import java.util.*;
 
 
 /**
+ * Currently this class stores the test score data in memory. Item level data is not stored in memory.
+ * Rather, the inter-item covariance matrix is incrementally updated.
  *
  * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
  */
@@ -51,9 +50,9 @@ public class TestSummary {
 
     private CovarianceMatrix partRelMatrix = null;
 
-    private ArrayList<Integer> cutScores = null;
+    private int[] cutScores = null;
 
-    private ArrayList<VariableInfo> vInfo = null;
+    private ArrayList<VariableAttributes> variableAttributes = null;
 
     private boolean deletedReliability = false;
 
@@ -63,33 +62,90 @@ public class TestSummary {
 
     private boolean showCsem = false;
 
-    public TestSummary(int numberOfItems, ArrayList<VariableInfo> vInfo){
-        this(numberOfItems, 1, null, vInfo, false, false, false);
-    }
+    private boolean unbiased = false;
+
+//    public TestSummary(int numberOfItems, ArrayList<VariableAttributes> variableAttributes){
+//        this(numberOfItems, 1, null, variableAttributes, false, false, false);
+//    }
 
     public TestSummary(int numberOfItems, int numberOfSubscales, ArrayList<Integer> cutScores,
-            ArrayList<VariableInfo> vInfo, boolean unbiased, boolean deletedReliability, boolean showCsem){
+            ArrayList<VariableAttributes> variableAttributes, boolean unbiased, boolean deletedReliability, boolean showCsem){
         this.numberOfItems = numberOfItems;
-        this.cutScores = cutScores;
-        this.vInfo = vInfo;
+
+        if(cutScores!=null){
+            this.cutScores = new int[cutScores.size()];
+            int i=0;
+            for(Integer intgr : cutScores){
+                this.cutScores[i] = intgr.intValue();
+                i++;
+            }
+        }
+
+        this.variableAttributes = variableAttributes;
+        this.unbiased = unbiased;
         this.deletedReliability = deletedReliability;
         this.showCsem = showCsem;
         stats = new DescriptiveStatistics();
         stdDev = new StandardDeviation(unbiased);
-        relMatrix = new CovarianceMatrix(vInfo);
+        relMatrix = new CovarianceMatrix(variableAttributes);
         this.numberOfSubscales = numberOfSubscales;
         if(numberOfSubscales>1) partRelMatrix = new CovarianceMatrix(numberOfSubscales);
     }
 
-    public void increment(RawScore rawScore){
-        double rawScoreValue = rawScore.value();
-        stats.addValue(rawScoreValue);
-        stdDev.increment(rawScoreValue);
+    public TestSummary(int numberOfItems, int numberOfSubscales, int[] cutScores,
+            ArrayList<VariableAttributes> variableAttributes, boolean unbiased, boolean deletedReliability, boolean showCsem){
+        this.numberOfItems = numberOfItems;
+        this.cutScores = cutScores;
+        this.variableAttributes = variableAttributes;
+        this.unbiased = unbiased;
+        this.deletedReliability = deletedReliability;
+        this.showCsem = showCsem;
+        stats = new DescriptiveStatistics();
+        stdDev = new StandardDeviation(unbiased);
+        relMatrix = new CovarianceMatrix(variableAttributes);
+        this.numberOfSubscales = numberOfSubscales;
+        if(numberOfSubscales>1) partRelMatrix = new CovarianceMatrix(numberOfSubscales);
     }
 
-    public void incrementReliability(int xIndex, int yIndex, Double x, Double y){
+    public TestSummary(int numberOfItems, int numberOfSubscales, int[] cutScores,
+            LinkedHashMap<VariableName, VariableAttributes> variableAttributeMap, boolean unbiased,
+            boolean deletedReliability, boolean showCsem){
+
+       this.variableAttributes = new ArrayList<VariableAttributes>();
+        for(VariableName v : variableAttributeMap.keySet()){
+            this.variableAttributes.add(variableAttributeMap.get(v));
+        }
+
+        this.unbiased = unbiased;
+        this.numberOfItems = numberOfItems;
+        this.cutScores = cutScores;
+        this.deletedReliability = deletedReliability;
+        this.showCsem = showCsem;
+        stats = new DescriptiveStatistics();
+        stdDev = new StandardDeviation(unbiased);
+        relMatrix = new CovarianceMatrix(variableAttributes);
+        this.numberOfSubscales = numberOfSubscales;
+        if(numberOfSubscales>1) partRelMatrix = new CovarianceMatrix(numberOfSubscales);
+
+    }
+
+    public void increment(RawScore rawScore){
+        double rawScoreValue = rawScore.value();
+        increment(rawScoreValue);
+    }
+
+    public void increment(double score){
+        stats.addValue(score);
+        stdDev.increment(score);
+    }
+
+    public void incrementReliability(int xIndex, int yIndex, double x, double y){
         relMatrix.increment(xIndex, yIndex, x, y);
         reliabilitySampleSize++;
+    }
+
+    public void incrementPartTestReliability(int xIndex, int yIndex, double x, double y){
+        partRelMatrix.increment(xIndex, yIndex, x, y);
     }
 
     public void incrementPartTestReliability(RawScore rawScore){
@@ -104,7 +160,7 @@ public class TestSummary {
             j=0;
             while(innerIter.hasNext()){
                 temp2 = innerIter.next();
-                partRelMatrix.increment(i, j, rawScore.getSubscaleScoreAt(temp), rawScore.getSubscaleScoreAt(temp2));
+                incrementPartTestReliability(i, j, rawScore.getSubscaleScoreAt(temp), rawScore.getSubscaleScoreAt(temp2));
                 j++;
             }
             i++;
@@ -112,7 +168,7 @@ public class TestSummary {
     }
 
     public double computeMaximumPossibleTestScore(){
-        Iterator<VariableInfo> iter = vInfo.iterator();
+        Iterator<VariableAttributes> iter = variableAttributes.iterator();
         double sum = 0.0;
         while(iter.hasNext()){
             sum+=iter.next().getMaximumPossibleItemScore();
@@ -121,15 +177,12 @@ public class TestSummary {
     }
 
     public Huynh computeDecisionConsistency(){
-        Integer[] cs = new Integer[cutScores.size()];
-        cs = cutScores.toArray(cs);
-        
         Huynh huynh = new Huynh((int)this.numberOfItems(),
                                 (int)stats.getN(),
-                                cutScores.size(),
+                                cutScores.length,
                                 stats.getMean(),
                                 stats.getStandardDeviation(),
-                                cs
+                                cutScores
                                 );
         return huynh;
     }
@@ -143,16 +196,16 @@ public class TestSummary {
         return s;
     }
 
-    public ConditionalSEM computeCSEM(ScoreReliability reliability){
+    public ConditionalSEM computeCSEM(ScoreReliability reliability, boolean unbiased){
         Integer[] scores = getAllScores();
-        kr21 = new KR21(this.numberOfItems(),stats.getMean(), stdDev.getResult());
-        CSEM = new ConditionalSEM(scores, this.computeMaximumPossibleTestScore(), reliability, this.kr21);
+        kr21 = new KR21(this.numberOfItems(),stats.getMean(), stdDev.getResult(), unbiased);
+        CSEM = new ConditionalSEM(scores, this.computeMaximumPossibleTestScore(), reliability, this.kr21, unbiased);
         return CSEM;
     }
 
-    public double kr21(boolean unbiased){
-		kr21 = new KR21(this.numberOfItems(), stats.getMean(), stdDev.getResult());
-		return kr21.value(unbiased);
+    public double kr21(){
+		kr21 = new KR21(this.numberOfItems(), stats.getMean(), stdDev.getResult(), unbiased);
+		return kr21.value();
 	}
 
     public int numberOfItems(){
@@ -163,7 +216,59 @@ public class TestSummary {
         return relMatrix;
     }
 
-    public String print(boolean unbiased){
+    public double[] getDIndexBounds(){
+        double[] bounds = new double[2];
+        bounds[0] = stats.getPercentile(0.27);
+        bounds[1] = stats.getPercentile(0.73);
+        return bounds;
+    }
+
+    public double getMean(){
+        return stats.getMean();
+    }
+
+    public double getStandardDeviation(){
+        return stats.getStandardDeviation();
+    }
+
+    public double getVariance(){
+        return stats.getVariance();
+    }
+
+    /**
+     *
+     * @param p a value between 0 and 100.
+     * @return
+     */
+    public double getPercentile(double p){
+        return stats.getPercentile(p);
+    }
+
+    public double getSkewness(){
+        return stats.getSkewness();
+    }
+
+    public double getKurtosis(){
+        return stats.getKurtosis();
+    }
+
+    public double getSampleSize(){
+        return stats.getN();
+    }
+
+    public double getMin(){
+        return stats.getMin();
+    }
+
+    public double getMax(){
+        return stats.getMax();
+    }
+
+    public double getGeometricMean(){
+        return stats.getGeometricMean();
+    }
+
+    public String print(){
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
         String f2="%.4f";
@@ -183,13 +288,13 @@ public class TestSummary {
 		f.format("%-22s", "Interquartile Range = "); f.format(f2, stats.getPercentile(75)-stats.getPercentile(25)); f.format("%n");
         f.format("%-11s", "Skewness = "); f.format(f2, stats.getSkewness()); f.format("%n");
 		f.format("%-11s", "Kurtosis = "); f.format(f2, stats.getKurtosis()); f.format("%n");
-		f.format("%-7s", "KR21 = "); f.format(f2, this.kr21(unbiased)); f.format("%n");
+		f.format("%-7s", "KR21 = "); f.format(f2, this.kr21()); f.format("%n");
         f.format("%-42s", "------------------------------------------");f.format("%n");
         f.format("%n");
         f.format("%n");
         
         if(reliabilitySampleSize>0){
-            reliability = new ReliabilitySummary(relMatrix, stats.getN(), vInfo, unbiased, deletedReliability);
+            reliability = new ReliabilitySummary(relMatrix, variableAttributes, unbiased, deletedReliability);
             sb.append(reliability.toString());
             if(deletedReliability){
                 f.format("%n");
@@ -208,12 +313,12 @@ public class TestSummary {
         if(showCsem){
             f.format("%n");
             f.format("%n");
-            sb.append(this.computeCSEM(reliability.value()).print(unbiased));
+            sb.append(this.computeCSEM(reliability.value(), unbiased).print());
         }
 
         //reliability of subscale defined part tests
         if(numberOfSubscales>1){
-            reliability = new ReliabilitySummary(partRelMatrix, stats.getN(), vInfo, unbiased, false);
+            reliability = new ReliabilitySummary(partRelMatrix, variableAttributes, unbiased, false);
             f.format("%n");
             f.format("%n");
             f.format("%n");

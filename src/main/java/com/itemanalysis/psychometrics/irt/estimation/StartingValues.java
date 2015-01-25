@@ -111,7 +111,7 @@ public class StartingValues {
                 try{
                     //Using observed counts, find the item parameters that maximize the marginal likelihood
                     itemLogLikelihood.setModel(irm[j], latentDistribution, estepEstimates.getRjkAt(j), estepEstimates.getNt());
-                    optimizer.minimize(itemLogLikelihood, initialValue, true, false, 100);
+                    optimizer.minimize(itemLogLikelihood, initialValue, true, false, 100, 2);
                     param = optimizer.getParameters();
                 }catch(UncminException ex){
                     fireEMStatusEvent("UNCMIN exception: Starting values nonlinear regression failed. Using defaults instead." );

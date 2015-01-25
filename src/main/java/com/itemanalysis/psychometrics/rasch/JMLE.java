@@ -15,8 +15,9 @@
  */
 package com.itemanalysis.psychometrics.rasch;
 
-import com.itemanalysis.psychometrics.data.VariableInfo;
+import com.itemanalysis.psychometrics.data.VariableAttributes;
 import com.itemanalysis.psychometrics.data.VariableName;
+import com.itemanalysis.psychometrics.measurement.DefaultItemScoring;
 import com.itemanalysis.psychometrics.scaling.DefaultLinearTransformation;
 import com.itemanalysis.psychometrics.texttable.TextTable;
 import com.itemanalysis.psychometrics.texttable.TextTablePosition;
@@ -61,7 +62,7 @@ public class JMLE {
     /**
      * VariableInfo list for all items.
      */
-    private ArrayList<VariableInfo> variables = null;
+    private ArrayList<VariableAttributes> variables = null;
 
     /**
      * Counts number of items in each rating scale group
@@ -101,7 +102,7 @@ public class JMLE {
 
     private ArrayList<Double> extremeIterationDelta = null;
 
-    public JMLE(ArrayList<VariableInfo> variables, double adjust, int nPeople, boolean ignoreMissing){
+    public JMLE(ArrayList<VariableAttributes> variables, double adjust, int nPeople, boolean ignoreMissing){
         this.variables = variables;
         this.adjust = adjust;
         this.ignoreMissing = ignoreMissing;
@@ -128,13 +129,13 @@ public class JMLE {
      *
      * @param variables
      */
-    private void createItemsAndCategories(ArrayList<VariableInfo> variables){
+    private void createItemsAndCategories(ArrayList<VariableAttributes> variables){
         RatingScaleItem item = null;
         String subscale = "";//may need to make this default to item name
         int k = 2;
         double mpis = 1.0;
         int position = 0;
-        for(VariableInfo v : variables){
+        for(VariableAttributes v : variables){
             subscale = v.getSubscale(true);
             mpis = v.getMaximumPossibleItemScore().doubleValue();
             k = (int)mpis+1;//number of categories
@@ -143,7 +144,7 @@ public class JMLE {
                     subscale,
                     (int)v.getItemScoring().maximumPossibleScore(),
                     position);
-            table.addItem(v.getName(), v.getSubscale(true), position, v.getItemScoring());
+            table.addItem(v.getName(), v.getItemGroup(), position, (DefaultItemScoring)v.getItemScoring());
             items.put(v.getName(), item);
             groupFrequencies.addValue(subscale);
 
@@ -187,7 +188,7 @@ public class JMLE {
             int c = 0;
             while(rs.next()){
                 c = 0;
-                for(VariableInfo v : variables){//columns in data will be in same order as variables
+                for(VariableAttributes v : variables){//columns in data will be in same order as variables
                     response = rs.getObject(v.getName().nameForDatabase());
                     if((response==null || response.equals("") || response.equals("NA")) && ignoreMissing){
                         data[r][c] = -1;//code for omitted responses
@@ -460,7 +461,7 @@ public class JMLE {
     private double MPRS(byte[] scores){
         double mprs = 0.0;
         int c = 0;
-        for(VariableInfo v : variables){
+        for(VariableAttributes v : variables){
             if(scores[c]>-1) mprs += v.getItemScoring().maximumPossibleScore();
             c++;
         }

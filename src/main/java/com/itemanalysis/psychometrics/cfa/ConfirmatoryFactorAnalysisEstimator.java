@@ -15,7 +15,7 @@
  */
 package com.itemanalysis.psychometrics.cfa;
 
-import com.itemanalysis.psychometrics.data.VariableInfo;
+import com.itemanalysis.psychometrics.data.VariableAttributes;
 import org.apache.commons.math3.analysis.DifferentiableMultivariateFunction;
 import org.apache.commons.math3.linear.RealMatrix;
 
@@ -64,7 +64,7 @@ public interface ConfirmatoryFactorAnalysisEstimator extends DifferentiableMulti
 
     public double degreesOfFreedom();
 
-    public String printEstimates(ArrayList<VariableInfo> items);
+    public String printEstimates(ArrayList<VariableAttributes> items);
 
     @Override
     public String toString();

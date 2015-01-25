@@ -1,0 +1,16 @@
+
+Polyserial correlations:
+The plugin polyserial correlation is complete and in use elsewhere in the library.
+The two-step and maximum likelihood versions are not complete and need to be finished.
+Add tests.
+
+Polychoric correlations:
+Complete the two-step and maximum liklihood versions. Need to add more tests.
+
+Remaining Items (Last updated: 1/3/2015)
+-------------------------------------------------------------------------------------------
+1. Complete polyserial maximum likelihood
+2. Complete polyserial two-step
+3. Delete deprecated classes
+4. Complete mixed correlation matrix and add tests.
+

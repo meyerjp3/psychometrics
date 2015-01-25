@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -32,8 +33,41 @@ public class ItemResponseFileSummary {
     }
 
     public ItemResponseVector[] getResponseVectors(String fileName, boolean headerIncluded){
-        File f = new File(fileName);
-        return getResponseVectors(f, headerIncluded);
+        return getResponseVectors(new File(fileName), headerIncluded);
+    }
+
+    public ItemResponseVector[] getResponseVectors(File f, boolean headerIncluded){
+        String responseString = "";
+        String[] line = null;
+        ArrayList<ItemResponseVector> responseData = new ArrayList<ItemResponseVector>();
+        byte[] rv = null;
+        ItemResponseVector irv = null;
+        ItemResponseVector[] itemResponseVector = null;
+
+        try(BufferedReader br = new BufferedReader(new FileReader(f))){
+
+            if(headerIncluded) br.readLine();//skip header
+            while((responseString=br.readLine())!=null){
+                line = responseString.split(",");
+                rv = new byte[line.length];
+
+                for(int j=0;j<line.length;j++){
+                    rv[j] = Byte.parseByte(line[j]);
+                }
+                irv = new ItemResponseVector(rv, 1.0);
+                responseData.add(irv);
+            }
+
+            itemResponseVector = new ItemResponseVector[responseData.size()];
+            for(int i=0;i<responseData.size();i++){
+                itemResponseVector[i] = responseData.get(i);
+            }
+
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
+
+        return itemResponseVector;
     }
 
     /**
@@ -43,51 +77,42 @@ public class ItemResponseFileSummary {
      * @param headerIncluded true if header included. False otherwise. The header will be omitted (ignored).
      * @return
      */
-    public ItemResponseVector[] getResponseVectors(File f, boolean headerIncluded){
-        Frequency freq = new Frequency();
+    public ItemResponseVector[] getResponseVectors(File f, int start, int nItems, boolean headerIncluded){
         String responseString = "";
+        String[] line = null;
+        ArrayList<ItemResponseVector> responseData = new ArrayList<ItemResponseVector>();
+        int lineCount = 0;
+        byte[] rv = null;
+        ItemResponseVector irv = null;
+        ItemResponseVector[] itemResponseVector = null;
 
-        try{
-            BufferedReader br = new BufferedReader(new FileReader(f));
-            String line = "";
+        try(BufferedReader br = new BufferedReader(new FileReader(f))){
+
             if(headerIncluded) br.readLine();//skip header
-            while((line=br.readLine())!=null){
-                line = line.replaceAll(",", "");
-                freq.addValue(line);
+
+            while((responseString=br.readLine())!=null){
+                line = responseString.split(",");
+                rv = new byte[nItems];
+
+                for(int j=0;j<nItems;j++){
+                    rv[j] = Byte.parseByte(line[j+start]);
+                }
+                irv = new ItemResponseVector(rv, 1.0);
+                responseData.add(irv);
+                lineCount++;
             }
-            br.close();
+
+            itemResponseVector = new ItemResponseVector[lineCount];
+            for(int i=0;i<lineCount;i++){
+                itemResponseVector[i] = responseData.get(i);
+            }
+
 
         }catch(IOException ex){
             ex.printStackTrace();
         }
 
-        ItemResponseVector[] responseData = new ItemResponseVector[freq.getUniqueCount()];
-        ItemResponseVector irv = null;
-        Iterator<Comparable<?>> iter = freq.valuesIterator();
-        int index = 0;
-        byte[] rv = null;
-
-        //create array of ItemResponseVector objects
-        while(iter.hasNext()){
-            Comparable<?> value = iter.next();
-            responseString = value.toString();
-
-            int n=responseString.length();
-            rv = new byte[n];
-
-            String response = "";
-            for (int i = 0;i < n; i++){
-                response = String.valueOf(responseString.charAt(i)).toString();
-                rv[i] = Byte.parseByte(response);
-            }
-
-            //create response vector objects
-            irv = new ItemResponseVector(rv, Long.valueOf(freq.getCount(value)).doubleValue());
-            responseData[index] = irv;
-            index++;
-        }
-
-        return responseData;
+        return itemResponseVector;
 
     }
 
@@ -101,7 +126,7 @@ public class ItemResponseFileSummary {
      * @param headerIncluded true if header is included. False otherwise. The header will be omitted.
      * @return an array of item resposne vectors
      */
-    public ItemResponseVector[] getResponseVectors(File f, int start, int nItems, boolean headerIncluded){
+    public ItemResponseVector[] getCondensedResponseVectors(File f, int start, int nItems, boolean headerIncluded){
         Frequency freq = new Frequency();
         String responseString = "";
 
@@ -114,8 +139,8 @@ public class ItemResponseFileSummary {
                 s = line.split(",");
                 line = "";
 
-                for(int j=start;j<start+nItems;j++){
-                    line += s[j];
+                for(int j=0;j<nItems;j++){
+                    line += s[j+start];
                 }
                 freq.addValue(line);
             }

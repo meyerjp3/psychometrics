@@ -15,57 +15,53 @@
  */
 package com.itemanalysis.psychometrics.reliability;
 
-import com.itemanalysis.psychometrics.data.VariableInfo;
+import com.itemanalysis.psychometrics.data.VariableAttributes;
 import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
-import org.apache.commons.math3.distribution.FDistribution;
 
 import java.util.ArrayList;
 import java.util.Formatter;
 
 
 
-public class FeldtGilmer implements ScoreReliability, Comparable<FeldtGilmer>{
-	
-	private CovarianceMatrix matrix = null;
-	private int precision=4, n=0;
-	private double fg = 0.0;
-    private double[] confidenceInterval = {0.0,0.0};
-    private double[] cdel = null;
-	private static final String name = "FG";
-	
-	public FeldtGilmer(CovarianceMatrix matrix){
+public class FeldtGilmer extends AbstractScoreReliability{
+
+	public FeldtGilmer(CovarianceMatrix matrix, boolean unbiased){
 		this.matrix=matrix;
-        n=matrix.getNumberOfVariables();
-        cdel = new double[n];
+        this.unbiased = unbiased;
+        nItems = matrix.getNumberOfVariables();
 	}
+
+    public FeldtGilmer(CovarianceMatrix matrix){
+        this(matrix, false);
+    }
+
+    public ScoreReliabilityType getType(){
+        return ScoreReliabilityType.FELDT_GILMER;
+    }
 	
-	private double[] rowOffDiagSums(boolean unbiased){
-		double offDiag[]= new double[n];
-		for(int i=0;i<n;i++){
+	private int getEll(){
+        double[] offDiag= new double[nItems];
+		for(int i=0;i<nItems;i++){
 			offDiag[i]=matrix.rowSum(i, unbiased)-matrix.getVarianceAt(i, unbiased);
 		}
-		return offDiag;
-	}
-	
-	private int getEll(double[] offDiagSums){
+
 		int maxIndex=0;
-		double maxValue=offDiagSums[0];
-		for(int i=1;i<offDiagSums.length;i++){
-			if(offDiagSums[i]>maxValue){
+		double maxValue=offDiag[0];
+		for(int i=1;i<nItems;i++){
+			if(offDiag[i]>maxValue){
 				maxIndex=i;
-				maxValue=offDiagSums[i];
+				maxValue=offDiag[i];
 			}
 		}
 		return maxIndex;
 	}
 	
-	private double[] D(int ell, boolean unbiased){
-		int n=matrix.getNumberOfVariables();
-		double[] d = new double[n];
+	private double[] D(int ell){
+		double[] d = new double[nItems];
 		double num=0.0;
 		double denom=0.0;
 		
-		for(int i=0;i<n;i++){
+		for(int i=0;i<nItems;i++){
 			if(i==ell){
 				d[i]=1.0;
 			}else{
@@ -77,65 +73,49 @@ public class FeldtGilmer implements ScoreReliability, Comparable<FeldtGilmer>{
 		return d;
 	}
 	
-	public double[] valueIfItemDeleted(){
-		return cdel;
-	}
-
-    public void incrementValueIfItemDeleted(int index, double value){
-        cdel[index]=value;
-    }
-	
-	public double sem(boolean unbiased){
-		return Math.sqrt(matrix.totalVariance(unbiased)*(1-this.value(unbiased)));
-	}
-
-    public String name(){
-        return name;
-    }
-
-    public double[] confidenceInterval(double numberOfExaminees, boolean unbiased){
-        double numberOfItems = (double)matrix.getNumberOfVariables();
-		double df1=numberOfExaminees-1.0;
-		double df2=(numberOfExaminees-1.0)*(numberOfItems-1.0);
-        FDistribution fDist = new FDistribution(df1, df2);
-        try{
-            confidenceInterval[0] = 1.0-((1.0-this.value(unbiased))*fDist.inverseCumulativeProbability(0.975));
-            confidenceInterval[1] = 1.0-((1.0-this.value(unbiased))*fDist.inverseCumulativeProbability(0.025));
-        }catch(Exception ex){
-            confidenceInterval[0] = Double.NaN;
-            confidenceInterval[1] = Double.NaN;
-        }
-
-
-		return confidenceInterval;
-	}
-
-    public String confidenceIntervalToString(){
-		StringBuilder builder = new StringBuilder();
-		Formatter f = new Formatter(builder);
-		f.format("(%6.4f, ",confidenceInterval[0]);
-        f.format("%6.4f)",confidenceInterval[1]);
-		return f.toString();
-	}
-	
-	public String print(boolean unbiased){
-		StringBuilder builder = new StringBuilder();
-		Formatter f = new Formatter(builder);
-		String f2="";
-		if(precision==2){
-			f2="%.2f";
-		}else if(precision==4){
-			f2="%.4f";
+	public double value(){
+		if(nItems<3) return Double.NaN;
+		int ell = getEll();
+		double[] d=D(ell);
+		double sumD=0.0;
+		double sumD2=0.0;
+		double observedScoreVariance = matrix.totalVariance(unbiased);
+		double componentVariance = matrix.diagonalSum(unbiased);
+		
+		for(int i=0;i<nItems;i++){
+			sumD+=d[i];
+			sumD2+=Math.pow(d[i], 2);
 		}
 		
-		f.format("%15s", "Feldt-Gilmer = "); f.format(f2,this.value(unbiased));
+		double fg=(Math.pow(sumD, 2)/(Math.pow(sumD, 2)-sumD2))*((observedScoreVariance-componentVariance)/observedScoreVariance);
+		return fg;
+	}
+
+    public double[] itemDeletedReliability(){
+        double[] rel = new double[nItems];
+        CovarianceMatrix cm = null;
+        FeldtGilmer fg = null;
+        for(int i=0;i<nItems;i++){
+            cm = matrix.matrixSansVariable(i, unbiased);
+            fg = new FeldtGilmer(cm, unbiased);
+            rel[i] = fg.value();
+        }
+        return rel;
+    }
+
+    @Override
+	public String toString(){
+		StringBuilder builder = new StringBuilder();
+		Formatter f = new Formatter(builder);
+		String f2="%.2f";
+		f.format("%15s", "Feldt-Gilmer = "); f.format(f2,this.value());
 		return f.toString();
 	}
 
-    public String ifDeletedToString(ArrayList<VariableInfo> var){
+    public String ifDeletedToString(ArrayList<VariableAttributes> var){
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
-        double[] del = valueIfItemDeleted();
+        double[] del = itemDeletedReliability();
         f.format("%-56s", " Feldt-Gilmer  (SEM in Parentheses) if Item Deleted"); f.format("%n");
 		f.format("%-56s", "========================================================"); f.format("%n");
         for(int i=0;i<del.length;i++){
@@ -144,43 +124,5 @@ public class FeldtGilmer implements ScoreReliability, Comparable<FeldtGilmer>{
         }
         return f.toString();
     }
-	
-	public double value(boolean unbiased){
-		if(matrix.getNumberOfVariables()<3) return Double.NaN;
-		int n=matrix.getNumberOfVariables();
-		int ell = getEll(this.rowOffDiagSums(unbiased));
-		double[] d=D(ell, unbiased);
-		double sumD=0.0;
-		double sumD2=0.0;
-		double observedScoreVariance = matrix.totalVariance(unbiased);
-		double componentVariance = matrix.diagonalSum(unbiased);
-		
-		for(int i=0;i<n;i++){
-			sumD+=d[i];
-			sumD2+=Math.pow(d[i], 2);
-		}
-		
-		fg=(Math.pow(sumD, 2)/(Math.pow(sumD, 2)-sumD2))*((observedScoreVariance-componentVariance)/observedScoreVariance);
-		return fg;
-	}
-	
-	public int compareTo(FeldtGilmer that){
-		if(this.fg>that.fg) return 1;
-		if(this.fg<that.fg) return -1;
-		return 0;
-	}
-	
-	public boolean equals(Object obj){
-		if(this==obj)return true;
-		if((obj == null) || (obj.getClass() != this.getClass())) return false;
-		Double v = new Double(fg);
-		return ((Double)obj)==v;
-		
-	}
-	
-	public int hashCode(){
-		Double v = new Double(fg);
-		return v.hashCode();
-	}
 
 }

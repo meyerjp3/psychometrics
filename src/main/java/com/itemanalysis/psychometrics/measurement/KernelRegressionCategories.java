@@ -15,7 +15,7 @@
  */
 package com.itemanalysis.psychometrics.measurement;
 
-import com.itemanalysis.psychometrics.data.VariableInfo;
+import com.itemanalysis.psychometrics.data.VariableAttributes;
 import com.itemanalysis.psychometrics.distribution.UniformDistributionApproximation;
 import com.itemanalysis.psychometrics.kernel.Bandwidth;
 import com.itemanalysis.psychometrics.kernel.KernelFunction;
@@ -28,9 +28,9 @@ public class KernelRegressionCategories {
 
     private boolean continuousItem = false;
 
-    private VariableInfo variableInfo = null;
+    private VariableAttributes variableAttributes = null;
 
-    private DefaultItemScoring itemScoring = new DefaultItemScoring();
+    private ItemScoring itemScoring = new DefaultItemScoring();
 
     private KernelFunction kernel = null;
 
@@ -42,12 +42,12 @@ public class KernelRegressionCategories {
 
     private KernelRegression expectedScore = null;
 
-    public KernelRegressionCategories(VariableInfo variableInfo, KernelFunction kernel, Bandwidth bandwidth, UniformDistributionApproximation uniform){
-        this.variableInfo = variableInfo;
+    public KernelRegressionCategories(VariableAttributes variableAttributes, KernelFunction kernel, Bandwidth bandwidth, UniformDistributionApproximation uniform){
+        this.variableAttributes = variableAttributes;
         this.kernel = kernel;
         this.bandwidth = bandwidth;
         this.uniform = uniform;
-        this.itemScoring = variableInfo.getItemScoring();
+        this.itemScoring = variableAttributes.getItemScoring();
         kernelRegressionMap = new TreeMap<Object, KernelRegression>();
         initializeCategories();
     }

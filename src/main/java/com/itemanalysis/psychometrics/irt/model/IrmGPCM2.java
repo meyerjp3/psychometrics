@@ -37,6 +37,8 @@ import java.util.Arrays;
  * of the PCM as used in jMetrik and WINSTEPS. Linacre's parameterization is found
  * in IrmPCM.
  *
+ * TODO currently stores m-1 thresholds for an item with m categories. Will need to change to an array of m thresholds when use this model for estimation.
+ *
  */
 public class IrmGPCM2 extends AbstractItemResponseModel{
 
@@ -55,6 +57,14 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
     private ItemParamPrior difficultyPrior = null;
     private ItemParamPrior[] stepPrior = null;
 
+    /**
+     * Default constructor
+     *
+     * @param discrimination item discrimination parameter
+     * @param difficulty item difficulty parameter
+     * @param threshold an array of m-1 threshold parameters for an m category item.
+     * @param D a scaling constant that is either 1.0, 1.7, or 1.712.
+     */
     public IrmGPCM2(double discrimination, double difficulty, double[] threshold, double D){
         this.discrimination = discrimination;
         this.difficulty = difficulty;
@@ -301,6 +311,13 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
     }
 
     public int getNumberOfParameters(){
+        return threshold.length+2;
+    }
+
+    public int getNumberOfEstimatedParameters(){
+
+        //TODO change to threshold.length+1 when threshold array changed to include first threshold that is fixed to zero.
+        if(isFixed) return 0;
         return threshold.length+2;
     }
 

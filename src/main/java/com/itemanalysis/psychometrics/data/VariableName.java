@@ -45,7 +45,6 @@ public class VariableName implements Comparable<VariableName>{
             String temp2 = checkVariableName(temp);
             length=Math.min(temp2.length(), NAME_LENGTH);
             this.variableName = temp2.substring(0,length);
-
         }
 
         else{

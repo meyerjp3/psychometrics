@@ -15,9 +15,9 @@
  */
 package com.itemanalysis.psychometrics.measurement;
 
-import com.itemanalysis.psychometrics.data.VariableInfo;
+import com.itemanalysis.psychometrics.data.ItemType;
+import com.itemanalysis.psychometrics.data.VariableAttributes;
 import com.itemanalysis.psychometrics.data.VariableName;
-import com.itemanalysis.psychometrics.data.VariableType;
 import com.itemanalysis.psychometrics.scaling.RawScore;
 
 import java.util.Formatter;
@@ -41,11 +41,6 @@ public class ClassicalItem {
     private TreeMap<Object, ItemStats> categoryStats = null;
 
     /**
-     * Use a bias corrected standard deviation (n-1) if true. Otherwise use a biased estimator (n).
-     */
-    private boolean biasCorrection = true;
-
-    /**
      * compute statistic for all response options.
      */
     boolean allCategories = true;
@@ -53,7 +48,7 @@ public class ClassicalItem {
     /**
      * Information about teh variable
      */
-    private VariableInfo varInfo = null;
+    private VariableAttributes variableAttributes = null;
 
     /**
      * A continuous item (not binary and not polytomous)
@@ -61,32 +56,21 @@ public class ClassicalItem {
     private boolean continuousItem = false;
 
     /**
-     * Use a Pearson type correlation
-     */
-    private boolean pearson = true;
-
-    /**
      * Item scoring tells the class how to score each possible response option.
      */
-    private DefaultItemScoring itemScoring = null;
+    private ItemScoring itemScoring = null;
 
-    public ClassicalItem(VariableInfo varInfo){
-        this(varInfo, true, true, true);
-    }
-
-    public ClassicalItem(VariableInfo varInfo, boolean biasCorrection, boolean allCategories, boolean pearson){
-        this.varInfo = varInfo;
-        this.itemScoring = varInfo.getItemScoring();
-        this.biasCorrection = biasCorrection;
+    public ClassicalItem(VariableAttributes variableAttributes, boolean biasCorrection, boolean allCategories, boolean pearson, boolean computeDIndex){
+        this.variableAttributes = variableAttributes;
+        this.itemScoring = variableAttributes.getItemScoring();
         this.allCategories = allCategories;
-        this.pearson = pearson;
-        initializeCategories();
+        initializeCategories(biasCorrection, pearson, computeDIndex);
     }
 
-    private void initializeCategories(){
-        continuousItem = varInfo.getType().getItemType()==VariableType.CONTINUOUS_ITEM;
+    private void initializeCategories(boolean biasCorrection, boolean pearson, boolean computeDIndex){
+        continuousItem = variableAttributes.getType().getItemType()== ItemType.CONTINUOUS_ITEM;
 
-        itemStats = new ItemStats(varInfo.getName().toString(), biasCorrection, pearson, continuousItem);
+        itemStats = new ItemStats(variableAttributes.getName().toString(), biasCorrection, pearson, continuousItem, computeDIndex);
         categoryStats = new TreeMap<Object, ItemStats>();
 
         if(!continuousItem){
@@ -95,14 +79,14 @@ public class ClassicalItem {
             Object obj = null;
             while(iter.hasNext()){
                 obj = iter.next();
-                iStats = new ItemStats(obj, biasCorrection, pearson, continuousItem);
+                iStats = new ItemStats(obj, biasCorrection, pearson, continuousItem, computeDIndex);
                 categoryStats.put(obj, iStats);
             }
         }
     }
 
     public boolean isContinuous(){
-        return varInfo.getType().getItemType()==VariableType.CONTINUOUS_ITEM;
+        return variableAttributes.getType().getItemType()==ItemType.CONTINUOUS_ITEM;
     }
 
     /**
@@ -112,12 +96,32 @@ public class ClassicalItem {
      * @param response observed item response (not the score value)
      */
     public void increment(RawScore rawScore, Object response){
-        double testScore = rawScore.value();
-        double itemScore = itemScoring.computeItemScore(response, varInfo.getType());
+        increment(rawScore.value(), response);
+//        double testScore = rawScore.value();
+//        double itemScore = itemScoring.computeItemScore(response);
+//        double catScore = 0.0;
+//
+//        //increment overall item statistics
+//        itemStats.increment(testScore, itemScore);
+//
+//        //increment category statistics for binary and polytomous items
+//        if(allCategories && !continuousItem){
+//            ItemStats catStats = null;
+//            for(Object o : categoryStats.keySet()){
+//                catStats = categoryStats.get(o);
+//                catScore = itemScoring.computeCategoryScore(o, response);
+//                catStats.increment(testScore, catScore);
+//            }
+//        }
+        
+    }
+
+    public void increment(double sumScore, Object response){
+        double itemScore = itemScoring.computeItemScore(response);
         double catScore = 0.0;
 
         //increment overall item statistics
-        itemStats.increment(testScore, itemScore);
+        itemStats.increment(sumScore, itemScore);
 
         //increment category statistics for binary and polytomous items
         if(allCategories && !continuousItem){
@@ -125,10 +129,25 @@ public class ClassicalItem {
             for(Object o : categoryStats.keySet()){
                 catStats = categoryStats.get(o);
                 catScore = itemScoring.computeCategoryScore(o, response);
-                catStats.increment(testScore, catScore);
+                catStats.increment(sumScore, catScore);
             }
         }
-        
+    }
+
+    public void incrementDindex(Object response, double testScore, double lowerCut, double upperCut){
+        double itemScore = itemScoring.computeItemScore(response);
+        itemStats.incrementDindex(itemScore, testScore, lowerCut, upperCut);
+        double catScore = 0.0;
+
+        //increment category statistics for binary and polytomous items
+        if(allCategories && !continuousItem){
+            ItemStats catStats = null;
+            for(Object o : categoryStats.keySet()){
+                catStats = categoryStats.get(o);
+                catScore = itemScoring.computeCategoryScore(o, response);
+                catStats.incrementDindex(catScore, testScore, lowerCut, upperCut);
+            }
+        }
     }
 
     /**
@@ -158,7 +177,7 @@ public class ClassicalItem {
      * @return
      */
     public VariableName getName(){
-        return varInfo.getName();
+        return variableAttributes.getName();
     }
 
     /**
@@ -186,6 +205,18 @@ public class ClassicalItem {
      */
     public double getDiscrimination(){
         return itemStats.getDiscrimination();
+    }
+
+    public double getDindexLower(){
+        return itemStats.getDindexLower();
+    }
+
+    public double getDindexUpper(){
+        return itemStats.getDindexUpper();
+    }
+
+    public double getDindex(){
+        return itemStats.getDIndex();
     }
 
     /**
@@ -259,7 +290,7 @@ public class ClassicalItem {
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
 
-        f.format("%-11s", " " + varInfo.getName());f.format("%1s", " ");
+        f.format("%-11s", " " + variableAttributes.getName());f.format("%1s", " ");
 
         //list overall item statistics
         f.format("%15s", "Overall"); f.format("%2s", " "); //name for overall statistics

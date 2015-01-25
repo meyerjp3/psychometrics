@@ -2,6 +2,7 @@ package com.itemanalysis.psychometrics.irt.estimation;
 
 
 import com.itemanalysis.psychometrics.data.VariableName;
+import com.itemanalysis.psychometrics.distribution.NormalDistributionApproximation;
 import com.itemanalysis.psychometrics.distribution.UserSuppliedDistributionApproximation;
 import com.itemanalysis.psychometrics.irt.model.Irm3PL;
 import com.itemanalysis.psychometrics.irt.model.IrmGPCM;
@@ -125,7 +126,7 @@ public class IrtExamineeTest {
             iVec.setResponseVector(lsat7[j]);
             eap = iVec.eapEstimate(0.0, 1.0, -4.0, 4.0, 25);
             se = iVec.eapStandardErrorAt(eap);
-            System.out.println("EAP" + j + ": " + eap + " SE: " + se);
+            System.out.println("  EAP" + j + ": " + eap + " SE: " + se);
             assertEquals("  EAP Test" + j, trueEAP_LSAT7[j], eap, 1e-3);
         }
 
@@ -230,7 +231,7 @@ public class IrtExamineeTest {
             iVec.setResponseVector(mixedFormatData[j]);
             mle = iVec.maximumLikelihoodEstimate(-6.0, 6.0);
             se = iVec.mleStandardErrorAt(mle);
-            System.out.println("MLE" + j + ": " + mle + " True MLE: " + trueMLE_mixed[j] + " SE: " + se);
+            System.out.println("  MLE" + j + ": " + mle + " True MLE: " + trueMLE_mixed[j] + " SE: " + se);
             assertEquals("  MLE Test" + j, trueMLE_mixed[j], mle, 1e-3);
         }
 
@@ -266,7 +267,7 @@ public class IrtExamineeTest {
         for(int j=0;j<nPeople;j++){
             iVec.setResponseVector(mixedFormatData[j]);
             eap = iVec.eapEstimate(0.0, 1.0, -6.0, 6.0, 40);//ICL defaults
-            System.out.println("EAP" + j + ": " + eap + " True EAP: " + trueEAP_mixed[j]);
+            System.out.println("  EAP" + j + ": " + eap + " True EAP: " + trueEAP_mixed[j]);
 
             //Not sure if ICL is using final quadrature or normal distribution values when computing EAP.
             // May be a reason for low accuracy of the results
@@ -366,6 +367,95 @@ public class IrtExamineeTest {
             System.out.println("MLE" + j + ": " + mle + " True MLE: " + trueMLE_parscale[j]);
 //            assertEquals("  MLE Test" + j, trueMLE_parscale[j], mle, 1e-1);
         }
+
+    }
+
+    @Test
+    public void binaryItems3plBILOGLTest(){
+        System.out.println("Binary items - 3PL with Guessing Prior - Compare to BILOG");
+
+        //Read file and create response vectors
+        ItemResponseFileSummary fileSummary = new ItemResponseFileSummary();
+        File f = FileUtils.toFile(this.getClass().getResource("/testdata/binary-items.txt"));
+        ItemResponseVector[] responseData = fileSummary.getResponseVectors(f, 1, 50, true);
+
+        //True estimates from bilog
+        double[][] bilog_param = {
+                {0.76333,-1.21526,0.21163},
+                {0.92486,1.07726,0.13576},
+                {0.72939,0.66366,0.25931},
+                {1.27357,-0.67493,0.14851},
+                {1.15729,-0.05777,0.27213},
+                {0.92745,-0.90561,0.08175},
+                {0.87548,-0.8385,0.13214},
+                {0.93323,1.1074,0.28915},
+                {0.79899,-1.30207,0.14256},
+                {1.72556,-1.81022,0.24254},
+                {0.83733,-1.88858,0.19475},
+                {1.37099,1.77929,0.11316},
+                {0.73367,0.17449,0.14378},
+                {0.90479,-0.03548,0.16812},
+                {1.06513,0.6771,0.20616},
+                {1.1643,-1.70204,0.1809},
+                {1.19574,-0.82412,0.33714},
+                {0.96185,-0.02128,0.25349},
+                {1.12286,-0.17356,0.23763},
+                {1.05235,0.08164,0.22479},
+                {1.05737,-2.97248,0.19588},
+                {0.8673,-1.39868,0.32696},
+                {1.06028,-0.74847,0.1799},
+                {0.77721,0.16493,0.27042},
+                {0.97387,1.17903,0.18722},
+                {0.86536,-1.02002,0.16694},
+                {0.49233,3.13203,0.23203},
+                {0.9268,-0.19869,0.11348},
+                {0.90175,-0.46986,0.09845},
+                {1.08255,0.21025,0.16163},
+                {0.82719,-0.21855,0.15793},
+                {1.00376,-0.40387,0.25606},
+                {1.02901,-0.98016,0.25859},
+                {0.83566,1.42253,0.15805},
+                {0.95164,-1.23035,0.1735},
+                {0.69049,-0.15762,0.3116},
+                {1.15594,0.01526,0.17259},
+                {0.89091,-0.06478,0.2345},
+                {1.15416,0.92837,0.12165},
+                {1.15666,2.11249,0.24942},
+                {0.91868,-0.43775,0.281},
+                {0.72744,-2.02223,0.19514},
+                {0.96094,0.55016,0.16756},
+                {1.70615,-0.5253,0.20926},
+                {0.86474,0.71882,0.13872},
+                {0.65904,-0.17672,0.2409},
+                {1.10421,-0.64317,0.23728},
+                {1.14024,1.50973,0.11551},
+                {0.90145,0.26977,0.11869},
+                {0.86409,0.13961,0.10132}
+        };
+
+        //Create array of item response models
+        ItemResponseModel[] irm = new ItemResponseModel[50];
+        Irm3PL pl3 = null;
+        for(int j=0;j<bilog_param.length;j++) {
+            //3PL with no priors
+            pl3 = new Irm3PL(bilog_param[j][0], bilog_param[j][1], bilog_param[j][2], 1.7);//Starting value of guessing parameter must be > 0.
+            pl3.setName(new VariableName("Item" + (j+1)));
+            irm[j] = pl3;
+        }
+
+        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
+
+        //estimate person ability
+        IrtExaminee irtExaminee = new IrtExaminee(irm);
+
+        double theta = 0;
+        for(int i=0;i<20;i++){
+            irtExaminee.setResponseVector(responseData[i]);
+            theta = irtExaminee.eapEstimate(latentDistribution);
+            System.out.println("EAP: " + theta + "  SUM: " + responseData[i].getSumScore());
+//            Assert.assertEquals("Binary items - EAP test", bilog_param[j][2], irm[j].getGuessing(), 1e-2);
+        }
+
 
     }
 

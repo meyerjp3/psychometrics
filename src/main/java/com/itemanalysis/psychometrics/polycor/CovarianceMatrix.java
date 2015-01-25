@@ -16,13 +16,17 @@
 package com.itemanalysis.psychometrics.polycor;
 
 
-import com.itemanalysis.psychometrics.data.VariableInfo;
+import com.itemanalysis.psychometrics.data.DataType;
+import com.itemanalysis.psychometrics.data.ItemType;
+import com.itemanalysis.psychometrics.data.VariableAttributes;
+import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.texttable.TextTable;
 import com.itemanalysis.psychometrics.texttable.TextTablePosition;
 import com.itemanalysis.psychometrics.texttable.TextTableColumnFormat;
 import com.itemanalysis.psychometrics.texttable.TextTableColumnFormat.OutputAlignment;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 /**
  * Computes NxN covariance and correlation matrix. The Covariance
@@ -41,31 +45,72 @@ public class CovarianceMatrix {
 
 	private Covariance[][] covMat;
     private int numberOfVariables=0;
-    private ArrayList<VariableInfo> variables = null;
+    private ArrayList<VariableAttributes> variables = null;
 
-    public CovarianceMatrix(ArrayList<VariableInfo> variables){
+    public CovarianceMatrix(double[][] covarianceMatrix){
+        this.numberOfVariables = covarianceMatrix.length;
+        covMat = new Covariance[numberOfVariables][numberOfVariables];
+        this.variables = new ArrayList<VariableAttributes>();
+        VariableAttributes variableAttributes = null;
+        Covariance cov = null;
+        for(int i=0;i<numberOfVariables;i++){
+            variableAttributes = new VariableAttributes("V"+(i+1), "", ItemType.NOT_ITEM, DataType.DOUBLE, i, "");
+            this.variables.add(variableAttributes);
+            for(int j=0;j<numberOfVariables;j++){
+                cov = new Covariance(covarianceMatrix[i][j]);
+                covMat[i][j] = cov;
+            }
+        }
+    }
+
+    public CovarianceMatrix(ArrayList<VariableAttributes> variables){
         this.variables = variables;
+		this.numberOfVariables=variables.size();
+		covMat = new Covariance[numberOfVariables][numberOfVariables];
+	}
+
+    public CovarianceMatrix(LinkedHashMap<VariableName, VariableAttributes> variableAttributeMap){
+        this.variables = new ArrayList<VariableAttributes>();
+        for(VariableName v : variableAttributeMap.keySet()){
+            this.variables.add(variableAttributeMap.get(v));
+        }
+
 		this.numberOfVariables=variables.size();
 		covMat = new Covariance[numberOfVariables][numberOfVariables];
 	}
 
     /**
      * This constructor is primarily used in the TestSummary.java class.
-     * It should be avoided. It will soon be depricated.
-     *
-     * FIXME to be depricated
      *
      * @param numberOfVariables
      */
     public CovarianceMatrix(int numberOfVariables){
         this.numberOfVariables=numberOfVariables;
 		covMat = new Covariance[numberOfVariables][numberOfVariables];
+        this.variables = new ArrayList<VariableAttributes>();
+        VariableAttributes variableAttributes = null;
+        for(int i=0;i<numberOfVariables;i++){
+            variableAttributes = new VariableAttributes("V"+(i+1), "", ItemType.NOT_ITEM, DataType.DOUBLE, i, "");
+            this.variables.add(variableAttributes);
+        }
     }
 
-    public CovarianceMatrix(Covariance[][] covMat, ArrayList<VariableInfo> variables){
+    public CovarianceMatrix(Covariance[][] covMat, ArrayList<VariableAttributes> variables){
         this.covMat = covMat;
         this.variables = variables;
         this.numberOfVariables = variables.size();
+    }
+
+    public double getMaxSampleSize(){
+        double maxSampleSize = 0;
+        Covariance covariance = null;
+        for(int i=0;i<covMat.length;i++){
+            for(int j=i;j<covMat[0].length;j++){
+                covariance = covMat[i][j];
+                if(covariance!=null) maxSampleSize = Math.max(maxSampleSize, covariance.sampleSize());
+            }
+        }
+        return maxSampleSize;
     }
 
     /**
@@ -205,7 +250,7 @@ public class CovarianceMatrix {
 		int n=this.numberOfVariables;
 		Covariance[][] newCm  = new Covariance[n-1][n-1];
 		int rowIndex=0, colIndex=0;
-        ArrayList<VariableInfo> v = new ArrayList<VariableInfo>();
+        ArrayList<VariableAttributes> v = new ArrayList<VariableAttributes>();
 
 		for(int i=0;i<n;i++){
 			if(i!=variableIndex){

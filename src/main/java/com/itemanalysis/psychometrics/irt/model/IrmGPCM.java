@@ -26,7 +26,7 @@ import java.util.Formatter;
 /**
  * This version of the Generalized Partial Credit Model (GPCM) uses a discrimination
  * parameter and two or more step parameters. For an item with m categories, there
- * are m step parameters with teh firsr step parameter fixed to zero. For k = 1,..., m,
+ * are m step parameters with the first step parameter fixed to zero. For k = 1,..., m,
  * Let Zk = sum_{v=1}^k {D*a*(theta-b_v)}, then the probability of a response of k is given by,
  * exp(Zk)/(sum_{c=1}^m {exp(Zc)}).
  *
@@ -57,6 +57,13 @@ public class IrmGPCM extends AbstractItemResponseModel {
     protected ItemParamPrior[] stepPrior = null;
 
 
+    /**
+     * Default constructor
+     *
+     * @param discrimination item discrimination parameters
+     * @param step an array of m step parameters. The first step parameter should be fixed to 0.
+     * @param D scaling constant tha is either 1 or 1.7 (or 1.712)
+     */
     public IrmGPCM(double discrimination, double[] step, double D){
 
         ncat = step.length;
@@ -576,8 +583,21 @@ public class IrmGPCM extends AbstractItemResponseModel {
         return IrmType.GPCM;
     }
 
+    /**
+     * Counts the first step which is always 0
+     * @return
+     */
     public int getNumberOfParameters(){
         return ncat+1;
+    }
+
+    /**
+     * Does not count the first step because it is fixed to zero
+     * @return
+     */
+    public int getNumberOfEstimatedParameters(){
+        if(isFixed) return 0;
+        return ncat;
     }
 
     public double getScalingConstant(){

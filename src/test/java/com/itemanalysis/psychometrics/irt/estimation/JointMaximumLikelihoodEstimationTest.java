@@ -368,6 +368,7 @@ public class JointMaximumLikelihoodEstimationTest {
         jmle.estimateParameters(50, 0.00001);
         jmle.computeItemStandardErrors();
         jmle.computePersonStandardErrors();
+//        jmle.computeItemFitStatistics();
 
 //        System.out.println(jmle.printFrequencyTables());
 //        System.out.println(jmle.printRatingScaleTables());

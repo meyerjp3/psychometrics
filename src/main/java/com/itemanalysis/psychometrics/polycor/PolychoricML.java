@@ -15,12 +15,8 @@
  */
 package com.itemanalysis.psychometrics.polycor;
 
-import org.apache.commons.math3.optim.InitialGuess;
-import org.apache.commons.math3.optim.MaxEval;
-import org.apache.commons.math3.optim.PointValuePair;
-import org.apache.commons.math3.optim.SimpleValueChecker;
-import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
-import org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer;
+import com.itemanalysis.psychometrics.uncmin.DefaultUncminOptimizer;
+import com.itemanalysis.psychometrics.uncmin.UncminException;
 
 import java.util.Formatter;
 
@@ -31,7 +27,8 @@ import java.util.Formatter;
  *
  * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
  */
-public class PolychoricML extends AbstractPolychoricCorrelation{
+@Deprecated
+public class PolychoricML extends AbstractPolychoricCorrelationOLD {
 
     PolychoricLogLikelihoodML mloglik = null;
 
@@ -131,27 +128,42 @@ public class PolychoricML extends AbstractPolychoricCorrelation{
      * @param data two way array of frequency counts
      */
     public void compute(double[][] data){
-        PolychoricTwoStep twoStep = new PolychoricTwoStep();
+        PolychoricTwoStepOLD twoStep = new PolychoricTwoStepOLD();
         mloglik = new PolychoricLogLikelihoodML(data);
 
         twoStep.compute(data);
         double[] initial = twoStep.getParameterArray();
 
-        NonLinearConjugateGradientOptimizer optimizer = new NonLinearConjugateGradientOptimizer(
-                NonLinearConjugateGradientOptimizer.Formula.POLAK_RIBIERE,
-                new SimpleValueChecker(1e-10, 1e-10));
+//        NonLinearConjugateGradientOptimizer optimizer = new NonLinearConjugateGradientOptimizer(
+//                NonLinearConjugateGradientOptimizer.Formula.POLAK_RIBIERE,
+//                new SimpleValueChecker(1e-10, 1e-10));
+//
+//        PointValuePair optimum = optimizer.optimize(
+//                new MaxEval(100),
+//                mloglik.getObjectiveFunction(),
+//                mloglik.getObjectiveFunctionGradient(),
+//                GoalType.MINIMIZE,
+//                new InitialGuess(initial));
+//
+//        result = optimum.getPoint();
+//        rho = result[0];
+//        mloglik.computeVariance(result);
+//        fmin = optimum.getValue();
+//        mloglik.chiSquare(fmin);
+//        rhoComputed = true;
 
-        PointValuePair optimum = optimizer.optimize(
-                new MaxEval(100),
-                mloglik.getObjectiveFunction(),
-                mloglik.getObjectiveFunctionGradient(),
-                GoalType.MINIMIZE,
-                new InitialGuess(initial));
+        DefaultUncminOptimizer optimizer = null;
+        try{
+            optimizer = new DefaultUncminOptimizer();
+            optimizer.minimize(mloglik, initial, true, false, 500, 1);
+        }catch(UncminException ex){
+            ex.printStackTrace();
+        }
 
-        result = optimum.getPoint();
+        result = optimizer.getParameters();
         rho = result[0];
         mloglik.computeVariance(result);
-        fmin = optimum.getValue();
+        fmin = optimizer.getFunctionValue();
         mloglik.chiSquare(fmin);
         rhoComputed = true;
     }
@@ -212,6 +224,10 @@ public class PolychoricML extends AbstractPolychoricCorrelation{
             f.format("% 6.4f", t[i]); f.format("%2s", ""); f.format("(%6.4f)", Math.sqrt(v[i+1+validRowCount][i+1+validRowCount])); f.format("%2s", "");
         }
         return f.toString();
+    }
+
+    public String print(){
+        return "";
     }
 
 

@@ -27,6 +27,7 @@ import java.util.Formatter;
  *
  * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
  */
+@Deprecated
 public class PolychoricLogLikelihoodTwoStep implements UnivariateFunction {
 
     private double[][] data = null; //a k x k matrix of frequencies

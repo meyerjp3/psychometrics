@@ -18,7 +18,6 @@ package com.itemanalysis.psychometrics.irt.estimation;
 import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
 import com.itemanalysis.psychometrics.distribution.NormalDistributionApproximation;
-import com.itemanalysis.psychometrics.distribution.UserSuppliedDistributionApproximation;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.analysis.differentiation.UnivariateDifferentiableFunction;
@@ -28,17 +27,14 @@ import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.univariate.*;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-
 /**
- * This class holds an item response vector for an examinee and stores a count of the
- * number of examinees with the same response vector. It computes the loglikelihood
+ * This class holds an item responseVector vector for an examinee and stores a count of the
+ * number of examinees with the same responseVector vector. It computes the loglikelihood
  * and the first derivative of the loglikelihood. These methods can be used for maximum
  * likelihood (ML), Bayes modal (MAP), expected a posteriori (EAP), and proportinal curve
- * fitting (PCF) estimation of person ability in univariate item response models.
+ * fitting (PCF) estimation of person ability in univariate item responseVector models.
  * Note: The PCF method should only be used for members of the Rasch family of item
- * response models.
+ * responseVector models.
  *
  * The order of item in the array irm MUST be the same as the order or item
  * responses in the array responses.
@@ -46,32 +42,79 @@ import java.util.LinkedHashMap;
  * Missing responses are coded as -1.
  *
  */
-public class IrtExaminee extends ItemResponseVector implements UnivariateDifferentiableFunction {
+public class IrtExaminee implements UnivariateDifferentiableFunction {
 
     private ItemResponseModel[] irm = null;
     private NormalDistribution mapPrior = null;
     private DistributionApproximation distributionApproximation = null;
     private EstimationMethod method = EstimationMethod.ML;
-    private double estimatedTheta = 0.0;//TODO initialize to NaN??
+    private double estimatedTheta = 0.0;
     private double MinPRS = 0.0;//minimum possible raw (i.e. sum) score
     private double MaxPRS = 0.0;//maximum possible raw (i.e. sum) score
 
-    public IrtExaminee(String groupID, ItemResponseModel[] irm)throws DimensionMismatchException{
-        super(groupID, irm.length);
+    private ItemResponseVector responseVector = null;
+    private String groupID = "";
+    private int nItems = 0;
+    private double sumScore = 0;
+
+    public IrtExaminee(String groupID, ItemResponseModel[] irm, ItemResponseVector responseVector)throws DimensionMismatchException{
+//        super(groupID, irm.length);
+        this.groupID = groupID;
         this.irm = irm;
-        if(irm.length!=response.length) throw new DimensionMismatchException(irm.length, response.length);
+        this.responseVector = responseVector;
+        this.nItems = irm.length;
+        if(irm.length!= responseVector.getNumberOfItems()) throw new DimensionMismatchException(irm.length, responseVector.getNumberOfItems());
         initializeScores();
     }
 
-    public IrtExaminee(ItemResponseModel[] irm)throws DimensionMismatchException{
-        super("", irm.length);
+    public IrtExaminee(ItemResponseModel[] irm, ItemResponseVector responseVector)throws DimensionMismatchException{
+//        super("", irm.length);
+        this.groupID = "";
         this.irm = irm;
-        if(irm.length!=response.length) throw new DimensionMismatchException(irm.length, response.length);
+        this.responseVector = responseVector;
+        this.nItems = irm.length;
+        if(irm.length!= this.responseVector.getNumberOfItems()) throw new DimensionMismatchException(irm.length, this.responseVector.getNumberOfItems());
         initializeScores();
     }
 
-    public void setItemResponseModels(){
+    /**
+     * this constructor allows a single instance to be used for estimating ability for multiple people
+     * by calling setResponseVector() prior to calling for amethod to compute ability.
+     *
+     * @param groupID examinee group ID
+     * @param irm an array of item response models
+     */
+    public IrtExaminee(String groupID, ItemResponseModel[] irm){
+        this.groupID = groupID;
         this.irm = irm;
+        this.nItems = irm.length;
+    }
+
+    /**
+     * this constructor allows a single instance to be used for estimating ability for multiple people
+     * by calling setResponseVector() prior to calling for amethod to compute ability.
+     *
+     * @param irm an array of item response models
+     */
+    public IrtExaminee(ItemResponseModel[] irm){
+        this.groupID = "";
+        this.irm = irm;
+        this.nItems = irm.length;
+    }
+
+    /**
+     * If the response vector was not set in teh constructor, this method must be called
+     * prior to estimating ability.
+     *
+     * @param responseVector
+     */
+    public void setResponseVector(ItemResponseVector responseVector){
+        this.responseVector = responseVector;
+        initializeScores();
+    }
+
+    public void setResponseVector(byte[] responseVector){
+        this.responseVector = new ItemResponseVector(responseVector, 1);
         initializeScores();
     }
 
@@ -79,17 +122,24 @@ public class IrtExaminee extends ItemResponseVector implements UnivariateDiffere
         this.estimatedTheta = theta;
     }
 
+    public ItemResponseVector getResponseVector(){
+        return responseVector;
+    }
+
     private void initializeScores(){
-        for(int i=0;i<response.length;i++){
-            if(response[i]!=-1){
+        MinPRS = 0;
+        MaxPRS = 0;
+        for(int i=0;i< responseVector.getNumberOfItems();i++){
+            if(responseVector.getResponseAt(i)!=-1){
                 MinPRS += irm[i].getMinScoreWeight();
                 MaxPRS += irm[i].getMaxScoreWeight();
             }
         }
+        sumScore = responseVector.getSumScore();
     }
 
     public boolean missingResponseAt(int index){
-        return response[index]==-1;
+        return responseVector.getResponseAt(index)==-1;
     }
 
     //adjust sum score to be nonextreme (i.e. all items correct or all wrong)
@@ -113,19 +163,19 @@ public class IrtExaminee extends ItemResponseVector implements UnivariateDiffere
     }
 
     /**
-     * computes the loglikelihood of a response vector at a given value of theta.
+     * computes the loglikelihood of a responseVector vector at a given value of theta.
      *
      * @param theta examinee ability
      * @return
      */
     public double logLikelihood(double theta){
-        if(validResponses <= 0) return Double.NaN;
+        if(responseVector.getValidResponseCount() <= 0) return Double.NaN;
         double ll = 0.0;
         double prob = 0.0;
         byte resp = 0;
         VariableName varName = null;
-        for(int i=0;i<response.length;i++){
-            resp = response[i];
+        for(int i=0;i< responseVector.getNumberOfItems();i++){
+            resp = responseVector.getResponseAt(i);
             if(resp!=-1){
                 prob = irm[i].probability(theta, resp);
                 prob = Math.min(Math.max(0.00001, prob), 0.99999);
@@ -210,6 +260,21 @@ public class IrtExaminee extends ItemResponseVector implements UnivariateDiffere
         method = EstimationMethod.EAP;
         distributionApproximation = new NormalDistributionApproximation(mean, sd, thetaMin, thetaMax, numPoints);
 
+        return eapEstimate(distributionApproximation);
+    }
+
+    /**
+     * EAP estimate using a distribution provided by the user such as quadrature points
+     * and weights from item calibration.
+     *
+     * @param dist User specified quadrature points and weights.
+     * @return
+     */
+    public double eapEstimate(DistributionApproximation dist){
+        method = EstimationMethod.EAP;
+        distributionApproximation = dist;
+        int numPoints = dist.getNumberOfPoints();
+
         double point = 0.0;
         double w = 0.0;
         double numer = 0.0;
@@ -221,33 +286,6 @@ public class IrtExaminee extends ItemResponseVector implements UnivariateDiffere
             numer += point*w;
             denom += w;
         }
-        estimatedTheta = numer/denom;
-        return estimatedTheta;
-    }
-
-    /**
-     * EAP estimate using a distribution provided by the user such as quadrature points
-     * and weights from item calibration.
-     *
-     * @param dist User specified quadrature points and weights.
-     * @return
-     */
-    public double eapEstimate(UserSuppliedDistributionApproximation dist){
-        method = EstimationMethod.EAP;
-        distributionApproximation = dist;
-        int numPoints = dist.getNumberOfPoints();
-        double point = 0.0;
-        double w = 0.0;
-        double numer = 0.0;
-        double denom = 0.0;
-
-        for(int i=0;i<numPoints;i++){
-            point = dist.getPointAt(i);
-            w = Math.exp(logLikelihood(point))*dist.getDensityAt(i);
-            numer += point*w;
-            denom += w;
-        }
-
         estimatedTheta = numer/denom;
         return estimatedTheta;
     }
@@ -281,32 +319,6 @@ public class IrtExaminee extends ItemResponseVector implements UnivariateDiffere
         int maxIteration = maxIter;
         double convergenceCriterion = converge;
 
-//        for(int i=0;i<response.length;i++){
-//            if(response[i]!=-1){
-//                MinPRS += irm[i].getMinScoreWeight();
-//                MaxPRS += irm[i].getMaxScoreWeight();
-//            }
-//        }
-
-        //adjust sum score to be nonextreme (i.e. all items correct or all wrong)
-        //convergence criterion set to 0.01 for extreme persons. This makes it
-        //consisten with the updateExtremem method in JMLE.java
-//        if(sumScore==MinPRS){
-//            adjustedSumScore = MinPRS + adjustment;
-////            extreme = true;
-//        }else if(sumScore==MaxPRS){
-//            adjustedSumScore = MaxPRS - adjustment;
-////            extreme = true;
-//        }else{
-//            adjustedSumScore = sumScore;
-//        }
-
-//        if(extreme){
-//            maxIteration = 1;
-//            convergenceCriterion = 0.01;
-//            delta = 1.0 + convergenceCriterion;
-//        }
-
         while(delta > convergenceCriterion && iter < maxIteration){
             previousTheta = theta;
             TCC1 = 0.0;
@@ -314,7 +326,7 @@ public class IrtExaminee extends ItemResponseVector implements UnivariateDiffere
             index = 0;
 
             for(ItemResponseModel i : irm){
-                if(response[index]!=-1){
+                if(responseVector.getResponseAt(index)!=-1){
                     TCC1 += i.expectedValue(theta);
                     TCC2 += i.expectedValue(theta+delta);
                 }

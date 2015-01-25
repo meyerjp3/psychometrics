@@ -15,9 +15,9 @@
  */
 package com.itemanalysis.psychometrics.cmh;
 
-import com.itemanalysis.psychometrics.data.VariableInfo;
+import com.itemanalysis.psychometrics.data.ItemType;
+import com.itemanalysis.psychometrics.data.VariableAttributes;
 import com.itemanalysis.psychometrics.data.VariableName;
-import com.itemanalysis.psychometrics.data.VariableType;
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
@@ -48,8 +48,8 @@ public class CochranMantelHaenszel {
     private TreeMap<Double, CmhTable> strata = null;
     private String focalCode = "";
     private String referenceCode = "";
-    private VariableInfo groupVariable = null;
-    private VariableInfo itemVariable = null;
+    private VariableAttributes groupVariable = null;
+    private VariableAttributes itemVariable = null;
     private StandardDeviation combinedGroupsSd = null;
     private StandardDeviation focalSd = null;
     private StandardDeviation referenceSd = null;
@@ -59,7 +59,7 @@ public class CochranMantelHaenszel {
     private Double comOddsRatio = null;
     double[] ci = null;
 
-    public CochranMantelHaenszel(String focalCode, String referenceCode, VariableInfo groupVariable, VariableInfo itemVariable,
+    public CochranMantelHaenszel(String focalCode, String referenceCode, VariableAttributes groupVariable, VariableAttributes itemVariable,
             boolean etsDelta){
         strata = new TreeMap<Double, CmhTable>();
         this.focalCode = focalCode;
@@ -434,7 +434,7 @@ public class CochranMantelHaenszel {
         double effectSize = 0.0;
         String etsClass = "";
 
-        if(itemVariable.getType().getItemType()== VariableType.BINARY_ITEM){
+        if(itemVariable.getType().getItemType()== ItemType.BINARY_ITEM){
             commonOddsRatio = commonOddsRatio();
             tempConfInt = commonOddsRatioConfidenceInterval(commonOddsRatio);
             if(etsDelta){
@@ -447,7 +447,7 @@ public class CochranMantelHaenszel {
                 confInt[1] = tempConfInt[1];
             }
             etsClass = etsBinayClassification(cmh, pvalue, commonOddsRatio);
-        }else if(itemVariable.getType().getItemType()==VariableType.POLYTOMOUS_ITEM){
+        }else if(itemVariable.getType().getItemType()== ItemType.POLYTOMOUS_ITEM){
             smd = pF();
             tempConfInt = smdConfidenceInterval(smd);
             confInt[0] = tempConfInt[0];
@@ -512,7 +512,7 @@ public class CochranMantelHaenszel {
         double effectSize = 0.0;
         String etsClass = "";
 
-        if(itemVariable.getType().getItemType()== VariableType.BINARY_ITEM){
+        if(itemVariable.getType().getItemType()== ItemType.BINARY_ITEM){
             commonOddsRatio = commonOddsRatio();
             tempConfInt = commonOddsRatioConfidenceInterval(commonOddsRatio);
             if(etsDelta){
@@ -525,7 +525,7 @@ public class CochranMantelHaenszel {
                 confInt[1] = tempConfInt[1];
             }
             etsClass = etsBinayClassification(cmh, pvalue, commonOddsRatio);
-        }else if(itemVariable.getType().getItemType()==VariableType.POLYTOMOUS_ITEM){
+        }else if(itemVariable.getType().getItemType()==ItemType.POLYTOMOUS_ITEM){
             smd = pF();
             tempConfInt = smdConfidenceInterval(smd);
             confInt[0] = tempConfInt[0];
