@@ -5,6 +5,12 @@ A Java library for psychometric analysis. [View the psychometrics API](http://ww
  to learn more about the library. It includes mathematical and statistical procedures that are not part of the Apache
  commons math library. It is a key component of [jMetrik](http://www.ItemAnalysis.com) an open source application for
  psychometrics. See http://www.ItemAnalysis.com for more information about jMetrik and the psychometrics library.
+ 
+ Recommended Citation
+ --------------------
+ Please cite the psychometrics library using the following information.
+ 
+ Meyer, J. P. (2015). Psychometrics: An open source Java(TM) library for measurement [computer software]. Available from https://github.com/meyerjp3/psychometrics. 
 
 
 Item Response Theory (IRT)
