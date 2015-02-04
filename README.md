@@ -15,17 +15,12 @@ Item Response Theory (IRT)
 --------------------------
 This library provides classes for IRT parameter estimation, scale linking, and score equating.
 Estimation currently involves joint maximum likelihood for the Rasch, partial credit, and
-rating scale models. Marginal maximum likelihood estimation procedure for other models are
-currently in development. Scale linking and score equating classes support a wider range of
-item response models such as those listed earlier and the two-parameter logistic (2PL), three
-parameter logistic (3PL), generalized partial credit model (GPCM), and graded response model
-(GRM). Scale linking procedures available in the library include the Stocking-Lord and
-Haebara procedures.
+rating scale models. Marginal maximum likelihood estimation procedures for binary item response models (Rasch, 2PL, 3PL, 4PL) and polytomous item response models (GPCM, PCM) are also available. Scale linking and score equating classes support a variety of item response models. Scale linking procedures available in the library include the Stocking-Lord and Haebara procedures.
 
 Factor Analysis
 ---------------
 Classes for exploratory factor analysis are in development. They currently include MINRES
-factor analysis and principal components analysis. No rotations have yet been implemented.
+factor analysis and principal components analysis. Some rotations have been implemented.
 
 Classical Test Theory
 ---------------------
