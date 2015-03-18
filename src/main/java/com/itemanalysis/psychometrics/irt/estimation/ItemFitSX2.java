@@ -40,7 +40,7 @@ import java.util.Formatter;
  *
  *
  */
-public class ItemFitGeneralizedSX2 extends AbstractItemFitStatistic {
+public class ItemFitSX2 extends AbstractItemFitStatistic {
 
     private double SX2 = 0;
 
@@ -58,17 +58,15 @@ public class ItemFitGeneralizedSX2 extends AbstractItemFitStatistic {
 
     int end = 0;
 
-    int numberOfCombinedCategories = 0;
-
     private DistributionApproximation latentDistribution = null;
 
     private IrtObservedScoreDistribution irtObservedScoreDistribution = null;
 
     private IrtObservedScoreDistribution irtObservedScoreDistributionWithoutItem = null;
 
-    public ItemFitGeneralizedSX2(IrtObservedScoreDistribution irtObservedScoreDistribution,
-                                 IrtObservedScoreDistribution irtObservedScoreDistributionWithoutItem,
-                                 ItemResponseModel irm, int maxTestScorePlusOne, int minExpectedCellCount){
+    public ItemFitSX2(IrtObservedScoreDistribution irtObservedScoreDistribution,
+                      IrtObservedScoreDistribution irtObservedScoreDistributionWithoutItem,
+                      ItemResponseModel irm, int maxTestScorePlusOne, int minExpectedCellCount){
         this.irtObservedScoreDistribution = irtObservedScoreDistribution;
         this.irtObservedScoreDistributionWithoutItem = irtObservedScoreDistributionWithoutItem;
         this.irm = irm;
@@ -92,14 +90,21 @@ public class ItemFitGeneralizedSX2 extends AbstractItemFitStatistic {
      * ItemFitChiSquare(ItemResponseModel irm, int numberOfBins, int minExpectedCellCount)
      *
      * @param summedScore summed score value.
-     * @param theta estimate of examinee ability.
      * @param itemResponse an item response.
      */
-    public void increment(int summedScore, double theta, int itemResponse){
+    public void increment(int summedScore, int itemResponse){
         if(itemResponse!=-1){
             table[summedScore][itemResponse]++;
             rowMargin[summedScore]++;
             totalCount++;
+        }
+    }
+
+    public void increment(int summedScore, int itemResponse, double frequency){
+        if(itemResponse!=-1){
+            table[summedScore][itemResponse]+=frequency;
+            rowMargin[summedScore]+=frequency;
+            totalCount+=frequency;
         }
     }
 
@@ -215,7 +220,6 @@ public class ItemFitGeneralizedSX2 extends AbstractItemFitStatistic {
         validRow[numberOfBins-1] = false;
         int midpoint = (int)(numberOfBins/2);
 
-
 //        for(int i=1;i<maxTestScore;i++){
 //            if(i<maxItemScore || i>end){
 //                validRow[i] = false;
@@ -243,7 +247,7 @@ public class ItemFitGeneralizedSX2 extends AbstractItemFitStatistic {
 //                }
             }
 //            System.out.println(meanEv.getResult());
-            if(sum < numberOfCategories || i<maxItemScore) validRow[i] = false;
+            if(sum/numberOfCategories < minExpectedCellCount || i<maxItemScore) validRow[i] = false;
             sum=0;
 
             if(!validRow[i]){
@@ -270,7 +274,7 @@ public class ItemFitGeneralizedSX2 extends AbstractItemFitStatistic {
 //                    break INNER;
 //                }
             }
-            if(sum<numberOfCategories || i>end) validRow[i] = false;
+            if(sum/numberOfCategories < minExpectedCellCount || i>end) validRow[i] = false;
             sum=0;
 
 
@@ -286,6 +290,10 @@ public class ItemFitGeneralizedSX2 extends AbstractItemFitStatistic {
 
     }
 
+    public double getThetaAt(int i){
+        return irtObservedScoreDistribution.getEAP(i);
+    }
+
     public void compute(){
         int validRowCount = 0;
         initializeExpectedFrequencies();
@@ -296,7 +304,7 @@ public class ItemFitGeneralizedSX2 extends AbstractItemFitStatistic {
         condenseTable();
 
         //For debugging
-        System.out.println(this.printMirtFormatTable(true));
+//        System.out.println(this.printMirtFormatTable(true));
 
         //Compute statistic.
         double d = 0;
@@ -318,8 +326,8 @@ public class ItemFitGeneralizedSX2 extends AbstractItemFitStatistic {
 //        System.out.println("  VALROW: " + validRowCount + "  NPAR: " + irm.getNumberOfEstimatedParameters() + "  COMBINED: " + numberOfCombinedCategories);
 
         //Compute degrees of freedom
-        double K = maxTestScore-2.0*maxItemScore+1;
-        dfSX2 = maxItemScore*validRowCount-irm.getNumberOfEstimatedParameters()-numberOfCombinedCategories;
+//        double K = maxTestScore-2.0*maxItemScore+1;//K and validRow count are the same
+        dfSX2 = maxItemScore*validRowCount-irm.getNumberOfEstimatedParameters();
         try{
             ChiSquaredDistribution chiSquaredDistribution = new ChiSquaredDistribution(dfSX2);
             pvalueSX2 = 1.0-chiSquaredDistribution.cumulativeProbability(SX2);

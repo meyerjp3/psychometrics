@@ -74,6 +74,18 @@ public class ItemFitG2 extends AbstractItemFitStatistic{
         }
     }
 
+    public void increment(double theta, int itemResponse, double frequency){
+        for(int i=0;i<numberOfBins;i++){
+            if(itemResponse!=-1 && thetaCut.getBinAt(i).inBin(theta)){
+                table[i][itemResponse]+=frequency;
+                rowMargin[i]+=frequency;
+                rowThetaSum[i]+=(theta*(double)frequency);
+                totalCount+=frequency;
+                break;
+            }
+        }
+    }
+
     protected void initializeExpectedFrequencies(){
         expectedValues = new double[numberOfBins][numberOfCategories];
         double theta = 0;
@@ -129,6 +141,10 @@ public class ItemFitG2 extends AbstractItemFitStatistic{
             pvalueG2 = Double.NaN;
         }
 
+    }
+
+    public double getThetaAt(int i){
+        return rowThetaSum[i]/rowMargin[i];
     }
 
     public double getValue(){

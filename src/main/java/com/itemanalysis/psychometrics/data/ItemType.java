@@ -23,6 +23,10 @@ public enum ItemType {
             return "Not Item";
         }
 
+        public int toInt(){
+            return 1;
+        }
+
     },
 
     BINARY_ITEM{
@@ -31,12 +35,20 @@ public enum ItemType {
             return "Binary Item";
         }
 
+        public int toInt(){
+            return 2;
+        }
+
     },
 
     POLYTOMOUS_ITEM{
         @Override
         public String toString(){
             return "Polytomous Item";
+        }
+
+        public int toInt(){
+            return 3;
         }
 
     },
@@ -48,6 +60,10 @@ public enum ItemType {
             return "Continuous Item";
         }
 
+        public int toInt(){
+            return 6;
+        }
+
     },
 
     NO_ITEMTYPE_FILTER{
@@ -55,6 +71,11 @@ public enum ItemType {
         public String toString(){
             return "No Item Type Filter";
         }
+
+        public int toInt(){
+            return -1;
+        }
+
     };
 
     public static int toInt(ItemType itemType){

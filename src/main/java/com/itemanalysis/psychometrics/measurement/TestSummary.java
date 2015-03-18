@@ -289,7 +289,7 @@ public class TestSummary {
         f.format("%-11s", "Skewness = "); f.format(f2, stats.getSkewness()); f.format("%n");
 		f.format("%-11s", "Kurtosis = "); f.format(f2, stats.getKurtosis()); f.format("%n");
 		f.format("%-7s", "KR21 = "); f.format(f2, this.kr21()); f.format("%n");
-        f.format("%-42s", "------------------------------------------");f.format("%n");
+        f.format("%-42s", "==========================================");f.format("%n");
         f.format("%n");
         f.format("%n");
         

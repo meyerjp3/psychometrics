@@ -16,6 +16,7 @@
 package com.itemanalysis.psychometrics.irt.model;
 
 import com.itemanalysis.psychometrics.data.VariableName;
+import com.itemanalysis.psychometrics.irt.estimation.ItemFitStatistic;
 import com.itemanalysis.psychometrics.measurement.ItemScoring;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 
@@ -32,6 +33,7 @@ public abstract class AbstractItemResponseModel implements ItemResponseModel{
     protected double minWeight = Double.MAX_VALUE;//not sure why need these. They were in IrmPCM. Will minCategory work?
     protected double maxWeight = Double.MIN_VALUE;//not sure why need these. They were in IrmPCM. Will maxCategory work?
     private ItemScoring itemScoring = null;
+    private ItemFitStatistic itemFitStatistic = null;
 
     public void setName(VariableName name){
         this.name = name;
@@ -53,6 +55,14 @@ public abstract class AbstractItemResponseModel implements ItemResponseModel{
 
     public int getNcat(){
         return ncat;
+    }
+
+    public void setItemFitStatistic(ItemFitStatistic itemFitStatistic){
+        this.itemFitStatistic = itemFitStatistic;
+    }
+
+    public ItemFitStatistic getItemFitStatistic(){
+        return itemFitStatistic;
     }
 
     public boolean isFixed(){

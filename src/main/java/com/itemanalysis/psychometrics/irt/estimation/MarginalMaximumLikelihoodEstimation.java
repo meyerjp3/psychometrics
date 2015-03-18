@@ -52,6 +52,9 @@ public class MarginalMaximumLikelihoodEstimation {
     private ForkJoinPool pool = null;
     private boolean verbose = false;
     private boolean estimateLatentDistribution = false;
+    private double[] theta = null;
+    private double[] thetaStdError = null;
+    private IrtObservedScoreDistribution mainIrtObservedScoreDistribution = null;
 
     /**
      * Stores counts of the number of error codes encountered during he Mstep.
@@ -174,6 +177,103 @@ public class MarginalMaximumLikelihoodEstimation {
 
     }
 
+    public int getNumberOfItems(){
+        return nItems;
+    }
+
+    public int getNumberOfPeople(){
+        int N = 0;
+        for(int i=0;i<responseVector.length;i++){
+            N+= responseVector[i].getFrequency();
+        }
+        return N;
+    }
+
+    public ItemResponseModel getItemResponseModelAt(int j){
+        return irm[j];
+    }
+
+//    /**
+//     * Computes the residual (observed item response minus expected item response).
+//     *
+//     * @param i person index
+//     * @param j item index
+//     * @return residual value
+//     */
+//    public double getResidualAt(int i, int j){
+//        if(theta==null) estimatePersonAbility(PersonScoringType.EAP, -6.0, 6.0, 0.0, 1.0, 60);
+//        double r = responseVector[i].getResponseAt(j) - irm[j].expectedValue(theta[i]);
+//        return r;
+//    }
+//
+//    /**
+//     * Estimates person ability and the corresponding standard error of the estimate.
+//     *
+//     * @param scoreType type of person score
+//     * @param min minimum possible score value
+//     * @param max maximum possible score value
+//     * @param mean mean of normal distribution (for MAP and EAP)
+//     * @param sd standard deviation of normal distribution (for MAP and EAP)
+//     * @param nPoints number of quadrature points (for EAP estimation)
+//     */
+//    public void estimatePersonAbility(PersonScoringType scoreType, double min, double max, double mean, double sd, int nPoints){
+//        IrtExaminee irtExaminee = new IrtExaminee("", irm);
+//        theta = new double[responseVector.length];
+//        thetaStdError = new double[responseVector.length];
+//
+//        if(PersonScoringType.MLE==scoreType){
+//            for(int i=0;i<responseVector.length;i++){
+//                irtExaminee.setResponseVector(responseVector[i]);
+//                theta[i] = irtExaminee.maximumLikelihoodEstimate(min, max);
+//                thetaStdError[i] = irtExaminee.mleStandardErrorAt(theta[i]);
+//            }
+//        }else if(PersonScoringType.MAP==scoreType){
+//            for(int i=0;i<responseVector.length;i++){
+//                irtExaminee.setResponseVector(responseVector[i]);
+//                theta[i] = irtExaminee.mapEstimate(mean, sd, min, max);
+//                thetaStdError[i] = irtExaminee.mapStandardErrorAt(theta[i]);
+//            }
+//        }else{
+//            for(int i=0;i<responseVector.length;i++){
+//                irtExaminee.setResponseVector(responseVector[i]);
+//                theta[i] = irtExaminee.eapEstimate(mean, sd, min, max, nPoints);
+//                thetaStdError[i] = irtExaminee.eapStandardErrorAt(theta[i]);
+//            }
+//        }
+//    }
+//
+//    /**
+//     * Uses default values of number of points, mean, and sd
+//     *
+//     * @param scoreType type of person score
+//     * @param min minimum possible score value
+//     * @param max maximum possible score value
+//     */
+//    public void estimatePersonAbility(PersonScoringType scoreType, double min, double max){
+//        estimatePersonAbility(scoreType, min, max, 0.0, 1.0, 60);
+//    }
+//
+//    /**
+//     * Uses default values of number of points, mean, and sd
+//     *
+//     * @param scoreType type of person score
+//     * @param min minimum possible score value
+//     * @param max maximum possible score value
+//     * @param mean mean of normal distribution
+//     * @param sd standard deviation of normal distribution
+//     */
+//    public void estimatePersonAbility(PersonScoringType scoreType, double min, double max, double mean, double sd){
+//        estimatePersonAbility(scoreType, min, max, mean, sd, 60);
+//    }
+//
+//    public double getPersonScoreAt(int index){
+//        return theta[index];
+//    }
+//
+//    public double getPersonScoreStandardErrorAt(int index){
+//        return thetaStdError[index];
+//    }
+
     private String codeToString(){
         String s = "[";
         for(int i=0;i<4;i++){
@@ -207,52 +307,42 @@ public class MarginalMaximumLikelihoodEstimation {
         }
     }
 
+    public IrtObservedScoreDistribution getIrtObservedScoreDistribution(){
+        return mainIrtObservedScoreDistribution;
+    }
+
     public void computeSX2ItemFit(int minExpectedCount){
         g2ItemFit = false;
-        itemFit = new ItemFitGeneralizedSX2[nItems];
+        itemFit = new ItemFitSX2[nItems];
 
-        IrtObservedScoreDistribution irtObservedScoreDistribution = new IrtObservedScoreDistribution(irm, latentDistribution);
-        irtObservedScoreDistribution.compute();
-
-        //Observed score distributions without studied item (item at given index)
-        IrtObservedScoreDistribution[] irtObservedScoreWithout = new IrtObservedScoreDistribution[nItems];
-        ItemResponseModel[] tempIrm = new ItemResponseModel[nItems-1];
-        int maxTestScore = 0;
-
-        //Compute IRT observed score distribution for each item by excluding studied item. (Could be done in parallel)
-        int offset = 0;
-        for(int j=0;j<nItems;j++){
-            offset = 0;
-            //Exclude item j from array of item response models.
-            for(int k=0;k<nItems;k++){
-                if(k!=j){
-                    tempIrm[offset] = irm[j];
-                    offset++;
-                }
-            }
-            irtObservedScoreWithout[j] = new IrtObservedScoreDistribution(tempIrm, latentDistribution);
-            irtObservedScoreWithout[j].compute();
-            maxTestScore += irm[j].getMaxScoreWeight();
-        }
+        IrtObservedScoreCollection irtObservedScoreCollection = new IrtObservedScoreCollection(irm, latentDistribution);
+        mainIrtObservedScoreDistribution = irtObservedScoreCollection.getIrtObservedScoreDistribution();
+        int maxTestScore = irtObservedScoreCollection.getMaxPossibleTestScore();
 
         int summedScore = 0;
         double theta = 0;
         for(int i=0;i<responseVector.length;i++){
             summedScore = (int)responseVector[i].getSumScore();
-            theta = irtObservedScoreDistribution.getEAP(summedScore);
 
             for(int j=0;j<nItems;j++){
-                if(i==0) itemFit[j] = new ItemFitGeneralizedSX2(irtObservedScoreDistribution, irtObservedScoreWithout[j],
+                if(i==0) itemFit[j] = new ItemFitSX2(
+                        mainIrtObservedScoreDistribution,
+                        irtObservedScoreCollection.getObservedScoreDistributionAt(j),
                         irm[j], maxTestScore+1, minExpectedCount);
-                ((ItemFitGeneralizedSX2)itemFit[j]).increment(summedScore, theta, responseVector[i].getResponseAt(j));
+                ((ItemFitSX2)itemFit[j]).increment(summedScore, responseVector[i].getResponseAt(j), responseVector[i].getFrequency());
             }
         }
 
         //Compute Item Fit
         for(int j=0;j<nItems;j++){
             itemFit[j].compute();
+            irm[j].setItemFitStatistic(itemFit[j]);
         }
 
+    }
+
+    public ItemFitStatistic[] getFitStatistics(){
+        return itemFit;
     }
 
     /**
@@ -289,6 +379,7 @@ public class MarginalMaximumLikelihoodEstimation {
 
         for(int j=0;j<nItems;j++){
             itemFit[j] = new ItemFitG2(irm[j], thetaCut, minExpectedCount);
+            irm[j].setItemFitStatistic(itemFit[j]);
         }
 
         //Second loop over response vectors
@@ -367,7 +458,7 @@ public class MarginalMaximumLikelihoodEstimation {
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
 
-        f.format("%30s", "     Latent Distribution      ");f.format("%n");
+        f.format("%30s", "     LATENT DISTRIBUTION      ");f.format("%n");
         f.format("%30s", "==============================");
         f.format("%n");
         f.format("%10s", "Point");f.format("%4s", "");f.format("%16s", "Density");f.format("%n");
@@ -388,7 +479,7 @@ public class MarginalMaximumLikelihoodEstimation {
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
 
-        f.format("%34s", "ITEM FIT STATISTIC"); f.format("%n");
+        f.format("%34s", "ITEM FIT STATISTICS"); f.format("%n");
         f.format("%50s", "=================================================="); f.format("%n");
         f.format("%-18s", "Item"); f.format("%2s", "");
         if(g2ItemFit){

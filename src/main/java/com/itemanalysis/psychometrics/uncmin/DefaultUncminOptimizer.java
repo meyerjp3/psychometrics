@@ -148,8 +148,6 @@ public class DefaultUncminOptimizer {
         optimizer.optif9_f77(n, x, minclass, typsiz, fscale, method, iexp, msg, ndigit, itnlim,
                 iagflg, iahflg, dlt, gradtl, stepmx, steptl, xpls, fpls, gpls, itrmcd, a, udiag);
 
-
-
     }
 
 //    public void minimize(Uncmin_methods minclass, double[] initialValue, int maxIter)throws UncminException{

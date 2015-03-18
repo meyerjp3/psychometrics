@@ -16,6 +16,9 @@
 package com.itemanalysis.psychometrics.distribution;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
+
+import java.util.Formatter;
+
 /**
  * An immutable object for creating evaluation points and associated density values from a normal distribution.
  * This class creates a set of evenly spaced evaluation points between the the minimum and maximum values.
@@ -192,6 +195,25 @@ public final class NormalDistributionApproximation implements DistributionApprox
      */
     public int getNumberOfPoints(){
         return numberOfPoints;
+    }
+
+    @Override
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        Formatter f = new Formatter(sb);
+
+        f.format("%-35s", "Normal Distribution Approximation"); f.format("%n");
+        f.format("%35s", "==================================="); f.format("%n");
+        f.format("%10s", "Value");f.format("%5s", "");f.format("%10s", "Density");f.format("%10s", "");f.format("%n");
+        f.format("%35s", "-----------------------------------"); f.format("%n");
+
+        for(int i=0;i<numberOfPoints;i++){
+            f.format("%10.6f", points[i]);f.format("%5s", "");f.format("%10.8e", density[i]);f.format("%10s", "");f.format("%n");
+        }
+
+        f.format("%35s", "==================================="); f.format("%n");
+
+        return f.toString();
     }
 
 }

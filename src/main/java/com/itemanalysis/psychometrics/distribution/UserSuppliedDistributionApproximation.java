@@ -17,6 +17,8 @@ package com.itemanalysis.psychometrics.distribution;
 
 import org.apache.commons.math3.util.ResizableDoubleArray;
 
+import java.util.Formatter;
+
 /**
  * A distribution approximation that allows the user to provide the evaluation points and the density values.
  * This is a class that can be used for numeric integration with user provided quadrature points and weights.
@@ -165,6 +167,25 @@ public final class UserSuppliedDistributionApproximation implements Distribution
             m2 += (points[i]-m)*(points[i]-m)*density[i];
         }
         return Math.sqrt(m2);
+    }
+
+    @Override
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        Formatter f = new Formatter(sb);
+
+        f.format("%-35s","Distribution Approximation         "); f.format("%n");
+        f.format("%35s", "==================================="); f.format("%n");
+        f.format("%10s", "Value");f.format("%5s", "");f.format("%10s", "Density");f.format("%10s", "");f.format("%n");
+        f.format("%35s", "-----------------------------------"); f.format("%n");
+
+        for(int i=0;i<numberOfPoints;i++){
+            f.format("%10.6f", points[i]);f.format("%5s", "");f.format("%10.8e", density[i]);f.format("%10s", "");f.format("%n");
+        }
+
+        f.format("%35s", "==================================="); f.format("%n");
+
+        return f.toString();
     }
 
 

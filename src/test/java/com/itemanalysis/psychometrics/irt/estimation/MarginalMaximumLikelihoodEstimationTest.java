@@ -23,7 +23,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
      * model2<-mirt(data=x, model=1, itemtype='2PL', TOL=1e-3)
      * coef(model2, IRTpars=TRUE)
      */
-    @Ignore
+//    @Ignore
     @Test
     public void LSAT6Test(){
         System.out.println("LSAT6 data 2PL model");
@@ -119,7 +119,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
      * coef(model2, IRTpars=TRUE)
      *
      */
-    @Ignore
+//    @Ignore
     @Test
     public void LSAT7mirtTest(){
         System.out.println("LSAT7 data - mirt test 3PL");
@@ -192,7 +192,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
      * release_items_dist
      *
      */
-    @Ignore
+//    @Ignore
     @Test
     public void lsat7Test(){
         System.out.println("LSAT 7 - ICL test 3PL");
@@ -272,7 +272,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
      * release_items_dist
      *
      */
-    @Ignore
+//    @Ignore
     @Test
     public void lsat72PLTest(){
         System.out.println("LSAT 7 - ICL test 2PL");
@@ -527,7 +527,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
      * release_items_dist
      *
      */
-    @Ignore
+//    @Ignore
     @Test
     public void binaryItems3plICLfixedCtest(){
         System.out.println("Binary items - 3PL with fixed guessing parameter - Compare to ICL");
@@ -642,7 +642,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
      *
      *
      */
-    @Ignore
+//    @Ignore
     @Test
     public void binaryItems3plICLtest(){
         System.out.println("Binary items - 3PL with Guessing Prior - Compare to ICL");
@@ -764,7 +764,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
      * >SCORE ;
      *
      */
-    @Ignore
+//    @Ignore
     @Test
     public void binaryItems3plBILOGLTest(){
         System.out.println("Binary items - 3PL with Guessing Prior - Compare to BILOG");
@@ -1133,7 +1133,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
      * release_items_dist
      *
      */
-    @Ignore
+//    @Ignore
     @Test
     public void binaryItems2plICLtest(){
         System.out.println("Binary items - 2PL - Compare to ICL");
@@ -1508,7 +1508,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
      * release_items_dist
      *
      */
-    @Ignore
+//    @Ignore
     @Test
     public void gpcmTest(){
         System.out.println("Generalized Partial Credit Model Test: ICL priors");
@@ -1589,7 +1589,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
      * release_items_dist
      *
      */
-    @Ignore
+//    @Ignore
     @Test
     public void pcmTest(){
         System.out.println("Partial Credit Model Test: ICL priors");

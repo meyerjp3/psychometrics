@@ -46,7 +46,7 @@ import java.util.LinkedHashMap;
  *
  * @Author J. Patrick Meyer
  */
-public class JointMaximumLikelihoodEstimation {
+public class JointMaximumLikelihoodEstimation{
 
     private byte data[][] = null;
     private double[] theta = null;
@@ -1120,6 +1120,10 @@ public class JointMaximumLikelihoodEstimation {
         double p = irm[j].expectedValue(theta[i]);
         double x = data[i][j];
         return x-p;
+    }
+
+    public byte getResponseAt(int i, int j){
+        return data[i][j];
     }
 
     /**

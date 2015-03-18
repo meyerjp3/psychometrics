@@ -1,7 +1,6 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.data.VariableName;
-import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
 import com.itemanalysis.psychometrics.distribution.NormalDistributionApproximation;
 import com.itemanalysis.psychometrics.irt.model.Irm3PL;
 import com.itemanalysis.psychometrics.irt.model.IrmGPCM;
@@ -10,12 +9,13 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.Comparator;
-import java.util.TreeMap;
 
 import static org.junit.Assert.*;
 
-public class ItemFitGeneralizedSX2Test {
+/**
+ * Test cases for item fit
+ */
+public class ItemFitSX2Test {
 
     /**
      * True value obtained from mirt package in R using the following syntax.
@@ -50,7 +50,7 @@ public class ItemFitGeneralizedSX2Test {
         irm[4] = new Irm3PL(0.736, -2.520, 1.0);
 
         int nItems = irm.length;
-        ItemFitStatistic[] itemFit = new ItemFitGeneralizedSX2[nItems];
+        ItemFitStatistic[] itemFit = new ItemFitSX2[nItems];
 
         //computation of quadrature points as done in the mirt R package
         double quadPoints = 41;
@@ -65,16 +65,14 @@ public class ItemFitGeneralizedSX2Test {
         //Create and increment fit statistics
         int summedScore = 0;
         int maxPossibleTestScore = obsScoreCollection.getMaxPossibleTestScore();
-        double theta = 0;
         for(int i=0;i<responseData.length;i++){
             summedScore = (int)responseData[i].getSumScore();
-            theta = mainScoreDistribution.getEAP(summedScore);
 
             for(int j=0;j<nItems;j++){
-                if(i==0) itemFit[j] = new ItemFitGeneralizedSX2(
+                if(i==0) itemFit[j] = new ItemFitSX2(
                         mainScoreDistribution, obsScoreCollection.getObservedScoreDistributionAt(j),
                         irm[j], maxPossibleTestScore+1, minExpectedCount);
-                ((ItemFitGeneralizedSX2)itemFit[j]).increment(summedScore, theta, responseData[i].getResponseAt(j));
+                ((ItemFitSX2)itemFit[j]).increment(summedScore, responseData[i].getResponseAt(j));
             }
         }
 
@@ -84,7 +82,7 @@ public class ItemFitGeneralizedSX2Test {
         //Compute Item Fit and test values
         for(int j=0;j<nItems;j++){
             itemFit[j].compute();
-//            System.out.println(itemFit[j].toString());
+            System.out.println(itemFit[j].toString());
             assertEquals("S-X2 value"+(j+1), sX2mirt[j], itemFit[j].getValue(), 1e-2);
             assertEquals("  DF value"+(j+1), dfmirt[j], itemFit[j].getDegreesOfFreedom(), 1e-8);
         }
@@ -138,7 +136,7 @@ public class ItemFitGeneralizedSX2Test {
             irm[j].setName(new VariableName("Item"+(j+1)));
         }
 
-        ItemFitStatistic[] itemFit = new ItemFitGeneralizedSX2[nItems];
+        ItemFitStatistic[] itemFit = new ItemFitSX2[nItems];
 
         //computation of quadrature points as done in the mirt R package
         double quadPoints = 41;
@@ -156,16 +154,14 @@ public class ItemFitGeneralizedSX2Test {
         int summedScore = 0;
         int maxPossibleTestScore = obsScoreCollection.getMaxPossibleTestScore();
 
-        double theta = 0;
         for(int i=0;i<responseData.length;i++){
             summedScore = (int)responseData[i].getSumScore();
-            theta = mainScoreDistribution.getEAP(summedScore);
 
             for(int j=0;j<nItems;j++){
-                if(i==0) itemFit[j] = new ItemFitGeneralizedSX2(
+                if(i==0) itemFit[j] = new ItemFitSX2(
                         mainScoreDistribution, obsScoreCollection.getObservedScoreDistributionAt(j),
                         irm[j], maxPossibleTestScore+1, minExpectedCount);
-                ((ItemFitGeneralizedSX2)itemFit[j]).increment(summedScore, theta, responseData[i].getResponseAt(j));
+                ((ItemFitSX2)itemFit[j]).increment(summedScore, responseData[i].getResponseAt(j));
             }
         }
 
@@ -220,7 +216,7 @@ public class ItemFitGeneralizedSX2Test {
             irm[j].setName(new VariableName("Item"+(j+1)));
         }
 
-        ItemFitStatistic[] itemFit = new ItemFitGeneralizedSX2[nItems];
+        ItemFitStatistic[] itemFit = new ItemFitSX2[nItems];
 
         //computation of quadrature points as done in the mirt R package
         double quadPoints = 41;
@@ -238,16 +234,14 @@ public class ItemFitGeneralizedSX2Test {
         int summedScore = 0;
         int maxPossibleTestScore = obsScoreCollection.getMaxPossibleTestScore();
 
-        double theta = 0;
         for(int i=0;i<responseData.length;i++){
             summedScore = (int)responseData[i].getSumScore();
-            theta = mainScoreDistribution.getEAP(summedScore);
 
             for(int j=0;j<nItems;j++){
-                if(i==0) itemFit[j] = new ItemFitGeneralizedSX2(
+                if(i==0) itemFit[j] = new ItemFitSX2(
                         mainScoreDistribution, obsScoreCollection.getObservedScoreDistributionAt(j),
                         irm[j], maxPossibleTestScore+1, minExpectedCount);
-                ((ItemFitGeneralizedSX2)itemFit[j]).increment(summedScore, theta, responseData[i].getResponseAt(j));
+                ((ItemFitSX2)itemFit[j]).increment(summedScore, responseData[i].getResponseAt(j));
             }
         }
 

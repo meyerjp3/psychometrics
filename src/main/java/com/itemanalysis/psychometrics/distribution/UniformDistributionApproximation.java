@@ -15,6 +15,8 @@
  */
 package com.itemanalysis.psychometrics.distribution;
 
+import java.util.Formatter;
+
 /**
  * An immutable object for creating evaluation points and associated density values. This class creates a set of
  * evenly spaced evaluation points between the the minimum and maximum values. The density for each point is also
@@ -175,6 +177,25 @@ public final class UniformDistributionApproximation implements DistributionAppro
             m2 += (points[i]-m)*(points[i]-m)*density[i];
         }
         return Math.sqrt(m2);
+    }
+
+    @Override
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        Formatter f = new Formatter(sb);
+
+        f.format("%-35s", "Uniform Distribution Approximation"); f.format("%n");
+        f.format("%35s", "==================================="); f.format("%n");
+        f.format("%10s", "Value");f.format("%5s", "");f.format("%10s", "Density");f.format("%10s", "");f.format("%n");
+        f.format("%35s", "-----------------------------------"); f.format("%n");
+
+        for(int i=0;i<numberOfPoints;i++){
+            f.format("%10.6f", points[i]);f.format("%5s", "");f.format("%10.8e", density[i]);f.format("%10s", "");f.format("%n");
+        }
+
+        f.format("%35s", "==================================="); f.format("%n");
+
+        return f.toString();
     }
 
 }

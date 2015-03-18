@@ -16,6 +16,7 @@
 package com.itemanalysis.psychometrics.irt.model;
 
 import com.itemanalysis.psychometrics.data.VariableName;
+import com.itemanalysis.psychometrics.irt.estimation.ItemFitStatistic;
 import com.itemanalysis.psychometrics.irt.estimation.ItemParamPrior;
 import com.itemanalysis.psychometrics.measurement.ItemScoring;
 import org.apache.commons.math3.exception.DimensionMismatchException;
@@ -463,6 +464,10 @@ public interface ItemResponseModel {
      * @return
      */
     public byte[] getScoreWeights();
+
+    public void setItemFitStatistic(ItemFitStatistic fitStatistic);
+
+    public ItemFitStatistic getItemFitStatistic();
 
     /**
      * Computes the first derivative with respect to person ability.

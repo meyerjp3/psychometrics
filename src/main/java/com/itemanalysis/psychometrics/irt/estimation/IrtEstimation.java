@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 J. Patrick Meyer
+ * Copyright 2015 J. Patrick Meyer
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,20 @@
  */
 package com.itemanalysis.psychometrics.irt.estimation;
 
-public interface ItemFitStatistic {
+import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 
-    public void compute();
+/**
+ * Interface for IRT estimation. It does not provide an interface to the estimation itself.
+ * Rather, it provides access to the parts of or output from the estimation routine.
+ */
+public interface IrtEstimation {
 
-    public double getValue();
+    public int getNumberOfItems();
 
-    public double getDegreesOfFreedom();
+    public int getNumberOfPeople();
 
-    public double getPValue();
+    public ItemResponseModel getItemResponseModelAt(int index);
 
-    public double getFrequencyAt(int i, int k);
-
-    public double getProportionAt(int i, int k);
-
-    public double getThetaAt(int i);
+    public double getResidualAt(int i, int j);
 
 }

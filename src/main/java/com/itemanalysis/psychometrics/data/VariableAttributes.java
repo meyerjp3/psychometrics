@@ -233,7 +233,7 @@ public class VariableAttributes implements Comparable<VariableAttributes> {
         s[0] = name.toString();
         s[1] = type.getDataType().toString();
         if(this.hasScoring()){
-            s[2] = itemScoring.toString();
+            s[2] = itemScoring.printOptionScoreKey();
         }else{
             s[2] = "";
         }

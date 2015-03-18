@@ -213,15 +213,19 @@ public class IrtExaminee implements UnivariateDifferentiableFunction {
      * @param thetaMax largest possible ability estimate (upper bound on BrentOptimizer)
      * @return MLE of examinee ability
      */
-    public double maximumLikelihoodEstimate(double thetaMin, double thetaMax){
+    public double maximumLikelihoodEstimate(double thetaMin, double thetaMax, int maxIter, double tolerance){
         method = EstimationMethod.ML;
-        UnivariateOptimizer optimizer = new BrentOptimizer(1e-10, 1e-14);
-        UnivariatePointValuePair pair = optimizer.optimize(new MaxEval(100),
+        UnivariateOptimizer optimizer = new BrentOptimizer(tolerance, 1e-14);
+        UnivariatePointValuePair pair = optimizer.optimize(new MaxEval(maxIter),
                 new UnivariateObjectiveFunction(this),
                 GoalType.MAXIMIZE,
                 new SearchInterval(thetaMin, thetaMax));
         estimatedTheta = pair.getPoint();
         return estimatedTheta;
+    }
+
+    public double maximumLikelihoodEstimate(double thetaMin, double thetaMax){
+        return maximumLikelihoodEstimate(thetaMin, thetaMax, 100, 1e-10);
     }
 
     /**
@@ -234,16 +238,20 @@ public class IrtExaminee implements UnivariateDifferentiableFunction {
      * @param thetaMax largest possible ability estimate (upper bound on BrentOptimizer)
      * @return MAP estimate of examinee ability
      */
-    public double mapEstimate(double mean, double sd, double thetaMin, double thetaMax){
+    public double mapEstimate(double mean, double sd, double thetaMin, double thetaMax, int maxIter, double tolerance){
         mapPrior = new NormalDistribution(mean, sd);
         method = EstimationMethod.MAP;
-        UnivariateOptimizer optimizer = new BrentOptimizer(1e-10, 1e-14);
-        UnivariatePointValuePair pair = optimizer.optimize(new MaxEval(100),
+        UnivariateOptimizer optimizer = new BrentOptimizer(tolerance, 1e-14);
+        UnivariatePointValuePair pair = optimizer.optimize(new MaxEval(maxIter),
                 new UnivariateObjectiveFunction(this),
                 GoalType.MAXIMIZE,
                 new SearchInterval(thetaMin, thetaMax));
         estimatedTheta = pair.getPoint();
         return estimatedTheta;
+    }
+
+    public double mapEstimate(double mean, double sd, double thetaMin, double thetaMax){
+        return mapEstimate(mean, sd, thetaMin, thetaMax, 100, 1e-10);
     }
 
     /**

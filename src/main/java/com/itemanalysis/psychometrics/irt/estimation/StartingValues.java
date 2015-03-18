@@ -88,8 +88,12 @@ public class StartingValues {
         //compute prox estimates of item difficulty and person ability
         prox(0.01, 10);
 
+//        System.out.println("PROX completed");
+
         //summarize the prox values
         computeEstepEstimates();
+
+//        System.out.println("ESTEP completed");
 
         //The histogram will return frequencies, but relative frequencies are needed for the latent distribution.
         //Create a new latent distribution with relative frequencies.
@@ -105,20 +109,21 @@ public class StartingValues {
             if(irm[j].getType()== IrmType.L3 || irm[j].getType()==IrmType.L4){
                 int nPar = irm[j].getNumberOfParameters();
 
-//                initialValue = irm[j].getItemParameterArray();
                 initialValue = irm[j].nonZeroPrior(irm[j].getItemParameterArray());
+
 
                 try{
                     //Using observed counts, find the item parameters that maximize the marginal likelihood
                     itemLogLikelihood.setModel(irm[j], latentDistribution, estepEstimates.getRjkAt(j), estepEstimates.getNt());
-                    optimizer.minimize(itemLogLikelihood, initialValue, true, false, 100, 2);
+                    optimizer.minimize(itemLogLikelihood, initialValue, true, false, 50, 1);
                     param = optimizer.getParameters();
                 }catch(UncminException ex){
                     fireEMStatusEvent("UNCMIN exception: Starting values nonlinear regression failed. Using defaults instead." );
                     ex.printStackTrace();
+                }catch(Exception ex){
+                    fireEMStatusEvent("UNCMIN exception." );
+                    ex.printStackTrace();
                 }
-
-//                setParameters(j, param, initialValue);
 
                 //Make sure start values have nonzero density
                 double[] finalStarts = irm[j].nonZeroPrior(param);
@@ -126,6 +131,8 @@ public class StartingValues {
 
 
             }
+
+//            System.out.println("Stating values for: " + irm[j].getName());
 
         }
 
@@ -388,12 +395,17 @@ public class StartingValues {
                 if(pScore==0) pScore+=0.3;
                 if(pScore==maxTestScore) pScore-=0.3;
 
+                //WARNING: With missing data could have some people with a maxTestScore and pScore of 0.
+                //If such a case occurs, the logit wil be Double.NaN.
                 logit = Math.log(pScore/(maxTestScore-pScore));
                 pProx = mItem[l].getResult() + Math.sqrt(1.0+sdItem[l].getResult()/2.9)*logit;
                 maxChange = Math.max(maxChange, Math.abs(theta[l]-pProx));
                 theta[l] = pProx;
-                personGrandMean.increment(pProx);
-                personGrandSd.increment(pProx);
+
+                if(!Double.isNaN(pProx)){
+                    personGrandMean.increment(pProx);
+                    personGrandSd.increment(pProx);
+                }
             }
 
 
@@ -408,7 +420,12 @@ public class StartingValues {
         //Linearly transform theta estimate to have a mean of 0 and a standard deviation of 1.
         //Apply the same transformation to item difficulty values.
         double A = 1.0/personGrandSd.getResult();
+        if(Double.isNaN(A)) A = 1.0;//Should not happen but this will prevent causing all scores to be Double.NaN
+        A = Math.min(0.00001, A); //To prevent division by 0;
+
         double B = -A*personGrandMean.getResult();
+
+
 
         for(int l=0;l<nResponseVectors;l++){
             theta[l] = theta[l]*A+B;

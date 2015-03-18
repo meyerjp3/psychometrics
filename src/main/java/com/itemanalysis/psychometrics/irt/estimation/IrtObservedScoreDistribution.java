@@ -173,6 +173,10 @@ public class IrtObservedScoreDistribution {
         return eap/summedScoreDensity[summedScore];
     }
 
+    public int getNumberOfScores(){
+        return maxPL1;
+    }
+
     public DistributionApproximation getLatentDistribution(){
         return latentDistribution;
     }

@@ -121,6 +121,14 @@ public abstract class AbstractItemFitStatistic implements ItemFitStatistic{
         return totalCount;
     }
 
+    public double getFrequencyAt(int i, int k){
+        return table[i][k];
+    }
+
+    public double getProportionAt(int i, int k){
+        return table[i][k]/rowMargin[i];
+    }
+
     public String printContingencyTable(String title, boolean observedFrequencies){
         String s = title + "\n";
         double value = 0;

@@ -108,7 +108,7 @@ public class ReliabilitySummary {
             f.format("%20s", feldtBrennan.confidenceIntervalToString(fbCI));f.format("%5s",  ""); f.format("% 10.4f", sem.value(totalVariance, fb));f.format("%n");
         f.format("%-20s",  " Raju's Beta        ");f.format("%10.4f", rj);f.format("%5s",  "");
             f.format("%20s", raju.confidenceIntervalToString(rjCI));f.format("%5s",  ""); f.format("% 10.4f", sem.value(totalVariance, rj));f.format("%n");
-        f.format("%-60s", "---------------------------------------------------------------------------");f.format("%n");
+        f.format("%-60s", "===========================================================================");f.format("%n");
         return f.toString();
     }
 
