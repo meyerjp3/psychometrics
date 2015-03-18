@@ -1,0 +1,15 @@
+*.iml
+.idea/.name
+.idea/compiler.xml
+.idea/copyright/profiles_settings.xml
+.idea/encodings.xml
+.idea/libraries/Maven__commons_io_commons_io_2_1.xml
+.idea/libraries/Maven__javax_activation_activation_1_1.xml
+.idea/libraries/Maven__javax_mail_mail_1_4.xml
+.idea/libraries/Maven__junit_junit_4_4.xml
+.idea/libraries/Maven__log4j_log4j_1_2_15.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/scopes/scope_settings.xml
+.idea/vcs.xml
+.idea/workspace.xml
