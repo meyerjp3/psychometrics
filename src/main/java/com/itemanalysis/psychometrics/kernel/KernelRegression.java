@@ -94,6 +94,16 @@ public class KernelRegression{
         }
     }
 
+    public void increment(double x, double y, double weight){
+        double k = 0.0;
+        n+=1;
+        for(int i=0;i<numPoints;i++){
+            k = kernel.value((x-points[i])/bandwidth);
+            numerator[i]+=weight*k*y;
+            denominator[i]+=weight*k;
+        }
+    }
+
     /**
      * Computes teh kernel regression estimate at teh evaluation points.
      * @return predicted values of y
