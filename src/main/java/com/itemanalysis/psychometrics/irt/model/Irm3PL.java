@@ -193,6 +193,12 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         return 1.0-probRight(theta);
     }
 
+    /**
+     * Computes the expected value
+     * 
+     * @param theta a person ability value.
+     * @return
+     */
     public double expectedValue(double theta){
         return scoreWeight[1]*probRight(theta);
     }
@@ -205,7 +211,7 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
 
     /**
      * Computes the gradientAt (vector of first partial derivatives) with respect to the item parameters.
-     * This method uses item parameters passed to teh method. It does NOT use item parameters stored in the
+     * This method uses item parameters passed to the method. It does NOT use item parameters stored in the
      * object.
      *
      * Note: The second argument (int k) is not actually used by this class. It is here to satisfy the interface.
@@ -287,7 +293,7 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
 //        return deriv;
 
         //=======================================================================
-        //This gradient is based on teh gradient for the 4PL. See Irm4PL.java
+        //This gradient is based on the gradient for the 4PL. See Irm4PL.java
 
         if(numberOfParameters==3){
             a = iparam[0];
@@ -336,7 +342,7 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
     }
 
     /**
-     * Computes gradientAt using item parameters stored in teh object.
+     * Computes gradientAt using item parameters stored in the object.
      *
      * @param theta person ability value
      * @param k response category
@@ -537,38 +543,7 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
             }
         }
 
-//        //difficulty prior
-//        if(numberOfParameters==1){
-//            if(difficultyPrior!=null){
-//                priorProb = difficultyPrior.logDensity(iparam[0]);
-//                ll += priorProb;
-//            }
-//        }
-//
-//        //difficulty and discrimination prior
-//        if(numberOfParameters>=2){
-//
-//            if(discriminationPrior!=null){
-//                priorProb = discriminationPrior.logDensity(iparam[0]);
-//                ll += priorProb;
-//            }
-//
-//            if(difficultyPrior!=null){
-//                priorProb = difficultyPrior.logDensity(iparam[1]);
-//                ll += priorProb;
-//            }
-//        }
-//
-//        //guessing prior
-//        if(numberOfParameters==3){
-//            if(guessingPrior!=null){
-//                priorProb = guessingPrior.logDensity(iparam[2]);
-//                ll += priorProb;
-//            }
-//        }
-
         return ll;
-
     }
 
     public double[] addPriorsToLogLikelihoodGradient(double[] loglikegrad, double[] iparam){
@@ -980,7 +955,7 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      * values for every item on the test, the proposal values can be accepted as the new parameter estimates. This
      * method must be called to accept the proposal values as the new estimates.
      *
-     * Returns teh maximum relative absolute difference between existing parameters and new parameters.
+     * Returns the maximum relative absolute difference between existing parameters and new parameters.
      *
      */
     public double acceptAllProposalValues(){

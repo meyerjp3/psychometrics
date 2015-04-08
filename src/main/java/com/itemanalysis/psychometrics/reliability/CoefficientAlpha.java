@@ -29,16 +29,32 @@ import java.util.Formatter;
  */
 public class CoefficientAlpha extends AbstractScoreReliability{
 
+    /**
+     * Constructor for coefficient alpha.
+     *
+     * @param matrix an inter-item correlation matrix
+     * @param unbiased true for unbiased estimates (i.e. n-1) of variance and covariance.
+     */
 	public CoefficientAlpha(CovarianceMatrix matrix, boolean unbiased){
 		this.matrix = matrix;
         this.unbiased = unbiased;
         nItems = matrix.getNumberOfVariables();
 	}
 
+    /**
+     * Constructor for coefficient alpha using a biased estimate (i.e. n) of the variance and covariance.
+     *
+     * @param matrix an inter-itm covariance matrix.
+     */
     public CoefficientAlpha(CovarianceMatrix matrix){
         this(matrix, false);
     }
-	
+
+    /**
+     * Compute the value of coefficient alpha.
+     *
+     * @return reliability estimate
+     */
 	public double value(){
 		double k=(double)nItems;
 		double observedScoreVariance = matrix.totalVariance(unbiased);
@@ -47,6 +63,13 @@ public class CoefficientAlpha extends AbstractScoreReliability{
 		return cronbachAlpha;
 	}
 
+    /**
+     * Computes reliability with each item omitted in turn. The first element in the array is the
+     * reliability estimate without the first item. The second item in the array is the reliability
+     * estimate without the second item and so on.
+     *
+     * @return array of item deleted estimates.
+     */
     public double[] itemDeletedReliability(){
         double[] rel = new double[nItems];
         CovarianceMatrix cm = null;

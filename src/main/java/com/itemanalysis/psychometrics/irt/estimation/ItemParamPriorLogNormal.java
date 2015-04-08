@@ -37,7 +37,7 @@ public class ItemParamPriorLogNormal implements ItemParamPrior {
     /**
      * Constructor takes an array as the input parameters. The first element is the mean and
      * the second element is the standard deviation.
-     * @param param
+     * @param param an array with the meanLog as the first argument and sdLog as the second.
      */
     public ItemParamPriorLogNormal(double[] param){
         this.parameters = param;
@@ -63,9 +63,9 @@ public class ItemParamPriorLogNormal implements ItemParamPrior {
     }
 
     /**
-     * Constructor taking teh mean and standard deviation as arguments.
-     * @param mean
-     * @param sd
+     * Constructor taking the mean and standard deviation as arguments.
+     * @param mean mean on the logarithmic scale (i.e. meanLog)
+     * @param sd standard deviation on the logarithmic scale (i.e. sdLog)
      */
     public ItemParamPriorLogNormal(double mean, double sd){
         if(sd <= 0.0) throw new IllegalArgumentException("Negative sd not allowed in ItemParamPriorLogNormal");

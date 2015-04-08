@@ -19,7 +19,9 @@ import java.util.Formatter;
 
 
 /**
- * 
+ * Computes Huynh's decision consistency indices. This class is a translation of Huynh's
+ * original FORTRAN code.
+ *
  * @author J Patrick Meyer
  * 
  * 	A computer program to compute the reliability indices

@@ -22,6 +22,9 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import java.util.Arrays;
 import java.util.Formatter;
 
+/**
+ * Four parameter logistic model.
+ */
 public class Irm4PL extends AbstractItemResponseModel {
 
     private int numberOfParameters = 4;
@@ -44,13 +47,13 @@ public class Irm4PL extends AbstractItemResponseModel {
     private ItemParamPrior slippingPrior = null;
 
     /**
-     * Constructor for three parameter logistic model
+     * Constructor for four parameter logistic model
      *
      * @param discrimination item discrimination parameter
      * @param difficulty item difficulty parameter
      * @param guessing lower-asymptote parameter
      * @param slipping upper-asymptote parameter
-     * @param D scaling factor
+     * @param D scaling factor that is either 1, 1.7 or 1.702
      */
     public Irm4PL(double discrimination, double difficulty, double guessing, double slipping, double D){
         this.discrimination = discrimination;
@@ -67,6 +70,17 @@ public class Irm4PL extends AbstractItemResponseModel {
         defaultScoreWeights();
     }
 
+    /**
+     * Computes probability of a correct response using value provided to the method, not the parameters 
+     * stored in the object. Probability of a correct response. The order of the parameters in the iparam array is:
+     * iparam[0] = discrimination, iparam[1] = difficulty, iparam[2] = guessing, iparam[3] = slipping.
+     * 
+     * @param theta person ability parameter.
+     * @param iparam array of item parameters. The order is important and will be unique to each implementation of the interface.
+     * @param response an item response category.
+     * @param D a scaling constant that is either 1 or 1.7 or 1.702.
+     * @return
+     */
     public double probability(double theta, double[] iparam, int response, double D){
         if(response==1){
             return probRight(theta, iparam, D);
@@ -75,6 +89,13 @@ public class Irm4PL extends AbstractItemResponseModel {
         }
     }
 
+    /**
+     * Computes the probability of a correct response given parameters stored in the object.
+     * 
+     * @param theta a person ability value.
+     * @param response an item response (i.e. a person's score on an item).
+     * @return
+     */
     public double probability(double theta, int response){
         double prob = 0.0;
         if(response==1){
@@ -108,16 +129,20 @@ public class Irm4PL extends AbstractItemResponseModel {
         return 1.0-probRight(theta);
     }
 
+    /**
+     * Computes the expected value, which is the same as the probability of a correct response.
+     * 
+     * @param theta a person ability value.
+     * @return
+     */
     public double expectedValue(double theta){
         return scoreWeight[1]*probRight(theta);
     }
 
     /**
      * Computes the gradientAt (vector of first partial derivatives) with respect to the item parameters.
-     * This method uses item parameters passed to teh method. It does NOT use item parameters stored in the
+     * This method uses item parameters passed to the method. It does NOT use item parameters stored in the
      * object.
-     *
-     * Note: The second argument (int k) is not actually used by this class. It is here to satisfy the interface.
      *
      * @param theta person ability estimate.
      * @param iparam array of item parameters.
@@ -156,7 +181,7 @@ public class Irm4PL extends AbstractItemResponseModel {
     }
 
     /**
-     * Computes gradientAt using item parameters stored in teh object.
+     * Computes gradientAt using item parameters stored in the object.
      *
      * @param theta person ability value
      * @param k response category
@@ -221,6 +246,14 @@ public class Irm4PL extends AbstractItemResponseModel {
         return slippingPrior;
     }
 
+    /**
+     * This method is used for marginal maximum likelihood estimation. It adds the logdensity 
+     * of a parameter to the loglikelihood. 
+     * 
+     * @param loglike value of the loglikelihood function
+     * @param iparam an item parameter array in a specific order.
+     * @return
+     */
     public double addPriorsToLogLikelihood(double loglike, double[] iparam){
         double priorProb = 0.0;
         double ll = loglike;
@@ -253,6 +286,14 @@ public class Irm4PL extends AbstractItemResponseModel {
 
     }
 
+    /**
+     * This method is used for marginal maximum likelihood estimation. It adds the logdensity 
+     * of a parameter to the loglikelihood gradient. 
+     *
+     * @param loglikegrad values of the loglikelihood gradient function
+     * @param iparam an item parameter array in a specific order.
+     * @return
+     */
     public double[] addPriorsToLogLikelihoodGradient(double[] loglikegrad, double[] iparam){
         double[] llg = loglikegrad;
 

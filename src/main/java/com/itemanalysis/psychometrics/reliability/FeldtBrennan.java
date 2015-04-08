@@ -22,7 +22,10 @@ import java.util.ArrayList;
 import java.util.Formatter;
 
 
-
+/**
+ * Computes teh Feldt-Brennan estimate of reliability. This method assumes that
+ * scores are classically congeneric.
+ */
 public class FeldtBrennan extends AbstractScoreReliability{
 	
 	public FeldtBrennan(CovarianceMatrix matrix, boolean unbiased){
@@ -46,7 +49,12 @@ public class FeldtBrennan extends AbstractScoreReliability{
 		}
 		return value;
 	}
-	
+
+    /**
+     * Computes the Feldt-Brennan estimate of reliability
+     *
+     * @return estimate of reliability
+     */
 	public double value(){
 		double observedScoreVariance = matrix.totalVariance(unbiased);
 		double componentVariance = matrix.diagonalSum(unbiased);
@@ -54,6 +62,13 @@ public class FeldtBrennan extends AbstractScoreReliability{
 		return fcc;
 	}
 
+    /**
+     * Computes reliability with each item omitted in turn. The first element in the array is the
+     * reliability estimate without the first item. The second item in the array is the reliability
+     * estimate without the second item and so on.
+     *
+     * @return array of item deleted estimates.
+     */
     public double[] itemDeletedReliability(){
         double[] rel = new double[nItems];
         CovarianceMatrix cm = null;

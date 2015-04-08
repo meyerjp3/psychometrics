@@ -102,5 +102,10 @@
       	<artifactId>commons-io</artifactId>
       	<version>2.1</version>
       </dependency>
+      <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-csv</artifactId>
+          <version>1.0</version>
+      </dependency>
   </dependencies>
 </project>

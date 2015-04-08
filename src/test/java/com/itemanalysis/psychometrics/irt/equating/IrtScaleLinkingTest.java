@@ -190,14 +190,13 @@ public class IrtScaleLinkingTest {
         HaebaraMethod hb = irtScaleLinking.getHaebaraMethod();
         StockingLordMethod sl = irtScaleLinking.getStockingLordMethod();
 
-        //TODO there's somethignwrong with plink. I'm getting different results, but sirt agree with mine (at least for the Rasch model).
+        assertEquals("  Mean/mean intercept test", 0.099914, mm.getIntercept(), 1e-4);//True results from plink package in R
+        assertEquals("  Mean/mean scale test", 1.0, mm.getScale(), 1e-4);
 
-//        assertEquals("  Mean/mean intercept test", 0.099914, mm.getIntercept(), 1e-4);//True results from plink package in R
-//        assertEquals("  Mean/mean scale test", 1.0, mm.getScale(), 1e-4);
-//
-//        assertEquals("  Mean/sigma intercept test", 0.099914, ms.getIntercept(), 1e-4);//True results from plink package in R
-//        assertEquals("  Mean/sigma scale test", 1.0, ms.getScale(), 1e-4);
-//
+        assertEquals("  Mean/sigma intercept test", 0.099914, ms.getIntercept(), 1e-4);//True results from plink package in R
+        assertEquals("  Mean/sigma scale test", 1.0, ms.getScale(), 1e-4);
+
+        //TODO there's somethignwrong with plink. I'm getting different results, but sirt agree with mine (at least for the Rasch model).
 //        assertEquals("  Haebara intercept test", 0.105526, hb.getIntercept(), 1e-4);//True results from plink package in R
 //        assertEquals("  Haebara scale test", 1.0, hb.getScale(), 1e-4);
 //
@@ -558,7 +557,7 @@ public class IrtScaleLinkingTest {
 
     /**
      * Item parameters for Form X and Form Y were obtained using ICL. True linking results obtained with
-     * STUIRT using teh following syntax on 10/18/2014.
+     * STUIRT using the following syntax on 10/18/2014.
      *
      * NE 13
      *   1  L3 2 DW  1.0  0.762370  1.009476 0.109968

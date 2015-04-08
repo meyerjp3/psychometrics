@@ -1374,6 +1374,75 @@ public class MarginalMaximumLikelihoodEstimationTest {
         System.out.println(mmle.printItemParameters());
     }
 
+    /**
+     * For running simulations
+     */
+    @Test
+    public void simulationRun(){
+        System.out.println("Running simulation...");
+        ItemResponseFileSummary fileSummary = new ItemResponseFileSummary();
+
+        int nPeople = 5000;
+        int nItems = 60;
+        int nrep = 1000;
+
+        String inputPath = "S:\\2014-3pl-simulation\\simdata\\condition6";
+//        String outputPath = inputPath + "\\jmetrik-output";
+        String outputPath = inputPath + "\\jmetrik-output-default-priors";
+        String dataFile = "";
+
+        for(int r=0;r<nrep;r++){
+            dataFile = "\\cond6_" + (r+1) + ".csv";
+            ItemResponseVector[] responseData = fileSummary.getResponseVectors(new File(inputPath + dataFile), 1, nItems, false);
+
+            //Create array of item response models
+            ItemResponseModel[] irm = new ItemResponseModel[nItems];
+            Irm3PL pl3 = null;
+            for(int j=0;j<nItems;j++) {
+                pl3 = new Irm3PL(1.0, 0.0, 1.0);
+                pl3.setName(new VariableName("item"+(j+1)));
+
+                //Parscale priors
+//                pl3.setDiscriminationPrior(new ItemParamPriorLogNormal(0, 0.5));
+
+                //Default priors
+                pl3.setDiscriminationPrior(new ItemParamPriorBeta4(1.75, 3, 0, 3));
+                pl3.setDifficultyPrior(new ItemParamPriorBeta4(1.01, 1.01, -6, 6));//uninformative
+                irm[j] = pl3;
+            }
+
+            //computation of quadrature points as done in the mirt R package
+            double quadPoints = 40;
+            NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, (int)quadPoints);
+
+            //compute start values
+            StartingValues startValues = new StartingValues(responseData, irm);
+            irm = startValues.computeStartingValues();
+
+            //estimate parameters
+            MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
+            mmle.estimateParameters(0.001, 500);
+            System.out.println("Replication " + (r+1) +  " complete");
+
+
+            try{
+                File f = new File(outputPath + dataFile);
+                BufferedWriter writer = new BufferedWriter(new FileWriter(f));
+                for(int j=0;j<nItems;j++){
+                    writer.write(Precision.round(irm[j].getDiscrimination(),6) + "," + Precision.round(irm[j].getDifficulty(), 6));
+                    writer.newLine();
+                }
+                writer.close();
+            }catch(IOException ex){
+                ex.printStackTrace();
+            }
+
+
+        }//end loop over replications
+
+
+    }
+
 //    @Test
     public void simulation2PL(){
         System.out.println("Running simulation...");

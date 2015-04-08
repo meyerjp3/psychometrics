@@ -22,7 +22,10 @@ import java.util.ArrayList;
 import java.util.Formatter;
 
 
-
+/**
+ * Computes teh Feldt-Gilmer estimate of reliability. This method assumes score are
+ * classically congeneric.
+ */
 public class FeldtGilmer extends AbstractScoreReliability{
 
 	public FeldtGilmer(CovarianceMatrix matrix, boolean unbiased){
@@ -91,6 +94,13 @@ public class FeldtGilmer extends AbstractScoreReliability{
 		return fg;
 	}
 
+    /**
+     * Computes reliability with each item omitted in turn. The first element in the array is the
+     * reliability estimate without the first item. The second item in the array is the reliability
+     * estimate without the second item and so on.
+     *
+     * @return array of item deleted estimates.
+     */
     public double[] itemDeletedReliability(){
         double[] rel = new double[nItems];
         CovarianceMatrix cm = null;

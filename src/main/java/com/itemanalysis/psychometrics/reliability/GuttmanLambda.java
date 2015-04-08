@@ -66,6 +66,13 @@ public class GuttmanLambda extends AbstractScoreReliability{
 		return gl;
 	}
 
+    /**
+     * Computes reliability with each item omitted in turn. The first element in the array is the
+     * reliability estimate without the first item. The second item in the array is the reliability
+     * estimate without the second item and so on.
+     *
+     * @return array of item deleted estimates.
+     */
     public double[] itemDeletedReliability(){
         double[] rel = new double[nItems];
         CovarianceMatrix cm = null;
