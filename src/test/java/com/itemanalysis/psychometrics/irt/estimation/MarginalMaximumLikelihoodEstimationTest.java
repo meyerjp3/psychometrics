@@ -1377,7 +1377,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
     /**
      * For running simulations
      */
-    @Test
+//    @Test
     public void simulationRun(){
         System.out.println("Running simulation...");
         ItemResponseFileSummary fileSummary = new ItemResponseFileSummary();
