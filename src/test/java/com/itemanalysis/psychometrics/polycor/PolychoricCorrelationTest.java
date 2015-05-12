@@ -170,5 +170,51 @@ public class PolychoricCorrelationTest {
 
     }
 
-
+    @Test
+    public void emptyCasesTest1() {
+	    	double[][] caseMatrix = new double[2][2];
+	
+				caseMatrix[0][0] = 0;
+				caseMatrix[0][1] = 1;
+				caseMatrix[1][0] = 0;
+				caseMatrix[1][1] = 16;
+	
+	    	new PolychoricTwoStep(caseMatrix);
+    }
+    
+    @Test
+    public void emptyCasesTest2() {
+	    	double[][] caseMatrix = new double[2][2];
+	
+				caseMatrix[0][0] = 0;
+				caseMatrix[0][1] = 0;
+				caseMatrix[1][0] = 0;
+				caseMatrix[1][1] = 16;
+	
+	    	new PolychoricTwoStep(caseMatrix);
+    }
+    
+    @Test
+    public void emptyCasesTest3() {
+	    	double[][] caseMatrix = new double[2][2];
+	
+				caseMatrix[0][0] = 0;
+				caseMatrix[0][1] = 0;
+				caseMatrix[1][0] = 1;
+				caseMatrix[1][1] = 16;
+	
+				new PolychoricTwoStep(caseMatrix);
+    }
+    
+    @Test
+    public void emptyCasesTest4() {
+	    	double[][] caseMatrix = new double[2][2];
+	
+				caseMatrix[0][0] = 1;
+				caseMatrix[0][1] = 0;
+				caseMatrix[1][0] = 0;
+				caseMatrix[1][1] = 16;
+	
+				new PolychoricTwoStep(caseMatrix);
+    }
 }
