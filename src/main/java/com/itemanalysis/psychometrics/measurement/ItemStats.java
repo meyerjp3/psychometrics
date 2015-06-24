@@ -180,7 +180,7 @@ public class ItemStats {
 
     public double getDIndex(){
         if(dIndex){
-            return upper.getResult()/-lower.getResult();
+            return upper.getResult()-lower.getResult();
         }else{
             return Double.NaN;
         }

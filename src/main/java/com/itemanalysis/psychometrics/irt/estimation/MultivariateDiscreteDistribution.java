@@ -20,12 +20,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Deprecated
 public class MultivariateDiscreteDistribution {
 
+    @Deprecated
     public MultivariateDiscreteDistribution(){
 
     }
 
+    @Deprecated
     public static Set<Set<Integer>> getCombinationsFor(List<Integer> group, int subsetSize) {
         Set<Set<Integer>> resultingCombinations = new HashSet<Set<Integer>> ();
         int totalSize=group.size();
@@ -46,10 +49,12 @@ public class MultivariateDiscreteDistribution {
         return resultingCombinations;
     }
 
+    @Deprecated
     private static void emptySet(Set<Set<Integer>> resultingCombinations) {
         resultingCombinations.add(new HashSet<Integer>());
     }
 
+    @Deprecated
     private static Integer popLast(List<Integer> elementsExclusiveX) {
         return elementsExclusiveX.remove(elementsExclusiveX.size()-1);
     }

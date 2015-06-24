@@ -78,12 +78,10 @@ public class DefaultItemScoring implements ItemScoring{
     }
 
     public void addCategory(Object categoryID, double scoreValue){
-        System.out.println(categoryID instanceof Double);
         categoryMap.put(categoryID, new Category(categoryID, scoreValue));
         maximumPossibleScore.increment(scoreValue);
         minimumPossibleScore.increment(scoreValue);
         scoreLevels.add(scoreValue);
-
     }
 
     public void clearCategory(){
