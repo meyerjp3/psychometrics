@@ -68,6 +68,7 @@ public class JointMaximumLikelihoodEstimation{
     private double adjustment = 0.3;
     private int extremeCount = 0;
     private int droppedCount = 0;
+    private RaschStandardizedResiduals standardizedResiduals = null;
 
     /**
      * The object is created with a set of data and array of item response models (See {@link ItemResponseModel}.
@@ -894,6 +895,7 @@ public class JointMaximumLikelihoodEstimation{
      */
     public void computeItemFitStatistics(){
         itemFit = new RaschFitStatistics[nItems];
+        standardizedResiduals = new RaschStandardizedResiduals(nPeople, nItems);
 
         for(int j=0;j<nItems;j++){
             itemFit[j] = new RaschFitStatistics();
@@ -902,7 +904,13 @@ public class JointMaximumLikelihoodEstimation{
         for(int i=0;i<nPeople;i++){
             if(extremePerson[i]==0){
                 for(int j=0;j<nItems;j++){
-                    if(data[i][j]>-1 && droppedStatus[j]==0) itemFit[j].increment(irm[j], theta[i], data[i][j]);
+                    if(data[i][j]>-1 && droppedStatus[j]==0){
+                        itemFit[j].increment(irm[j], theta[i], data[i][j]);
+                        standardizedResiduals.increment(i, j, irm[j], theta[i], data[i][j]);
+                    }else{
+                        //Missing data scored as zero points. Same thing is done in WINSTEPS.
+                        standardizedResiduals.increment(i, j, irm[j], theta[i], (byte)0);
+                    }
                 }
             }
         }
@@ -1415,7 +1423,7 @@ public class JointMaximumLikelihoodEstimation{
         }
 
         TextTable textTable = new TextTable();
-        textTable.addAllColumnFormats(cformats, numRows+5);
+        textTable.addAllColumnFormats(cformats, numRows + 5);
         textTable.getRowAt(0).addHeader(0, 8, "FINAL JMLE CATEGORY STATISTICS", TextTablePosition.CENTER);
         textTable.getRowAt(1).addHorizontalRule(0, 8, "=");
         textTable.getRowAt(2).addHeader(0, 1, "Group", TextTablePosition.LEFT);
@@ -1466,6 +1474,33 @@ public class JointMaximumLikelihoodEstimation{
         }
         textTable.getRowAt(numRows+3).addHorizontalRule(0, 6, "=");
         return textTable.toString();
+    }
+
+    public String printDimensionalityResults(){
+        StringBuilder sb = new StringBuilder();
+        Formatter f = new Formatter(sb);
+
+        double totalVariance = 0;
+        double[] eigenValues = standardizedResiduals.eigenValues();
+        for(int j=0;j<eigenValues.length;j++){
+            totalVariance += eigenValues[j];
+        }
+
+        f.format("%-50s", "STANDARDIZED RESIDUAL EIGEN VALUES"); f.format("%n");
+        f.format("%45s", "=================================================="); f.format("%n");
+        f.format("%10s", "Component"); f.format("%5s", "");
+        f.format("%11s", "Eigen Value"); f.format("%5s", "");
+        f.format("%18s", "Explained Variance");  f.format("%n");
+        f.format("%50s", "--------------------------------------------------"); f.format("%n");
+
+        for(int j=0;j<eigenValues.length;j++){
+            f.format("%10d", (j+1)); f.format("%5s", "");
+            f.format("%10.4f", eigenValues[j]);f.format("%5s", "");
+            f.format("%16.4f%%", eigenValues[j]/totalVariance*100);f.format("%n");
+        }
+        f.format("%50s", "=================================================="); f.format("%n");
+
+        return f.toString();
     }
 
 }
