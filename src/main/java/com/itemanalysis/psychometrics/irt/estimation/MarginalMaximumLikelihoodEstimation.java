@@ -112,6 +112,11 @@ public class MarginalMaximumLikelihoodEstimation {
             codeCount[i]+=tc[i];
         }
 
+        //TODO activate this option when fully tested
+        //estimate latent distribution here
+//        if(estimateLatentDistribution){
+//            latentDistribution = mstepParallel.updateLatentDistribution();
+//        }
 
         //pass optimizer status to a log or something
 //        fireEMStatusEvent(uncminStatusListener.toString());
@@ -122,11 +127,6 @@ public class MarginalMaximumLikelihoodEstimation {
             maxChange = Math.max(maxChange, irm[j].acceptAllProposalValues());
         }
 
-        //TODO activate this option when fully tested
-        //estimate latent distribution here
-//        if(estimateLatentDistribution){
-//            latentDistribution = mstepParallel.updateLatentDistribution();
-//        }
 
         return maxChange;
 

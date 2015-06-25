@@ -159,7 +159,7 @@ public class MstepParallel extends RecursiveAction {
 
         //Transform item parameters
         for(int j=0;j<irm.length;j++){
-            irm[j].scale(intercept, slope);
+            irm[j].scale(intercept, slope);//FIXME this should only rescale the proposal values
         }
 
         return latentDistribution;
