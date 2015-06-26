@@ -66,8 +66,27 @@ public abstract class AbstractFactorMethod implements FactorMethod{
         return factorLoading;
     }
 
+    /**
+     *
+     * @param i variable index of the factor loading
+     * @param j factor index of the loading
+     * @return
+     */
     public double getFactorLoadingAt(int i, int j){
         return factorLoading[i][j];
+    }
+
+    /**
+     *
+     * @param factorID position number of factor of interest.
+     * @return array of factor loadings
+     */
+    public double[] getLoadingsForFactorAt(int factorID){
+        double[] l = new double[nVariables];
+        for(int i=0;i<nVariables;i++){
+            l[i] = factorLoading[i][factorID];
+        }
+        return l;
     }
 
     public double getUniquenessAt(int i){

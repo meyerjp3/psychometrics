@@ -1,6 +1,7 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.data.VariableName;
+import com.itemanalysis.psychometrics.factoranalysis.ExploratoryFactorAnalysis;
 import com.itemanalysis.psychometrics.irt.model.Irm3PL;
 import com.itemanalysis.psychometrics.irt.model.IrmPCM;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
@@ -293,6 +294,9 @@ public class JointMaximumLikelihoodEstimationTest {
         jmle.computePersonStandardErrors();
         jmle.computeItemFitStatistics();
 
+        ExploratoryFactorAnalysis efa = jmle.getPrincipalComponentsForStandardizedResiduals(5);
+        System.out.println(efa.printOutput("Principal Component Analysis of Std. Residuals"));
+
 //        System.out.println(jmle.printDimensionalityResults());
 
 
@@ -371,7 +375,9 @@ public class JointMaximumLikelihoodEstimationTest {
         jmle.computeItemStandardErrors();
         jmle.computePersonStandardErrors();
         jmle.computeItemFitStatistics();
-        System.out.println(jmle.printDimensionalityResults());
+
+        ExploratoryFactorAnalysis efa = jmle.getPrincipalComponentsForStandardizedResiduals(5);
+//        System.out.println(efa.printOutput("Principal Component Analysis of Std. Residuals"));
 
 //        System.out.println(jmle.printFrequencyTables());
 //        System.out.println(jmle.printRatingScaleTables());

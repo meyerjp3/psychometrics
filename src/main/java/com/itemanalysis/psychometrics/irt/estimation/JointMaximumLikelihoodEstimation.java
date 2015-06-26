@@ -16,14 +16,20 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.data.VariableName;
+import com.itemanalysis.psychometrics.factoranalysis.*;
+import com.itemanalysis.psychometrics.factoranalysis.EstimationMethod;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.irt.model.RaschRatingScaleGroup;
+import com.itemanalysis.psychometrics.polycor.Covariance;
+import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
+import com.itemanalysis.psychometrics.polycor.PearsonCorrelation;
 import com.itemanalysis.psychometrics.scaling.DefaultLinearTransformation;
 import com.itemanalysis.psychometrics.texttable.TextTable;
 import com.itemanalysis.psychometrics.texttable.TextTableColumnFormat;
 import com.itemanalysis.psychometrics.texttable.TextTablePosition;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.NoDataException;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 
 import java.util.ArrayList;
@@ -68,7 +74,6 @@ public class JointMaximumLikelihoodEstimation{
     private double adjustment = 0.3;
     private int extremeCount = 0;
     private int droppedCount = 0;
-    private RaschStandardizedResiduals standardizedResiduals = null;
 
     /**
      * The object is created with a set of data and array of item response models (See {@link ItemResponseModel}.
@@ -895,25 +900,59 @@ public class JointMaximumLikelihoodEstimation{
      */
     public void computeItemFitStatistics(){
         itemFit = new RaschFitStatistics[nItems];
-        standardizedResiduals = new RaschStandardizedResiduals(nPeople, nItems);
 
         for(int j=0;j<nItems;j++){
             itemFit[j] = new RaschFitStatistics();
         }
 
-        for(int i=0;i<nPeople;i++){
-            if(extremePerson[i]==0){
-                for(int j=0;j<nItems;j++){
-                    if(data[i][j]>-1 && droppedStatus[j]==0){
+        for(int i=0;i<nPeople;i++) {
+            if (extremePerson[i] == 0) {
+                for (int j = 0; j < nItems; j++) {
+                    if (data[i][j] > -1 && droppedStatus[j] == 0) {
                         itemFit[j].increment(irm[j], theta[i], data[i][j]);
-                        standardizedResiduals.increment(i, j, irm[j], theta[i], data[i][j]);
-                    }else{
-                        //Missing data scored as zero points. Same thing is done in WINSTEPS.
-                        standardizedResiduals.increment(i, j, irm[j], theta[i], (byte)0);
                     }
                 }
             }
         }
+
+    }
+
+    public ExploratoryFactorAnalysis getPrincipalComponentsForStandardizedResiduals(int nFactors){
+        double residual1 = 0;
+        double residual2 = 0;
+        CovarianceMatrix covMatrix = new CovarianceMatrix(nItems);
+
+        for(int i=0;i<nPeople;i++) {
+            for (int j = 0; j < nItems; j++) {
+                if (data[i][j] > -1 && droppedStatus[j] == 0){
+                    residual1 = data[i][j] - irm[j].expectedValue(theta[i]);
+                    residual1 /= Math.sqrt(irm[j].itemInformationAt(theta[i]));
+                }else{
+                    //Missing data scored as zero points. Same thing is done in WINSTEPS.
+                    residual1 = 0;
+                }
+
+                for(int k=j;k<nItems;k++){
+                    if (data[i][k] > -1 && droppedStatus[k] == 0){
+                        residual2 = data[i][k] - irm[k].expectedValue(theta[i]);
+                        residual2 /= Math.sqrt(irm[k].itemInformationAt(theta[i]));
+                    }else{
+                        //Missing data scored as zero points. Same thing is done in WINSTEPS.
+                        residual2 = 0;
+                    }
+
+                    covMatrix.increment(j, k, residual1, residual2);
+                }//end inner loop over items
+
+            }//end outer loop over items
+        }
+
+        Array2DRowRealMatrix R = new Array2DRowRealMatrix(covMatrix.correlation(true));
+        ExploratoryFactorAnalysis efa = new ExploratoryFactorAnalysis(R, nFactors);
+        efa.estimateParameters(EstimationMethod.PRINCOMP);
+
+        return efa;
+
     }
 
     /**
@@ -1476,31 +1515,44 @@ public class JointMaximumLikelihoodEstimation{
         return textTable.toString();
     }
 
-    public String printDimensionalityResults(){
-        StringBuilder sb = new StringBuilder();
-        Formatter f = new Formatter(sb);
+//    public RaschDimensionalityEvaluation getRaschDimensionalityEvaluation(){
+//        return dimensionalityEvaluation;
+//    }
 
-        double totalVariance = 0;
-        double[] eigenValues = standardizedResiduals.eigenValues();
-        for(int j=0;j<eigenValues.length;j++){
-            totalVariance += eigenValues[j];
-        }
-
-        f.format("%-50s", "STANDARDIZED RESIDUAL EIGEN VALUES"); f.format("%n");
-        f.format("%45s", "=================================================="); f.format("%n");
-        f.format("%10s", "Component"); f.format("%5s", "");
-        f.format("%11s", "Eigen Value"); f.format("%5s", "");
-        f.format("%18s", "Explained Variance");  f.format("%n");
-        f.format("%50s", "--------------------------------------------------"); f.format("%n");
-
-        for(int j=0;j<eigenValues.length;j++){
-            f.format("%10d", (j+1)); f.format("%5s", "");
-            f.format("%10.4f", eigenValues[j]);f.format("%5s", "");
-            f.format("%16.4f%%", eigenValues[j]/totalVariance*100);f.format("%n");
-        }
-        f.format("%50s", "=================================================="); f.format("%n");
-
-        return f.toString();
-    }
+//    public String printDimensionalityResults(){
+//        StringBuilder sb = new StringBuilder();
+//
+//        ExploratoryFactorAnalysis efa = dimensionalityEvaluation.principalComponentsAnalysis();
+//
+//        sb.append(dimensionalityEvaluation.printEigenValues());
+//        sb.append("\n\n");
+//        sb.append(efa.printOutput());
+//        return sb.toString();
+//
+//
+////        Formatter f = new Formatter(sb);
+////
+////        double totalVariance = 0;
+////        double[] eigenValues = dimensionalityEvaluation.eigenValues();
+////        for(int j=0;j<eigenValues.length;j++){
+////            totalVariance += eigenValues[j];
+////        }
+////
+////        f.format("%-50s", "STANDARDIZED RESIDUAL EIGEN VALUES"); f.format("%n");
+////        f.format("%45s", "=================================================="); f.format("%n");
+////        f.format("%10s", "Component"); f.format("%5s", "");
+////        f.format("%11s", "Eigen Value"); f.format("%5s", "");
+////        f.format("%18s", "Explained Variance");  f.format("%n");
+////        f.format("%50s", "--------------------------------------------------"); f.format("%n");
+////
+////        for(int j=0;j<eigenValues.length;j++){
+////            f.format("%10d", (j+1)); f.format("%5s", "");
+////            f.format("%10.4f", eigenValues[j]);f.format("%5s", "");
+////            f.format("%16.4f%%", eigenValues[j]/totalVariance*100);f.format("%n");
+////        }
+////        f.format("%50s", "=================================================="); f.format("%n");
+////
+////        return f.toString();
+//    }
 
 }

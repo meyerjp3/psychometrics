@@ -39,6 +39,14 @@ public interface FactorMethod {
     public double getFactorLoadingAt(int i, int j);
 
     /**
+     * Returns all factor loadings for a particular factor
+     *
+     * @param factorID position number of factor of interest.
+     * @return array of factor loadings.
+     */
+    public double[] getLoadingsForFactorAt(int factorID);
+
+    /**
      * Returns the variabl's uniqueness (i.e. residual value)
      *
      * @param i variable index of the uniqueness
