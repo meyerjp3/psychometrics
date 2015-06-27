@@ -15,6 +15,7 @@
  */
 package com.itemanalysis.psychometrics.factoranalysis;
 
+import com.itemanalysis.psychometrics.data.VariableName;
 import org.apache.commons.math3.linear.RealMatrix;
 
 import java.util.Formatter;
@@ -34,6 +35,7 @@ public class ExploratoryFactorAnalysis {
     private RotationMethod rotationMethod = RotationMethod.NONE;
     private double fmin = 0.0;
     private String title = "";
+    private VariableName[] variableNames = null;
 
     /**
      * The constructor requires a correlation matrix and the number of factors.
@@ -46,6 +48,12 @@ public class ExploratoryFactorAnalysis {
         this.nFactors = Math.max(nFactors, 1);
         this.nVariables = correlationMatrix.getColumnDimension();
         this.nParameters = nVariables;
+
+        //set default names
+        variableNames = new VariableName[nVariables];
+        for(int j=0;j<nVariables;j++){
+            variableNames[j] = new VariableName("V" + (j+1));
+        }
     }
 
     /**
@@ -76,6 +84,15 @@ public class ExploratoryFactorAnalysis {
 
         fmin = factorMethod.estimateParameters();
 
+    }
+
+    public void setVariableNameAt(int index, VariableName variableName){
+        variableNames[index] = variableName;
+    }
+
+    public void setVariableNameAt(int index, String name){
+        VariableName variableName = new VariableName(name);
+        setVariableNameAt(index, variableName);
     }
 
     public void estimateParameters(EstimationMethod fm){
@@ -142,7 +159,8 @@ public class ExploratoryFactorAnalysis {
         f.format("%"+size+"s", line2);f.format("%n");
 
         for(int i=0;i<nVariables;i++){
-            f.format("%20s", "V"+ (i+1));f.format("%5s", "");
+//            f.format("%20s", "V"+ (i+1));f.format("%5s", "");
+            f.format("%20s", variableNames[i].toString());f.format("%5s", "");
             for(int j=0;j<nFactors;j++){
                 f.format("%6."+precision+"f",  factorMethod.getFactorLoadingAt(i,j));f.format("%4s", "");
             }

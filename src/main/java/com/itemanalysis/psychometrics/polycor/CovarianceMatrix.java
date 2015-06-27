@@ -101,6 +101,14 @@ public class CovarianceMatrix {
         this.numberOfVariables = variables.size();
     }
 
+    public void setNameAt(int index, VariableName name){
+        variables.get(index).setName(name);
+    }
+
+    public void setNameAt(int index, String name){
+        variables.get(index).setName(new VariableName(name));
+    }
+
     public double getMaxSampleSize(){
         double maxSampleSize = 0;
         Covariance covariance = null;

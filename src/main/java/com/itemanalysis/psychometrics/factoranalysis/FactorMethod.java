@@ -15,6 +15,8 @@
  */
 package com.itemanalysis.psychometrics.factoranalysis;
 
+import com.itemanalysis.psychometrics.data.VariableName;
+
 /**
  * This interface allows for a variety of methods for estimating parameters in exploratory
  * factor analysis.
@@ -85,5 +87,15 @@ public interface FactorMethod {
      * @return
      */
     public double getProportionOfVarianceAt(int j);
+
+    /**
+     * Returns the name of the variable at index.
+     *
+     * @param index position (zero based) of variable for which name is sought.
+     * @return variable name.
+     */
+    public VariableName getVariableNameAt(int index);
+
+    public void setVariableNameAt(int index, VariableName name);
 
 }

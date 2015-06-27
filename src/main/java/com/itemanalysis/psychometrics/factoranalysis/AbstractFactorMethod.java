@@ -15,6 +15,7 @@
  */
 package com.itemanalysis.psychometrics.factoranalysis;
 
+import com.itemanalysis.psychometrics.data.VariableName;
 import org.apache.commons.math3.linear.RealMatrix;
 
 /**
@@ -36,6 +37,7 @@ public abstract class AbstractFactorMethod implements FactorMethod{
     protected double[] sumsOfSquares = null;
     protected double[] proportionOfVariance = null;
     protected double[] proportionOfExplainedVariance = null;
+    protected VariableName[] variableNames = null;
 
     /**
      * Lower bounds of the parameters
@@ -107,6 +109,24 @@ public abstract class AbstractFactorMethod implements FactorMethod{
 
     public double getProportionOfVarianceAt(int j){
         return proportionOfVariance[j];
+    }
+
+    public VariableName getVariableNameAt(int index){
+        if(variableNames==null){
+            VariableName variableName = new VariableName("V" + (index+1));
+            return variableName;
+        }
+        return variableNames[index];
+    }
+
+    public void setVariableNameAt(int index, VariableName name){
+        if(variableNames==null) variableNames = new VariableName[nVariables];
+        variableNames[index] = name;
+    }
+
+    public void setVariableNameAt(int index, String name){
+        VariableName variableName = new VariableName(name);
+        setVariableNameAt(index, variableName);
     }
 
 }

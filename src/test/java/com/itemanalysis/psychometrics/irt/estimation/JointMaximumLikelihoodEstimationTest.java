@@ -294,10 +294,9 @@ public class JointMaximumLikelihoodEstimationTest {
         jmle.computePersonStandardErrors();
         jmle.computeItemFitStatistics();
 
-        ExploratoryFactorAnalysis efa = jmle.getPrincipalComponentsForStandardizedResiduals(5);
-        System.out.println(efa.printOutput("Principal Component Analysis of Std. Residuals"));
+//        ExploratoryFactorAnalysis efa = jmle.getPrincipalComponentsForStandardizedResiduals(5);
+//        System.out.println(efa.printOutput("Principal Component Analysis of Std. Residuals"));
 
-//        System.out.println(jmle.printDimensionalityResults());
 
 
 //        System.out.println(jmle.printFrequencyTables());
@@ -370,14 +369,14 @@ public class JointMaximumLikelihoodEstimationTest {
         JointMaximumLikelihoodEstimation jmle = new JointMaximumLikelihoodEstimation(data, irm);
         jmle.summarizeData(0.3);
         jmle.itemProx();
-//        System.out.println(jmle.printBasicItemStats());
         jmle.estimateParameters(50, 0.00001);
         jmle.computeItemStandardErrors();
         jmle.computePersonStandardErrors();
         jmle.computeItemFitStatistics();
+//        System.out.println(jmle.printBasicItemStats());
 
-        ExploratoryFactorAnalysis efa = jmle.getPrincipalComponentsForStandardizedResiduals(5);
-//        System.out.println(efa.printOutput("Principal Component Analysis of Std. Residuals"));
+//        ExploratoryFactorAnalysis efa = jmle.getPrincipalComponentsForStandardizedResiduals(5);
+//        System.out.println(efa.printOutput("Principal Component Analysis of Standardized Residuals"));
 
 //        System.out.println(jmle.printFrequencyTables());
 //        System.out.println(jmle.printRatingScaleTables());

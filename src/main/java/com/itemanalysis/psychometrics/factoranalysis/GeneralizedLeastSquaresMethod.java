@@ -16,6 +16,7 @@
 package com.itemanalysis.psychometrics.factoranalysis;
 
 import com.itemanalysis.psychometrics.analysis.AbstractMultivariateFunction;
+import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.measurement.DiagonalMatrix;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;

@@ -917,39 +917,91 @@ public class JointMaximumLikelihoodEstimation{
 
     }
 
+    /**
+     * Conducts a principal components analysis of standardized residuals. Extreme items and dropped items are
+     * excluded from the correlaiton matrix. Extreme persons are not included in the computation of the correlation.
+     * Missing data are scored as zero points in computation of the correlation. These conventions are consistent
+     * with WINSTEPS.
+     *
+     * @param nFactors number of factors retained in the principal components analysis.
+     * @return an ExploratoryFactorAnalysis object.
+     */
     public ExploratoryFactorAnalysis getPrincipalComponentsForStandardizedResiduals(int nFactors){
         double residual1 = 0;
         double residual2 = 0;
-        CovarianceMatrix covMatrix = new CovarianceMatrix(nItems);
+        int validIndex1 = 0;
+        int validIndex2 = 0;
+
+        int validItemCount = 0;
+        for(int j=0;j<nItems;j++){
+            if(extremeItem[j]==0 && droppedStatus[j]==0) validItemCount++;
+        }
+
+        CovarianceMatrix covMatrix = new CovarianceMatrix(validItemCount);
 
         for(int i=0;i<nPeople;i++) {
-            for (int j = 0; j < nItems; j++) {
-                if (data[i][j] > -1 && droppedStatus[j] == 0){
-                    residual1 = data[i][j] - irm[j].expectedValue(theta[i]);
-                    residual1 /= Math.sqrt(irm[j].itemInformationAt(theta[i]));
-                }else{
-                    //Missing data scored as zero points. Same thing is done in WINSTEPS.
-                    residual1 = 0;
-                }
+            if(extremePerson[i]==0){
+                validIndex1=0;
+                for (int j = 0; j < nItems; j++) {
 
-                for(int k=j;k<nItems;k++){
-                    if (data[i][k] > -1 && droppedStatus[k] == 0){
-                        residual2 = data[i][k] - irm[k].expectedValue(theta[i]);
-                        residual2 /= Math.sqrt(irm[k].itemInformationAt(theta[i]));
-                    }else{
-                        //Missing data scored as zero points. Same thing is done in WINSTEPS.
-                        residual2 = 0;
+
+                    if(extremeItem[j]==0 && droppedStatus[j]==0){
+
+                        if (data[i][j] > -1){
+                            residual1 = data[i][j] - irm[j].expectedValue(theta[i]);
+                            residual1 /= Math.sqrt(irm[j].itemInformationAt(theta[i]));
+                        }else{
+                            //Missing data scored as zero points. Same thing is done in WINSTEPS.
+                            residual1 = 0;
+                        }
+
+                        validIndex2 = validIndex1;
+                        for(int k=j;k<nItems;k++){
+                            if(extremeItem[k]==0 && droppedStatus[k] == 0){
+                                if (data[i][k] > -1){
+                                    residual2 = data[i][k] - irm[k].expectedValue(theta[i]);
+                                    residual2 /= Math.sqrt(irm[k].itemInformationAt(theta[i]));
+                                }else{
+                                    //Missing data scored as zero points. Same thing is done in WINSTEPS.
+                                    residual2 = 0;
+                                }
+
+                                covMatrix.increment(validIndex1, validIndex2, residual1, residual2);
+
+                                validIndex2++;
+                            }
+
+                        }//end inner loop over items
+
+                        validIndex1++;
+
                     }
 
-                    covMatrix.increment(j, k, residual1, residual2);
-                }//end inner loop over items
 
-            }//end outer loop over items
+
+                }//end outer loop over items
+            }
+
         }
 
         Array2DRowRealMatrix R = new Array2DRowRealMatrix(covMatrix.correlation(true));
         ExploratoryFactorAnalysis efa = new ExploratoryFactorAnalysis(R, nFactors);
+
+        //set variable names
+        validIndex1 = 0;
+        for(int j=0;j<nItems;j++){
+            if(extremeItem[j]==0 && droppedStatus[j] == 0){
+                efa.setVariableNameAt(validIndex1, irm[j].getName());
+                validIndex1++;
+            }
+        }
+
         efa.estimateParameters(EstimationMethod.PRINCOMP);
+
+
+
+
+
 
         return efa;
 
