@@ -218,8 +218,8 @@ public class TestSummary {
 
     public double[] getDIndexBounds(){
         double[] bounds = new double[2];
-        bounds[0] = stats.getPercentile(0.27);
-        bounds[1] = stats.getPercentile(0.73);
+        bounds[0] = stats.getPercentile(27);
+        bounds[1] = stats.getPercentile(73);
         return bounds;
     }
 

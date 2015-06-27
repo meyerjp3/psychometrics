@@ -15,17 +15,13 @@
  */
 package com.itemanalysis.psychometrics.irt.estimation;
 
-import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
+@Deprecated
 public class MultivariateDiscreteDistributionTest {
 
 
 
-    @Test
+//    @Test
     public void testPermutations5(){
 
         int size = 5;
@@ -46,7 +42,7 @@ public class MultivariateDiscreteDistributionTest {
 
     }
 
-    @Test
+//    @Test
     public void testPermutations2(){
 
         int size = 21;
@@ -74,7 +70,7 @@ public class MultivariateDiscreteDistributionTest {
 
     }
 
-    @Test
+//    @Test
     public void testPermutations3(){
 
         int size = 11;
@@ -89,7 +85,7 @@ public class MultivariateDiscreteDistributionTest {
         }
     }
 
-    @Test
+//    @Test
     public void testPermutations4(){
 
         int size = 7;

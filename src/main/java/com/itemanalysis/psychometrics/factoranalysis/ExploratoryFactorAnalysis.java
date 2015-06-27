@@ -82,10 +82,6 @@ public class ExploratoryFactorAnalysis {
         estimateParameters(fm, RotationMethod.NONE);
     }
 
-    public void rotateFactor(RotationMethod method){
-
-    }
-
     /**
      * Return s the factor method for obtaining values of the estimates and other information as indicated in the
      * FactorMethod interface.
@@ -98,6 +94,16 @@ public class ExploratoryFactorAnalysis {
 
     public String printOutput(){
         return printOutput(2);
+    }
+
+    public String printOutput(String title){
+        this.title = title;
+        return printOutput();
+    }
+
+    public String printOutput(String title, int precision){
+        this.title = title;
+        return printOutput(precision);
     }
 
     /**

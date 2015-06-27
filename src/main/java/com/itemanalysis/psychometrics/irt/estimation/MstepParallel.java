@@ -91,13 +91,12 @@ public class MstepParallel extends RecursiveAction {
                     irm[j].setProposalDiscrimination(param[0]);
                     irm[j].setProposalDifficulty(param[1]);
                     irm[j].setProposalGuessing(Math.min(1.000, Math.max(param[2], 0.001)));//set negative estimates to just above zero
-                    irm[j].setProposalSlipping(Math.max(0.60, Math.min(param[3], 0.999)));//set negative estimates to just below 1.
+                    irm[j].setProposalSlipping(Math.max(0.60, Math.min(param[3], 0.999)));//set estimates above one to just below 1.
                 }else if(nPar==3){
                     if(param[0]<0) codeCount[1]++;
                     if(param[2]<0) codeCount[2]++;
                     irm[j].setProposalDiscrimination(param[0]);
                     irm[j].setProposalDifficulty(param[1]);
-//                    irm[j].setProposalGuessing(param[2]);
                     irm[j].setProposalGuessing(Math.min(1.000, Math.max(param[2], 0.001)));//set negative estimates to just above zero
                 }else if(nPar==2){
                     if(param[0]<0) codeCount[1]++;
