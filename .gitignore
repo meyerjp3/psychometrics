@@ -1,9 +1,12 @@
 *.iml
 .idea/.name
 .idea/compiler.xml
+.idea/uiDesigner.xml
 .idea/copyright/profiles_settings.xml
 .idea/encodings.xml
 .idea/libraries/Maven__commons_io_commons_io_2_1.xml
+.idea/libraries/Maven__org_apache_commons_commons_csv_1_0.xml
+.idea/libraries/Maven__org_apache_commons_commons_math3_3_3.xml
 .idea/libraries/Maven__javax_activation_activation_1_1.xml
 .idea/libraries/Maven__javax_mail_mail_1_4.xml
 .idea/libraries/Maven__junit_junit_4_4.xml
