@@ -112,8 +112,8 @@ public class MarginalMaximumLikelihoodEstimation {
             codeCount[i]+=tc[i];
         }
 
-        //TODO activate this option when fully tested
-        //estimate latent distribution here
+//        //TODO activate this option when fully tested
+//        //estimate latent distribution here
 //        if(estimateLatentDistribution){
 //            latentDistribution = mstepParallel.updateLatentDistribution();
 //        }
@@ -125,6 +125,12 @@ public class MarginalMaximumLikelihoodEstimation {
         double maxChange = 0.0;
         for(int j=0;j<nItems;j++){
             maxChange = Math.max(maxChange, irm[j].acceptAllProposalValues());
+        }
+
+        //TODO activate this option when fully tested
+        //estimate latent distribution here
+        if(estimateLatentDistribution){
+//            latentDistribution = mstepParallel.updateLatentDistribution();
         }
 
 
@@ -170,6 +176,28 @@ public class MarginalMaximumLikelihoodEstimation {
             //Format and send EM cycle summary to EMStatusListeners
            if(verbose)  fireEMStatusEvent(iter, delta, completeDataLogLikelihood(), codeToString());
         }
+
+        if(estimateLatentDistribution){
+//            double newMean = latentDistribution.getMean();
+//            double newSD = latentDistribution.getStandardDeviation();
+//
+//
+//            //Compute linear transformation that set distribution mean to 0 and standard deviation to 1
+//            double slope = 1.0/newSD;
+//            double intercept = -slope*newMean;
+//            double point = 0;
+//            for(int k=0;k<latentDistribution.getNumberOfPoints();k++){
+//                point = latentDistribution.getPointAt(k);
+//                latentDistribution.setPointAt(k, point*slope+intercept);
+//            }
+
+            //Transform item parameters
+//            for(int j=0;j<irm.length;j++){
+//                irm[j].scale(intercept, slope);
+//            }
+
+        }
+
 
         if(!verbose) fireEMStatusEvent(iter, delta, completeDataLogLikelihood(), codeToString());
         fireEMStatusEvent("Elapsed time: " + stopWatch.getElapsedTime());

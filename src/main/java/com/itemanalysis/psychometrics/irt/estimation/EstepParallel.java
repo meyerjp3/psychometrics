@@ -160,11 +160,16 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
 
             response = Byte.valueOf(responseVector.getResponseAt(j)).intValue();
             if(response!=-1){
-                for(int k=0;k<ncat[j];k++){
-                    //TODO might need to change  k to the item score weight
-                    if(response==k) value *= irm[j].probability(quadPoint, k);
 
-                }
+                value *= irm[j].probability(quadPoint, response);
+
+//Not sure why I was using a loop here, when I could have just used the response directly
+//                for(int k=0;k<ncat[j];k++){
+//                    //TODO might need to change  k to the item score weight
+//                    if(response==k) value *= irm[j].probability(quadPoint, k);
+//
+//                }
+
             }
 
 

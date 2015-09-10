@@ -351,7 +351,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
      * release_items_dist
      *
      */
-//    @Test
+    @Test
     public void lsat7LatentDistributionTest(){
         System.out.println("LSAT 7 - ICL test 2PL with Latent Distribution");
 
@@ -376,7 +376,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
             pl3 = new Irm3PL(1.0, 0.0, 1.7);
             pl3.setName(new VariableName("item"+(j+1)));
             pl3.setDiscriminationPrior(new ItemParamPriorBeta4(1.75, 3.0, 0.0, 3.0));
-            pl3.setDifficultyPrior(new ItemParamPriorBeta4(1.01, 1.01, -6.0, 6.0));
+            pl3.setDifficultyPrior(new ItemParamPriorNormal(0.0, 2.0));
             irm[j] = pl3;
         }
 
@@ -888,7 +888,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
      * >SCORE ;
      *
      */
-//    @Test
+    @Test
     public void binaryItems3plBILOGLatentDensityTest(){
         System.out.println("Binary items - 3PL with Guessing Prior and Estimating Latent Density Compare to BILOG");
 
@@ -959,6 +959,8 @@ public class MarginalMaximumLikelihoodEstimationTest {
             pl3 = new Irm3PL(1.0, 0.0, 0.05, 1.7);//Starting value of guessing parameter must be > 0.
             pl3.setName(new VariableName("Item" + (j+1)));
             pl3.setGuessingPrior(new ItemParamPriorBeta4(5, 17, 0.0, 1.0));
+//            pl3.setDifficultyPrior(new ItemParamPriorNormal(0.0, 2.0));
+//            pl3.setDiscriminationPrior(new ItemParamPriorBeta4(1.75, 3.0, 0.0, 3.0));
             irm[j] = pl3;
         }
 
@@ -972,7 +974,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         DefaultEMStatusListener emStatus = new DefaultEMStatusListener();
         mmle.addEMStatusListener(emStatus);
         mmle.setVerbose(true);
-        mmle.estimateParameters(0.001, 500, true);
+        mmle.estimateParameters(0.001, 150, true);
         mmle.computeItemStandardErrors();
         System.out.println();
         System.out.println(mmle.printItemParameters());
@@ -981,9 +983,9 @@ public class MarginalMaximumLikelihoodEstimationTest {
         System.out.println(mmle.printLatentDistribution());
 
         for(int j=0;j<50;j++){
-            assertEquals("Binary items - discrimination test", bilog_param[j][0], irm[j].getDiscrimination(), 1e-1);
-            assertEquals("Binary items - difficulty test", bilog_param[j][1], irm[j].getDifficulty(), 1e-1);
-            assertEquals("Binary items - guessing test", bilog_param[j][2], irm[j].getGuessing(), 1e-1);
+            assertEquals("Binary items - discrimination test", bilog_param[j][0], irm[j].getDiscrimination(), 1e-2);
+            assertEquals("Binary items - difficulty test", bilog_param[j][1], irm[j].getDifficulty(), 1e-2);
+            assertEquals("Binary items - guessing test", bilog_param[j][2], irm[j].getGuessing(), 1e-2);
         }
 
     }

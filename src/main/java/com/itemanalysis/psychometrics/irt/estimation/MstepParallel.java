@@ -144,22 +144,23 @@ public class MstepParallel extends RecursiveAction {
             latentDistribution.setDensityAt(k, nk[k]/sumNk);
         }
 
-        double newMean = latentDistribution.getMean();
-        double newSD = latentDistribution.getStandardDeviation();
+//        double newMean = latentDistribution.getMean();
+//        double newSD = latentDistribution.getStandardDeviation();
 
-        //Compute linear transformation that set distribution mean to 0 and standard deviation to 1
-        double slope = 1.0/newSD;
-        double intercept = -slope*newMean;
-        double point = 0;
-        for(int k=0;k<nk.length;k++){
-            point = latentDistribution.getPointAt(k);
-            latentDistribution.setPointAt(k, point*slope+intercept);
-        }
 
-        //Transform item parameters
-        for(int j=0;j<irm.length;j++){
-            irm[j].scale(intercept, slope);//FIXME this should only rescale the proposal values
-        }
+//        //Compute linear transformation that set distribution mean to 0 and standard deviation to 1
+//        double slope = 1.0/newSD;
+//        double intercept = -slope*newMean;
+//        double point = 0;
+//        for(int k=0;k<nk.length;k++){
+//            point = latentDistribution.getPointAt(k);
+//            latentDistribution.setPointAt(k, point*slope+intercept);
+//        }
+//
+//        //Transform item parameters
+//        for(int j=0;j<irm.length;j++){
+//            irm[j].scale(intercept, slope);//FIXME this should only rescale the proposal values
+//        }
 
         return latentDistribution;
     }
