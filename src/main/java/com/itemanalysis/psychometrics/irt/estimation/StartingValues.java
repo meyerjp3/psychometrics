@@ -111,7 +111,6 @@ public class StartingValues {
 
                 initialValue = irm[j].nonZeroPrior(irm[j].getItemParameterArray());
 
-
                 try{
                     //Using observed counts, find the item parameters that maximize the marginal likelihood
                     itemLogLikelihood.setModel(irm[j], latentDistribution, estepEstimates.getRjkAt(j), estepEstimates.getNt());

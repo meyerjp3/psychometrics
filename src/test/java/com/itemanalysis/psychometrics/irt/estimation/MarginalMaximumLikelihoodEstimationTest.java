@@ -351,7 +351,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
      * release_items_dist
      *
      */
-    @Test
+//    @Test
     public void lsat7LatentDistributionTest(){
         System.out.println("LSAT 7 - ICL test 2PL with Latent Distribution");
 
@@ -888,7 +888,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
      * >SCORE ;
      *
      */
-    @Test
+//    @Test
     public void binaryItems3plBILOGLatentDensityTest(){
         System.out.println("Binary items - 3PL with Guessing Prior and Estimating Latent Density Compare to BILOG");
 

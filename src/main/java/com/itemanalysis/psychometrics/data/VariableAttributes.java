@@ -206,7 +206,7 @@ public class VariableAttributes implements Comparable<VariableAttributes> {
         if(specialDataCodes.isMissing(response)){
             return specialDataCodes.computeMissingScore(response);
         }else if(itemScoring==null){
-            return Integer.parseInt(response);
+            return Double.parseDouble(response);
         }else{
             return itemScoring.computeItemScore(response);
         }

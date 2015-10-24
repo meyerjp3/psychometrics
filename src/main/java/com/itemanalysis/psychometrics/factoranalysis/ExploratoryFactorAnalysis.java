@@ -36,6 +36,7 @@ public class ExploratoryFactorAnalysis {
     private double fmin = 0.0;
     private String title = "";
     private VariableName[] variableNames = null;
+    private EstimationMethod estimationMethod = EstimationMethod.MINRES;
 
     /**
      * The constructor requires a correlation matrix and the number of factors.
@@ -68,18 +69,23 @@ public class ExploratoryFactorAnalysis {
         if(fm==EstimationMethod.PRINCOMP){
             factorMethod = new PrincipalComponentsMethod(correlationMatrix, nFactors, rotationMethod);
             title = "Principal Components Analysis (" + rotationMethod.toString() + ")";
+            estimationMethod = EstimationMethod.PRINCOMP;
         }else if(fm==EstimationMethod.ML){
             factorMethod = new MaximumLikelihoodMethod(correlationMatrix, nFactors, rotationMethod);
             title = "Maximum Likelihood Factor Analysis (" + rotationMethod.toString() + ")";
+            estimationMethod = EstimationMethod.ML;
         }else if(fm==EstimationMethod.WLS){
             factorMethod = new WeightedLeastSquaresMethod(correlationMatrix, nFactors, rotationMethod);
             title = "Weighted Least Squares Factor Analysis (" + rotationMethod.toString() + ")";
+            estimationMethod = EstimationMethod.WLS;
         }else if(fm==EstimationMethod.GLS){
             factorMethod = new GeneralizedLeastSquaresMethod(correlationMatrix, nFactors, rotationMethod);
             title = "Generalized Least Squares Factor Analysis (" + rotationMethod.toString() + ")";
+            estimationMethod = EstimationMethod.GLS;
         }else{
             factorMethod = new MINRESmethod(correlationMatrix, nFactors, rotationMethod);
             title = "MINRES Factor Analysis (" + rotationMethod.toString() + ")";
+            estimationMethod = EstimationMethod.MINRES;
         }
 
         fmin = factorMethod.estimateParameters();
@@ -179,7 +185,11 @@ public class ExploratoryFactorAnalysis {
         }
         f.format("%n");
 
-        f.format("%20s", "SS loadings");
+        if(estimationMethod==EstimationMethod.PRINCOMP){
+            f.format("%20s", "Eigen value");
+        }else{
+            f.format("%20s", "SS loadings");
+        }
         for(int j=0;j<nFactors;j++){
             f.format("%6."+precision+"f", factorMethod.getSumsOfSquaresAt(j)); f.format("%2s", "");
         }

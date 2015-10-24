@@ -137,7 +137,7 @@ public class ReliabilitySummary {
             f.format("%4s",  ""); f.format("%6.4f", rjDeleted[i]);
             f.format("%n");
         }
-        f.format("%-60s", "-----------------------------------------------------------------");f.format("%n");
+        f.format("%-60s", "=================================================================");f.format("%n");
         f.format("%-30s", "L2: Guttman's lambda-2");f.format("%n");
         f.format("%-30s", "Alpha: Coefficient alpha");f.format("%n");
         f.format("%-30s", "F-G: Feldt-Gilmer coefficient");f.format("%n");
