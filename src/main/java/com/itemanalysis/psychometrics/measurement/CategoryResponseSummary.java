@@ -198,13 +198,12 @@ public class CategoryResponseSummary {
         }
     }
 
-    public double getDindexLowerProportion(){
+    public double getDindexLowerMean(){
         return lower.getResult();
     }
 
-    public double getDindexUpperProportion(){
+    public double getDindexUpperMean(){
         return upper.getResult();
     }
-
 
 }

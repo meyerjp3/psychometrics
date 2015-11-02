@@ -16,6 +16,7 @@
 package com.itemanalysis.psychometrics.measurement;
 
 import com.itemanalysis.psychometrics.data.ItemType;
+import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.data.VariableType;
 
 import java.util.Iterator;
@@ -57,6 +58,8 @@ public interface ItemScoring {
     public Iterator<Object> categoryIterator();
 
     public String getCategoryScoreString(Object response);
+
+    public VariableName getName();
 
 //    public void addCategory(Category cat);
 

@@ -87,6 +87,55 @@ public class ClassicalItemSummary {
         }
     }
 
+    /**
+     * Create an Object array that contains the statistics for every options for this item. This method is mainly
+     * used for creating printable output.
+     *
+     * @return array of item statistics.
+     */
+    public Object[] getOptionOutputArray(){
+        int count = categorySummary.size()*3;
+        Object[] obj = new Object[count];
+        CategoryResponseSummary temp = null;
+        int col = 0;
+        for(Object o : categorySummary.keySet()){
+            temp = categorySummary.get(o);
+            obj[col++] = temp.getDifficulty();
+            obj[col++] = temp.getStandardDeviation();
+            obj[col++] = temp.getDiscrimination();
+        }
+        return obj;
+    }
+
+    public boolean allCategories(){
+        return allCategories;
+    }
+
+    public int numberOfCategories(){
+        if(allCategories) return categorySummary.size();
+        return 0;
+    }
+
+    public double getItemDifficulty(){
+        return mainItemSummary.getDifficulty();
+    }
+
+    public double getItemStandardDeviation(){
+        return mainItemSummary.getStandardDeviation();
+    }
+
+    public double getItemDiscrimination(){
+        return mainItemSummary.getDiscrimination();
+    }
+
+    public double getDindexLowerMean(){
+        return mainItemSummary.getDindexLowerMean();
+    }
+
+    public double getDindexUpperMean(){
+        return mainItemSummary.getDindexUpperMean();
+    }
+
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
@@ -98,8 +147,8 @@ public class ClassicalItemSummary {
         f.format("% 12.4f", mainItemSummary.getStandardDeviation());
 
         if(discriminationType==DiscriminationType.DINDEX27 || discriminationType==DiscriminationType.DINDEX33){
-            double upper = mainItemSummary.getDindexUpperProportion();
-            double lower = mainItemSummary.getDindexLowerProportion();
+            double upper = mainItemSummary.getDindexUpperMean();
+            double lower = mainItemSummary.getDindexLowerMean();
             double dIndex = 0;
 
             if(variableAttributes.hasScoring()){
@@ -129,8 +178,8 @@ public class ClassicalItemSummary {
                 f.format("% 12.4f", crs.getStandardDeviation());
 
                 if(discriminationType==DiscriminationType.DINDEX27 || discriminationType==DiscriminationType.DINDEX33){
-                    double upper = crs.getDindexUpperProportion();
-                    double lower = crs.getDindexLowerProportion();
+                    double upper = crs.getDindexUpperMean();
+                    double lower = crs.getDindexLowerMean();
                     f.format("% 12.4f", upper);
                     f.format("% 12.4f", lower);
                     f.format("% 12.4f", crs.getDiscrimination());

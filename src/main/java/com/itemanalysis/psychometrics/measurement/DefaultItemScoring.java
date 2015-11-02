@@ -52,6 +52,8 @@ public class DefaultItemScoring implements ItemScoring{
 
     private boolean isContinuous = false;
 
+    private VariableName variableName = null;
+
     public DefaultItemScoring(){
         this(false);
     }
@@ -63,6 +65,7 @@ public class DefaultItemScoring implements ItemScoring{
         minimumPossibleScore = new Min();
         specialDataCodes = new SpecialDataCodes();
         scoreLevels = new TreeSet<Double>();
+        variableName = new VariableName("");//To be consistent with past usage of this class.
     }
 
     public void addCategory(Category cat){
@@ -509,6 +512,10 @@ public class DefaultItemScoring implements ItemScoring{
         }
         Arrays.sort(s);
         return s;
+    }
+
+    public VariableName getName(){
+        return variableName;
     }
 
     /**

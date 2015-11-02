@@ -170,8 +170,10 @@ public class VariableAttributes implements Comparable<VariableAttributes> {
     }
 
     public void setItemScoring(ItemScoring itemScoring){
-        this.itemScoring = itemScoring;
-        type.setItemType(itemScoring.getItemType());
+        if(this.name.equals(itemScoring.getName())){
+            this.itemScoring = itemScoring;
+            type.setItemType(itemScoring.getItemType());
+        }
     }
 
     /**
