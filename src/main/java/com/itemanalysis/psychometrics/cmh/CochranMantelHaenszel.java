@@ -57,6 +57,7 @@ public class CochranMantelHaenszel {
     private double validSampleSize = 0.0;
     private Double cmhChiSquare = null;
     private Double comOddsRatio = null;
+    private ChiSquaredDistribution chiSquare = new ChiSquaredDistribution(1.0);
     double[] ci = null;
 
     public CochranMantelHaenszel(String focalCode, String referenceCode, VariableAttributes groupVariable, VariableAttributes itemVariable,
@@ -350,6 +351,53 @@ public class CochranMantelHaenszel {
         return itemVariable.getName();
     }
 
+    public double getPValue(){
+        double value = cochranMantelHaenszel();
+        double pvalue = 1.0-chiSquare.cumulativeProbability(value);
+        return pvalue;
+    }
+
+    public int getSampleSize(){
+        return (int)validSampleSize;
+    }
+
+    public double getEffectSize(){
+        double effectSize = 0;
+        if(itemVariable.getType().getItemType()== ItemType.BINARY_ITEM){
+            effectSize = commonOddsRatio();
+            if(etsDelta) effectSize = etsDelta(effectSize);
+        }else{
+            effectSize = pF();
+        }
+        return effectSize;
+    }
+
+    public double[] getEffectSizeConfidenceInterval(){
+        double[] confInt = new double[2];
+        if(itemVariable.getType().getItemType()== ItemType.BINARY_ITEM){
+            double effectSize = commonOddsRatio();
+            confInt = commonOddsRatioConfidenceInterval(effectSize);
+            if(etsDelta){
+                confInt[0] = etsDelta(confInt[0]);
+                confInt[1] = etsDelta(confInt[1]);
+            }
+        }else{
+            double smd = pF();
+            confInt = smdConfidenceInterval(smd);
+        }
+        return confInt;
+    }
+
+    public String getETSDifClassification(){
+        String etsClass = "A";
+        if(itemVariable.getType().getItemType()== ItemType.BINARY_ITEM){
+            etsClass = etsBinayClassification(cochranMantelHaenszel(), getPValue(), commonOddsRatio());
+        }else{
+            etsClass = smdDifClass();
+        }
+        return etsClass;
+    }
+
     /**
      * From 1999 South Carolina PACT Technical Documentation
      *
@@ -421,12 +469,9 @@ public class CochranMantelHaenszel {
      */
     public String getDatabaseString(){
         String output = "";
-        ChiSquaredDistribution chiSquare = new ChiSquaredDistribution(1.0);
 
         double cmh = cochranMantelHaenszel();
-        Double pvalue = 1.0;
-        pvalue = 1.0-chiSquare.cumulativeProbability(cmh);
-
+        double pvalue = getPValue();
         double commonOddsRatio = 0.0;
         double[] tempConfInt = {0.0, 0.0};
         double[] confInt = {0.0, 0.0};

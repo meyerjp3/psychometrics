@@ -197,10 +197,13 @@ public class VariableAttributes implements Comparable<VariableAttributes> {
     }
 
     /**
-     First checks for missing data. If missing then the missing response is scored.
-     Otherwise, an item score is computed. IF the item scoring object it is assumed that the data are
-     already scored and are integers. It will parse the response as an integer and return it.
-
+     * First checks for missing data. If missing then the missing response is scored.
+     * Otherwise, an item score is computed. IF the item scoring object it is assumed that the data are
+     * already scored and are integers. It will parse the response as an integer and return it.
+     *
+     * If the response is a String and no scoring or special data codes are associated with it,
+     * then a NumberFormatException will occur.
+     *
      * @param response an item response.
      * @return a score for the response
      */
@@ -208,6 +211,8 @@ public class VariableAttributes implements Comparable<VariableAttributes> {
         if(specialDataCodes.isMissing(response)){
             return specialDataCodes.computeMissingScore(response);
         }else if(itemScoring==null){
+            //Response is a String but has no item scoring or special data codes.
+            //It cannot be parsed as Double and NumberFormatException will occur.
             return Double.parseDouble(response);
         }else{
             return itemScoring.computeItemScore(response);
