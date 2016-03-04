@@ -20,8 +20,8 @@ public class RaschFitStatisticsTest {
         for(int i=0;i<theta.length;i++){
             double v1 = fit.varianceOfResponse(rasch, theta[i]);
             double v2 = rasch.itemInformationAt(theta[i]);
-            System.out.println(v1 + " = " + v2 + ": " + (Math.abs(v1-v2)<1e-15));
-            assertEquals("Testing informaiton", v2, v1, 1e-15);
+//            System.out.println(v1 + " = " + v2 + ": " + (Math.abs(v1-v2)<1e-15));
+            assertEquals("Testing information", v2, v1, 1e-15);
         }
 
     }

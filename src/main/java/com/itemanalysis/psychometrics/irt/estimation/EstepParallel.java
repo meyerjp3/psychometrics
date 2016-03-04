@@ -23,7 +23,7 @@ import java.util.concurrent.RecursiveTask;
 
 /**
  * Estep of the EM algorithm for estimating item parameters in MMLE. The computation is done in parallel if the
- * number of response vectors exceeds {@link #PARALLEL_THRESHOLD}.
+ * number of response vectors exceeds estepParallelThreshold.
  */
 public class EstepParallel extends RecursiveTask<EstepEstimates> {
 
@@ -35,7 +35,7 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
     private ItemResponseVector[] responseVector = null;
     private DistributionApproximation latentDistribution = null;
     private ItemResponseModel[] irm = null;
-    private static int PARALLEL_THRESHOLD = 250;//Use default of 250
+    private static int PARALLEL_THRESHOLD = 250;//A threshold of 250 works best in my tests, but could scale it according to the user's processor.
 
     /**
      * Default constructor may be called recursively for parallel computations.
@@ -44,8 +44,8 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
      * @param irm an array of item response models whose parameters are being estimated
      * @param latentDistribution latent distribution quadrature used for computing the marginal likelihood
      * @param start beginning index for the response vector. Manual calls should always be 0, recursive calls are done automatically.
-     * @param length length of the response vector segment. This length is manually set to the length of teh response vector.
-     *               Recursive calls use the value specified by {@link #PARALLEL_THRESHOLD}.
+     * @param length length of the response vector segment. This length is manually set to the length of the response vector.
+     *               Recursive calls use the value specified by estepParallelThreshold.
      */
     public EstepParallel(ItemResponseVector[] responseVector, ItemResponseModel[] irm, DistributionApproximation latentDistribution, int start, int length){
         this.responseVector = responseVector;
@@ -64,7 +64,7 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
     }
 
     /**
-     * Estep computation when the number of response vectors is less than {@link #PARALLEL_THRESHOLD} or when
+     * Estep computation when the number of response vectors is less than estepParallelThreshold or when
      * the recursive algorithm has reached its stopping condition. In parallel processing, this method represents
      * each chunk that is processed in parallel.
      *
@@ -74,7 +74,7 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
         double response = 0;
         double point = 0.0;
         double density = 0.0;
-        double value = 0.0;
+        double posteriorProbability = 0.0;
         double freq = 0.0;
         EstepEstimates estepEstimates = new EstepEstimates(nItems, ncat, nPoints);
 
@@ -95,22 +95,23 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
             for(int t=0;t<nPoints;t++){
                 density = latentDistribution.getDensityAt(t);
 
-                //nk
-                value = freq*conditionalLikelihood[t]*density/marginalLikelihood;
-                estepEstimates.incrementNt(t, value);
+                posteriorProbability = freq*conditionalLikelihood[t]*density/marginalLikelihood;
+                responseVector[l].setPosteriorProbability(posteriorProbability);
 
-                //rjkt
+                //increment nk
+                estepEstimates.incrementNt(t, posteriorProbability);
+
+                //increment rjkt
                 for(int j=0;j<nItems;j++){
                     response = Byte.valueOf(responseVector[l].getResponseAt(j)).doubleValue();
 
                     if(response!=-1){//Do not count missing responses
                         for(int k=0;k<irm[j].getNcat();k++){
 
-                            //TODO might need to change k to the item score weight??
-                            value = 0;
-                            if((int)response==k) value = freq*conditionalLikelihood[t]*density/marginalLikelihood; //value = freq*clike*density/mlike;
+                            if((int)response==k){
+                                estepEstimates.incrementRjkt(j, k, t, posteriorProbability);
+                            }
 
-                            estepEstimates.incrementRjkt(j, k, t, value);
                         }
                     }
 
@@ -160,16 +161,7 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
 
             response = Byte.valueOf(responseVector.getResponseAt(j)).intValue();
             if(response!=-1){
-
                 value *= irm[j].probability(quadPoint, response);
-
-//Not sure why I was using a loop here, when I could have just used the response directly
-//                for(int k=0;k<ncat[j];k++){
-//                    //TODO might need to change  k to the item score weight
-//                    if(response==k) value *= irm[j].probability(quadPoint, k);
-//
-//                }
-
             }
 
 

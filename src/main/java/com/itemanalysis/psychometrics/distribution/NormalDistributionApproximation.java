@@ -15,6 +15,10 @@
  */
 package com.itemanalysis.psychometrics.distribution;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
+import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 import java.util.Formatter;
@@ -26,23 +30,7 @@ import java.util.Formatter;
  * distribution (mean=0, sd=1), but the user cna optionally provide a different mean and standard deviation.
  *
  */
-public final class NormalDistributionApproximation implements DistributionApproximation {
-
-//    private double mean = 0.0;
-//
-//    private double sd = 1.0;
-//
-//    private double min = 0.0;
-//
-//    private double max = 0.0;
-//
-//    private double range = 0.0;
-
-    private int numberOfPoints = 0;
-
-    private double[] points = null;
-
-    private double[] density = null;
+public final class NormalDistributionApproximation extends AbstractDistributionApproximation {
 
     /**
      * Creates a numerical approximation to the standard normal distribution. Evaluation points will lie between
@@ -68,14 +56,7 @@ public final class NormalDistributionApproximation implements DistributionApprox
      * @param numberOfPoints number of evaluation points (and corresponding number of density values).
      */
     public NormalDistributionApproximation(double mean, double sd, double min, double max, int numberOfPoints)throws IllegalArgumentException{
-        this.numberOfPoints = numberOfPoints;
-
-        //force ordering of min and max from lowest to highest
-        if(max<min){
-            double temp = min;
-            min = max;
-            max = temp;
-        }
+        initialize(numberOfPoints, min, max);
 
         //If mean is outside min or max value or is on the boundary (an invalid case),
         // make the mean the midpoint between min and max.
@@ -83,119 +64,37 @@ public final class NormalDistributionApproximation implements DistributionApprox
             throw new IllegalArgumentException("Invalid parameters for normal distribution approximation");
         }
 
-        initialize(min, max, mean, sd);
+        this.setNormalPointsAndWeights(mean, sd);
 
     }
 
-    private void initialize(double min, double max, double mean, double sd){
-        //create points
-        double range = max-min;
+    private void initialize(int numberOfPoints, double min, double max){
+        this.numberOfPoints = numberOfPoints;
+        this.min = min;
+        this.max = max;
+
+        //Enforce that min <= max
+        if(this.min>this.max){
+            double temp = this.min;
+            this.min = this.max;
+            this.max = temp;
+        }
+
+        range = this.max-this.min;
         points = new double[numberOfPoints];
-        double step = range/((double)numberOfPoints - 1.0);
-        points[0] = min;
-        for(int i=1;i<numberOfPoints;i++){
-            points[i] = points[i-1]+step;
-        }
-
-        //compute density
-        NormalDistribution normal = new NormalDistribution(mean, sd);
-        density = new double[numberOfPoints];
-        double densitySum = 0.0;
-        for(int i=0;i<numberOfPoints;i++){
-            density[i] = normal.density(points[i]);
-            densitySum += density[i];
-        }
-
-        //make sure probabilities sum to unity
-        for(int i=0;i<numberOfPoints;i++){
-            density[i] = density[i]/densitySum;
-        }
-
+        weights = new double[numberOfPoints];
+        step = range/((double)numberOfPoints - 1.0);
     }
 
-    /**
-     * Gets the array of evaluation points.
-     *
-     * @return evaluation points.
-     */
-    public double[] getPoints(){
-        return points;
-    }
-
-    /**
-     * Gets the array of density values.
-     *
-     * @return density values.
-     */
-    public double[] evaluate(){
-        return density;
-    }
-
-    /**
-     * Gets an evaluation points at the specified index of the array.
-     *
-     * @param index array index of evaluation point.
-     * @return an evaluation point.
-     */
-    public double getPointAt(int index){
-        return points[index];
-    }
-
-    /**
-     * Gets a density value at the specified index of the array.
-     *
-     * @param index array index of density value.
-     * @return a density value.
-     */
-    public double getDensityAt(int index){
-        return density[index];
-    }
-
-    public void setDensityAt(int index, double value){
-        density[index] = value;
+    public void setDensityAt(int index, double value){//TODO should only allow densities from a normal distribution
+        weights[index] = value;
     }
 
     public void setPointAt(int index, double value){
         points[index] = value;
     }
 
-    public double getMinimum(){
-        return points[0];
-    }
 
-    public double getMaximum(){
-        return points[numberOfPoints-1];
-    }
-
-    public double getMean(){
-        double m = 0.0;
-        double denom = 0.0;
-        for(int i=0;i<numberOfPoints;i++){
-            m += points[i]*density[i];
-            denom += density[i];
-        }
-        return m/denom;
-    }
-
-    public double getStandardDeviation(){
-        double m = getMean();
-        double m2 = 0;
-        double dev = 0;
-        for(int i=0;i<numberOfPoints;i++){
-            dev = (points[i]-m);
-            m2 += dev*dev*density[i];
-        }
-        return Math.sqrt(m2);
-    }
-
-    /**
-     * Gets the number of evaluation points (and corresponding number of density values).
-     *
-     * @return number of evaluation points.
-     */
-    public int getNumberOfPoints(){
-        return numberOfPoints;
-    }
 
     @Override
     public String toString(){
@@ -208,7 +107,7 @@ public final class NormalDistributionApproximation implements DistributionApprox
         f.format("%35s", "-----------------------------------"); f.format("%n");
 
         for(int i=0;i<numberOfPoints;i++){
-            f.format("%10.6f", points[i]);f.format("%5s", "");f.format("%10.8e", density[i]);f.format("%10s", "");f.format("%n");
+            f.format("%10.6f", points[i]);f.format("%5s", "");f.format("%10.8e", weights[i]);f.format("%10s", "");f.format("%n");
         }
 
         f.format("%35s", "==================================="); f.format("%n");

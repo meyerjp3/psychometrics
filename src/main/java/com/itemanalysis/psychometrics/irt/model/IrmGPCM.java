@@ -427,6 +427,7 @@ public class IrmGPCM extends AbstractItemResponseModel {
      * @param slope slope transformation coefficient.
      */
     public void scale(double intercept, double slope){
+        if(isFixed) return;//DO NOT transform the item parameters when they are fixed
         discrimination /= slope;
         for(int k=1;k<ncat;k++){//start at 1 because first step is fixed to zero. Do not rescale it.
             step[k] = step[k]*slope + intercept;

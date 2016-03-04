@@ -19,6 +19,7 @@ import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
 import com.itemanalysis.psychometrics.distribution.UniformDistributionApproximation;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
 
 public class KernelDensity implements DistributionApproximation {
@@ -50,6 +51,11 @@ public class KernelDensity implements DistributionApproximation {
      * number of evaluation points
      */
     private int numPoints = 0;
+
+    protected boolean interpolatorUpdateNeeded = false;
+
+    //Cubic spline interpolator
+    private UnivariateFunction interpolationFunction = null;
 
 	public KernelDensity(KernelFunction kernel, Bandwidth h, UniformDistributionApproximation uniform){
         this.kernel = kernel;
@@ -213,6 +219,75 @@ public class KernelDensity implements DistributionApproximation {
             m2 += (points[i]-m)*(points[i]-m)*density[i];
         }
         return Math.sqrt(m2);
+    }
+
+    /**
+     * Uses current quadrature points and weights to compute the mean and standard deviation of the
+     * density, and tehn standardizes the distribution to have a mean of zero and a standard deviation of one.
+     * It achieves standardization in one of two possible ways. If keepPoints is true, the original points are
+     * retained and linear interpolation of the empiricial cumulative distribution is used to obtain the new
+     * weights. That is, the points are never changed, but the distribution is standardized. If keepPoints is
+     * false, the original weights are retained, but the points are transformed to standardize the distribution.
+     *
+     * @param keepPoints if true original points are retained and weights are computed at these points using
+     *                   linear interpolation of the empirical cumulative distribution. If false, original weights
+     *                   are retained and standardization is achieved by linearly transforming the original points.
+     * @return transformation coefficients as a double array with two values used for the linear transformation of
+     * the points. The first value is the slope and the second value is the intercept.
+     */
+    public double[] standardize(boolean keepPoints){
+
+        //Compute current mean and standard deviation
+        double newMean = this.getMean();
+        double newSD = this.getStandardDeviation();
+
+        //Compute transformation coefficients
+        double slope = 1.0/newSD;
+        double intercept = -slope*newMean;
+        double[] coef = {slope, intercept};
+
+        //Keep points and change weights to standardize the distribution.
+        if(keepPoints){
+            //Transform points and compute cumulative sum of weights (i.e. cumulative probabilities)
+            double[] x = new double[numPoints+2];
+            double[] w = new double[numPoints+2];
+            double cumSum = 0;
+            for(int i=0;i<numPoints;i++){
+                x[i+1] = points[i]*slope+intercept;
+                cumSum += density[i];
+                w[i+1] = cumSum;
+            }
+
+            //To interpolate at the boundary, set lower bound just below the minimum and
+            //the upper bound just above the maximum.
+            double lower = Math.min(getMinimum(), x[1]);
+            double upper = Math.max(getMaximum(), x[numPoints]);
+            x[0] = lower-0.05;
+            x[numPoints+1] = upper+0.05;
+
+            //Set weights to zero for the lower boundary and 1.0 for the upper boundary
+            w[0] = 0.0;
+            w[numPoints+1] = 1.0;
+
+            //Interpolator object
+            UnivariateFunction interpolationFunction = null;
+            UnivariateInterpolator interpolator = new LinearInterpolator();
+            interpolationFunction = interpolator.interpolate(x, w);
+            interpolatorUpdateNeeded = false;
+
+            density[0] = interpolationFunction.value(points[0]);
+            for(int i=1;i<numPoints;i++){
+                density[i] = interpolationFunction.value(points[i])-interpolationFunction.value(points[i-1]);
+            }
+        }
+        //Keep weights and linearly transform points to standardize the distribution
+        else{
+            for(int i=0;i<numPoints;i++){
+                points[i] = points[i]*slope+intercept;
+            }
+        }
+
+        return coef;
     }
 
 }

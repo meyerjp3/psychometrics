@@ -438,6 +438,7 @@ public class Irm4PL extends AbstractItemResponseModel {
      * @param slope slope transformation coefficient.
      */
     public void scale(double intercept, double slope){//TODO check for correctness
+        if(isFixed) return;//DO NOT transform the item parameters when they are fixed
         difficulty = intercept + slope*difficulty;
         discrimination = discrimination/slope;
         difficultyStdError *= slope;

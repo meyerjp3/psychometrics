@@ -1,5 +1,6 @@
 package com.itemanalysis.psychometrics.irt.equating;
 
+import com.itemanalysis.psychometrics.distribution.ContinuousDistributionApproximation;
 import com.itemanalysis.psychometrics.distribution.UniformDistributionApproximation;
 import com.itemanalysis.psychometrics.distribution.UserSuppliedDistributionApproximation;
 import com.itemanalysis.psychometrics.irt.model.*;
@@ -247,8 +248,9 @@ public class IrtScaleLinkingTest {
         double[] points = {-4.0000, -3.1110, -2.2220, -1.3330, -0.4444, 0.4444, 1.3330, 2.2220, 3.1110, 4.0000};
         double[] xDensity = {0.0001008, 0.002760, 0.03021, 0.1420, 0.3149, 0.3158, 0.1542, 0.03596, 0.003925, 0.0001862};
         double[] yDensity = {0.0001173, 0.003242, 0.03449, 0.1471, 0.3148, 0.3110, 0.1526, 0.03406, 0.002510, 0.0001116};
-        UserSuppliedDistributionApproximation distX = new UserSuppliedDistributionApproximation(points, xDensity);
-        UserSuppliedDistributionApproximation distY = new UserSuppliedDistributionApproximation(points, yDensity);
+
+        ContinuousDistributionApproximation distX = new ContinuousDistributionApproximation(points, xDensity);
+        ContinuousDistributionApproximation distY = new ContinuousDistributionApproximation(points, yDensity);
 
         IrtScaleLinking irtScaleLinking = new IrtScaleLinking(irmX, irmY, distX, distY);
         irtScaleLinking.setPrecision(6);

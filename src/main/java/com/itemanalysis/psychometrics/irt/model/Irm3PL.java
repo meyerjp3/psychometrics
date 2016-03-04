@@ -30,6 +30,7 @@ import java.util.Formatter;
  */
 public class Irm3PL extends AbstractItemResponseModelWithGradient {
 
+    private boolean raschModel = false;
     private double discrimination = 1.0;
     private double difficulty = 0.0;
     private double guessing = 0.0;
@@ -95,6 +96,7 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      * @param D scaling factor
      */
     public Irm3PL(double difficulty, double D){
+        this.raschModel = true;
         this.difficulty = difficulty;
         this.proposalDiscrimination = 1.0;
         this.proposalDifficulty = difficulty;
@@ -722,10 +724,16 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      * @param slope slope transformation coefficient.
      */
     public void scale(double intercept, double slope){
+        if(isFixed) return;//DO NOT transform the item parameters when they are fixed
         difficulty = intercept + slope*difficulty;
-        discrimination = discrimination/slope;
         difficultyStdError *= slope;
-        discriminationStdError *= slope;
+
+        //Do NOT transform discrimination parameter if it is a Rasch model because discrimination is fixed to 1.
+        if(!raschModel){
+            discrimination = discrimination/slope;
+            discriminationStdError *= slope;
+        }
+
     }
 
 //=====================================================================================================================//
@@ -766,7 +774,7 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      * @return type of item response model.
      */
     public IrmType getType(){
-        return IrmType.L3;
+        return IrmType.L3;//TODO should this be more specific and indicate a 2pl or Rasch model when those models are used?
     }
 
     /**

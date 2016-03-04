@@ -73,4 +73,6 @@ public interface DistributionApproximation {
 
     public double getStandardDeviation();
 
+    public double[] standardize(boolean keepPoints);
+
 }

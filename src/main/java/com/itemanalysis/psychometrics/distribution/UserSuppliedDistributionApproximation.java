@@ -23,14 +23,11 @@ import java.util.Formatter;
  * A distribution approximation that allows the user to provide the evaluation points and the density values.
  * This is a class that can be used for numeric integration with user provided quadrature points and weights.
  */
-public final class UserSuppliedDistributionApproximation implements DistributionApproximation{
+@Deprecated
+public final class UserSuppliedDistributionApproximation extends AbstractDistributionApproximation{
 
     private ResizableDoubleArray pointsStore = new ResizableDoubleArray();
     private ResizableDoubleArray densityStore = new ResizableDoubleArray();
-    private double[] points = null;
-    private double[] density = null;
-    private int numberOfPoints = 0;
-    private double weightSum = 0;
 
     /**
      * Create the distribution approximation with an array of evaluation points and an array of density values
@@ -43,6 +40,8 @@ public final class UserSuppliedDistributionApproximation implements Distribution
         this.pointsStore.addElements(points);
         this.densityStore.addElements(density);
         this.numberOfPoints = points.length;
+        this.points = new double[numberOfPoints];
+        this.weights = new double[numberOfPoints];
     }
 
     /**
@@ -51,12 +50,13 @@ public final class UserSuppliedDistributionApproximation implements Distribution
      * or {@link #increment(double)};
      */
     public UserSuppliedDistributionApproximation(){
-
+        points = new double[numberOfPoints];
+        weights = new double[numberOfPoints];
     }
 
     /**
      * Increment the array of evaluation points and weights with the provided values.
-     * 
+     *
      * @param point an evaluation point.
      * @param density a density value.
      */
@@ -68,105 +68,22 @@ public final class UserSuppliedDistributionApproximation implements Distribution
 
     /**
      * An evaluation points. This method will result in uniform density values.
-     * 
+     *
      * @param point
      */
     public void increment(double point){
         this.pointsStore.addElement(point);
         numberOfPoints++;
-        weightSum += 1.0;
     }
 
-    /**
-     * Gets the number of evaluation points (and corresponding number of density values).
-     * 
-     * @return number of evaluation points.
-     */
-    public int getNumberOfPoints(){
-        return numberOfPoints;
-    }
 
-    /**
-     * Gets the array of evaluation points.
-     * 
-     * @return evaluation points.
-     */
-    public double[] getPoints(){
-        if(points!=null) return points;
-        points = pointsStore.getElements();
-        return points;
-    }
-
-    /**
-     * Gets the array of density values.
-     * 
-     * @return density values.
-     */
-    public double[] evaluate(){
-        if(density!=null) return density;
-        if(points==null) getPoints();
-        density = densityStore.getElements();
-        if(weightSum>0){
-            for(int i=0;i<density.length;i++){
-                density[i] = density[i]/weightSum;
-            }
-        }
-        return density;
-    }
-
-    /**
-     * Gets an evaluation point from the array at position given by the index.
-     * 
-     * @param index array index of evaluation point.
-     * @return an evaluation point.
-     */
-    public double getPointAt(int index){
-        if(points==null) getPoints();
-        return points[index];
-    }
-
-    /**
-     * Gets the density value from the array at the psition given by index.
-     * 
-     * @param index array index of density value.
-     * @return a density value.
-     */
-    public double getDensityAt(int index){
-        if(density==null) evaluate();
-        return density[index];
-    }
 
     public void setDensityAt(int index, double value){
-        density[index] = value;
+        weights[index] = value;
     }
 
     public void setPointAt(int index, double value){
         points[index] = value;
-    }
-
-    public double getMinimum(){
-        return points[0];
-    }
-
-    public double getMaximum(){
-        return  points[numberOfPoints-1];
-    }
-
-    public double getMean(){
-        double m = 0.0;
-        for(int i=0;i<numberOfPoints;i++){
-            m += points[i]*density[i];
-        }
-        return m;
-    }
-
-    public double getStandardDeviation(){
-        double m = getMean();
-        double m2 = 0;
-        for(int i=0;i<numberOfPoints;i++){
-            m2 += (points[i]-m)*(points[i]-m)*density[i];
-        }
-        return Math.sqrt(m2);
     }
 
     @Override
@@ -180,7 +97,7 @@ public final class UserSuppliedDistributionApproximation implements Distribution
         f.format("%35s", "-----------------------------------"); f.format("%n");
 
         for(int i=0;i<numberOfPoints;i++){
-            f.format("%10.6f", points[i]);f.format("%5s", "");f.format("%10.8e", density[i]);f.format("%10s", "");f.format("%n");
+            f.format("%10.6f", points[i]);f.format("%5s", "");f.format("%10.8e", weights[i]);f.format("%10s", "");f.format("%n");
         }
 
         f.format("%35s", "==================================="); f.format("%n");

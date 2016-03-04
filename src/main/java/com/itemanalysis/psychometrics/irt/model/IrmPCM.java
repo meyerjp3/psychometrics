@@ -267,6 +267,7 @@ public class IrmPCM extends AbstractItemResponseModel{
     }
 
     public void scale(double intercept, double slope){
+        if(isFixed) return;//DO NOT transform the item parameters when they are fixed
         difficulty = difficulty*slope + intercept;
         difficultyStdError *= slope;
         for(int i=0;i<ncatM1;i++){

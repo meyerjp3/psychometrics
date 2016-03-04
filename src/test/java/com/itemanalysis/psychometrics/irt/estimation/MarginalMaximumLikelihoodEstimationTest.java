@@ -1,11 +1,11 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.data.VariableName;
+import com.itemanalysis.psychometrics.distribution.ContinuousDistributionApproximation;
 import com.itemanalysis.psychometrics.distribution.NormalDistributionApproximation;
 import com.itemanalysis.psychometrics.irt.model.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.util.Precision;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.*;
@@ -13,7 +13,6 @@ import java.io.*;
 import static org.junit.Assert.*;
 
 public class MarginalMaximumLikelihoodEstimationTest {
-
 
     /**
      * True results obtained from mirt package in R.
@@ -25,7 +24,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
      */
 //    @Ignore
     @Test
-    public void LSAT6Test(){
+    public void LSAT6TestComparison(){
         System.out.println("LSAT6 data 2PL model");
 
         byte[][] u = {
@@ -87,11 +86,14 @@ public class MarginalMaximumLikelihoodEstimationTest {
             irm[j] = pl2;
         }
 
-        //mirt R package default quadrature
+        //mirt R package default quadrature points and weights
         double quadPoints = 41;
         double min = -.8 * Math.sqrt(quadPoints);
         double max = -1*min;
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(min, max, (int)quadPoints);
+        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation((int)quadPoints, min, max, 0, 1);
+
+        StartingValues startingValues = new StartingValues(responseData, irm);
+        irm = startingValues.computeStartingValues();
 
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
         EMStatusListener statusListener = new DefaultEMStatusListener();
@@ -150,7 +152,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         double quadPoints = 41;
         double min = -.8 * Math.sqrt(quadPoints);
         double max = -1*min;
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(min, max, (int)quadPoints);
+        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation((int)quadPoints, min, max, 0, 1);
 
         StartingValues startingValues = new StartingValues(responseData, irm);
         irm = startingValues.computeStartingValues();
@@ -230,7 +232,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         irm = startValues.computeStartingValues();
 
         //set latent distribution
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
+        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -306,14 +308,14 @@ public class MarginalMaximumLikelihoodEstimationTest {
         irm = startValues.computeStartingValues();
 
         //set latent distribution
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
+        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
         DefaultEMStatusListener emStatus = new DefaultEMStatusListener();
         mmle.addEMStatusListener(emStatus);
         mmle.setVerbose(true);
-        mmle.estimateParameters(1e-3, 250, false);
+        mmle.estimateParameters(1e-3, 250);
         mmle.computeItemStandardErrors();
         System.out.println();
         System.out.println(mmle.printItemParameters());
@@ -330,53 +332,34 @@ public class MarginalMaximumLikelihoodEstimationTest {
 
     }
 
-    /**
-     * True results obtained using ICL with the following syntax.
-     *
-     * options -D 1.7
-     * options -default_prior_a {beta 1.75 3.0 0.0 3.0}
-     * options -default_prior_b {beta 1.01 1.01 -6.0 6.0}
-     * options -default_prior_c {beta 2 4 0 1}
-     * allocate_items_dist 5
-     * #2PL model with a fixed c parameter
-     * for {set i 1} {$i <= 5} {incr i} {
-     *     item_set_model $i 2PL
-     * }
-     * read_examinees lsat7-icl-data.txt 5i1
-     * output -log_file lsat7-latent-dist-ICL-results.log
-     * starting_values_dichotomous
-     *
-     * EM_steps -max_iter 1000 -crit 0.001 -estim_dist
-     * print -item_param -latent_dist
-     * release_items_dist
-     *
-     */
-//    @Test
-    public void lsat7LatentDistributionTest(){
-        System.out.println("LSAT 7 - ICL test 2PL with Latent Distribution");
+    @Test
+    public void lemond3plTest(){
+        System.out.println("Lemond data 3PL comparison to flexMIRT");
+
+        int nItems = 40;
 
         //Read file and create response vectors
         ItemResponseFileSummary fileSummary = new ItemResponseFileSummary();
-        File f = FileUtils.toFile(this.getClass().getResource("/testdata/lsat7-expanded.txt"));
-        ItemResponseVector[] responseData = fileSummary.getResponseVectors(f, true);
+        File f = FileUtils.toFile(this.getClass().getResource("/testdata/lemond-jan15.csv"));
+        ItemResponseVector[] responseData = fileSummary.getResponseVectors(f, 2, nItems, true);
 
-        //parameter estimates from ICL
-        double[][] iclParam = {
-                {0.597384,	-1.548385},
-                {0.646839,	-0.449039},
-                {1.005875,	-0.759424},
-                {0.466020,	-0.331112},
-                {0.443911,	-2.178220}
+        //parameter estimates from flexMIRT
+        double[][] flexMIRTParam = {
+
         };
 
         //Create array of item response models
-        ItemResponseModel[] irm = new ItemResponseModel[5];
+        ItemResponseModel[] irm = new ItemResponseModel[nItems];
         Irm3PL pl3 = null;
-        for(int j=0;j<5;j++) {
-            pl3 = new Irm3PL(1.0, 0.0, 1.7);
+        for(int j=0;j<nItems;j++) {
+            pl3 = new Irm3PL(1.0, 0.0, 0.05, 1.0);
             pl3.setName(new VariableName("item"+(j+1)));
-            pl3.setDiscriminationPrior(new ItemParamPriorBeta4(1.75, 3.0, 0.0, 3.0));
-            pl3.setDifficultyPrior(new ItemParamPriorNormal(0.0, 2.0));
+//            pl3.setDiscriminationPrior(new ItemParamPriorBeta4(1.75, 3.0, 0.0, 3.0));
+//            pl3.setDifficultyPrior(new ItemParamPriorBeta4(1.01, 1.01, -6.0, 6.0));
+            pl3.setGuessingPrior(new ItemParamPriorBeta4(2.0, 4.0, 0.0, 1.0));
+
+//            pl3.setDiscriminationPrior(new ItemParamPriorLogNormal(0, 0.25));
+//            pl3.setGuessingPrior(new ItemParamPriorBeta4(1.0, 4.0, 0.0, 1.0));
             irm[j] = pl3;
         }
 
@@ -384,23 +367,25 @@ public class MarginalMaximumLikelihoodEstimationTest {
         irm = startValues.computeStartingValues();
 
         //set latent distribution
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
+        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(49, -6, 6, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
         DefaultEMStatusListener emStatus = new DefaultEMStatusListener();
         mmle.addEMStatusListener(emStatus);
         mmle.setVerbose(true);
-        mmle.estimateParameters(1e-3, 250, true);
+        mmle.estimateParameters(1e-4, 250);
         mmle.computeItemStandardErrors();
         System.out.println();
         System.out.println(mmle.printItemParameters());
-        System.out.println();
-        System.out.println(mmle.printLatentDistribution());
+//        System.out.println();
+//        System.out.println(mmle.printLatentDistribution());
+//        mmle.computeSX2ItemFit(1);
+//        System.out.println(mmle.printItemFitStatistics());
 
         for(int j=0;j<5;j++){
-            assertEquals("  LSAT 7 discrimination test", iclParam[j][0], irm[j].getDiscrimination(), 1e-2);
-            assertEquals("  LSAT 7 difficulty test", iclParam[j][1], irm[j].getDifficulty(), 1e-2);
+//            assertEquals("  LSAT 7 discrimination test", flexMIRTParam[j][0], irm[j].getDiscrimination(), 1e-2);
+//            assertEquals("  LSAT 7 difficulty test", flexMIRTParam[j][1], irm[j].getDifficulty(), 1e-2);
         }
 
     }
@@ -481,7 +466,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         }
 
 
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
+        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
 
 
 
@@ -605,7 +590,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         StartingValues startValues = new StartingValues(responseData, irm);
         irm = startValues.computeStartingValues();
 
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
+        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -728,7 +713,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         startValues.addEMStatusListener(emStatus);
         irm = startValues.computeStartingValues();
 
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
+        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -842,7 +827,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         StartingValues startValues = new StartingValues(responseData, irm);
         irm = startValues.computeStartingValues();
 
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
+        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -872,245 +857,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
 
     }
 
-    /**
-     * BILOG estimates obtained with the following commands:
-     *
-     * >GLOBAL DFName = 'binary-items.txt',
-     * NPArm = 3, SAVE;
-     * >SAVE PARM='binary-items-ipar.txt';
-     * >LENGTH NITEMS=50;
-     * >INPUT NTOtal=50, NIDCHAR = 4;
-     * >ITEMS INAMES=(ITEM01(1)ITEM50);
-     * >TEST1 TNAme = 'BINITEMS', INUMBER = (1(1)50);
-     * (4A1, 50A1)
-     * >CALIB NQPT=40, CYCLES=250, NEWTON=100, CRIT=0.001, ACCel = 1.0000,
-     *  CHI=15, NOTPRIOR, NOSPRIOR, GPRIOR;
-     * >SCORE ;
-     *
-     */
-//    @Test
-    public void binaryItems3plBILOGLatentDensityTest(){
-        System.out.println("Binary items - 3PL with Guessing Prior and Estimating Latent Density Compare to BILOG");
 
-        //Read file and create response vectors
-        ItemResponseFileSummary fileSummary = new ItemResponseFileSummary();
-        File f = FileUtils.toFile(this.getClass().getResource("/testdata/binary-items.txt"));
-        ItemResponseVector[] responseData = fileSummary.getResponseVectors(f, 1, 50, true);
-
-        //True estimates from bilog
-        double[][] bilog_param = {
-                {0.76133,-1.22509,0.2113},
-                {0.92189,1.07408,0.13571},
-                {0.72703,0.65897,0.25918},
-                {1.27024,-0.68308,0.14836},
-                {1.15387,-0.06442,0.27201},
-                {0.92518,-0.91416,0.08166},
-                {0.87321,-0.84708,0.13198},
-                {0.93018,1.1043,0.2891},
-                {0.79706,-1.3116,0.14243},
-                {1.72203,-1.8205,0.24238},
-                {0.83544,-1.89931,0.19459},
-                {1.36628,1.77853,0.11315},
-                {0.73148,0.16842,0.14364},
-                {0.90213,-0.0421,0.16798},
-                {1.06181,0.67268,0.20611},
-                {1.16179,-1.71223,0.18074},
-                {1.19246,-0.83291,0.33688},
-                {0.95898,-0.02788,0.25335},
-                {1.11951,-0.1806,0.23747},
-                {1.04921,0.07539,0.22469},
-                {1.05543,-2.9846,0.19586},
-                {0.86494,-1.40935,0.32644},
-                {1.05751,-0.75684,0.17975},
-                {0.77482,0.15875,0.27027},
-                {0.97071,1.17619,0.18718},
-                {0.86315,-1.02906,0.16676},
-                {0.49058,3.13578,0.23198},
-                {0.92417,-0.20571,0.11334},
-                {0.89932,-0.47753,0.09831},
-                {1.07933,0.20442,0.16155},
-                {0.82483,-0.22567,0.15778},
-                {1.00078,-0.41169,0.25581},
-                {1.02615,-0.98954,0.25819},
-                {0.83288,1.42046,0.158},
-                {0.94931,-1.23983,0.17329},
-                {0.68824,-0.16529,0.31126},
-                {1.15258,0.00888,0.1725},
-                {0.8883,-0.07148,0.23437},
-                {1.15039,0.92475,0.1216},
-                {1.15253,2.11288,0.2494},
-                {0.916,-0.44564,0.28078},
-                {0.72577,-2.03332,0.19499},
-                {0.95793,0.5453,0.16748},
-                {1.70146,-0.53311,0.20913},
-                {0.86201,0.71445,0.13864},
-                {0.65701,-0.18418,0.24062},
-                {1.10115,-0.65145,0.23706},
-                {1.13652,1.50801,0.11549},
-                {0.89878,0.2641,0.1186},
-                {0.86153,0.1335,0.10119}
-        };
-
-        //Create array of item response models
-        ItemResponseModel[] irm = new ItemResponseModel[50];
-        Irm3PL pl3 = null;
-        for(int j=0;j<50;j++) {
-            //3PL with no priors
-            pl3 = new Irm3PL(1.0, 0.0, 0.05, 1.7);//Starting value of guessing parameter must be > 0.
-            pl3.setName(new VariableName("Item" + (j+1)));
-            pl3.setGuessingPrior(new ItemParamPriorBeta4(5, 17, 0.0, 1.0));
-//            pl3.setDifficultyPrior(new ItemParamPriorNormal(0.0, 2.0));
-//            pl3.setDiscriminationPrior(new ItemParamPriorBeta4(1.75, 3.0, 0.0, 3.0));
-            irm[j] = pl3;
-        }
-
-        StartingValues startValues = new StartingValues(responseData, irm);
-        irm = startValues.computeStartingValues();
-
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
-
-        //estimate parameters
-        MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
-        DefaultEMStatusListener emStatus = new DefaultEMStatusListener();
-        mmle.addEMStatusListener(emStatus);
-        mmle.setVerbose(true);
-        mmle.estimateParameters(0.001, 150, true);
-        mmle.computeItemStandardErrors();
-        System.out.println();
-        System.out.println(mmle.printItemParameters());
-        System.out.println();
-        System.out.println();
-        System.out.println(mmle.printLatentDistribution());
-
-        for(int j=0;j<50;j++){
-            assertEquals("Binary items - discrimination test", bilog_param[j][0], irm[j].getDiscrimination(), 1e-2);
-            assertEquals("Binary items - difficulty test", bilog_param[j][1], irm[j].getDifficulty(), 1e-2);
-            assertEquals("Binary items - guessing test", bilog_param[j][2], irm[j].getGuessing(), 1e-2);
-        }
-
-    }
-
-    /**
-     * NOTE ***This test currently fails because updating latent distribution is note correctly implemente din psychometrics.***
-     *
-     * Test compares results to those obtained from ICL. The ICL command file was
-     *   output -log_file binary-items-ICL-results.log
-     *   options -D 1.7
-     *   options -default_prior_a none
-     *   options -default_prior_b none
-     *   options -default_prior_c {beta 5 17 0 1}
-     *   allocate_items_dist 50
-     *   read_examinees binary-items-for-ICL.txt 50i1
-     *   starting_values_dichotomous
-     *   EM_steps -max_iter 550 -crit 0.001 -estim_dist
-     *   print -item_param -latent_dist
-     *   write_item_param binary-items-output.txt
-     *   release_items_dist
-     *
-     *
-     */
-//    @Test
-    public void binaryItems3plICLLatentDensityTest(){
-        System.out.println("Binary items - 3PL with Guessing Prior - Estimating Latent Density - Compare to ICL");
-
-        //Read file and create response vectors
-        ItemResponseFileSummary fileSummary = new ItemResponseFileSummary();
-        File f = FileUtils.toFile(this.getClass().getResource("/testdata/binary-items.txt"));
-        ItemResponseVector[] responseData = fileSummary.getResponseVectors(f, 1, 50, true);
-
-        //True loglikelihood from ICL
-        double icl_loglike = -124969.8947;
-
-        //True estimates from ICL
-        double[][] icl_param = {
-                {0.76347,-1.220144,0.212395},
-                {0.924354,1.071646,0.135753},
-                {0.729147,0.657936,0.259344},
-                {1.273566,-0.680918,0.148698},
-                {1.156938,-0.063871,0.272147},
-                {0.92746,-0.911331,0.082136},
-                {0.875503,-0.844159,0.132513},
-                {0.932577,1.101763,0.289127},
-                {0.798808,-1.308274,0.142742},
-                {1.726537,-1.81536,0.243826},
-                {0.837149,-1.89469,0.195161},
-                {1.369644,1.774273,0.113152},
-                {0.733356,0.168418,0.143773},
-                {0.904579,-0.041443,0.168195},
-                {1.064602,0.671262,0.206159},
-                {1.1643,-1.707713,0.181641},
-                {1.195676,-0.830128,0.337304},
-                {0.961585,-0.027297,0.253533},
-                {1.122585,-0.179624,0.237685},
-                {1.052078,0.075657,0.224839},
-                {1.056582,-2.980166,0.196181},
-                {0.867291,-1.40431,0.327393},
-                {1.060104,-0.754592,0.180022},
-                {0.776832,0.158786,0.270386},
-                {0.973238,1.173471,0.187204},
-                {0.865314,-1.025846,0.167251},
-                {0.491908,3.128096,0.232012},
-                {0.92658,-0.20472,0.113559},
-                {0.901685,-0.475711,0.098661},
-                {1.082212,0.204264,0.16166},
-                {0.826917,-0.224698,0.157947},
-                {1.003709,-0.409727,0.256233},
-                {1.029246,-0.985538,0.259123},
-                {0.835143,1.41714,0.158039},
-                {0.951621,-1.236146,0.173898},
-                {0.690575,-0.162861,0.311894},
-                {1.155624,0.009218,0.17263},
-                {0.89074,-0.070704,0.234589},
-                {1.153326,0.922644,0.121614},
-                {1.15512,2.107876,0.249394},
-                {0.918532,-0.443734,0.28112},
-                {0.727258,-2.028257,0.195629},
-                {0.96052,0.544287,0.167568},
-                {1.70593,-0.531446,0.209331},
-                {0.864322,0.713006,0.138718},
-                {0.658931,-0.182462,0.241043},
-                {1.10429,-0.648928,0.237559},
-                {1.139427,1.504423,0.115497},
-                {0.901024,0.263703,0.118666},
-                {0.863821,0.133621,0.101356}
-        };
-
-        //Create array of item response models
-        ItemResponseModel[] irm = new ItemResponseModel[50];
-        Irm3PL pl3 = null;
-        for(int j=0;j<50;j++) {
-            //3PL with no priors
-            pl3 = new Irm3PL(1.0, 0.0, 0.05, 1.7);
-            pl3.setName(new VariableName("item"+(j+1)));
-            pl3.setGuessingPrior(new ItemParamPriorBeta4(5, 17, 0.0, 1.0));
-            irm[j] = pl3;
-        }
-
-        StartingValues startValues = new StartingValues(responseData, irm);
-        irm = startValues.computeStartingValues();
-
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
-
-        //estimate parameters
-        MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
-        DefaultEMStatusListener emStatus = new DefaultEMStatusListener();
-        mmle.addEMStatusListener(emStatus);
-        mmle.setVerbose(true);
-        mmle.estimateParameters(1e-3, 500, true);
-        mmle.computeItemStandardErrors();
-        System.out.println();
-        System.out.println(mmle.printItemParameters());
-        System.out.println();
-        System.out.println();
-        System.out.println(mmle.printLatentDistribution());
-
-        for(int j=0;j<50;j++){
-            assertEquals("Binary items - discrimination test", icl_param[j][0], irm[j].getDiscrimination(), 1e-1);
-            assertEquals("Binary items - difficulty test", icl_param[j][1], irm[j].getDifficulty(), 1e-1);
-            assertEquals("Binary items - guessing test", icl_param[j][2], irm[j].getGuessing(), 1e-1);
-        }
-
-    }
 
     /**
      * ICL results obtained with the syntax below
@@ -1211,7 +958,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         StartingValues startValues = new StartingValues(responseData, irm);
         irm = startValues.computeStartingValues();
 
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
+        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -1289,7 +1036,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
 //        double max = -1*min;
 //        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(min, max, (int)quadPoints);
 
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
+        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
 
         //Estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -1325,7 +1072,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         }
 
         //ICL default quadrature
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
+        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -1364,7 +1111,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         double quadPoints = 41;
         double min = -.8 * Math.sqrt(quadPoints);
         double max = -1*min;
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(min, max, (int)quadPoints);
+        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation((int)quadPoints, min, max, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -1543,7 +1290,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
 //        System.out.println(startValues.toString());
 
         //ICL default quadrature
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
+        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -1618,7 +1365,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         }
 
         //ICL default quadrature
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
+        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -1697,7 +1444,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         }
 
         //ICL default quadrature
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
+        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);

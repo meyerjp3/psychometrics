@@ -51,9 +51,7 @@ public class MarginalMaximumLikelihoodEstimation {
     private ArrayList<EMStatusListener> emStatusListeners = new ArrayList<EMStatusListener>();
     private ForkJoinPool pool = null;
     private boolean verbose = false;
-    private boolean estimateLatentDistribution = false;
-    private double[] theta = null;
-    private double[] thetaStdError = null;
+    private DensityEstimationType densityEstimationType = DensityEstimationType.FIXED_NO_ESTIMATION;
     private IrtObservedScoreDistribution mainIrtObservedScoreDistribution = null;
 
     /**
@@ -100,7 +98,16 @@ public class MarginalMaximumLikelihoodEstimation {
      */
     private double doMStep(){
 
-        MstepParallel mstepParallel = new MstepParallel(irm, latentDistribution, estepEstimates, 0, irm.length);
+        //Get latent mean and SD if estimating these values. Needed for computing max change (see below).
+        double oldMean = 0;
+        double oldSD = 1;
+        if(DensityEstimationType.FIXED_NO_ESTIMATION!=densityEstimationType){
+            oldMean = latentDistribution.getMean();
+            oldSD = latentDistribution.getStandardDeviation();
+        }
+
+
+        MstepParallel mstepParallel = new MstepParallel(irm, latentDistribution, estepEstimates, densityEstimationType, 0, irm.length);
 
         //start parallel processing
         pool.invoke(mstepParallel);
@@ -112,12 +119,6 @@ public class MarginalMaximumLikelihoodEstimation {
             codeCount[i]+=tc[i];
         }
 
-//        //TODO activate this option when fully tested
-//        //estimate latent distribution here
-//        if(estimateLatentDistribution){
-//            latentDistribution = mstepParallel.updateLatentDistribution();
-//        }
-
         //pass optimizer status to a log or something
 //        fireEMStatusEvent(uncminStatusListener.toString());
 
@@ -127,19 +128,19 @@ public class MarginalMaximumLikelihoodEstimation {
             maxChange = Math.max(maxChange, irm[j].acceptAllProposalValues());
         }
 
-        //TODO activate this option when fully tested
-        //estimate latent distribution here
-        if(estimateLatentDistribution){
-//            latentDistribution = mstepParallel.updateLatentDistribution();
-        }
-
-
         return maxChange;
 
     }
 
+    /**
+     * Estimate parameters using the specified convergence criterion and maximum number of iterations. If using this call
+     * the latent distribution is not estimated.
+     *
+     * @param converge convergence criterion should be a positivie number close to zero such as 1e-3. If it is a negative number algorithm will run to maximum number of iterations.
+     * @param maxIter maximum number of iterations. Algorithm will stop if the maximum is reached evne if convergence criterion is not satistfied.
+     */
     public void estimateParameters(double converge, int maxIter){
-        estimateParameters(converge, maxIter, false);
+        estimateParameters(converge, maxIter, densityEstimationType);
     }
 
     /**
@@ -151,12 +152,14 @@ public class MarginalMaximumLikelihoodEstimation {
      *
      * @param converge maximum change in parameter estimate convergence criterion.
      * @param maxIter maximum number of EM cycles.
+     * @param densityEstimationType method to estimate (or not estimate) latent distribution
      */
-    public void estimateParameters(double converge, int maxIter, boolean estimateLatentDistribution){
-        this.estimateLatentDistribution = estimateLatentDistribution;
+    public void estimateParameters(double converge, int maxIter, DensityEstimationType densityEstimationType){
+        this.densityEstimationType = densityEstimationType;
 
         fireEMStatusEvent("STARTING EM CYCLES...");
         fireEMStatusEvent("Number of available processors = " + PROCESSORS);
+
 
         StopWatch stopWatch = new StopWatch();
         double delta = 1.0+converge;
@@ -176,28 +179,6 @@ public class MarginalMaximumLikelihoodEstimation {
             //Format and send EM cycle summary to EMStatusListeners
            if(verbose)  fireEMStatusEvent(iter, delta, completeDataLogLikelihood(), codeToString());
         }
-
-        if(estimateLatentDistribution){
-//            double newMean = latentDistribution.getMean();
-//            double newSD = latentDistribution.getStandardDeviation();
-//
-//
-//            //Compute linear transformation that set distribution mean to 0 and standard deviation to 1
-//            double slope = 1.0/newSD;
-//            double intercept = -slope*newMean;
-//            double point = 0;
-//            for(int k=0;k<latentDistribution.getNumberOfPoints();k++){
-//                point = latentDistribution.getPointAt(k);
-//                latentDistribution.setPointAt(k, point*slope+intercept);
-//            }
-
-            //Transform item parameters
-//            for(int j=0;j<irm.length;j++){
-//                irm[j].scale(intercept, slope);
-//            }
-
-        }
-
 
         if(!verbose) fireEMStatusEvent(iter, delta, completeDataLogLikelihood(), codeToString());
         fireEMStatusEvent("Elapsed time: " + stopWatch.getElapsedTime());
@@ -219,6 +200,10 @@ public class MarginalMaximumLikelihoodEstimation {
 
     public ItemResponseModel getItemResponseModelAt(int j){
         return irm[j];
+    }
+
+    public DistributionApproximation getLatentDistribution(){
+        return latentDistribution;
     }
 
 //    /**

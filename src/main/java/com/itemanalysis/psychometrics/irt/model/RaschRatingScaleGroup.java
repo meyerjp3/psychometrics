@@ -168,8 +168,11 @@ public class RaschRatingScaleGroup {
      * This method checks for empty categories and sets the flag for the item. A code of 0 indicates
      * that all categories have at least one observation, a code of -1 indicates a category with no
      * observations, and a code of +1 indicates a category that contains all of the responses.
+     *
+     * Do not drop an item if it has fixed parameters.
      */
     public void checkForDroppping(){
+        if(isFixed) return;
         for(int m=0;m<nCat;m++){
             if(Tpj[m]==0){
                 extremeCategory = -1;

@@ -15,7 +15,7 @@
  */
 package com.itemanalysis.psychometrics.irt.estimation;
 
-import com.itemanalysis.psychometrics.distribution.UserSuppliedDistributionApproximation;
+import com.itemanalysis.psychometrics.distribution.ContinuousDistributionApproximation;
 import com.itemanalysis.psychometrics.histogram.*;
 import com.itemanalysis.psychometrics.irt.model.IrmType;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
@@ -26,7 +26,6 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math3.util.Pair;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Computes starting values for binary item response models. It begins with PROX estimates of
@@ -97,10 +96,11 @@ public class StartingValues {
 
         //The histogram will return frequencies, but relative frequencies are needed for the latent distribution.
         //Create a new latent distribution with relative frequencies.
-        UserSuppliedDistributionApproximation latentDistribution = new UserSuppliedDistributionApproximation();
+        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(hist.getNumberOfPoints(), hist.getMinimum(), hist.getMaximum());
         double sum = hist.getSumOfValues();
         for(int k=0;k<hist.getNumberOfPoints();k++){
-            latentDistribution.increment(hist.getPointAt(k), hist.getDensityAt(k)/sum);
+            latentDistribution.setPointAt(k, hist.getPointAt(k));
+            latentDistribution.setDensityAt(k, hist.getDensityAt(k)/sum);
         }
 
         for(int j=0;j<nItems;j++){

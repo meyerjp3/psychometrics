@@ -38,13 +38,15 @@ public class MstepParallel extends RecursiveAction {
     private static int PARALLEL_THRESHOLD = 100;
     private DefaultUncminOptimizer optimizer = null;
     private int[] codeCount = new int[4];
+    private DensityEstimationType densityEstimationType = DensityEstimationType.FIXED_NO_ESTIMATION;
 
 //    private QNMinimizer qn = null;
 
-    public MstepParallel(ItemResponseModel[] irm, DistributionApproximation latentDistribution, EstepEstimates estepEstimates, int start, int length){
+    public MstepParallel(ItemResponseModel[] irm, DistributionApproximation latentDistribution, EstepEstimates estepEstimates, DensityEstimationType densityEstimationType, int start, int length){
         this.irm = irm;
         this.latentDistribution = latentDistribution;
         this.estepEstimates = estepEstimates;
+        this.densityEstimationType = densityEstimationType;
         this.start = start;
         this.length = length;
         optimizer = new DefaultUncminOptimizer(10);
@@ -114,7 +116,8 @@ public class MstepParallel extends RecursiveAction {
                 irm[j].setProposalStepParameters(param);
             }
 
-        }
+        }//end item loop
+
     }
 
     /**
@@ -124,43 +127,47 @@ public class MstepParallel extends RecursiveAction {
     protected void compute(){
         if(length<=PARALLEL_THRESHOLD){
             computeDirectly();
-            return;
         }else{
             int split = length/2;
-
-            MstepParallel mstep1 = new MstepParallel(irm, latentDistribution, estepEstimates, start, split);
-            MstepParallel mstep2 = new MstepParallel(irm, latentDistribution, estepEstimates, start+split, length-split);
+            MstepParallel mstep1 = new MstepParallel(irm, latentDistribution, estepEstimates, densityEstimationType, start, split);
+            MstepParallel mstep2 = new MstepParallel(irm, latentDistribution, estepEstimates, densityEstimationType, start+split, length-split);
             invokeAll(mstep1, mstep2);
         }
+
+
+        //Estimate latent density - It is done here to prevent problems with parallel processing. Also,
+        //parallel processing would not accelerate this part because only iterates over quadrature points.
+        if(DensityEstimationType.EMPIRICAL_HISTOGRAM_FREE==densityEstimationType ||
+                DensityEstimationType.EMPIRICAL_HISTOGRAM_STANDARDIZED==densityEstimationType ||
+                DensityEstimationType.EMPIRICAL_HISTOGRAM_STANDARDIZED_KEEP_POINTS==densityEstimationType){
+
+            this.empiricalHistogramLatentDensityEstimation();
+        }
+
+
     }
 
-    //TODO more testing is needed for the method below.
-    public DistributionApproximation updateLatentDistribution(){
+    /**
+     * Nonparametric estimation (empirical histogram method) of the latent density.
+     *
+     * @return
+     */
+    public DistributionApproximation empiricalHistogramLatentDensityEstimation(){
         double sumNk = estepEstimates.getSumNt();
         double[] nk = estepEstimates.getNt();
+        double[] linTrans = null;
 
-        //Update posterior probabilities and compute new mean and standard deviation.
+        //Update posterior probabilities
+        //With no changes this results in DensityEstimationType.EMPIRICAL_HISTOGRAM_FREE
         for(int k=0;k<nk.length;k++){
             latentDistribution.setDensityAt(k, nk[k]/sumNk);
         }
 
-//        double newMean = latentDistribution.getMean();
-//        double newSD = latentDistribution.getStandardDeviation();
-
-
-//        //Compute linear transformation that set distribution mean to 0 and standard deviation to 1
-//        double slope = 1.0/newSD;
-//        double intercept = -slope*newMean;
-//        double point = 0;
-//        for(int k=0;k<nk.length;k++){
-//            point = latentDistribution.getPointAt(k);
-//            latentDistribution.setPointAt(k, point*slope+intercept);
-//        }
-//
-//        //Transform item parameters
-//        for(int j=0;j<irm.length;j++){
-//            irm[j].scale(intercept, slope);//FIXME this should only rescale the proposal values
-//        }
+        if(DensityEstimationType.EMPIRICAL_HISTOGRAM_STANDARDIZED_KEEP_POINTS==densityEstimationType){
+            linTrans = latentDistribution.standardize(true);
+        }else if(DensityEstimationType.EMPIRICAL_HISTOGRAM_STANDARDIZED==densityEstimationType){
+            linTrans = latentDistribution.standardize(false);
+        }
 
         return latentDistribution;
     }

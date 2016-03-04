@@ -300,6 +300,7 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
     }
 
     public void scale(double intercept, double slope){
+        if(isFixed) return;//DO NOT transform the item parameters when they are fixed
         discrimination /= slope;
         discriminationStdError *= slope;
         difficulty = difficulty*slope + intercept;

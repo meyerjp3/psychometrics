@@ -23,13 +23,7 @@ import java.util.Formatter;
  * computed.
  *
  */
-public final class UniformDistributionApproximation implements DistributionApproximation {
-
-    private int numberOfPoints = 0;
-
-    private double[] points = null;
-
-    private double[] density = null;
+public final class UniformDistributionApproximation extends AbstractDistributionApproximation {
 
     /**
      * Create a uniform distribution with a specified number of evaluation points between the min and max values.
@@ -40,144 +34,33 @@ public final class UniformDistributionApproximation implements DistributionAppro
      */
     public UniformDistributionApproximation(double min, double max, int numberOfPoints){
         this.numberOfPoints = numberOfPoints;
-        if(min>max){
-            double temp = min;
-            min = max;
-            max = temp;
+        this.min = min;
+        this.max = max;
+
+        //Enforce that min <= max
+        if(this.min>this.max){
+            double temp = this.min;
+            this.min = this.max;
+            this.max = temp;
         }
 
-        initialize(min, max);
-
-    }
-
-    private void initialize(double min, double max){
-        double difference = max - min;
-
-        //create evenly spaced points from min to max
+        range = this.max-this.min;
         points = new double[numberOfPoints];
-        double step = difference/((double)numberOfPoints - 1.0);
-        points[0] = min;
-        for(int i=1;i<numberOfPoints;i++){
-            points[i] = points[i-1]+step;
-        }
+        weights = new double[numberOfPoints];
+        step = range/((double)numberOfPoints - 1.0);
 
-        density = new double[numberOfPoints];
-        for(int i=0;i<numberOfPoints;i++){
-            density[i] = 1.0/numberOfPoints;
-        }
+        this.setUniformPointsAndWeights();
 
     }
 
-    /**
-     * The number of getPoints return is specified by numberOfPoints.
-     * @return equally spaced disjoint getPoints from the interval [min, max]
-     */
-    public double[] getPoints(){
-//        if(points!=null) return points;
-//
-//        double difference = max - min;
-//        if(max<min){
-//            difference = min - max;
-//        }
-//
-//        //create evenly spaced points from min to max
-//        points = new double[numberOfPoints];
-//        double step = difference/((double)numberOfPoints - 1.0);
-//        points[0] = min;
-//        for(int i=1;i<numberOfPoints;i++){
-//            points[i] = points[i-1]+step;
-//        }
-        return points;
-    }
-
-    /**
-     * Gets an array of density values at each point in the distribution.
-     *
-     * @return density values.
-     */
-    public double[] evaluate(){
-//        if(density!=null) return density;
-//        if(points==null) getPoints();
-//
-//        density = new double[numberOfPoints];
-//        for(int i=0;i<numberOfPoints;i++){
-//            density[i] = 1.0/numberOfPoints;
-//        }
-
-        return density;
-    }
-
-    /**
-     * Gets a single point value at index.
-     *
-     * @param index the array index for the point value.
-     * @return evaluation point.
-     */
-    public double getPointAt(int index){
-        return points[index];
-    }
-
-    /**
-     * Gets a single density point at index.
-     *
-     * @param index array index of density point.
-     * @return density point.
-     */
-    public double getDensityAt(int index){
-        return density[index];
+    public void setDensityAt(int index, double value){//TODO this method should be change. It should only allow for uniform weights
+        weights[index] = value;
     }
 
     public void setPointAt(int index, double value){
         points[index] = value;
     }
 
-    public void setDensityAt(int index, double value){
-        density[index] = value;
-    }
-
-    /**
-     * Gets the number of evaluation points in this distribution approximation.
-     *
-     * @return number of evaluation points.
-     */
-    public int getNumberOfPoints(){
-        return numberOfPoints;
-    }
-
-    /**
-     * Gets the smallest evaluation point.
-     *
-     * @return minimum evaluation point.
-     */
-    public double getMinimum(){
-        return points[0];
-    }
-
-    /**
-     * Gets the largest evaluation point.
-     *
-     * @return largest evaluation point.
-     */
-    public double getMaximum(){
-        return points[numberOfPoints-1];
-    }
-
-    public double getMean(){
-        double m = 0.0;
-        for(int i=0;i<numberOfPoints;i++){
-            m += points[i]*density[i];
-        }
-        return m;
-    }
-
-    public double getStandardDeviation(){
-        double m = getMean();
-        double m2 = 0;
-        for(int i=0;i<numberOfPoints;i++){
-            m2 += (points[i]-m)*(points[i]-m)*density[i];
-        }
-        return Math.sqrt(m2);
-    }
 
     @Override
     public String toString(){
@@ -190,7 +73,7 @@ public final class UniformDistributionApproximation implements DistributionAppro
         f.format("%35s", "-----------------------------------"); f.format("%n");
 
         for(int i=0;i<numberOfPoints;i++){
-            f.format("%10.6f", points[i]);f.format("%5s", "");f.format("%10.8e", density[i]);f.format("%10s", "");f.format("%n");
+            f.format("%10.6f", points[i]);f.format("%5s", "");f.format("%10.8e", weights[i]);f.format("%10s", "");f.format("%n");
         }
 
         f.format("%35s", "==================================="); f.format("%n");

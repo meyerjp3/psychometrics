@@ -61,6 +61,11 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
 
     private String responseString = "";
 
+    /**
+     * Stores the posterior probability of teh response vector
+     */
+    private double posteriorProbability = 0;
+
 //    private double eapEstimate = Double.NaN;
 
     /**
@@ -204,15 +209,13 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
         return (int)validResponses;
     }
 
-//    public double computeEap(ItemResponseModel[] irm, DistributionApproximation latentDistribution){
-//        IrtExaminee irtExaminee = new IrtExaminee(groupID, irm, this);
-//        eapEstimate = irtExaminee.eapEstimate(latentDistribution);
-//        return eapEstimate;
-//    }
-//
-//    public double getEapEstimate(){
-//        return eapEstimate;
-//    }
+    public void setPosteriorProbability(double posteriorProbability){
+        this.posteriorProbability = posteriorProbability;
+    }
+
+    public double getPosteriorProbability(){
+        return posteriorProbability;
+    }
 
     /**
      * A string representation of the response string.
