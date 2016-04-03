@@ -207,11 +207,9 @@ public abstract class AbstractDistributionApproximation implements DistributionA
 //    }
 
 
-
-
     /**
      * Uses current quadrature points and weights to compute the mean and standard deviation of the
-     * density, and tehn standardizes the distribution to have a mean of zero and a standard deviation of one.
+     * density, and then standardizes the distribution to have a mean of zero and a standard deviation of one.
      * It achieves standardization in one of two possible ways. If keepPoints is true, the original points are
      * retained and linear interpolation of the empiricial cumulative distribution is used to obtain the new
      * weights. That is, the points are never changed, but the distribution is standardized. If keepPoints is

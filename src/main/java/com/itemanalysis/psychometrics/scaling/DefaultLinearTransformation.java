@@ -28,13 +28,43 @@ public class DefaultLinearTransformation implements LinearTransformation{
     private double intercept = 0.0;
 
     public DefaultLinearTransformation(Double oldMean, Double newMean, Double oldSd, Double newSd){
-        if(oldSd==0.0){
-            scale = Double.NaN;
-            intercept = Double.NaN;
-        }else{
-            scale = newSd/oldSd;
-            intercept = newMean - scale*oldMean;
+        this(oldMean, newMean, oldSd, newSd, LinearTransformationType.MEAN_STANDARD_DEVIATION);
+    }
+
+    /**
+     * Constructor for two different ways of creating the transformation coefficients.
+     * When linearTransformationType==MEAN_STANDARD_DEVIATION the transformation uses the new and old mean
+     * and standard deviation to compute the coefficients. When linearTransformationType==MIN_MAX the transformation
+     * uses the new and old min and max values t compute the transformation coefficients.
+     *
+     * The new mean and new standard deviation are the desired mean and standard deviation of the scale. Values
+     * will be transformed to have this mean and standard deviation. Likewise, the new min and new max are the
+     * desired minimum and desired maximum values of the scale. Original values will be transformed to have these
+     * min and max values.
+     *
+     * @param oldMeanOrMin either the old mean or the old minimum
+     * @param newMeanOrMin either the new mean or the new minimum
+     * @param oldSdOrMax either the old standard deviation or the old maximum
+     * @param newSdOrMax either the new standard deviation or the new maximum
+     * @param linearTransformationType method of computing the linear transformation
+     */
+    public DefaultLinearTransformation(double oldMeanOrMin, double newMeanOrMin, double oldSdOrMax, double newSdOrMax, LinearTransformationType linearTransformationType){
+        if(LinearTransformationType.MEAN_STANDARD_DEVIATION==linearTransformationType){
+            transformFromMeanSd(oldMeanOrMin, newMeanOrMin, oldSdOrMax, newSdOrMax);
+
+        }else if(LinearTransformationType.MIN_MAX==linearTransformationType){
+            transformFromMinMax(oldMeanOrMin, newMeanOrMin, oldSdOrMax, newSdOrMax);
         }
+    }
+
+    private void transformFromMeanSd(double oldMeanOrMin, double newMeanOrMin, double oldSdOrMax, double newSdOrMax){
+        scale = newSdOrMax/oldSdOrMax;
+        intercept = newMeanOrMin - scale*oldMeanOrMin;
+    }
+
+    private void transformFromMinMax(double oldMeanOrMin, double newMeanOrMin, double oldSdOrMax, double newSdOrMax){
+        scale = (newSdOrMax-newMeanOrMin)/(oldSdOrMax-oldMeanOrMin);
+        intercept = newMeanOrMin - oldMeanOrMin*scale;
     }
 
     public DefaultLinearTransformation(double intercept, double scale){
