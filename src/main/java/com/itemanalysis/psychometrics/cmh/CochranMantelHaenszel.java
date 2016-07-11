@@ -504,12 +504,12 @@ public class CochranMantelHaenszel {
 
         output += itemVariable.getName().toString() + ",";
 
-        if(Double.isNaN(cmh)){
+        if(Double.isNaN(cmh) || Double.isInfinite(cmh)){
             output += ",";
         }else{
             output += cmh + ",";
         }
-        if(Double.isNaN(pvalue)){
+        if(Double.isNaN(pvalue) || Double.isInfinite(pvalue)){
             output += ",";
         }else{
             output += pvalue + ",";

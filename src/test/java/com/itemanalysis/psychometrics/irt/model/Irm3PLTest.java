@@ -209,4 +209,10 @@ public class Irm3PLTest {
 
     }
 
+    @Test
+    public void codeTest(){
+        IrmGPCM gpcm = new IrmGPCM(0.9, new double[]{0.0, -1.2, 0.5, 1.8}, 1.0);
+        System.out.println(gpcm.probability(-0.8, 2));
+    }
+
 }
