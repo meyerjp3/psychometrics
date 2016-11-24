@@ -232,7 +232,6 @@ public class IrmPCM extends AbstractItemResponseModel{
     }
 
     public double itemInformationAt(double theta){
-
         double T = 0;
         double prob = 0.0;
         double sum1 = 0.0;
@@ -543,6 +542,7 @@ public class IrmPCM extends AbstractItemResponseModel{
 
     public void setThresholdParameters(double[] thresholds){
         this.threshold = thresholds;
+        this.proposalThreshold = thresholds;
     }
 
     public double[] getProposalThresholds(){
@@ -550,7 +550,7 @@ public class IrmPCM extends AbstractItemResponseModel{
     }
 
     public void setProposalThresholds(double[] thresholds){
-        if(!isFixed) this.proposalThreshold = thresholds;
+        this.proposalThreshold = thresholds;
     }
 
     public double[] getThresholdStdError(){
@@ -598,6 +598,7 @@ public class IrmPCM extends AbstractItemResponseModel{
     }
 
     public double acceptAllProposalValues(){
+        if(isFixed) return 0;
         double max = Math.max(0, Math.abs(this.difficulty-this.proposalDifficulty));
         for(int m=0;m<getNcat()-1;m++){
             max = Math.max(max, Math.abs(this.threshold[m]-this.proposalThreshold[m]));

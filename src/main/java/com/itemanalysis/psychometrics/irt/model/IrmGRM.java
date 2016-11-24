@@ -517,6 +517,7 @@ public class IrmGRM extends AbstractItemResponseModel {
     }
 
     public double acceptAllProposalValues(){
+        if(isFixed) return 0;
         double max = 0;
         if(!isFixed){
             double delta = Math.abs(this.discrimination-proposalDiscrimination);

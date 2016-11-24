@@ -17,6 +17,33 @@ package com.itemanalysis.psychometrics.measurement;
 
 public enum DiscriminationType {
 
-    PEARSON, POLYSERIAL, DINDEX27, DINDEX33
+    PEARSON{
+        @Override
+        public String toString(){
+            return "pearson";
+        }
+
+    },
+
+    POLYSERIAL{
+        @Override
+        public String toString(){
+            return "polyserial";
+        }
+    },
+
+    DINDEX27{
+        @Override
+        public String toString(){
+            return "dindex27";
+        }
+    },
+
+    DINDEX33{
+        @Override
+        public String toString(){
+            return "dindex33";
+        }
+    }
 
 }

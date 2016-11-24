@@ -31,6 +31,12 @@ public class ClassicalItemSummary {
     private CategoryResponseSummary mainItemSummary = null;
     private TreeMap<Object, CategoryResponseSummary> categorySummary = null;
 
+    //flag criteria
+    private double lowPvalue = 0.1;
+    private double highPvalue = 0.9;
+    private double lowDiscrimination = 0.2;
+    private double highDiscrimination = 0.8;
+
     public ClassicalItemSummary(VariableAttributes variableAttributes, boolean correctForSupriousness, boolean allCategories, DiscriminationType discriminationType){
         this.variableAttributes = variableAttributes;
         this.itemScoring = this.variableAttributes.getItemScoring();
@@ -87,6 +93,22 @@ public class ClassicalItemSummary {
         }
     }
 
+    public void setLowPvalue(double lowPvalue){
+        this.lowPvalue = lowPvalue;
+    }
+
+    public void setHighPvalue(double highPvalue){
+        this.highPvalue = highPvalue;
+    }
+
+    public void setLowDiscrimination(double lowDiscrimination){
+        this.lowDiscrimination = lowDiscrimination;
+    }
+
+    public void setHighDiscrimination(double highDiscrimination){
+        this.highDiscrimination = highDiscrimination;
+    }
+
     /**
      * Create an Object array that contains the statistics for every options for this item. This method is mainly
      * used for creating printable output.
@@ -136,34 +158,71 @@ public class ClassicalItemSummary {
         return mainItemSummary.getDindexUpperMean();
     }
 
+    public String getDifficultyFlag(){
+        double scoreRange = 0;
+        if(variableAttributes.hasScoring()){
+            scoreRange = itemScoring.maximumPossibleScore()-itemScoring.minimumPossibleScore();
+        }else{
+            scoreRange = mainItemSummary.getMaximumObservedItemScore()-mainItemSummary.getMinimumObservedItemScore();
+        }
+
+        double pval = mainItemSummary.getDifficulty()/scoreRange;//convert to p-value
+        if(pval < lowPvalue){
+            return "LP ";
+        }else if(pval > highPvalue){
+            return "HP ";
+        }
+
+        return "";
+    }
+
+    public String getDiscriminationFlag(double discrim){
+        if(discrim < lowDiscrimination){
+            return "LD";
+        }else if(discrim > highDiscrimination){
+            return "HD";
+        }
+        return "";
+    }
+
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
 
+        double iMean = mainItemSummary.getDifficulty();
+        double discrim = 0;
+        double scoreRange = 0;
+
+        if(variableAttributes.hasScoring()){
+            scoreRange = itemScoring.maximumPossibleScore()-itemScoring.minimumPossibleScore();
+        }else{
+            scoreRange = mainItemSummary.getMaximumObservedItemScore()-mainItemSummary.getMinimumObservedItemScore();
+        }
+
         f.format("%20s", variableAttributes.getName().toString());
         f.format("%10s", "Overall");
-        f.format("% 12.4f", mainItemSummary.getDifficulty());
+        f.format("% 12.4f", iMean);
         f.format("% 12.4f", mainItemSummary.getStandardDeviation());
 
         if(discriminationType==DiscriminationType.DINDEX27 || discriminationType==DiscriminationType.DINDEX33){
             double upper = mainItemSummary.getDindexUpperMean();
             double lower = mainItemSummary.getDindexLowerMean();
-            double dIndex = 0;
-
-            if(variableAttributes.hasScoring()){
-                dIndex = (upper - lower)/(itemScoring.maximumPossibleScore()-itemScoring.minimumPossibleScore());
-            }else{
-                dIndex = (upper - lower)/(mainItemSummary.getMaximumObservedItemScore()-mainItemSummary.getMinimumObservedItemScore());
-            }
-
+            discrim = (upper - lower)/scoreRange;
 
             f.format("% 12.4f", upper);
             f.format("% 12.4f", lower);
-            f.format("% 12.4f", dIndex);
+            f.format("% 12.4f", discrim);
         }else {
-            f.format("% 12.4f", mainItemSummary.getDiscrimination());
+            discrim = mainItemSummary.getDiscrimination();
+            f.format("% 12.4f", discrim);
         }
+
+        //Set flags
+        String flag = getDifficultyFlag();
+        flag += " " + getDiscriminationFlag(discrim);
+        f.format("%10s", flag.trim());
+
         f.format("%n");
 
         if(allCategories){
@@ -186,6 +245,14 @@ public class ClassicalItemSummary {
                 }else{
                     f.format("% 12.4f", crs.getDiscrimination());
                 }
+
+                //add flag for ambiguous key
+                if(variableAttributes.getItemType()==ItemType.BINARY_ITEM && variableAttributes.hasScoring()){
+                    if(variableAttributes.computeItemScore((String)k)==0 && crs.getDiscrimination() > 0){
+                        f.format("%10s", "key?");
+                    }
+                }
+
                 f.format("%n");
             }//end loop over response options
 
@@ -199,10 +266,10 @@ public class ClassicalItemSummary {
         Formatter f = new Formatter(sb);
 
         if(discriminationType==DiscriminationType.DINDEX27 || discriminationType==DiscriminationType.DINDEX33){
-            f.format("%90s", "==========================================================================================");
+            f.format("%100s", "====================================================================================================");
             f.format("%n");
         }else{
-            f.format("%66s", "==================================================================");
+            f.format("%76s", "============================================================================");
             f.format("%n");
         }
         f.format("%20s", "Item");
@@ -212,17 +279,18 @@ public class ClassicalItemSummary {
         if(discriminationType==DiscriminationType.DINDEX27){
             f.format("%12s", "Upper 27%");
             f.format("%12s", "Lower 27%");
-            f.format("%12s", "D-Index");f.format("%n");
-            f.format("%90s", "------------------------------------------------------------------------------------------");
+            f.format("%12s", "D-Index");f.format("%10s", "Flags");f.format("%n");
+            f.format("%100s", "----------------------------------------------------------------------------------------------------");
         }else if(discriminationType==DiscriminationType.DINDEX33){
             f.format("%12s", "Upper 33%");
             f.format("%12s", "Lower 33%");
-            f.format("%12s", "D-Index");f.format("%n");
-            f.format("%90s", "------------------------------------------------------------------------------------------");
+            f.format("%12s", "D-Index");f.format("%10s", "Flags");f.format("%n");
+            f.format("%100s", "----------------------------------------------------------------------------------------------------");
         }else{
-            f.format("%12s", "Discrim.");f.format("%n");
-            f.format("%66s", "------------------------------------------------------------------");
+            f.format("%12s", "Discrim.");f.format("%10s", "Flags");f.format("%n");
+            f.format("%76s", "----------------------------------------------------------------------------");
         }
+
 
         return f.toString();
     }
@@ -232,10 +300,10 @@ public class ClassicalItemSummary {
         Formatter f = new Formatter(sb);
 
         if(discriminationType==DiscriminationType.DINDEX27 || discriminationType==DiscriminationType.DINDEX33){
-            f.format("%90s", "==========================================================================================");
+            f.format("%100s", "====================================================================================================");
             f.format("%n");
         }else{
-            f.format("%66s", "==================================================================");
+            f.format("%76s", "============================================================================");
             f.format("%n");
         }
         return f.toString();

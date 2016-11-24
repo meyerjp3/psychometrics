@@ -266,6 +266,10 @@ public class RaschRatingScaleGroup {
 
     }
 
+    public boolean isFixed(){
+        return isFixed;
+    }
+
     /**
      * Each category has an associated score weight. They are stored in an array. Gets the score weights.
      *

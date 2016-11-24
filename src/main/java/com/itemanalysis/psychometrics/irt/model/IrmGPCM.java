@@ -460,25 +460,6 @@ public class IrmGPCM extends AbstractItemResponseModel {
             }
         }
         return probability(theta, iparam, category, D);
-
-//        double Zk = 0;
-//        double expZk = 0;
-//        double numer = 0;
-//        double denom = 0;
-//        double a = discrimination/slope;
-//        double b = 0;
-//
-//        for(int k=0;k<ncat;k++){
-//            Zk = D*a*(theta-0.0);//First step fixed to zero and not transformed
-//            for(int v=1;v<=k;v++){
-//                b = step[v]*slope+intercept;
-//                Zk += D*a*(theta-b);
-//            }
-//            expZk = Math.exp(Zk);
-//            if(k==category) numer = expZk;
-//            denom += expZk;
-//        }
-//        return numer/denom;
     }
 
     /**
@@ -522,25 +503,6 @@ public class IrmGPCM extends AbstractItemResponseModel {
 
         }
         return probability(theta, iparam, category, D);
-
-//        double Zk = 0;
-//        double expZk = 0;
-//        double numer = 0;
-//        double denom = 0;
-//        double a = discrimination*slope;
-//        double b = 0;
-//
-//        for(int k=0;k<ncat;k++){
-//            Zk = D*a*(theta-0.0);//First step is always zero. Do not rescale it.
-//            for(int v=1;v<=k;v++){
-//                b = (step[v]-intercept)/slope;
-//                Zk += D*a*(theta-b);
-//            }
-//            expZk = Math.exp(Zk);
-//            if(k==category) numer = expZk;
-//            denom += expZk;
-//        }
-//        return numer/denom;
     }
 
     /**
@@ -635,6 +597,7 @@ public class IrmGPCM extends AbstractItemResponseModel {
 
     public void setDiscrimination(double discrimination){
         this.discrimination = discrimination;
+        this.proposalDiscrimination = discrimination;
     }
 
     public void setProposalDiscrimination(double discrimination){
@@ -696,6 +659,7 @@ public class IrmGPCM extends AbstractItemResponseModel {
     public void setStepParameters(double[] step){
         if(step.length>ncat) throw new IllegalArgumentException("Step parameter array is too large.");
         this.step = step;
+        this.proposalStep = step;
     }
 
     public void setProposalStepParameters(double[] step){
@@ -736,6 +700,7 @@ public class IrmGPCM extends AbstractItemResponseModel {
     }
 
     public double acceptAllProposalValues(){
+        if(isFixed) return 0;
         double max = 0;
         if(!isFixed){
             double delta = Math.abs(this.discrimination-proposalDiscrimination);

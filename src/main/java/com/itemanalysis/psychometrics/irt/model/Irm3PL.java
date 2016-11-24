@@ -967,6 +967,8 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      *
      */
     public double acceptAllProposalValues(){
+        if(isFixed) return 0;
+
         double max = 0;
 
         double delta = Math.abs(this.difficulty - proposalDifficulty);

@@ -348,6 +348,56 @@ public class JointMaximumLikelihoodEstimationTest {
         }
     }
 
+
+    /**
+     * This test involves the TAP data from Wright and Stone's Best Test Design text.
+     * It is also the data in WINSTEPS example1. It involves three fixed item parameters.
+     *
+     * Using the values jmle.estimateParameters(250, 0.00001, 1, .01), jMetrik should
+     * give four decimal places of accuracy with winsteps when winsteps uses the
+     * same convergence criterion (i.e control file uses CONVERGE=L and LCONV = 0.00001.)
+     * More decimal places of accuracy are possible if use a more stringent criterion.
+     *
+     */
+    @Test
+    public void testTapDataFixedParam(){
+        System.out.println("JMLE TAP DATA TEST FIXED PARAMETERS");
+        byte[][] data = readTapData();
+        int nItems = data[0].length;
+
+        //true estimates from WINSTEPS
+        double[] tap_true_difficulty = {-6.6171, -6.6171, -6.6171, -4.4262, -3.7000, -3.3882, -3.8476, -2.3363, -3.3882,
+                -1.5375, 0.8500, 2.3796, 2.0832, 3.5000, 5.0043, 5.0043, 5.0043, 6.3376};
+
+        ItemResponseModel[] irm = new ItemResponseModel[18];
+        for(int i=0;i<nItems;i++){
+            irm[i] = new Irm3PL(0.0, 1.0);
+            irm[i].setName(new VariableName("V"+(i+1)));
+        }
+
+        //set fixed parameters
+        irm[4].setFixed(true);
+        irm[4].setDifficulty(-3.7);
+        irm[10].setFixed(true);
+        irm[10].setDifficulty(0.85);
+        irm[13].setFixed(true);
+        irm[13].setDifficulty(3.5);
+
+        JointMaximumLikelihoodEstimation jmle = new JointMaximumLikelihoodEstimation(data, irm);
+        jmle.summarizeData(0.3);
+        jmle.itemProx();
+        jmle.estimateParameters(150, 0.00001);
+//        System.out.println(jmle.printIterationHistory());
+
+
+        System.out.println("     Testing fixed difficulty");
+        for(int j=0;j<irm.length;j++){
+            assertEquals("  JMLE tap test: fixed difficulty", tap_true_difficulty[j], Precision.round(irm[j].getDifficulty(), 5), 1e-4);
+            System.out.println(irm[j].toString());
+        }
+
+    }
+
     /**
      * This test involves polytomous items scored in four categories. A
      * partial credit item is applied to each item. Thus, it estimates
@@ -638,8 +688,94 @@ public class JointMaximumLikelihoodEstimationTest {
      * This test involves polytomous items scored in four categories. A
      * partial credit item is applied to each item. Thus, it estimates
      * item difficulty and several threshold parameters for each item.
+     *
+     * Items 1, 5, 8, and 10 have been fixed to specified values.
+     *
+     * The procedure for fixing items is different in this example than
+     * the one in testPartialCreditModelFixed(). Here parameters are
+     * fixed after instantiation by calling methods.
+     *
+     */
+    @Test
+    public void testPartialCreditModelSomeFixed(){
+        System.out.println("JMLE PCM DATA TEST");
+        byte[][] data = readPcmData();
+        int nItems = data[0].length;
+
+        double[] pcm_fixed_winsteps_difficulty = {0.4600, 1.2227, -0.8435, -0.6782, -0.6000, -0.5736, 0.2583, 1.0000, -0.102, -0.7000};
+        double[][] pacm_fixed_winsteps_thresholds ={
+                {-0.7000, -0.3000, 1.0000},
+                {-1.2554, 0.2589, 0.9964},
+                {0.6412, -1.1306, 0.4894},
+                {-0.8639, 0.0965, 0.7674},
+                {-0.5000, -0.6000, 1.1000},
+                {-1.2751, 0.0268, 1.2483},
+                {-1.5692, -0.0739, 1.6431},
+                {-0.9000, -0.1500, 1.0500},
+                {-0.1833, -1.1296, 1.3130},
+                {-0.7500, -0.3500, 1.1000}
+        };
+
+        ItemResponseModel[] irm = new ItemResponseModel[nItems];
+        double[] threshold = {0.0, 0.0, 0.0};
+        for(int i=0;i<nItems;i++){
+            irm[i] = new IrmPCM(0.0, threshold, 1.0);
+            irm[i].setName(new VariableName("V"+(i+1)));
+        }
+
+        //set fixed parameters
+        irm[0].setFixed(true);
+        irm[0].setDifficulty(0.46);
+        irm[0].setThresholdParameters(new double[]{-0.7, -0.3, 1.0});
+
+        irm[4].setFixed(true);
+        irm[4].setDifficulty(-0.60);
+        irm[4].setThresholdParameters(new double[]{-0.50, -0.60, 1.10});
+
+        irm[7].setFixed(true);
+        irm[7].setDifficulty(1.00);
+        irm[7].setThresholdParameters(new double[]{-0.90, -0.15, 1.05});
+
+        irm[9].setFixed(true);
+        irm[9].setDifficulty(-0.70);
+        irm[9].setThresholdParameters(new double[]{-0.75, -0.35, 1.10});
+
+        JointMaximumLikelihoodEstimation jmle = new JointMaximumLikelihoodEstimation(data, irm);
+        jmle.summarizeData(0.3);
+        jmle.itemProx();
+        jmle.estimateParameters(150, 0.00001);
+
+//        System.out.println(jmle.printIterationHistory());
+
+
+        System.out.println("     Testing difficulty");
+        for(int j=0;j<nItems;j++){
+//            System.out.println(irm[j].toString());
+            assertEquals("  JMLE pcm test: difficulty", pcm_fixed_winsteps_difficulty[j], Precision.round(irm[j].getDifficulty(), 5), 1e-4);
+        }
+
+        System.out.println("     Testing thresholds");
+        for(int j=0;j<nItems;j++){
+            double[] est_thresh = irm[j].getThresholdParameters();
+            for(int k=0;k<est_thresh.length;k++){
+                assertEquals("  JMLE pcm test: threshold", pacm_fixed_winsteps_thresholds[j][k], Precision.round(est_thresh[k], 5), 1e-4);
+            }
+
+        }
+
+    }
+
+    /**
+     * This test involves polytomous items scored in four categories. A
+     * partial credit item is applied to each item. Thus, it estimates
+     * item difficulty and several threshold parameters for each item.
      * Unlike testPartialCreditModel(), this test fixes item 1 and item 5
      * to specific values.
+     *
+     * The procedure for fixing items is different in this example than
+     * the one in testPartialCreditModelSomeFixed(). Here parameters are
+     * fixed in the constructor.
+     *
     */
     @Test
     public void testPartialCreditModelFixed(){
@@ -687,7 +823,7 @@ public class JointMaximumLikelihoodEstimationTest {
         JointMaximumLikelihoodEstimation jmle = new JointMaximumLikelihoodEstimation(data, irm);
         jmle.summarizeData(0.3);
         jmle.estimateParameters(50, 0.00001);
-        jmle.computeItemStandardErrors();
+//        jmle.computeItemStandardErrors();
 
 //        System.out.println(jmle.printFrequencyTables());
 //        System.out.println(jmle.printRatingScaleTables());

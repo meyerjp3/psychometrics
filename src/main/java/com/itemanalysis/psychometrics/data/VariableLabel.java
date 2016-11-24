@@ -22,7 +22,7 @@ package com.itemanalysis.psychometrics.data;
  */
 public class VariableLabel implements Comparable<Object>{
 
-    private int length = 50;
+    private int length = 125;
 
     private String label = "";
 

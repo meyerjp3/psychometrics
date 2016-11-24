@@ -42,6 +42,7 @@ public class RaschScoreTable {
     private double MinPS = 0.0;
     private double MaxPS = 0.0;
     private int nItems = 0;
+    private int precision = 2;
 
     /**
      * The constructor should be called after joint maximum likelhood estimation is complete.
@@ -50,11 +51,12 @@ public class RaschScoreTable {
      * @param extremeItem an array of extreme item codes.
      * @param droppedStatus an array of dropped item status codes. This argument is mainly needed for polytomous items.
      */
-    public RaschScoreTable(ItemResponseModel[] irm, int[] extremeItem, int[] droppedStatus){
+    public RaschScoreTable(ItemResponseModel[] irm, int[] extremeItem, int[] droppedStatus, int precision){
         this.irm = irm;
         this.extremeItem = extremeItem;
         this.droppedStatus = droppedStatus;
         nItems = irm.length;
+        this.precision = precision;
         computeMPS();
     }
 
@@ -173,7 +175,7 @@ public class RaschScoreTable {
         cformats[0] = new TextTableColumnFormat();
         cformats[0].setDoubleFormat(8, 2, TextTableColumnFormat.OutputAlignment.RIGHT);
         cformats[1] = new TextTableColumnFormat();
-        cformats[1].setDoubleFormat(8, 2, TextTableColumnFormat.OutputAlignment.RIGHT);
+        cformats[1].setDoubleFormat(8, precision, TextTableColumnFormat.OutputAlignment.RIGHT);
         cformats[2] = new TextTableColumnFormat();
         cformats[2].setDoubleFormat(8, 2, TextTableColumnFormat.OutputAlignment.RIGHT);
 
@@ -226,6 +228,18 @@ public class RaschScoreTable {
             }
             thetaStdError[i] = 1.0/Math.sqrt(info);
         }
+    }
+
+    public Object[][] getOutputArray(){
+
+        Object[][] out = new Object[theta.length][3];
+
+        for(int i=0;i<theta.length;i++){
+            out[i][0] = sumScore[i];
+            out[i][1] = theta[i];
+            out[i][2] = thetaStdError[i];
+        }
+        return out;
     }
 
 }

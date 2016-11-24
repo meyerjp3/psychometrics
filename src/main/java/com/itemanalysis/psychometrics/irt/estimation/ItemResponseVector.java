@@ -16,7 +16,10 @@
 
 package com.itemanalysis.psychometrics.irt.estimation;
 
+import com.itemanalysis.psychometrics.data.VariableName;
+
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * A class for storing the item response vector and frequency counts. This class is designed
@@ -66,7 +69,26 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
      */
     private double posteriorProbability = 0;
 
-//    private double eapEstimate = Double.NaN;
+    /**
+     * A map that allows the response to be called by item name
+     */
+    private HashMap<VariableName, Integer> nameIndexMap = null;
+
+    public ItemResponseVector(String groupID, byte[] response, VariableName[] itemName, double freq){
+        this.groupID = groupID;
+        this.response = response;
+        this.freq = freq;
+        this.nItems = response.length;
+        this.nameIndexMap = new HashMap<VariableName, Integer>();
+        for(int i=0;i<response.length;i++){
+            nameIndexMap.put(itemName[i], Integer.valueOf(i));
+            if(response[i]!=-1){
+                sumScore += response[i];
+                validResponses++;
+            }
+            responseString += response[i];
+        }
+    }
 
     /**
      * A constructor that is designed for storing all response vectors during MML estimation.
@@ -79,7 +101,9 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
         this.response = response;
         this.freq = freq;
         this.nItems = response.length;
+        this.nameIndexMap = new HashMap<VariableName, Integer>();
         for(int i=0;i<response.length;i++){
+            nameIndexMap.put(new VariableName("V"+(i+1)), Integer.valueOf(i));
             if(response[i]!=-1){
                 sumScore += response[i];
                 validResponses++;
@@ -106,6 +130,10 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
         this.groupID = groupID;
         this.nItems = nItems;
         response = new byte[nItems];
+        this.nameIndexMap = new HashMap<VariableName, Integer>();
+        for(int i=0;i<nItems;i++){
+            nameIndexMap.put(new VariableName("V"+(i+1)), Integer.valueOf(i));
+        }
     }
 
     /**
@@ -182,6 +210,20 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
      */
     public byte getResponseAt(int itemPosition){
         return response[itemPosition];
+    }
+
+    /**
+     * Get item response by the variable name
+     *
+     * @param variableName item for which the response is needed
+     * @return
+     */
+    public byte getResponseAt(VariableName variableName){
+        return response[nameIndexMap.get(variableName)];
+    }
+
+    public byte getResponseAt(String name){
+        return response[nameIndexMap.get(new VariableName(name))];
     }
 
     /**

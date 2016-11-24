@@ -74,6 +74,7 @@ public class JointMaximumLikelihoodEstimation{
     private double adjustment = 0.3;
     private int extremeCount = 0;
     private int droppedCount = 0;
+    private Object[][] scoreConversionTable = null;
 
     /**
      * The object is created with a set of data and array of item response models (See {@link ItemResponseModel}.
@@ -299,7 +300,6 @@ public class JointMaximumLikelihoodEstimation{
     public boolean estimateParameters(int globalMaxIter, double globalConv, int personMaxIter, double personConv, boolean centerItems){
         double delta = 1.0+globalConv;
         double itemDelta = 0.0;
-        double threshDelta = 0.0;
         double personDelta = 0.0;
         int iter = 0;
 
@@ -309,16 +309,8 @@ public class JointMaximumLikelihoodEstimation{
 
         while(delta > globalConv && iter < globalMaxIter){
 
-            //update items
+            //update items and thresholds
             itemDelta = updateAllItems(delta, centerItems);
-
-            //update thresholds
-            if(maxCategory>2){
-                //update thresholds
-                for(String s:rsg.keySet()){
-                    threshDelta = updateThresholds(rsg.get(s));
-                }
-            }
 
             //accept proposal values
             for(int j=0;j<nItems;j++){
@@ -362,11 +354,15 @@ public class JointMaximumLikelihoodEstimation{
 
         //update each non extreme item
         for(int j=0;j<nItems;j++){
-            if(droppedStatus[j]==0){
-                tempDifficulty = updateDifficulty(irm[j], itemSummary[j], delta);
-                if(extremeItem[j]==0) mean.increment(tempDifficulty);
+            if(irm[j].isFixed()){
+                hasFixed=true;
+            }else{
+                if(droppedStatus[j]==0){
+                    tempDifficulty = updateDifficulty(irm[j], itemSummary[j], delta);
+                    if(extremeItem[j]==0) mean.increment(tempDifficulty);
+                }
             }
-            if(irm[j].isFixed()) hasFixed=true;
+
         }
 
         //Center non extreme items about the mean item difficulty.
@@ -374,7 +370,9 @@ public class JointMaximumLikelihoodEstimation{
         for(int j=0;j<nItems;j++){
             if(hasFixed){
                 //with fixed values, there is no need to constrain item difficulty to be zero.
-                maxDelta = Math.max(maxDelta, Math.abs(irm[j].getProposalDifficulty()-irm[j].getDifficulty()));
+                if(!irm[j].isFixed()){
+                    maxDelta = Math.max(maxDelta, Math.abs(irm[j].getProposalDifficulty()-irm[j].getDifficulty()));
+                }
             }else{
                 //without fixed item parameter, constrain item difficulty to be zero.
                 if(droppedStatus[j]==0 && extremeItem[j]==0){
@@ -385,21 +383,31 @@ public class JointMaximumLikelihoodEstimation{
                     maxDelta = Math.max(maxDelta, Math.abs(tempDifficulty-difficulty));
                 }
             }
-
         }
+
+        //update thresholds
+        if(maxCategory>2){
+            //update thresholds
+            for(String s:rsg.keySet()){
+                if(!rsg.get(s).isFixed()){
+                    maxDelta = Math.max(maxDelta, updateThresholds(rsg.get(s)));
+                }
+            }
+        }
+
         return maxDelta;
     }
 
     /**
      * Update of an individual item. The update only involves nonextreme examinees that responded to the item.
+     * Only call this method for items with free parameters to be estimated.
      *
-     * @param irm an item response model.
+     * @param irm an item response model with free parameters to be estimated.
      * @param isum an item response summary object with item frequencies.
      * @param delta current value of the observed maximum change in logits.
      * @return
      */
     private double updateDifficulty(ItemResponseModel irm, ItemResponseSummary isum, double delta){
-        if(irm.isFixed()) return 0.0;
         double iTCC1 = 0.0;
         double iTCC2 = 0.0;
         double proposalDifficulty = 0.0;
@@ -420,25 +428,25 @@ public class JointMaximumLikelihoodEstimation{
         return proposalDifficulty;
     }
 
-    /**
-     * All thresholds updated here.
-     *
-     * @return largest change in threshold estimate.
-     */
-    private double updateAllThresholds(){
-        double tDelta = 0.0;
-        double maxDelta = 0.0;
-        RaschRatingScaleGroup raschRatingScaleGroup = null;
-        for(String s:rsg.keySet()){
-            raschRatingScaleGroup = rsg.get(s);
-            if(raschRatingScaleGroup.dropStatus()==0){
-                tDelta = updateThresholds(raschRatingScaleGroup);
-                maxDelta = Math.max(maxDelta, tDelta);
-                raschRatingScaleGroup.acceptAllProposalValues();
-            }
-        }
-        return maxDelta;
-    }
+//    /**
+//     * All thresholds updated here.
+//     *
+//     * @return largest change in threshold estimate.
+//     */
+//    private double updateAllThresholds(){
+//        double tDelta = 0.0;
+//        double maxDelta = 0.0;
+//        RaschRatingScaleGroup raschRatingScaleGroup = null;
+//        for(String s:rsg.keySet()){
+//            raschRatingScaleGroup = rsg.get(s);
+//            if(raschRatingScaleGroup.dropStatus()==0){
+//                tDelta = updateThresholds(raschRatingScaleGroup);
+//                maxDelta = Math.max(maxDelta, tDelta);
+//                raschRatingScaleGroup.acceptAllProposalValues();
+//            }
+//        }
+//        return maxDelta;
+//    }
 
     /**
      * Thresholds for a single rating scale group are updated in this method. Updates only involve nonextreme
@@ -449,7 +457,7 @@ public class JointMaximumLikelihoodEstimation{
      */
     private double updateThresholds(RaschRatingScaleGroup raschRatingScaleGroup){
         double thresh = 0.0;
-        int[] pos = raschRatingScaleGroup.getPositions();
+//        int[] pos = raschRatingScaleGroup.getPositions();
         int nCat = raschRatingScaleGroup.getNumberOfCategories();
         double[] catKSum = new double[nCat];
         double[] thresholds = null;
@@ -1396,11 +1404,16 @@ public class JointMaximumLikelihoodEstimation{
      */
     public String printScoreTable(int maxIter, double converge, double adjustment,
                                   DefaultLinearTransformation transformation, int precision){
-        RaschScoreTable table = new RaschScoreTable(irm, extremeItem, droppedStatus);
+        RaschScoreTable table = new RaschScoreTable(irm, extremeItem, droppedStatus, precision);
         table.updateScoreTable(maxIter, converge, adjustment);
         table.computePersonStandardErrors();
         table.linearTransformation(transformation, precision);//must come after computation of standard errors
+        scoreConversionTable = table.getOutputArray();
         return table.printScoreTable();
+    }
+
+    public Object[][] getScoreconversionTableForOutputter(){
+        return scoreConversionTable;
     }
 
     /**

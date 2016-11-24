@@ -505,6 +505,7 @@ public class Irm4PL extends AbstractItemResponseModel {
      */
     public void setDifficulty(double difficulty){
         this.difficulty = difficulty;
+        this.proposalDifficulty = difficulty;
     }
 
     /**
@@ -562,6 +563,7 @@ public class Irm4PL extends AbstractItemResponseModel {
      */
     public void setDiscrimination(double discrimination){
         this.discrimination = discrimination;
+        this.proposalDiscrimination = discrimination;
     }
 
     public double getProposalDiscrimination(){
@@ -611,6 +613,7 @@ public class Irm4PL extends AbstractItemResponseModel {
      */
     public void setGuessing(double guessing){
         this.guessing = guessing;
+        this.proposalGuessing = guessing;
     }
 
     /**
@@ -658,6 +661,7 @@ public class Irm4PL extends AbstractItemResponseModel {
      */
     public void setSlipping(double slipping){
         this.slipping = slipping;
+        this.proposalSlipping = slipping;
     }
 
     /**
@@ -704,6 +708,7 @@ public class Irm4PL extends AbstractItemResponseModel {
      *
      */
     public double acceptAllProposalValues(){
+        if(isFixed) return 0;
         double max = 0;
         double delta = 0;
 

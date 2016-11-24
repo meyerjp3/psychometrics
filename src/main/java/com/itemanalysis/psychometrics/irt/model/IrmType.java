@@ -20,12 +20,40 @@ package com.itemanalysis.psychometrics.irt.model;
  */
 public enum IrmType {
 
-    L3,     //to indicate use of the object Irm3PL
-    L4,     //to indicate use of Irm4PL
-    GPCM,   //to indicate use of the object IrmGPCM (step parameterization of GPCM)
-    GPCM2,  //to indicate use of the object IrmGPCM2 (difficulty plus threshold  parameterization of GPCM as in PARSCALE)
-    PCM,     //to indicate use of the object IrmPCM (difficulty plus threshold parameterization of PCM)
-    PCM2,   //to indicate use of the object IrmPCM (step parameterization of PCM)
-    GRM     //o indicate use of the object IrmGRM
+    L3{
+        public String toString(){
+            return "L3";
+        }
+    },     //to indicate use of the object Irm3PL
+    L4{
+        public String toString(){
+            return "L4";
+        }
+    },     //to indicate use of Irm4PL
+    GPCM{
+        public String toString(){
+            return "GPCM";
+        }
+    },   //to indicate use of the object IrmGPCM (step parameterization of GPCM)
+    GPCM2{
+        public String toString(){
+            return "GPCM2";
+        }
+    },  //to indicate use of the object IrmGPCM2 (difficulty plus threshold  parameterization of GPCM as in PARSCALE)
+    PCM{
+        public String toString(){
+            return "PCM";
+        }
+    },     //to indicate use of the object IrmPCM (difficulty plus threshold parameterization of PCM)
+    PCM2{
+        public String toString(){
+            return "PCM2";
+        }
+    },   //to indicate use of the object IrmPCM (step parameterization of PCM)
+    GRM{
+        public String toString(){
+            return "GRM";
+        }
+    }     //o indicate use of the object IrmGRM
 
 }
