@@ -2,6 +2,8 @@ package com.itemanalysis.psychometrics.histogram;
 
 import org.junit.Test;
 
+import java.util.Arrays;
+
 import static org.junit.Assert.*;
 
 public class HistogramTest {
@@ -58,6 +60,28 @@ public class HistogramTest {
         for(int i=0;i<y.length;i++){
             assertEquals("Histogram relative frequency", true_relative_frequency[i], y[i], 1e-2);
         }
+
+    }
+
+    @Test
+    public void indexTest(){
+
+        double[] x = {-7,1.4, 2.0, 2.5, 3, 5.3, 4.1, 8};
+        double[] bounds = {0,2,4,6};//[0,2) [2,4) [4,6) [6,+Inf]
+        double index = 0;
+
+        for( double d : x){
+            int insertionPoint = Arrays.binarySearch(bounds, d);
+            if(insertionPoint<0){
+                index = ~insertionPoint-1;
+            }else{
+                index = insertionPoint-1;//will be lower inclusive, upper exclusive [x,y)
+            }
+            System.out.println("Value = " + d);
+            System.out.println("  Insertion Point = " + insertionPoint);
+            System.out.println("            index = " + index);
+        }
+
 
     }
 

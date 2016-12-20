@@ -26,7 +26,7 @@ public class ConditionalItemResponseSummaryTest {
     @Test
     public void propTest(){
 
-        ConditionalItemResponseSummary cIRS = new ConditionalItemResponseSummary(new VariableName("item1"));
+        ConditionalNumericItemResponseSummary cIRS = new ConditionalNumericItemResponseSummary(new VariableName("item1"));
 
         cIRS.increment(10, 1);
         cIRS.increment(10, 1);

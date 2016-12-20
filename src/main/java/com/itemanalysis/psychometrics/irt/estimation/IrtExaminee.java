@@ -27,6 +27,9 @@ import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.univariate.*;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
 /**
  * This class holds an item responseVector vector for an examinee and stores a count of the
  * number of examinees with the same responseVector vector. It computes the loglikelihood
@@ -100,6 +103,30 @@ public class IrtExaminee implements UnivariateDifferentiableFunction {
         this.groupID = "";
         this.irm = irm;
         this.nItems = irm.length;
+    }
+
+    public IrtExaminee(ArrayList<ItemResponseModel> irm){
+        this.groupID = "";
+        this.nItems = irm.size();
+        this.irm = new ItemResponseModel[nItems];
+
+        int index = 0;
+        for(ItemResponseModel model : irm){
+            this.irm[index] = model;
+            index++;
+        }
+    }
+
+    public IrtExaminee(LinkedHashMap<VariableName, ItemResponseModel> irm){
+        this.groupID = "";
+        this.nItems = irm.size();
+        this.irm = new ItemResponseModel[nItems];
+
+        int index = 0;
+        for(VariableName vn : irm.keySet()){
+            this.irm[index] = irm.get(vn);
+            index++;
+        }
     }
 
     /**

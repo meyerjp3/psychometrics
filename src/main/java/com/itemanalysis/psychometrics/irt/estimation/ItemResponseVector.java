@@ -18,8 +18,10 @@ package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.data.VariableName;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * A class for storing the item response vector and frequency counts. This class is designed
@@ -87,6 +89,37 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
                 validResponses++;
             }
             responseString += response[i];
+        }
+    }
+
+    public ItemResponseVector(String groupID, byte[] response, ArrayList<VariableName>  itemName, double freq){
+        this.groupID = groupID;
+        this.response = response;
+        this.freq = freq;
+        this.nItems = response.length;
+        this.nameIndexMap = new HashMap<VariableName, Integer>();
+        for(int i=0;i<response.length;i++){
+            nameIndexMap.put(itemName.get(i), Integer.valueOf(i));
+            if(response[i]!=-1){
+                sumScore += response[i];
+                validResponses++;
+            }
+            responseString += response[i];
+        }
+    }
+
+    public ItemResponseVector(String groupID, ArrayList<Byte> response, ArrayList<VariableName> itemName, double freq){
+        this.groupID = groupID;
+        this.freq = freq;
+        this.nItems = response.size();
+        this.response = new byte[nItems];
+        this.nameIndexMap = new HashMap<VariableName, Integer>();
+
+        int index = 0;
+        for(VariableName vName : itemName){
+            this.response[index] = response.get(index);
+            this.nameIndexMap.put(vName, Integer.valueOf(index));
+            index++;
         }
     }
 
