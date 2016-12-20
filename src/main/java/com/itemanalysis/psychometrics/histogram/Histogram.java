@@ -193,6 +193,7 @@ public class Histogram implements DistributionApproximation {
         for(Bin b : bins){
             points[index] = b.getMidPoint();
             value[index] = b.getFrequency()/n;
+            sum += value[index];
             index++;
         }
 

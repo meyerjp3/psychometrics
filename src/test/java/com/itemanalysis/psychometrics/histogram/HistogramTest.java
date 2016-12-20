@@ -73,13 +73,13 @@ public class HistogramTest {
         for( double d : x){
             int insertionPoint = Arrays.binarySearch(bounds, d);
             if(insertionPoint<0){
-                index = ~insertionPoint-1;
+                insertionPoint = ~insertionPoint-1;
             }else{
-                index = insertionPoint-1;//will be lower inclusive, upper exclusive [x,y)
+                insertionPoint = insertionPoint-1;//will be lower inclusive, upper exclusive [x,y)
             }
             System.out.println("Value = " + d);
             System.out.println("  Insertion Point = " + insertionPoint);
-            System.out.println("            index = " + index);
+            System.out.println("            index = " + insertionPoint);
         }
 
 
