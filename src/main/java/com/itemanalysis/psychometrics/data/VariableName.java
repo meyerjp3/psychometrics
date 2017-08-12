@@ -37,7 +37,8 @@ public class VariableName implements Comparable<VariableName>{
 
 	public VariableName(String variableName){
         String lcVarName = variableName.trim().toLowerCase();
-		if(lcVarName.startsWith("x") && lcVarName.endsWith("x")){
+
+		if(lcVarName.toLowerCase().startsWith("x") && lcVarName.toLowerCase().endsWith("x")){
 			String temp = lcVarName.substring(1,lcVarName.length()-1);
 			int length=Math.min(temp.length(), NAME_LENGTH);
 			this.originalVariableName=temp.substring(0,length);
