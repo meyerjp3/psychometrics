@@ -62,7 +62,7 @@ public class NumericItemResponseSummaryTest {
         irs.increment(0, 4);
 
         assertEquals("Test of sample mean", 0.6, irs.getMean(), 1e-15);
-        assertEquals("Test of sample variance", 0.2666666666666667, irs.getVariance(), 1e-15);
+        assertEquals("Test of sample variance", 0.2666666666666667, irs.getVariance(), 1e-14);
         assertEquals("Test of sample mean", 0.5163977794943223, irs.getStandardDeviation(), 1e-15);
     }
 
@@ -122,7 +122,7 @@ public class NumericItemResponseSummaryTest {
         irs.increment(-0.009);
 
         assertEquals("Test of sample mean", 2.546666666666667, irs.getMean(), 1e-15);
-        assertEquals("Test of sample variance", 18.06262706666666, irs.getVariance(), 1e-15);
+        assertEquals("Test of sample variance", 18.06262706666666, irs.getVariance(), 1e-14);
         assertEquals("Test of sample mean", 4.250014948993317, irs.getStandardDeviation(), 1e-15);
 
 //        System.out.println(irs.toString());
