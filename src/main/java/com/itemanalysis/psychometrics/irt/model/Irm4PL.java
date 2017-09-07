@@ -140,6 +140,17 @@ public class Irm4PL extends AbstractItemResponseModel {
     }
 
     /**
+     * Not implemented. Only implemented for the graded response model.
+     *
+     * @param theta a person ability value
+     * @param category response category
+     * @return
+     */
+    public double cumulativeProbability(double theta, int category){
+        return Double.NaN;
+    }
+
+    /**
      * Computes the gradientAt (vector of first partial derivatives) with respect to the item parameters.
      * This method uses item parameters passed to the method. It does NOT use item parameters stored in the
      * object.
@@ -199,10 +210,6 @@ public class Irm4PL extends AbstractItemResponseModel {
     public double itemInformationAt(double theta){
         double p = probRight(theta);
         double a2 = discrimination*discrimination;
-//        double part1 = Math.pow(p - guessing, 2);
-//        double part2 = Math.pow(slipping-guessing, 2);
-//        double info = D*D*a2*(part1/part2)*((slipping-p)/p);
-
         double top = D*D*a2*Math.pow(p-guessing, 2)*Math.pow(slipping-p, 2);
         double bot = Math.pow(slipping-guessing, 2)*p*(1-p);
         double info = top/bot;

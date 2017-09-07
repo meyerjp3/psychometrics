@@ -205,6 +205,18 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         return scoreWeight[1]*probRight(theta);
     }
 
+
+    /**
+     * Not implemented. Only implemented for the graded response model.
+     *
+     * @param theta a person ability value
+     * @param category response category
+     * @return
+     */
+    public double cumulativeProbability(double theta, int category){
+        return Double.NaN;
+    }
+
 //    public double[] gradientAt(double theta){
 //        //Note: The second argument (-1) is not actually used by this class.
 //        //It is here to satisfy the interface.

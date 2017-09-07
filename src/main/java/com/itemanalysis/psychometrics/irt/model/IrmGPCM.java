@@ -123,6 +123,17 @@ public class IrmGPCM extends AbstractItemResponseModel {
     }
 
     /**
+     * Not implemented. Only implemented for the graded response model.
+     *
+     * @param theta a person ability value
+     * @param category response category
+     * @return
+     */
+    public double cumulativeProbability(double theta, int category){
+        return Double.NaN;
+    }
+
+    /**
      * Computes the numerator of the item response model. This method is used internally for the computation
      * of the probability of an item response. It uses item parameter values passed in the iparam argument.
      * It does NOT use item parameter values stored in the object.

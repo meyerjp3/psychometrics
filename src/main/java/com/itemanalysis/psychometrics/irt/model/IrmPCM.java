@@ -168,6 +168,17 @@ public class IrmPCM extends AbstractItemResponseModel{
         return ev;
     }
 
+    /**
+     * Not implemented. Only implemented for the graded response model.
+     *
+     * @param theta a person ability value
+     * @param category response category
+     * @return
+     */
+    public double cumulativeProbability(double theta, int category){
+        return Double.NaN;
+    }
+
     public double[] gradient(double theta, double[] iparam, int k, double D){
         //empty method
         return null;

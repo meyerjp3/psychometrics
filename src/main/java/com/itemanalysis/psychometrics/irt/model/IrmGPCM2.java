@@ -96,6 +96,17 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
         return t/b;
     }
 
+    /**
+     * Not implemented. Only implemented for the graded response model.
+     *
+     * @param theta a person ability value
+     * @param category response category
+     * @return
+     */
+    public double cumulativeProbability(double theta, int category){
+        return Double.NaN;
+    }
+
     private double numer(double theta, double[] iparam, int category, double D){
         double Zk = 0;
         double a = iparam[0];

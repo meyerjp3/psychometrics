@@ -65,6 +65,15 @@ public interface ItemResponseModel {
      */
     public double expectedValue(double theta);
 
+    /**
+     * Mainly here for the graded response model
+     *
+     * @param theta a person ability value
+     * @param category response category
+     * @return the probability of responding at or above the given category
+     */
+    public double cumulativeProbability(double theta, int category);
+
     public void setDiscriminationPrior(ItemParamPrior prior);
 
     public void setDifficultyPrior(ItemParamPrior prior);
