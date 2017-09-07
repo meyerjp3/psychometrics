@@ -116,6 +116,7 @@ public class ClassicalItemSummary {
      * @return array of item statistics.
      */
     public Object[] getOptionOutputArray(){
+        if(null==categorySummary) return null;
         int count = categorySummary.size()*3;
         Object[] obj = new Object[count];
         CategoryResponseSummary temp = null;

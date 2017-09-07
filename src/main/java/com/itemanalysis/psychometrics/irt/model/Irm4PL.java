@@ -197,7 +197,16 @@ public class Irm4PL extends AbstractItemResponseModel {
     }
 
     public double itemInformationAt(double theta){
-        return Double.NaN;
+        double p = probRight(theta);
+        double a2 = discrimination*discrimination;
+//        double part1 = Math.pow(p - guessing, 2);
+//        double part2 = Math.pow(slipping-guessing, 2);
+//        double info = D*D*a2*(part1/part2)*((slipping-p)/p);
+
+        double top = D*D*a2*Math.pow(p-guessing, 2)*Math.pow(slipping-p, 2);
+        double bot = Math.pow(slipping-guessing, 2)*p*(1-p);
+        double info = top/bot;
+        return info;
     }
 
     public double[] nonZeroPrior(double[] param){
