@@ -94,7 +94,7 @@ public class ReliabilitySummary {
         StandardErrorOfMeasurement sem = new StandardErrorOfMeasurement();
 
         f.format("%n");
-        f.format("%-20s", "                            RELIABILIY ANALYSIS");f.format("%n");
+        f.format("%-20s", "                            RELIABILITY ANALYSIS");f.format("%n");
         f.format("%-60s", "===========================================================================");f.format("%n");
         f.format("%-20s",  " Method             ");f.format("%10s",  "Estimate");f.format("%5s",  ""); f.format("%20s",  "95% Conf. Int. ");f.format("%5s",  ""); f.format("%10s",  "SEM"); f.format("%n");
         f.format("%-60s", "---------------------------------------------------------------------------");f.format("%n");
@@ -124,7 +124,7 @@ public class ReliabilitySummary {
         double[] rjDeleted = raju.itemDeletedReliability();
 
         f.format("%n");
-        f.format("%-20s", "                    RELIABILIY IF ITEM DELTED");f.format("%n");
+        f.format("%-20s", "                    RELIABILITY IF ITEM DELETED");f.format("%n");
         f.format("%-60s", "=================================================================");f.format("%n");
         f.format("%-10s",  " Item");f.format("%10s",  "L2");f.format("%10s",  "Alpha");f.format("%10s",  "F-G"); f.format("%10s",  "F-B"); f.format("%10s",  "Raju");f.format("%n");
         f.format("%-60s", "-----------------------------------------------------------------");f.format("%n");
