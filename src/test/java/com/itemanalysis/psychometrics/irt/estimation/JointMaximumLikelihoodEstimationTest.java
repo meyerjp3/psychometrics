@@ -5,6 +5,7 @@ import com.itemanalysis.psychometrics.factoranalysis.ExploratoryFactorAnalysis;
 import com.itemanalysis.psychometrics.irt.model.Irm3PL;
 import com.itemanalysis.psychometrics.irt.model.IrmPCM;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
+import com.itemanalysis.psychometrics.scaling.DefaultLinearTransformation;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.exception.NoDataException;
 import org.apache.commons.math3.util.Precision;
@@ -394,6 +395,52 @@ public class JointMaximumLikelihoodEstimationTest {
         for(int j=0;j<irm.length;j++){
             assertEquals("  JMLE tap test: fixed difficulty", tap_true_difficulty[j], Precision.round(irm[j].getDifficulty(), 5), 1e-4);
             System.out.println(irm[j].toString());
+        }
+
+    }
+
+    /**
+     * Fix all items and check th score table. It should have raw scores from 0 to 18 because all
+     * items are fixed and none of the extreme items are dropped.
+     *
+     * True theta values in score table (true_scoreTable) from WINSTEPS using the item
+     * parameters in tap_true_difficulty array.
+     */
+    @Test
+    public void testTapDataAllItemsFixed(){
+        System.out.println("JMLE TAP DATA SCORE TABLE WITH FIXED PARAMETERS");
+        byte[][] data = readTapData();
+        int nItems = data[0].length;
+
+        //true estimates from WINSTEPS
+        double[] tap_true_difficulty = {-6.6171, -6.6171, -6.6171, -4.4262, -3.7000, -3.3882, -3.8476, -2.3363, -3.3882,
+                -1.5375, 0.8500, 2.3796, 2.0832, 3.5000, 5.0043, 5.0043, 5.0043, 6.3376};
+
+        double[] true_scoreTable = {-8.93904, -7.51335, -6.43587, -5.57658, -4.82076, -4.15276, -3.53151, -2.90290,
+                -2.20359, -1.34004, -.19676, 1.03313, 2.07424, 2.99413, 3.85601, 4.68154, 5.53466, 6.61733, 8.07333};
+
+        ItemResponseModel[] irm = new ItemResponseModel[18];
+        for(int i=0;i<nItems;i++){
+            irm[i] = new Irm3PL(0.0, 1.0);
+            irm[i].setName(new VariableName("V"+(i+1)));
+
+            irm[i].setDifficulty(tap_true_difficulty[i]);
+            irm[i].setFixed(true);
+        }
+
+        JointMaximumLikelihoodEstimation jmle = new JointMaximumLikelihoodEstimation(data, irm);
+        jmle.summarizeData(0.3);
+        jmle.itemProx();
+        jmle.estimateParameters(150, 0.005);
+
+        String table = jmle.printScoreTable(150, 0.005, 0.3, new DefaultLinearTransformation(0, 1), 5);
+        Object[][] scoreTable = jmle.getScoreconversionTableForOutputter();
+//        System.out.println(table);
+//        System.out.println(jmle.printIterationHistory());
+
+
+        for(int i=0;i<true_scoreTable.length; i++){
+            assertEquals("  JMLE tap test: fixed difficulty score table", true_scoreTable[i], (Double)scoreTable[i][1], 1e-4);
         }
 
     }

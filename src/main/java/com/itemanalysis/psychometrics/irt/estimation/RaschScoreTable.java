@@ -64,6 +64,14 @@ public class RaschScoreTable {
      * Computes the maximum possible test score. This value is needed for identifying extreme examinees.
      */
     private void computeMPS(){
+
+        //An item response model with fixed difficulty cannot be an extreme item
+        for(int i=0;i<nItems;i++){
+            if(irm[i].isFixed()){
+                extremeItem[i]=0;
+            }
+        }
+
         for(int i=0;i<nItems;i++){
             if(droppedStatus[i]==0 && extremeItem[i]==0){
                 MinPS += irm[i].getMinScoreWeight();
