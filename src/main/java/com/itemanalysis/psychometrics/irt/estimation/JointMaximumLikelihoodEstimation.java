@@ -1540,6 +1540,7 @@ public class JointMaximumLikelihoodEstimation{
 
         int index = 4;
         RaschRatingScaleGroup group = null;
+        RaschCategoryFitStatistic catFit = null;
         double[] thresholds = null;
         double[] thresholdsStdError = null;
         for(String s : rsg.keySet()){
@@ -1566,8 +1567,17 @@ public class JointMaximumLikelihoodEstimation{
                     }else{
                         textTable.getRowAt(index).addDoubleAt(2, thresholds[i-1]);
                         textTable.getRowAt(index).addDoubleAt(3, thresholdsStdError[i-1]);
-                        textTable.getRowAt(index).addDoubleAt(4, group.getCategoryFitAt(i-1).getWeightedMeanSquare());
-                        textTable.getRowAt(index).addDoubleAt(5, group.getCategoryFitAt(i-1).getUnweightedMeanSquare());
+
+                        catFit = group.getCategoryFitAt(i-1);
+                        if(null==catFit){
+                            textTable.getRowAt(index).addStringAt(4, " ");
+                            textTable.getRowAt(index).addStringAt(5, " ");
+                        }else{
+                            textTable.getRowAt(index).addDoubleAt(4, catFit.getWeightedMeanSquare());
+                            textTable.getRowAt(index).addDoubleAt(5, catFit.getUnweightedMeanSquare());
+                        }
+
+
                     }
                 }
                 index++;

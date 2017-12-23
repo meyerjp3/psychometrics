@@ -236,7 +236,7 @@ public class RaschRatingScaleGroup {
      * During each iteration of the joint maximum likelihood routine, preliminary threshold estimates are obtained.
      * These proposal values are stored in a separate array. After one complete iteration is complete, the threshold
      * values are set to the proposal values. See
-     * {@link com.itemanalysis.psychometrics.irt.estimation.JointMaximumLikelihoodEstimation#updateAllThresholds()}.
+     * {@link com.itemanalysis.psychometrics.irt.estimation.JointMaximumLikelihoodEstimation#updateThresholds(RaschRatingScaleGroup)}.
      *
      * @return
      */
@@ -386,7 +386,8 @@ public class RaschRatingScaleGroup {
      * @return category fit statistics.
      */
     public RaschCategoryFitStatistic getCategoryFitAt(int index){
-        return fitStatistics[index];
+        if(null!=fitStatistics[index]) return fitStatistics[index];
+        return null;
     }
 
     /**
