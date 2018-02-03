@@ -189,7 +189,7 @@ public class DefaultItemScoring implements ItemScoring{
      * They are stored in an array of Pairs so that the category ID and score are kept together.
      *
      * @param response an item response
-     * @return
+     * @return pair of category value score pairs
      */
     public Pair[] computeScoreVector(Object response){
         Pair[] pair = new Pair[this.numberOfCategories()];
@@ -208,9 +208,9 @@ public class DefaultItemScoring implements ItemScoring{
     /**
      * Returns 1 if response == categoryId and 0 otherwise.
      *
-     * @param categoryId
-     * @param response
-     * @return
+     * @param categoryId category ID
+     * @param response response value
+     * @return category score
      */
     public double computeCategoryScore(Object categoryId, Object response){
         if(categoryId.equals(response)) return 1.0;
@@ -433,7 +433,7 @@ public class DefaultItemScoring implements ItemScoring{
      * A CONTINUOUS_ITEM has more than two levels and each level is a real number. Or, it is an item
      * set as continuous in the constructor or parsing of a score string.
      *
-     * @return
+     * @return type of item
      */
     public ItemType getItemType(){
 //        if(categories==null || categories.size()==0){
@@ -454,7 +454,7 @@ public class DefaultItemScoring implements ItemScoring{
      * this method creates a String that represents the item scoring. It
      * is referred to as the score string.
      *
-     * @return
+     * @return string representation of option score key
      */
     public String printOptionScoreKey(){
 //        if(categories.size()==0) return "";

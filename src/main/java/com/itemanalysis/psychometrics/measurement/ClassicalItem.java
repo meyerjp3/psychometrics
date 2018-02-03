@@ -155,7 +155,7 @@ public class ClassicalItem {
      * This method provides starting values for confirmatory factor
      * analysis factor loadings.
      *
-     * @return
+     * @return an approximation to teh factor loading
      */
     @Deprecated
     public double factorLoadingApproximation(){
@@ -164,7 +164,7 @@ public class ClassicalItem {
 
     /**
      * Number of response categories
-     * @return
+     * @return the number of response categories
      */
     public int numberOfCategories(){
         if(allCategories) return itemScoring.numberOfCategories();
@@ -174,7 +174,7 @@ public class ClassicalItem {
     /**
      * Name of item
      *
-     * @return
+     * @return name of the item
      */
     public VariableName getName(){
         return variableAttributes.getName();
@@ -201,7 +201,7 @@ public class ClassicalItem {
     /**
      * Classical item discrimination estimate (i.e. item-total correlation)
      *
-     * @return
+     * @return item discrimination
      */
     public double getDiscrimination(){
         return itemStats.getDiscrimination();
@@ -251,8 +251,8 @@ public class ClassicalItem {
     }
 
     /**
-     * Iterator for teh catgory objects
-     * @return
+     * Iterator for the catgory objects
+     * @return iterator for the categories
      */
     public Iterator<Object> categoryIterator(){
         return categoryStats.keySet().iterator();
@@ -283,7 +283,7 @@ public class ClassicalItem {
 
     /**
      * Provide all requested statistics for the item. This output aligns with the printHeader() method.
-     * @return
+     * @return string output
      */
     @Override
     public String toString(){

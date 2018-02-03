@@ -36,7 +36,10 @@ public class MachineAccuracy
 	public static double SQRT_EPSILON = 1.4901161193847656E-8;
 	public static double SQRT_SQRT_EPSILON = 1.220703125E-4;
 
-	/** compute EPSILON from scratch */
+	/**
+	 * compute EPSILON from scratch
+	 * @return epsilon
+	 */
 	public static double computeEpsilon()
 	{
 		double eps = 1.0;
@@ -53,6 +56,11 @@ public class MachineAccuracy
 	/**
 	 * @return true if the relative difference between the two parameters
 	 * is smaller than SQRT_EPSILON.
+	 *
+	 * @param a value 1
+	 * @param b value 2
+	 * @return whether or not values are the same within epsilon
+	 *
 	 */
 	public static boolean same(double a, double b) {
 		return Math.abs((a/b)-1.0) <= SQRT_EPSILON;

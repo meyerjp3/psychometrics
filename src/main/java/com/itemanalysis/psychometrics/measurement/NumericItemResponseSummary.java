@@ -84,7 +84,7 @@ public class NumericItemResponseSummary extends AbstractItemResponseSummary{
     /**
      * Increment frequency count of a response by one.
      *
-     * @param response
+     * @param response an item response
      */
     public void increment(double response){
         increment(response, 1.0);
@@ -262,7 +262,7 @@ public class NumericItemResponseSummary extends AbstractItemResponseSummary{
     /**
      * The item population standard deviation (i.e. n in the denominator).
      *
-     * @return
+     * @return population standard deviation
      */
     public double getPopulationStandardDeviation(){
         return Math.sqrt(getPopulationVariance());

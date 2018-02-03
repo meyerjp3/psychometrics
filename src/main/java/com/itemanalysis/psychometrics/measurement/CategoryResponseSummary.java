@@ -184,7 +184,7 @@ public class CategoryResponseSummary {
 
     /**
      * Returns the discrimination for the response category, which may also be the whole item.
-     * @return
+     * @return discrimination value
      */
     public double getDiscrimination(){
         if(discriminationType==DiscriminationType.DINDEX27 || discriminationType==DiscriminationType.DINDEX33){

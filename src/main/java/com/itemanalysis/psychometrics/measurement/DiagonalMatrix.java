@@ -30,7 +30,7 @@ public class DiagonalMatrix  extends Array2DRowRealMatrix {
 
     /**
      * Creates a matrix with diagonal elements set to x. Off diagonal elements are zero.
-     * @param x
+     * @param x diagonal values of the matrix
      */
     public DiagonalMatrix(double[] x){
         super(x.length, x.length);
@@ -40,9 +40,9 @@ public class DiagonalMatrix  extends Array2DRowRealMatrix {
     }
 
     /**
-     * Changes the diagonal of the matrix to teh values in x.
+     * Changes the diagonal of the matrix to the values in x.
      *
-     * @param x
+     * @param x diagonal values of the matrix
      */
     public void setMatrix(double[] x){//TODO check that x.length==cols
         for(int i=0;i<rows;i++){

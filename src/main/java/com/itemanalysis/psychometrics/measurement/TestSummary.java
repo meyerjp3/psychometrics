@@ -30,7 +30,7 @@ import java.util.*;
  * Currently this class stores the test score data in memory. Item level data is not stored in memory.
  * Rather, the inter-item covariance matrix is incrementally updated.
  *
- * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
+ * @author J. Patrick Meyer, meyerjp at itemanalysis.com
  */
 public class TestSummary {
     
@@ -234,7 +234,7 @@ public class TestSummary {
     /**
      *
      * @param p a value between 0 and 100.
-     * @return
+     * @return pth percentile value
      */
     public double getPercentile(double p){
         return stats.getPercentile(p);

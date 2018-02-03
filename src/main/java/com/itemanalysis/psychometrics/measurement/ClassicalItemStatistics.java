@@ -111,10 +111,10 @@ public class ClassicalItemStatistics {
      * The D index must be incremented in a second loop after test scores have been computed and
      * percentiles computed. Use this method to increment the D index.
      *
-     * @param itemScore
-     * @param testScore
-     * @param lowCut
-     * @param upperCut
+     * @param itemScore item response score
+     * @param testScore test summed score
+     * @param lowCut cutoff value for lower group
+     * @param upperCut cutoff value for the upper group
      */
     public void incrementDindex(double itemScore, double testScore, double lowCut, double upperCut){
 

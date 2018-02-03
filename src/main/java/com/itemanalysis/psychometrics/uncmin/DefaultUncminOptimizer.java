@@ -250,7 +250,7 @@ public class DefaultUncminOptimizer {
 
     An integer variable which the user may set on input to inhibit certain
     automatic checks or override certain default characteristics of the package.
-    There are currently ﬁve "message" features which can be used individually
+    There are currently five "message" features which can be used individually
     or in combination.
 
     = 0 No message.
@@ -261,19 +261,19 @@ public class DefaultUncminOptimizer {
         its finite difference estimate. This may be necessary if the
         user knows his gradientAt function is properly coded, but the
         program aborts because the comparative tolerance is too
-        tight. It is also efﬁcient if the gradientAt has previously been
+        tight. It is also efficient if the gradientAt has previously been
         checked. Do not use MSG=2 if the analytic gradientAt is not
         supplied.
 
     = 4 Do not check user analytic Hessian routine D2FN
-        against its ﬁnite difference estimate. This may be necessary
+        against its finite difference estimate. This may be necessary
         if the user knows his Hessian function is properly coded, but the
         program aborts because the comparative tolerance is too
-        tight. It is also efﬁcient if the Hessian has previously been
+        tight. It is also efficient if the Hessian has previously been
         checked. Do not use MSG=4 if the analytic Hessian is not
         supplied.
 
-    = 8 Suppress printing of the input state, the ﬁnal results,
+    = 8 Suppress printing of the input state, the final results,
         and the stopping condition.
 
     = 16 Print intermediate results.
@@ -284,7 +284,7 @@ public class DefaultUncminOptimizer {
     suppress the automatic outputting of all results. The user would set
     MSG=4+8=12.
 
-    The module DFAULT returns a value of 0. If the user speciﬁes an illegal
+    The module DFAULT returns a value of 0. If the user specifies an illegal
     value, its value MOD 32 will be used.
 
     On output, if the program has terminated because of erroneous input
@@ -297,17 +297,17 @@ public class DefaultUncminOptimizer {
     = -4 Iteration limit ITNLIM≤0.
     = -5 No good digitsin optimization function, NDIGIT=0.-9-
     = -6 Program asked to override check of analytic gradientAt
-         against ﬁnite difference estimate, but routine D1FN not
+         against finite difference estimate, but routine D1FN not
          supplied. (Incompatible input: MSG=0 mod 2 and IAGFLG=0)
     = -7 Program asked to override check of analytic Hessian
-         against ﬁnite difference estimate, but routine D2FN not
+         against finite difference estimate, but routine D2FN not
          supplied. (Incompatible input: MSG=0 mod 4 and IAGFLG=0)
     = -21 Probable coding error in the user’s analytic gradientAt
-         routine D1FN. Analytic and ﬁnite difference gradients do
+         routine D1FN. Analytic and finite difference gradients do
          not agree within the assigned tolerance. (See computation
          of tolerance under D1FN)
     = -22 Probable coding error in the user’s analytic Hessian
-         routine D2FN. Analytic and ﬁnite difference Hessians do
+         routine D2FN. Analytic and finite difference Hessians do
          not agree within the assigned tolerance. (See computation
          of tolerance under D2FN).
 */

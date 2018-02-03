@@ -119,10 +119,10 @@ public class ItemStats {
      * The D index must be incremented in a second loop after test scores have been computed and
      * percentiles computed. Use this method to increment the D index.
      *
-     * @param itemScore
-     * @param testScore
-     * @param lowCut
-     * @param upperCut
+     * @param itemScore item response score
+     * @param testScore test score
+     * @param lowCut test score cutoff value for lower group
+     * @param upperCut test score cutoff value for the upper group
      */
     public void incrementDindex(double itemScore, double testScore, double lowCut, double upperCut){
 

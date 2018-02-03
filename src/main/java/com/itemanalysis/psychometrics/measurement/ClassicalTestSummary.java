@@ -128,7 +128,7 @@ public class ClassicalTestSummary {
      * Computes the sum score values at the pth and 100-pth percentile.
      *
      * @param percentile a number between 1 and 99.
-     * @return
+     * @return upper and lower bounds for the D-index
      */
     public double[] getDIndexBounds(int percentile){
         int p = Math.max(Math.min(99,percentile), 1);
