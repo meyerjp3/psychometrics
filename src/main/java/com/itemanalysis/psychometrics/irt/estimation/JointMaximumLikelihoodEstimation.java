@@ -945,7 +945,7 @@ public class JointMaximumLikelihoodEstimation{
             if(extremeItem[j]==0 && droppedStatus[j]==0) validItemCount++;
         }
 
-        CovarianceMatrix covMatrix = new CovarianceMatrix(validItemCount);
+        CovarianceMatrix covMatrix = new CovarianceMatrix(validItemCount, true);
 
         for(int i=0;i<nPeople;i++) {
             if(extremePerson[i]==0){
@@ -992,7 +992,7 @@ public class JointMaximumLikelihoodEstimation{
 
         }
 
-        Array2DRowRealMatrix R = new Array2DRowRealMatrix(covMatrix.correlation(true));
+        Array2DRowRealMatrix R = new Array2DRowRealMatrix(covMatrix.correlation());
         ExploratoryFactorAnalysis efa = new ExploratoryFactorAnalysis(R, nFactors);
 
         //set variable names

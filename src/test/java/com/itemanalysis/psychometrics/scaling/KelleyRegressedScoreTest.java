@@ -56,7 +56,7 @@ public class KelleyRegressedScoreTest {
             }
         }
 
-        CoefficientAlpha alpha = new CoefficientAlpha(S, false);
+        CoefficientAlpha alpha = new CoefficientAlpha(S);
         KelleyRegressedScore kscore = new KelleyRegressedScore(mean.evaluate(sum), alpha);
 
         double[] kscores = this.getKelleyScores();

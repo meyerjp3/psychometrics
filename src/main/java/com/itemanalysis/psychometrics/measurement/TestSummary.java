@@ -64,10 +64,6 @@ public class TestSummary {
 
     private boolean unbiased = false;
 
-//    public TestSummary(int numberOfItems, ArrayList<VariableAttributes> variableAttributes){
-//        this(numberOfItems, 1, null, variableAttributes, false, false, false);
-//    }
-
     public TestSummary(int numberOfItems, int numberOfSubscales, ArrayList<Integer> cutScores,
             ArrayList<VariableAttributes> variableAttributes, boolean unbiased, boolean deletedReliability, boolean showCsem){
         this.numberOfItems = numberOfItems;
@@ -294,7 +290,7 @@ public class TestSummary {
         f.format("%n");
         
         if(reliabilitySampleSize>0){
-            reliability = new ReliabilitySummary(relMatrix, variableAttributes, unbiased, deletedReliability);
+            reliability = new ReliabilitySummary(relMatrix, variableAttributes, deletedReliability);
             sb.append(reliability.toString());
             if(deletedReliability){
                 f.format("%n");
@@ -318,7 +314,7 @@ public class TestSummary {
 
         //reliability of subscale defined part tests
         if(numberOfSubscales>1){
-            reliability = new ReliabilitySummary(partRelMatrix, variableAttributes, unbiased, false);
+            reliability = new ReliabilitySummary(partRelMatrix, variableAttributes, false);
             f.format("%n");
             f.format("%n");
             f.format("%n");

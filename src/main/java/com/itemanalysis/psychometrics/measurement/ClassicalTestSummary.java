@@ -65,7 +65,7 @@ public class ClassicalTestSummary {
         this.cutScores = cutScores;
         stats = new DescriptiveStatistics();
         stdDev = new StandardDeviation(unbiased);
-        relMatrix = new CovarianceMatrix(variableAttributes);
+        relMatrix = new CovarianceMatrix(variableAttributes, unbiased);
     }
 
 
@@ -164,7 +164,7 @@ public class ClassicalTestSummary {
         f.format("%n");
 
         if(reliabilitySampleSize>0){
-            reliability = new ReliabilitySummary(relMatrix, variableAttributes, unbiased, deletedReliability);
+            reliability = new ReliabilitySummary(relMatrix, variableAttributes, deletedReliability);
             sb.append(reliability.toString());
             if(deletedReliability){
                 f.format("%n");

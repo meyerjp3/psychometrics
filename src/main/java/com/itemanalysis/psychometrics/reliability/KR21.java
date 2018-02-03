@@ -35,7 +35,6 @@ public class KR21 extends AbstractScoreReliability{
 		nItems=numberOfItems;
 		mean=testMean;
 		sd=testStdDev;
-        this.unbiased = unbiased;
 	}
 
     public KR21(int numberOfItems, double testMean, double testStdDev){
@@ -69,7 +68,7 @@ public class KR21 extends AbstractScoreReliability{
 		return f.toString();
 	}
 
-    public String ifDeletedToString(ArrayList<VariableAttributes> var){
+    public String printItemDeletedSummary(ArrayList<VariableAttributes> var){
         return "";
     }
 

@@ -31,18 +31,13 @@ import java.util.Formatter;
  */
 public class GuttmanLambda extends AbstractScoreReliability{
 
-	public GuttmanLambda(CovarianceMatrix matrix, boolean unbiased){
+	public GuttmanLambda(CovarianceMatrix matrix){
 		this.matrix = matrix;
-        this.unbiased = unbiased;
         nItems = matrix.getNumberOfVariables();
 	}
 
-    public GuttmanLambda(CovarianceMatrix matrix){
-        this(matrix, false);
-    }
-
-    public void isUnbiased(boolean unbiased){
-        this.unbiased = unbiased;
+    public GuttmanLambda(double[][] matrix){
+        this(new CovarianceMatrix(matrix));
     }
 
     public ScoreReliabilityType getType(){
@@ -50,21 +45,35 @@ public class GuttmanLambda extends AbstractScoreReliability{
     }
 	
 	public double value(){
-		double observedScoreVariance = matrix.totalVariance(unbiased);
-		double lambda1 = 1-matrix.diagonalSum(unbiased)/observedScoreVariance;
+		double observedScoreVariance = matrix.totalVariance();
+		double lambda1 = 1-matrix.diagonalSum()/observedScoreVariance;
 		double k = Double.valueOf(matrix.getNumberOfVariables()).doubleValue();
 		double ssV=0.0;
 		
 		for(int i=0;i<nItems;i++){
 			for(int j=0;j<nItems;j++){
 				if(i!=j){
-					ssV+=Math.pow(matrix.getCovarianceAt(i, j, unbiased),2);
+					ssV+=Math.pow(matrix.getCovarianceAt(i, j),2);
 				}
 			}
 		}
 		double gl = lambda1 + Math.sqrt((k/(k-1))*ssV)/observedScoreVariance;
 		return gl;
 	}
+
+    private double computeSsvWithoutItemAt(int index){
+        double ssV=0.0;
+
+        for(int i=0;i<nItems;i++){
+            for(int j=0;j<nItems;j++){
+                if(i!=j && i!=index && j!=index){
+                    ssV+=Math.pow(matrix.getCovarianceAt(i, j),2);
+                }
+            }
+        }
+
+        return ssV;
+    }
 
     /**
      * Computes reliability with each item omitted in turn. The first element in the array is the
@@ -75,13 +84,35 @@ public class GuttmanLambda extends AbstractScoreReliability{
      */
     public double[] itemDeletedReliability(){
         double[] rel = new double[nItems];
-        CovarianceMatrix cm = null;
-        GuttmanLambda gl = null;
+        double totalVariance = this.totalVariance();
+        double diagonalSum = matrix.diagonalSum();
+        double nItemsM1 = ((double)this.nItems) - 1;
+        double totalVarianceAdjusted = 0;
+        double diagonalSumAdjusted = 0;
+        double reliabilityWithoutItem = 0;
+        double ssVAdjusted = 0;
+        double lambda1Adjusted = 0;
+
+
         for(int i=0;i<nItems;i++){
-            cm = matrix.matrixSansVariable(i, unbiased);
-            gl = new GuttmanLambda(cm, unbiased);
-            rel[i] = gl.value();
+            //Compute item variance
+            double itemVariance = matrix.getCovarianceAt(i,i);
+
+            //Compute sum of covariance between this item and all others
+            double itemCovariance = 0;
+            for(int j=0;j<nItems;j++){
+                if(i!=j) itemCovariance += matrix.getCovarianceAt(i,j);
+            }
+            itemCovariance *= 2;
+
+            ssVAdjusted = computeSsvWithoutItemAt(i);
+            totalVarianceAdjusted = totalVariance - itemCovariance - itemVariance;
+            diagonalSumAdjusted = diagonalSum - itemVariance;
+            lambda1Adjusted = 1-diagonalSumAdjusted/totalVarianceAdjusted;
+            reliabilityWithoutItem = lambda1Adjusted + Math.sqrt((nItemsM1/(nItemsM1-1))*ssVAdjusted)/totalVarianceAdjusted;
+            rel[i] = reliabilityWithoutItem;
         }
+
         return rel;
     }
 
@@ -94,7 +125,7 @@ public class GuttmanLambda extends AbstractScoreReliability{
 		return f.toString();
 	}
 
-    public String ifDeletedToString(ArrayList<VariableAttributes> var){
+    public String printItemDeletedSummary(ArrayList<VariableAttributes> var){
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
         double[] del = itemDeletedReliability();

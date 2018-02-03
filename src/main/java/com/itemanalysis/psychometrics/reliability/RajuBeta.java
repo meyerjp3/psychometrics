@@ -27,9 +27,8 @@ public class RajuBeta extends AbstractScoreReliability{
 
 	private double[] lambda;
 	
-	public RajuBeta(CovarianceMatrix matrix, boolean unbiased){
+	public RajuBeta(CovarianceMatrix matrix){
 		this.matrix = matrix;
-        this.unbiased = unbiased;
         nItems = matrix.getNumberOfVariables();
 		double ni=(double)nItems;
 		
@@ -39,13 +38,12 @@ public class RajuBeta extends AbstractScoreReliability{
 		}
 	}
 
-    public RajuBeta(CovarianceMatrix matrix){
-        this(matrix, false);
+    public RajuBeta(double[][] matrix){
+        this(new CovarianceMatrix(matrix));
     }
 	
-	public RajuBeta(CovarianceMatrix matrix, double[] numberOfItems, boolean unbiased){
+	public RajuBeta(CovarianceMatrix matrix, double[] numberOfItems){
 		this.matrix=matrix;
-        this.unbiased = unbiased;
 		nItems = matrix.getNumberOfVariables();
 		for(int i=0;i<nItems;i++){
 			lambda[i]=1/numberOfItems[i];
@@ -64,25 +62,54 @@ public class RajuBeta extends AbstractScoreReliability{
 		}
 		return sumLambda;
 	}
-	
+
+	private double sumLambdaSquaredWithItemAt(int index){
+		double sumLambda2=0.0;
+
+		double LAMBDA = 1/((double)nItems-1); //TODO allow user to provide Lambda values.
+
+		for(int i=0;i<lambda.length;i++){
+			if(i != index) sumLambda2+=Math.pow(LAMBDA,2); //TODO allow user to provide Lambda values.
+		}
+		return sumLambda2;
+	}
+
 	public double value(){
 		double sumLambda2 = sumLambdaSquared();
-		double observedScoreVariance = matrix.totalVariance(unbiased);
-		double componentVariance = matrix.diagonalSum(unbiased);
+		double observedScoreVariance = matrix.totalVariance();
+		double componentVariance = matrix.diagonalSum();
 		double raju=(1/(1-sumLambda2))*((observedScoreVariance-componentVariance)/observedScoreVariance);
 		return raju;
 	}
 
     public double[] itemDeletedReliability(){
-        double[] rel = new double[nItems];
-        CovarianceMatrix cm = null;
-        RajuBeta rb = null;
-        for(int i=0;i<nItems;i++){
-            cm = matrix.matrixSansVariable(i, unbiased);
-            rb = new RajuBeta(cm, unbiased);
-            rel[i] = rb.value();
-        }
-        return rel;
+		double[] rel = new double[nItems];
+		double totalVariance = this.totalVariance();
+		double diagonalSum = matrix.diagonalSum();
+		double totalVarianceAdjusted = 0;
+		double diagonalSumAdjusted = 0;
+		double sumLambda2Adjusted = 0;
+		double reliabilityWithoutItem = 0;
+
+
+		for(int i=0;i<nItems;i++){
+			//Compute item variance
+			double itemVariance = matrix.getCovarianceAt(i,i);
+
+			//Compute sum of covariance between this item and all others
+			double itemCovariance = 0;
+			for(int j=0;j<nItems;j++){
+				if(i!=j) itemCovariance += matrix.getCovarianceAt(i,j);
+			}
+			itemCovariance *= 2;
+
+			sumLambda2Adjusted = sumLambdaSquaredWithItemAt(i);
+			totalVarianceAdjusted = totalVariance - itemCovariance - itemVariance;
+			diagonalSumAdjusted = diagonalSum - itemVariance;
+			reliabilityWithoutItem = (1/(1-sumLambda2Adjusted))*(1.0 - diagonalSumAdjusted/totalVarianceAdjusted);
+			rel[i] = reliabilityWithoutItem;
+		}
+		return rel;
     }
 
     @Override
@@ -94,7 +121,7 @@ public class RajuBeta extends AbstractScoreReliability{
 		return f.toString();
 	}
 
-    public String ifDeletedToString(ArrayList<VariableAttributes> var){
+    public String printItemDeletedSummary(ArrayList<VariableAttributes> var){
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
         double[] del = itemDeletedReliability();

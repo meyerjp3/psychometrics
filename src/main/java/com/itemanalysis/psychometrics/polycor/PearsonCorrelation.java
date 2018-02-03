@@ -36,10 +36,14 @@ public class PearsonCorrelation implements Comparable<PearsonCorrelation>{
 
     private StandardDeviation sdY = null;
 
+	public PearsonCorrelation(boolean unbiased){
+        covariance = new Covariance(unbiased);
+        sdX = new StandardDeviation(unbiased);
+        sdY = new StandardDeviation(unbiased);
+	}
+
 	public PearsonCorrelation(){
-        covariance = new Covariance();
-        sdX = new StandardDeviation();
-        sdY = new StandardDeviation();
+		this(true);
 	}
 
 	public void increment(Double X, Double Y){
@@ -67,11 +71,11 @@ public class PearsonCorrelation implements Comparable<PearsonCorrelation>{
 	}
 
 	public double value(){
-        return covariance.correlation().doubleValue();
+        return covariance.correlation();
 	}
 
     public double value(boolean unbiased){
-        return covariance.correlation(unbiased).doubleValue();
+        return covariance.correlation();
     }
 
     public double sampleSize(){

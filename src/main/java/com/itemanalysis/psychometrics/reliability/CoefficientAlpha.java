@@ -33,21 +33,14 @@ public class CoefficientAlpha extends AbstractScoreReliability{
      * Constructor for coefficient alpha.
      *
      * @param matrix an inter-item correlation matrix
-     * @param unbiased true for unbiased estimates (i.e. n-1) of variance and covariance.
      */
-	public CoefficientAlpha(CovarianceMatrix matrix, boolean unbiased){
+	public CoefficientAlpha(CovarianceMatrix matrix){
 		this.matrix = matrix;
-        this.unbiased = unbiased;
         nItems = matrix.getNumberOfVariables();
 	}
 
-    /**
-     * Constructor for coefficient alpha using a biased estimate (i.e. n) of the variance and covariance.
-     *
-     * @param matrix an inter-itm covariance matrix.
-     */
-    public CoefficientAlpha(CovarianceMatrix matrix){
-        this(matrix, false);
+	public CoefficientAlpha(double[][] matrix){
+	    this(new CovarianceMatrix(matrix));
     }
 
     /**
@@ -57,8 +50,8 @@ public class CoefficientAlpha extends AbstractScoreReliability{
      */
 	public double value(){
 		double k=(double)nItems;
-		double observedScoreVariance = matrix.totalVariance(unbiased);
-		double componentVariance = matrix.diagonalSum(unbiased);
+		double observedScoreVariance = matrix.totalVariance();
+		double componentVariance = matrix.diagonalSum();
 		double cronbachAlpha = (k/(k-1.0))*((observedScoreVariance-componentVariance)/observedScoreVariance);
 		return cronbachAlpha;
 	}
@@ -72,14 +65,34 @@ public class CoefficientAlpha extends AbstractScoreReliability{
      */
     public double[] itemDeletedReliability(){
         double[] rel = new double[nItems];
-        CovarianceMatrix cm = null;
-        CoefficientAlpha ca = null;
+        double totalVariance = this.totalVariance();
+        double diagonalSum = matrix.diagonalSum();
+        double nItemsM1 = ((double)this.nItems) - 1;
+        double totalVarianceAdjusted = 0;
+        double diagonalSumAdjusted = 0;
+        double reliabilityWithoutItem = 0;
+
         for(int i=0;i<nItems;i++){
-            cm = matrix.matrixSansVariable(i, unbiased);
-            ca = new CoefficientAlpha(cm, unbiased);
-            rel[i] = ca.value();
+            //Compute item variance
+            double itemVariance = matrix.getCovarianceAt(i, i);
+
+            //Compute sum of covariance between this item and all others
+            double itemCovariance = 0;
+            for(int j=0;j<nItems;j++){
+                if(i!=j) itemCovariance += matrix.getCovarianceAt(i,j);
+            }
+            itemCovariance *= 2;
+
+            totalVarianceAdjusted = totalVariance - itemCovariance - itemVariance;
+            diagonalSumAdjusted = diagonalSum - itemVariance;
+            reliabilityWithoutItem = (nItemsM1/(nItemsM1-1.0))*(1.0 - diagonalSumAdjusted/totalVarianceAdjusted);
+
+            rel[i] = reliabilityWithoutItem;
         }
         return rel;
+
+
+
     }
 
     public ScoreReliabilityType getType(){
@@ -95,7 +108,7 @@ public class CoefficientAlpha extends AbstractScoreReliability{
 		return f.toString();
 	}
 
-    public String ifDeletedToString(ArrayList<VariableAttributes> var){
+    public String printItemDeletedSummary(ArrayList<VariableAttributes> var){
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
         double[] del = itemDeletedReliability();

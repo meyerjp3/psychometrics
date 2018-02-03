@@ -47,7 +47,7 @@ public interface ScoreReliability {
      * @param var VariableAttributes that provide the variable names.
      * @return
      */
-    public String ifDeletedToString(ArrayList<VariableAttributes> var);
+    public String printItemDeletedSummary(ArrayList<VariableAttributes> var);
 
     /**
      * Type of reliability estimate
@@ -78,12 +78,12 @@ public interface ScoreReliability {
      */
     public String confidenceIntervalToString(double[] confidenceInterval);
 
-    /**
-     * Set the unbiased flag. 
-     * 
-     * @param unbiased true if variance calculations should use N-1 in the denominator, and false otherwise.
-     */
-    public void isUnbiased(boolean unbiased);
+//    /**
+//     * Set the unbiased flag.
+//     *
+//     * @param unbiased true if variance calculations should use N-1 in the denominator, and false otherwise.
+//     */
+//    public void isUnbiased(boolean unbiased);
 
     /**
      * Total observed score variance. It is the sum of all values in the covariance matrix.

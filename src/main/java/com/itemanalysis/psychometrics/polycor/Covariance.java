@@ -34,17 +34,28 @@ public class Covariance implements Comparable<Covariance>{
     private double varNumeratorY = 0.0;
     private double covariance = 0;
     boolean fixedValue = false;
+    boolean unbiased = true;
+
+    public Covariance(boolean unbiased){
+        this.unbiased = unbiased;
+    }
 
 	public Covariance(){
-        
+        this(true);
 	}
 
-    public Covariance(double covariance){
+    public Covariance(double covariance, boolean unbiased){
         this.covariance = covariance;
+        this.unbiased = unbiased;
         fixedValue = true;
     }
 
-	public Covariance(Covariance cov){
+    public Covariance(double covariance){
+        this(covariance, true);
+    }
+
+	public Covariance(Covariance cov, boolean unbiased){
+        this.unbiased = unbiased;
         this.N = cov.N;
         this.deltaX = cov.deltaX;
         this.deltaY = cov.deltaY;
@@ -54,6 +65,10 @@ public class Covariance implements Comparable<Covariance>{
         this.varNumeratorX = cov.varNumeratorX;
         this.varNumeratorY = cov.varNumeratorY;
 	}
+
+    public Covariance(Covariance cov){
+	    this(cov, true);
+    }
 
     /**
      * Update formula for recursive on-line (i.e. one pass) method of computing the covariance.This method
@@ -82,7 +97,7 @@ public class Covariance implements Comparable<Covariance>{
         
     }
 
-    public Double value(boolean unbiased){
+    public double value(){
         if(fixedValue) return covariance;
         if(N<1) return Double.NaN;
         if(unbiased){
@@ -92,11 +107,11 @@ public class Covariance implements Comparable<Covariance>{
         }
     }
 
-    public Double value(){
-        return value(true);
-    }
+//    public Double value(){
+//        return value();
+//    }
     
-    public Double varX(boolean unbiased){
+    public double varX(){
         if(N<1) return Double.NaN;
         if(unbiased){
             return varNumeratorX/(N-1.0);
@@ -105,11 +120,11 @@ public class Covariance implements Comparable<Covariance>{
         }
     }
 
-    public double sdX(boolean unbiased){
-        return Math.sqrt(varX(unbiased));
+    public double sdX(){
+        return Math.sqrt(varX());
     }
     
-    public Double varY(boolean unbiased){
+    public double varY(){
         if(N<1) return Double.NaN;
         if(unbiased){
             return varNumeratorY/(N-1.0);
@@ -118,23 +133,23 @@ public class Covariance implements Comparable<Covariance>{
         }
     }
 
-    public double sdY(boolean unbiased){
-        return Math.sqrt(varY(unbiased));
+    public double sdY(){
+        return Math.sqrt(varY());
     }
 
-    public Double correlation(boolean unbiased){
-        double cv = this.value(unbiased);
-        double r = cv/(Math.sqrt(this.varX(unbiased))*Math.sqrt(this.varY(unbiased)));
+    public double correlation(){
+        double cv = this.value();
+        double r = cv/(Math.sqrt(this.varX())*Math.sqrt(this.varY()));
         return r;
     }
 
-    public Double correlation(){
-        return correlation(true);
-    }
+//    public double correlation(){
+//        return correlation(true);
+//    }
 
     public double correlationStandardError(){
         if(N<3) return Double.NaN;
-        double r = correlation(true);
+        double r = correlation();
         double r2 = Math.pow(r,2);
         double se = Math.sqrt((1-r2)/(N-2.0));
         return se;
@@ -143,7 +158,7 @@ public class Covariance implements Comparable<Covariance>{
     public double correlationPvalue(){
         double se = correlationStandardError();
         if(se==0.0) return Double.NaN;
-        double r = correlation(true);
+        double r = correlation();
         double tval = r/se;
         double df = N-2.0;
         TDistribution t = new TDistribution(df);
@@ -170,7 +185,7 @@ public class Covariance implements Comparable<Covariance>{
 	}
 
 	public int hashCode(){
-		return this.value().hashCode();
+		return Double.valueOf(value()).hashCode();
 	}
 
 }

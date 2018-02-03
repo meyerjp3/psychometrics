@@ -28,16 +28,10 @@ public abstract class AbstractScoreReliability implements ScoreReliability,  Com
 
     protected CovarianceMatrix matrix = null;
 
-    protected boolean unbiased = false;
-
     protected int nItems=0;
 
     public double totalVariance(){
-        return matrix.totalVariance(unbiased);
-    }
-
-    public void isUnbiased(boolean unbiased){
-        this.unbiased = unbiased;
+        return matrix.totalVariance();
     }
 
     /**

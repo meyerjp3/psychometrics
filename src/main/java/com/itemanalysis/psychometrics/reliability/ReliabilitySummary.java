@@ -40,26 +40,25 @@ public class ReliabilitySummary {
     private ArrayList<VariableAttributes> var = null;
     private boolean itemDeleted = false;
 
-    public ReliabilitySummary(CovarianceMatrix matrix, ArrayList<VariableAttributes> var, boolean unbiased, boolean itemDeleted){
+    public ReliabilitySummary(CovarianceMatrix matrix, ArrayList<VariableAttributes> var, boolean itemDeleted){
         this.nItems = matrix.getNumberOfVariables();
         this.itemDeleted = itemDeleted;
-        alpha = new CoefficientAlpha(matrix, unbiased);
-        lambda = new GuttmanLambda(matrix, unbiased);
-        feldtGilmer = new FeldtGilmer(matrix, unbiased);
-        feldtBrennan = new FeldtBrennan(matrix, unbiased);
-        raju = new RajuBeta(matrix, unbiased);
+        alpha = new CoefficientAlpha(matrix);
+        lambda = new GuttmanLambda(matrix);
+        feldtGilmer = new FeldtGilmer(matrix);
+        feldtBrennan = new FeldtBrennan(matrix);
+        raju = new RajuBeta(matrix);
         this.var = var;
     }
 
-    public ReliabilitySummary(CovarianceMatrix matrix, LinkedHashMap<VariableName, VariableAttributes> variableAttributeMap,
-            boolean unbiased, boolean itemDeleted){
+    public ReliabilitySummary(CovarianceMatrix matrix, LinkedHashMap<VariableName, VariableAttributes> variableAttributeMap, boolean itemDeleted){
         this.nItems = matrix.getNumberOfVariables();
         this.itemDeleted = itemDeleted;
-        alpha = new CoefficientAlpha(matrix, unbiased);
-        lambda = new GuttmanLambda(matrix, unbiased);
-        feldtGilmer = new FeldtGilmer(matrix, unbiased);
-        feldtBrennan = new FeldtBrennan(matrix, unbiased);
-        raju = new RajuBeta(matrix, unbiased);
+        alpha = new CoefficientAlpha(matrix);
+        lambda = new GuttmanLambda(matrix);
+        feldtGilmer = new FeldtGilmer(matrix);
+        feldtBrennan = new FeldtBrennan(matrix);
+        raju = new RajuBeta(matrix);
 
         this.var = new ArrayList<VariableAttributes>();
         for(VariableName v : variableAttributeMap.keySet()){

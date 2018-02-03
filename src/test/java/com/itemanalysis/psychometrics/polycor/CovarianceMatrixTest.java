@@ -51,7 +51,7 @@ public class CovarianceMatrixTest {
             }
         }
         
-        double[][] obsCov = S.value(true);
+        double[][] obsCov = S.value();
 
         for(int i=0;i<50;i++){
             for(int j=0;j<50;j++){
@@ -74,7 +74,7 @@ public class CovarianceMatrixTest {
             }
         }
 
-        double[][] obsCor = S.correlation(false);
+        double[][] obsCor = S.correlation();
 
         for(int i=0;i<50;i++){
             for(int j=0;j<50;j++){
