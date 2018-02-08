@@ -26,12 +26,34 @@ import java.util.Formatter;
  */
 public abstract class AbstractScoreReliability implements ScoreReliability,  Comparable<ScoreReliability>{
 
-    protected CovarianceMatrix matrix = null;
+    protected double[][] matrix = null;
 
     protected int nItems=0;
 
     public double totalVariance(){
-        return matrix.totalVariance();
+        double total = 0.0;
+        for(int i=0;i<nItems;i++){
+            for(int j=0;j<nItems;j++){
+                total += matrix[i][j];
+            }
+        }
+        return total;
+    }
+
+    protected double diagonalSum(){
+        double total = 0.0;
+        for(int i=0;i<nItems;i++){
+            total += matrix[i][i];
+        }
+        return total;
+    }
+
+    protected double rowSum(int row){
+        double total = 0.0;
+        for(int i=0;i<nItems;i++){
+            total += matrix[row][i];
+        }
+        return total;
     }
 
     /**
@@ -41,8 +63,8 @@ public abstract class AbstractScoreReliability implements ScoreReliability,  Com
      *
      * @return confidence interval as an array with the lower bound in position 0 and the upper bound in position 1.
      */
-    public double[] confidenceInterval(){
-        double numberOfExaminees = matrix.getMaxSampleSize();
+    public double[] confidenceInterval(double numberOfExaminees){
+//        double numberOfExaminees = matrix.getMaxSampleSize();
         double[] confidenceInterval = new double[2];
         double numberOfItems = (double)nItems;
 		double df1=numberOfExaminees-1.0;

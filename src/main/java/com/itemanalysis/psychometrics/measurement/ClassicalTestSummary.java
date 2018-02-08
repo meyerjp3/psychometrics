@@ -16,6 +16,7 @@
 package com.itemanalysis.psychometrics.measurement;
 
 import com.itemanalysis.psychometrics.data.VariableAttributes;
+import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
 import com.itemanalysis.psychometrics.reliability.*;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -65,7 +66,13 @@ public class ClassicalTestSummary {
         this.cutScores = cutScores;
         stats = new DescriptiveStatistics();
         stdDev = new StandardDeviation(unbiased);
-        relMatrix = new CovarianceMatrix(variableAttributes, unbiased);
+
+        ArrayList<VariableName> vNames = new ArrayList<VariableName>();
+        for(VariableAttributes v : variableAttributes){
+            vNames.add(v.getName());
+        }
+
+        relMatrix = new CovarianceMatrix(vNames, unbiased);
     }
 
 

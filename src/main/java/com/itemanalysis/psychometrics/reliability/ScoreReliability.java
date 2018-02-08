@@ -67,7 +67,7 @@ public interface ScoreReliability {
      *
      * @return a confidence interval for the reliability estimate.
      */
-    public double[] confidenceInterval();
+    public double[] confidenceInterval(double numberOfExaminees);
 
     /**
      * Creates a String representation of the confidence interval. It is used for 

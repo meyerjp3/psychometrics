@@ -36,6 +36,7 @@ public class ReliabilitySummary {
     private FeldtGilmer feldtGilmer = null;
     private FeldtBrennan feldtBrennan = null;
     private RajuBeta raju = null;
+    private double nPeople = 0;
     private int nItems = 0;
     private ArrayList<VariableAttributes> var = null;
     private boolean itemDeleted = false;
@@ -43,22 +44,30 @@ public class ReliabilitySummary {
     public ReliabilitySummary(CovarianceMatrix matrix, ArrayList<VariableAttributes> var, boolean itemDeleted){
         this.nItems = matrix.getNumberOfVariables();
         this.itemDeleted = itemDeleted;
-        alpha = new CoefficientAlpha(matrix);
-        lambda = new GuttmanLambda(matrix);
-        feldtGilmer = new FeldtGilmer(matrix);
-        feldtBrennan = new FeldtBrennan(matrix);
-        raju = new RajuBeta(matrix);
+
+        double[][] cov = matrix.value();
+        this.nPeople = matrix.getMinSampleSize();
+
+        alpha = new CoefficientAlpha(cov);
+        lambda = new GuttmanLambda(cov);
+        feldtGilmer = new FeldtGilmer(cov);
+        feldtBrennan = new FeldtBrennan(cov);
+        raju = new RajuBeta(cov);
         this.var = var;
     }
 
     public ReliabilitySummary(CovarianceMatrix matrix, LinkedHashMap<VariableName, VariableAttributes> variableAttributeMap, boolean itemDeleted){
         this.nItems = matrix.getNumberOfVariables();
         this.itemDeleted = itemDeleted;
-        alpha = new CoefficientAlpha(matrix);
-        lambda = new GuttmanLambda(matrix);
-        feldtGilmer = new FeldtGilmer(matrix);
-        feldtBrennan = new FeldtBrennan(matrix);
-        raju = new RajuBeta(matrix);
+
+        double[][] cov = matrix.value();
+        this.nPeople = matrix.getMaxSampleSize();
+
+        alpha = new CoefficientAlpha(cov);
+        lambda = new GuttmanLambda(cov);
+        feldtGilmer = new FeldtGilmer(cov);
+        feldtBrennan = new FeldtBrennan(cov);
+        raju = new RajuBeta(cov);
 
         this.var = new ArrayList<VariableAttributes>();
         for(VariableName v : variableAttributeMap.keySet()){
@@ -84,11 +93,11 @@ public class ReliabilitySummary {
         double fb = feldtBrennan.value();
         double rj = raju.value();
 
-        double[] glCI = lambda.confidenceInterval();
-        double[] caCI = alpha.confidenceInterval();
-        double[] fgCI = feldtGilmer.confidenceInterval();
-        double[] fbCI = feldtBrennan.confidenceInterval();
-        double[] rjCI = raju.confidenceInterval();
+        double[] glCI = lambda.confidenceInterval(nPeople);
+        double[] caCI = alpha.confidenceInterval(nPeople);
+        double[] fgCI = feldtGilmer.confidenceInterval(nPeople);
+        double[] fbCI = feldtBrennan.confidenceInterval(nPeople);
+        double[] rjCI = raju.confidenceInterval(nPeople);
 
         StandardErrorOfMeasurement sem = new StandardErrorOfMeasurement();
 

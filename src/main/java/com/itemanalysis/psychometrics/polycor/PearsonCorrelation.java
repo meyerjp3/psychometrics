@@ -16,14 +16,10 @@
 package com.itemanalysis.psychometrics.polycor;
 
 
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
-
 /**
- * This class is mainly a short-cut for the Pearson correlation.
- * The same computations are provided in Covariance.java with the exception
- * of the correctedValue() method. This method is only found here and it
- * is used primarily for correcting a correlation for spuriousness
- * for an item analysis.
+ * Computes a Pearson correlation. Individual values are not stored in memory.
+ * Can either supply the x and y arrays, or incrementally update the
+ * calculation by calling increment(), or both.
  *
  *
  * @author J. Patrick Meyer
@@ -32,15 +28,19 @@ public class PearsonCorrelation implements Comparable<PearsonCorrelation>{
 
     private Covariance covariance = null;
 
-    private StandardDeviation sdX = null;
-
-    private StandardDeviation sdY = null;
-
 	public PearsonCorrelation(boolean unbiased){
         covariance = new Covariance(unbiased);
-        sdX = new StandardDeviation(unbiased);
-        sdY = new StandardDeviation(unbiased);
 	}
+
+	public PearsonCorrelation(Covariance covariance){
+	    this.covariance = covariance;
+    }
+
+    public PearsonCorrelation(double[] x, double[] y){
+	    for(int i=0;i<x.length;i++){
+	        this.increment(x[i], y[i]);
+        }
+    }
 
 	public PearsonCorrelation(){
 		this(true);
@@ -49,8 +49,6 @@ public class PearsonCorrelation implements Comparable<PearsonCorrelation>{
 	public void increment(Double X, Double Y){
         if(X!=null || Y!=null){
             covariance.increment(X, Y);
-            sdX.increment(X);
-            sdY.increment(Y);
         }
 	}
 
@@ -62,8 +60,8 @@ public class PearsonCorrelation implements Comparable<PearsonCorrelation>{
 	 * @return correlation corrected for spuriousness
 	 */
 	public Double correctedValue(){
-		double testSd = sdX.getResult();
-		double itemSd = sdY.getResult();
+		double testSd = covariance.sdX();
+		double itemSd = covariance.sdY();
 		double rOld = this.value();
         double denom = Math.sqrt(itemSd*itemSd+testSd*testSd-2*rOld*itemSd*testSd);
         if(denom==0.0) return Double.NaN;
@@ -71,11 +69,15 @@ public class PearsonCorrelation implements Comparable<PearsonCorrelation>{
 	}
 
 	public double value(){
-        return covariance.correlation();
-	}
+         return covariance.correlation();
+    }
 
-    public double value(boolean unbiased){
-        return covariance.correlation();
+    public double standardError(){
+        return covariance.correlationStandardError();
+    }
+
+    public double pValue(){
+        return covariance.correlationPvalue();
     }
 
     public double sampleSize(){

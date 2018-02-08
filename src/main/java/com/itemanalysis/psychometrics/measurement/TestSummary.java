@@ -83,7 +83,7 @@ public class TestSummary {
         this.showCsem = showCsem;
         stats = new DescriptiveStatistics();
         stdDev = new StandardDeviation(unbiased);
-        relMatrix = new CovarianceMatrix(variableAttributes);
+        relMatrix = new CovarianceMatrix(extractVariableNames(variableAttributes));
         this.numberOfSubscales = numberOfSubscales;
         if(numberOfSubscales>1) partRelMatrix = new CovarianceMatrix(numberOfSubscales);
     }
@@ -98,7 +98,7 @@ public class TestSummary {
         this.showCsem = showCsem;
         stats = new DescriptiveStatistics();
         stdDev = new StandardDeviation(unbiased);
-        relMatrix = new CovarianceMatrix(variableAttributes);
+        relMatrix = new CovarianceMatrix(extractVariableNames(variableAttributes));
         this.numberOfSubscales = numberOfSubscales;
         if(numberOfSubscales>1) partRelMatrix = new CovarianceMatrix(numberOfSubscales);
     }
@@ -119,7 +119,7 @@ public class TestSummary {
         this.showCsem = showCsem;
         stats = new DescriptiveStatistics();
         stdDev = new StandardDeviation(unbiased);
-        relMatrix = new CovarianceMatrix(variableAttributes);
+        relMatrix = new CovarianceMatrix(extractVariableNames(variableAttributes));
         this.numberOfSubscales = numberOfSubscales;
         if(numberOfSubscales>1) partRelMatrix = new CovarianceMatrix(numberOfSubscales);
 
@@ -262,6 +262,14 @@ public class TestSummary {
 
     public double getGeometricMean(){
         return stats.getGeometricMean();
+    }
+
+    private ArrayList<VariableName> extractVariableNames(ArrayList<VariableAttributes> variableAttributes){
+        ArrayList<VariableName> vNames = new ArrayList<VariableName>();
+        for(VariableAttributes v : variableAttributes){
+            vNames.add(v.getName());
+        }
+        return vNames;
     }
 
     public String print(){

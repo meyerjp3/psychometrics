@@ -28,14 +28,10 @@ import java.util.Formatter;
  */
 public class FeldtGilmer extends AbstractScoreReliability{
 
-	public FeldtGilmer(CovarianceMatrix matrix){
+	public FeldtGilmer(double[][] matrix){
 		this.matrix=matrix;
-        nItems = matrix.getNumberOfVariables();
+        nItems = matrix.length;
 	}
-
-    public FeldtGilmer(double[][] matrix){
-        this(new CovarianceMatrix(matrix));
-    }
 
     public ScoreReliabilityType getType(){
         return ScoreReliabilityType.FELDT_GILMER;
@@ -44,7 +40,7 @@ public class FeldtGilmer extends AbstractScoreReliability{
 	private int getEll(){
         double[] offDiag= new double[nItems];
 		for(int i=0;i<nItems;i++){
-			offDiag[i]=matrix.rowSum(i)-matrix.getVarianceAt(i);
+			offDiag[i]=this.rowSum(i)-matrix[i][i];
 		}
 
 		int maxIndex=0;
@@ -67,8 +63,8 @@ public class FeldtGilmer extends AbstractScoreReliability{
 			if(i==ell){
 				d[i]=1.0;
 			}else{
-				num=matrix.rowSum(i)-matrix.getCovarianceAt(i, ell)-matrix.getVarianceAt(i);
-				denom=matrix.rowSum(ell)-matrix.getCovarianceAt(i, ell)-matrix.getVarianceAt(ell);
+				num=this.rowSum(i)-matrix[i][ell]-matrix[i][i];
+				denom=this.rowSum(ell)-matrix[i][ell]-matrix[ell][ell];
 				d[i]=num/denom;
 			}
 		}
@@ -78,7 +74,7 @@ public class FeldtGilmer extends AbstractScoreReliability{
 	private int getEllWithoutItemAt(int index){
 		double[] offDiag= new double[nItems];
 		for(int i=0;i<nItems;i++){
-			if(i!=index) offDiag[i]=matrix.rowSum(i)-matrix.getCovarianceAt(i,i);
+			if(i!=index) offDiag[i]=this.rowSum(i)-matrix[i][i];
 		}
 
 		int maxIndex=0;
@@ -106,9 +102,9 @@ public class FeldtGilmer extends AbstractScoreReliability{
 				if(i==ell){
 					d[i]=1.0;
 				}else{
-					covAt = matrix.getCovarianceAt(i, ell);
-					num=matrix.rowSum(i)-covAt-matrix.getCovarianceAt(i, i);
-					denom=matrix.rowSum(ell)-covAt-matrix.getCovarianceAt(ell, ell);
+					covAt = matrix[i][ell];
+					num=this.rowSum(i)-covAt-matrix[i][i];
+					denom=this.rowSum(ell)-covAt-matrix[ell][ell];
 					d[i]=num/denom;
 				}
 			}
@@ -122,8 +118,8 @@ public class FeldtGilmer extends AbstractScoreReliability{
 		double[] d=D(ell);
 		double sumD=0.0;
 		double sumD2=0.0;
-		double observedScoreVariance = matrix.totalVariance();
-		double componentVariance = matrix.diagonalSum();
+		double observedScoreVariance = this.totalVariance();
+		double componentVariance = this.diagonalSum();
 		
 		for(int i=0;i<nItems;i++){
 			sumD+=d[i];
@@ -144,7 +140,7 @@ public class FeldtGilmer extends AbstractScoreReliability{
     public double[] itemDeletedReliability(){
 		double[] rel = new double[nItems];
 		double totalVariance = this.totalVariance();
-		double diagonalSum = matrix.diagonalSum();
+		double diagonalSum = this.diagonalSum();
 		double totalVarianceAdjusted = 0;
 		double diagonalSumAdjusted = 0;
 		double reliabilityWithoutItem = 0;
@@ -157,12 +153,12 @@ public class FeldtGilmer extends AbstractScoreReliability{
 
 		for(int i=0;i<nItems;i++){
 			//Compute item variance
-			double itemVariance = matrix.getCovarianceAt(i,i);
+			double itemVariance = matrix[i][i];
 
 			//Compute sum of covariance between this item and all others
 			double itemCovariance = 0;
 			for(int j=0;j<nItems;j++){
-				if(i!=j) itemCovariance += matrix.getCovarianceAt(i,j);
+				if(i!=j) itemCovariance += matrix[i][j];
 			}
 			itemCovariance *= 2;
 

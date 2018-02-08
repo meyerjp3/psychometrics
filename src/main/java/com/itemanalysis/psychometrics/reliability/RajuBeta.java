@@ -27,9 +27,9 @@ public class RajuBeta extends AbstractScoreReliability{
 
 	private double[] lambda;
 	
-	public RajuBeta(CovarianceMatrix matrix){
+	public RajuBeta(double[][] matrix){
 		this.matrix = matrix;
-        nItems = matrix.getNumberOfVariables();
+        nItems = matrix.length;
 		double ni=(double)nItems;
 		
 		lambda = new double[nItems];
@@ -37,14 +37,10 @@ public class RajuBeta extends AbstractScoreReliability{
 			lambda[i]=1/ni;
 		}
 	}
-
-    public RajuBeta(double[][] matrix){
-        this(new CovarianceMatrix(matrix));
-    }
 	
-	public RajuBeta(CovarianceMatrix matrix, double[] numberOfItems){
+	public RajuBeta(double[][] matrix, double[] numberOfItems){
 		this.matrix=matrix;
-		nItems = matrix.getNumberOfVariables();
+		nItems = matrix.length;
 		for(int i=0;i<nItems;i++){
 			lambda[i]=1/numberOfItems[i];
 		}
@@ -76,8 +72,8 @@ public class RajuBeta extends AbstractScoreReliability{
 
 	public double value(){
 		double sumLambda2 = sumLambdaSquared();
-		double observedScoreVariance = matrix.totalVariance();
-		double componentVariance = matrix.diagonalSum();
+		double observedScoreVariance = this.totalVariance();
+		double componentVariance = this.diagonalSum();
 		double raju=(1/(1-sumLambda2))*((observedScoreVariance-componentVariance)/observedScoreVariance);
 		return raju;
 	}
@@ -85,7 +81,7 @@ public class RajuBeta extends AbstractScoreReliability{
     public double[] itemDeletedReliability(){
 		double[] rel = new double[nItems];
 		double totalVariance = this.totalVariance();
-		double diagonalSum = matrix.diagonalSum();
+		double diagonalSum = this.diagonalSum();
 		double totalVarianceAdjusted = 0;
 		double diagonalSumAdjusted = 0;
 		double sumLambda2Adjusted = 0;
@@ -94,12 +90,12 @@ public class RajuBeta extends AbstractScoreReliability{
 
 		for(int i=0;i<nItems;i++){
 			//Compute item variance
-			double itemVariance = matrix.getCovarianceAt(i,i);
+			double itemVariance = matrix[i][i];
 
 			//Compute sum of covariance between this item and all others
 			double itemCovariance = 0;
 			for(int j=0;j<nItems;j++){
-				if(i!=j) itemCovariance += matrix.getCovarianceAt(i,j);
+				if(i!=j) itemCovariance += matrix[i][j];
 			}
 			itemCovariance *= 2;
 

@@ -29,18 +29,9 @@ import java.util.Formatter;
  */
 public class CoefficientAlpha extends AbstractScoreReliability{
 
-    /**
-     * Constructor for coefficient alpha.
-     *
-     * @param matrix an inter-item correlation matrix
-     */
-	public CoefficientAlpha(CovarianceMatrix matrix){
-		this.matrix = matrix;
-        nItems = matrix.getNumberOfVariables();
-	}
-
 	public CoefficientAlpha(double[][] matrix){
-	    this(new CovarianceMatrix(matrix));
+	    this.matrix = matrix;
+	    this.nItems = matrix.length;
     }
 
     /**
@@ -50,8 +41,8 @@ public class CoefficientAlpha extends AbstractScoreReliability{
      */
 	public double value(){
 		double k=(double)nItems;
-		double observedScoreVariance = matrix.totalVariance();
-		double componentVariance = matrix.diagonalSum();
+		double observedScoreVariance = this.totalVariance();
+		double componentVariance = this.diagonalSum();
 		double cronbachAlpha = (k/(k-1.0))*((observedScoreVariance-componentVariance)/observedScoreVariance);
 		return cronbachAlpha;
 	}
@@ -66,7 +57,7 @@ public class CoefficientAlpha extends AbstractScoreReliability{
     public double[] itemDeletedReliability(){
         double[] rel = new double[nItems];
         double totalVariance = this.totalVariance();
-        double diagonalSum = matrix.diagonalSum();
+        double diagonalSum = this.diagonalSum();
         double nItemsM1 = ((double)this.nItems) - 1;
         double totalVarianceAdjusted = 0;
         double diagonalSumAdjusted = 0;
@@ -74,12 +65,12 @@ public class CoefficientAlpha extends AbstractScoreReliability{
 
         for(int i=0;i<nItems;i++){
             //Compute item variance
-            double itemVariance = matrix.getCovarianceAt(i, i);
+            double itemVariance = matrix[i][i];
 
             //Compute sum of covariance between this item and all others
             double itemCovariance = 0;
             for(int j=0;j<nItems;j++){
-                if(i!=j) itemCovariance += matrix.getCovarianceAt(i,j);
+                if(i!=j) itemCovariance += matrix[i][j];
             }
             itemCovariance *= 2;
 

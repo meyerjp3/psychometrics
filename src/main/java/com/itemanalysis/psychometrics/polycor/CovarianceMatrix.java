@@ -16,14 +16,14 @@
 package com.itemanalysis.psychometrics.polycor;
 
 
-import com.itemanalysis.psychometrics.data.DataType;
-import com.itemanalysis.psychometrics.data.ItemType;
 import com.itemanalysis.psychometrics.data.VariableAttributes;
 import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.texttable.TextTable;
 import com.itemanalysis.psychometrics.texttable.TextTablePosition;
 import com.itemanalysis.psychometrics.texttable.TextTableColumnFormat;
 import com.itemanalysis.psychometrics.texttable.TextTableColumnFormat.OutputAlignment;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -33,9 +33,9 @@ import java.util.LinkedHashMap;
  * class will automatically do a pairwise deletion. For listwise 
  * deletion, the data should be screened for missing values before 
  * calling increment() and increment should only be called when a
- * particular case has data for all variables. For example, do not 
+ * particular case has data for all variableNames. For example, do not
  * call increment() if a case is missing data on any of the 
- * variables in a matrix and listwise deletion is required.
+ * variableNames in a matrix and listwise deletion is required.
  * 
  * @author J. Patrick Meyer
  * @since January 27, 2008
@@ -45,42 +45,13 @@ public class CovarianceMatrix {
 
 	private Covariance[][] covMat;
     private int numberOfVariables=0;
-    private ArrayList<VariableAttributes> variables = null;
+    private ArrayList<VariableName> variableNames = null;
     private boolean unbiased = true;//use n-1 instead of n
 
-    /**
-     * Input is a two-array of doubles. Each entry is a covariance that may or may not have been
-     * computed as an unbiased estimate. The unbiased argument here is somewhat misleading and
-     * probably unnecessary.
-     *
-     * @param covarianceMatrix a two-way array of doubles that are covariances
-     * @param unbiased
-     */
-    public CovarianceMatrix(double[][] covarianceMatrix, boolean unbiased){
+    public CovarianceMatrix(ArrayList<VariableName> variableNames, boolean unbiased){
+        this.variableNames = variableNames;
         this.unbiased = unbiased;
-        this.numberOfVariables = covarianceMatrix.length;
-        covMat = new Covariance[numberOfVariables][numberOfVariables];
-        this.variables = new ArrayList<VariableAttributes>();
-        VariableAttributes variableAttributes = null;
-        Covariance cov = null;
-        for(int i=0;i<numberOfVariables;i++){
-            variableAttributes = new VariableAttributes("V"+(i+1), "", ItemType.NOT_ITEM, DataType.DOUBLE, i, "");
-            this.variables.add(variableAttributes);
-            for(int j=0;j<numberOfVariables;j++){
-                cov = new Covariance(covarianceMatrix[i][j], unbiased);
-                covMat[i][j] = cov;
-            }
-        }
-    }
-
-    public CovarianceMatrix(double[][] covarianceMatrix){
-        this(covarianceMatrix, true);
-    }
-
-    public CovarianceMatrix(ArrayList<VariableAttributes> variables, boolean unbiased){
-        this.variables = variables;
-        this.unbiased = unbiased;
-		this.numberOfVariables=variables.size();
+		this.numberOfVariables= variableNames.size();
 		covMat = new Covariance[numberOfVariables][numberOfVariables];
 
         //Initialize covariance matrix
@@ -92,18 +63,18 @@ public class CovarianceMatrix {
 
 	}
 
-    public CovarianceMatrix(ArrayList<VariableAttributes> variables){
-        this(variables, true);
+    public CovarianceMatrix(ArrayList<VariableName> variableNames){
+        this(variableNames, true);
     }
 
     public CovarianceMatrix(LinkedHashMap<VariableName, VariableAttributes> variableAttributeMap, boolean unbiased){
         this.unbiased = unbiased;
-        this.variables = new ArrayList<VariableAttributes>();
+        this.variableNames = new ArrayList<VariableName>();
         for(VariableName v : variableAttributeMap.keySet()){
-            this.variables.add(variableAttributeMap.get(v));
+            this.variableNames.add(v);
         }
 
-		this.numberOfVariables=variables.size();
+		this.numberOfVariables= variableNames.size();
 		covMat = new Covariance[numberOfVariables][numberOfVariables];
 
         //Initialize covariance matrix
@@ -127,11 +98,11 @@ public class CovarianceMatrix {
         this.numberOfVariables=numberOfVariables;
         this.unbiased = unbiased;
 		covMat = new Covariance[numberOfVariables][numberOfVariables];
-        this.variables = new ArrayList<VariableAttributes>();
-        VariableAttributes variableAttributes = null;
+        this.variableNames = new ArrayList<VariableName>();
+        VariableName v = null;
         for(int i=0;i<numberOfVariables;i++){
-            variableAttributes = new VariableAttributes("V"+(i+1), "", ItemType.NOT_ITEM, DataType.DOUBLE, i, "");
-            this.variables.add(variableAttributes);
+            v = new VariableName("V"+(i+1));
+            this.variableNames.add(v);
         }
 
         //Initialize covariance matrix
@@ -146,32 +117,61 @@ public class CovarianceMatrix {
         this(numberOfVariables, true);
     }
 
-    public CovarianceMatrix(Covariance[][] covMat, ArrayList<VariableAttributes> variables, boolean unbiased){
-        this.covMat = covMat;
-        this.variables = variables;
+    public CovarianceMatrix(double[][] x, boolean unbiased){
+        this.numberOfVariables=numberOfVariables;
         this.unbiased = unbiased;
-        this.numberOfVariables = variables.size();
+        covMat = new Covariance[numberOfVariables][numberOfVariables];
+        this.variableNames = new ArrayList<VariableName>();
+        VariableName v = null;
+        for(int i=0;i<numberOfVariables;i++){
+            v = new VariableName("V"+(i+1));
+            this.variableNames.add(v);
+        }
+
+        //Initialize covariance matrix
+        for(int i=0;i<numberOfVariables;i++){
+            for(int j=0;j<numberOfVariables;j++){
+                covMat[i][j] = new Covariance(unbiased);
+            }
+        }
+
+        //loop over data and increment covariance matrix
+        for(int i=0;i<x.length;i++){
+            for(int j=0;j<numberOfVariables;j++){
+                for(int k=0;k<numberOfVariables;k++)
+                    this.increment(j, k, x[i][j], x[i][k]);
+            }
+        }
+
     }
 
-    public CovarianceMatrix(Covariance[][] covMat, ArrayList<VariableAttributes> variables){
-        this(covMat, variables, true);
+    public CovarianceMatrix(double[][] x){
+        this(x, true);
     }
 
     public void setNameAt(int index, VariableName name){
-        variables.get(index).setName(name);
+        variableNames.add(index, name);
     }
 
     public void setNameAt(int index, String name){
-        variables.get(index).setName(new VariableName(name));
+        variableNames.add(index, new VariableName(name));
+    }
+
+    public double getMinSampleSize(){
+        double minSampleSize = covMat[0][0].sampleSize();
+        for(int i=0;i<covMat.length;i++){
+            for(int j=i;j<covMat[0].length;j++){
+                minSampleSize = Math.min(minSampleSize, covMat[i][j].sampleSize());
+            }
+        }
+        return minSampleSize;
     }
 
     public double getMaxSampleSize(){
         double maxSampleSize = 0;
-        Covariance covariance = null;
         for(int i=0;i<covMat.length;i++){
             for(int j=i;j<covMat[0].length;j++){
-                covariance = covMat[i][j];
-                if(covariance!=null) maxSampleSize = Math.max(maxSampleSize, covariance.sampleSize());
+                maxSampleSize = Math.max(maxSampleSize, covMat[i][j].sampleSize());
             }
         }
         return maxSampleSize;
@@ -181,39 +181,65 @@ public class CovarianceMatrix {
      * Increment values in the matrix.
      * Only increments for the upper diagonal of the matrix.
      *
-     * @param xIndex
-     * @param yIndex
-     * @param x
-     * @param y
+     * @param xIndex index of variable x
+     * @param yIndex index of variable y
+     * @param x value of variable x
+     * @param y value of variable y
      */
 	public void increment(int xIndex, int yIndex, Double x, Double y){
         if(yIndex>=xIndex){
-//            if(covMat[xIndex][yIndex]==null) covMat[xIndex][yIndex] = new Covariance(unbiased);
             covMat[xIndex][yIndex].increment(x, y);
         }
 	}
-	
+
+    /**
+     * Gives the value of the covriance matrix as a two-way array.
+     *
+     * @return covariance matrix
+     */
 	public double[][] value(){
 		double[][] cov = new double[numberOfVariables][numberOfVariables];
 		for(int i=0;i<numberOfVariables;i++){
 			for(int j=i;j<numberOfVariables;j++){
                 cov[i][j]=covMat[i][j].value();
-                if(i!=j){
-                    cov[j][i]=covMat[i][j].value();
-                }
+                cov[j][i]=covMat[i][j].value();
 			}
 		}
 		return cov;
 	}
+
+    /**
+     * Gives the covariance matrix with the off-diagonal elements set to zero.
+     *
+     * @return diagonal matrix of covariances
+     */
+	public double[][] diagonalMatrix(){
+        double[][] cov = new double[numberOfVariables][numberOfVariables];
+        for(int i=0;i<numberOfVariables;i++){
+            for(int j=i;j<numberOfVariables;j++){
+                cov[i][j] = 0.0;
+            }
+            cov[i][i]=covMat[i][i].value();
+        }
+        return cov;
+    }
+
+    public RealMatrix diagonalMatrixAsMatrix(){
+	    RealMatrix matrix = new Array2DRowRealMatrix(diagonalMatrix());
+	    return matrix;
+    }
+
+	public RealMatrix valueAsMatrix(){
+	    RealMatrix matrix = new Array2DRowRealMatrix(value());
+	    return matrix;
+    }
 	
 	public double[][] correlation(){
 		double[][] cor = new double[numberOfVariables][numberOfVariables];
 		for(int i=0;i<numberOfVariables;i++){
 			for(int j=i;j<numberOfVariables;j++){
 				cor[i][j]=covMat[i][j].correlation();
-                if(i!=j){
-                    cor[j][i]=covMat[i][j].correlation();
-                }
+                cor[j][i]=covMat[i][j].correlation();
 			}
 		}
 		return cor;
@@ -301,51 +327,26 @@ public class CovarianceMatrix {
 		}
 		return sum;
 	}
-
-//    /**
-//     * returns an upper diagonal matrix that excludes variable at
-//     * variableIndex from current matrix
-//     *
-//     * @param variableIndex
-//     * @return
-//     */
-//	public CovarianceMatrix matrixSansVariable(int variableIndex){
-//		int n=this.numberOfVariables;
-//		Covariance[][] newCm  = new Covariance[n-1][n-1];
-//		int rowIndex=0, colIndex=0;
-//        ArrayList<VariableAttributes> v = new ArrayList<VariableAttributes>();
-//
-//		for(int i=0;i<n;i++){
-//			if(i!=variableIndex){
-//                v.add(variables.get(i));
-//				colIndex=rowIndex;
-//				for(int j=i;j<n;j++){
-//					if(j!=variableIndex){
-//                        newCm[rowIndex][colIndex]=new Covariance(covMat[i][j], unbiased);
-//                        colIndex++;
-//					}
-//				}
-//				rowIndex++;
-//			}
-//		}
-//        CovarianceMatrix cvm = new CovarianceMatrix(newCm, v, unbiased);
-//		return cvm;
-//	}
-	
 	
 	public int getNumberOfVariables(){
 		return covMat.length;
 	}
 	
-	/**
-	 * 
-	 * @return double indicating sample size. This method is only valid for
-	 * listwise deletion. Sample sizes vary for each pair with pairwise 
-	 * deletion.
-	 */
-	public double listwiseSampleSize(){
-		return covMat[0][0].sampleSize();
-	}
+//	/**
+//	 *
+//	 * @return double indicating sample size. This method is only valid for
+//	 * listwise deletion. Sample sizes vary for each pair with pairwise
+//	 * deletion.
+//	 */
+//	public double listwiseSampleSize(){
+//	    double N = covMat[0][0].sampleSize();
+//	    for(int i=0;i<covMat.length;i++){
+//	        for(int j=0;j<covMat[0].length;j++){
+//	            N = Math.min(N, covMat[i][j].sampleSize());
+//            }
+//        }
+//		return covMat[0][0].sampleSize();
+//	}
 
     @Override
 	public String toString(){
@@ -381,14 +382,14 @@ public class CovarianceMatrix {
         table.getRowAt(1).addHorizontalRule(0, numberOfVariables+1, "=");
 
         for(int i=0;i<numberOfVariables;i++){
-            table.getRowAt(2).addHeader(i+1, 1, variables.get(i).getName().toString(), TextTablePosition.RIGHT);
+            table.getRowAt(2).addHeader(i+1, 1, variableNames.get(i).toString(), TextTablePosition.RIGHT);
         }
         table.getRowAt(3).addHorizontalRule(0, numberOfVariables+1, "-");
 
         int row = 0;
         for(int i=0;i<numberOfVariables;i++){
             row = 4+i*(int)exrtaRowFactor;
-            table.getRowAt(row).addStringAt(0, variables.get(i).getName().toString());
+            table.getRowAt(row).addStringAt(0, variableNames.get(i).toString());
             for(int j=0;j<numberOfVariables;j++){
                 if(correlation){
                     table.getRowAt(row).addDoubleAt(j+1, this.getCorrelationAt(i, j));

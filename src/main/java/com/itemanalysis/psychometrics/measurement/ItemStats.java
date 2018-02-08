@@ -19,8 +19,6 @@ import com.itemanalysis.psychometrics.polycor.PearsonCorrelation;
 import com.itemanalysis.psychometrics.polycor.PolyserialPlugin;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
-import org.apache.commons.math3.util.ResizableDoubleArray;
 
 import java.util.Formatter;
 

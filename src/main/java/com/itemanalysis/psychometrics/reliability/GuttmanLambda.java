@@ -31,29 +31,25 @@ import java.util.Formatter;
  */
 public class GuttmanLambda extends AbstractScoreReliability{
 
-	public GuttmanLambda(CovarianceMatrix matrix){
+	public GuttmanLambda(double[][] matrix){
 		this.matrix = matrix;
-        nItems = matrix.getNumberOfVariables();
+        nItems = matrix.length;
 	}
-
-    public GuttmanLambda(double[][] matrix){
-        this(new CovarianceMatrix(matrix));
-    }
 
     public ScoreReliabilityType getType(){
         return ScoreReliabilityType.GUTTMAN_LAMBDA;
     }
 	
 	public double value(){
-		double observedScoreVariance = matrix.totalVariance();
-		double lambda1 = 1-matrix.diagonalSum()/observedScoreVariance;
-		double k = Double.valueOf(matrix.getNumberOfVariables()).doubleValue();
+		double observedScoreVariance = this.totalVariance();
+		double lambda1 = 1-this.diagonalSum()/observedScoreVariance;
+		double k = Double.valueOf(matrix.length).doubleValue();
 		double ssV=0.0;
 		
 		for(int i=0;i<nItems;i++){
 			for(int j=0;j<nItems;j++){
 				if(i!=j){
-					ssV+=Math.pow(matrix.getCovarianceAt(i, j),2);
+					ssV+=Math.pow(matrix[i][j],2);
 				}
 			}
 		}
@@ -67,7 +63,7 @@ public class GuttmanLambda extends AbstractScoreReliability{
         for(int i=0;i<nItems;i++){
             for(int j=0;j<nItems;j++){
                 if(i!=j && i!=index && j!=index){
-                    ssV+=Math.pow(matrix.getCovarianceAt(i, j),2);
+                    ssV+=Math.pow(matrix[i][j],2);
                 }
             }
         }
@@ -85,7 +81,7 @@ public class GuttmanLambda extends AbstractScoreReliability{
     public double[] itemDeletedReliability(){
         double[] rel = new double[nItems];
         double totalVariance = this.totalVariance();
-        double diagonalSum = matrix.diagonalSum();
+        double diagonalSum = this.diagonalSum();
         double nItemsM1 = ((double)this.nItems) - 1;
         double totalVarianceAdjusted = 0;
         double diagonalSumAdjusted = 0;
@@ -96,12 +92,12 @@ public class GuttmanLambda extends AbstractScoreReliability{
 
         for(int i=0;i<nItems;i++){
             //Compute item variance
-            double itemVariance = matrix.getCovarianceAt(i,i);
+            double itemVariance = matrix[i][i];
 
             //Compute sum of covariance between this item and all others
             double itemCovariance = 0;
             for(int j=0;j<nItems;j++){
-                if(i!=j) itemCovariance += matrix.getCovarianceAt(i,j);
+                if(i!=j) itemCovariance += matrix[i][j];
             }
             itemCovariance *= 2;
 

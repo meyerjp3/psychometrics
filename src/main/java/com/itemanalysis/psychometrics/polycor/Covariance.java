@@ -29,11 +29,10 @@ public class Covariance implements Comparable<Covariance>{
     private double meanX = 0.0;
     private double meanY = 0.0;
 	private double N=0;
-	private Double covarianceNumerator=0.0;
+	private double covarianceNumerator=0.0;
     private double varNumeratorX = 0.0;
     private double varNumeratorY = 0.0;
     private double covariance = 0;
-    boolean fixedValue = false;
     boolean unbiased = true;
 
     public Covariance(boolean unbiased){
@@ -44,30 +43,15 @@ public class Covariance implements Comparable<Covariance>{
         this(true);
 	}
 
-    public Covariance(double covariance, boolean unbiased){
-        this.covariance = covariance;
-        this.unbiased = unbiased;
-        fixedValue = true;
+	public Covariance(double[] x, double[] y, boolean unbiased){
+	    this.unbiased = unbiased;
+	    for(int i=0;i<x.length;i++){
+	        this.increment(x[i], y[i]);
+        }
     }
 
-    public Covariance(double covariance){
-        this(covariance, true);
-    }
-
-	public Covariance(Covariance cov, boolean unbiased){
-        this.unbiased = unbiased;
-        this.N = cov.N;
-        this.deltaX = cov.deltaX;
-        this.deltaY = cov.deltaY;
-        this.meanX = cov.meanX;
-        this.meanY = cov.meanY;
-        this.covarianceNumerator = cov.covarianceNumerator;
-        this.varNumeratorX = cov.varNumeratorX;
-        this.varNumeratorY = cov.varNumeratorY;
-	}
-
-    public Covariance(Covariance cov){
-	    this(cov, true);
+    public Covariance(double[] x, double[] y){
+	    this(x, y, true);
     }
 
     /**
@@ -83,39 +67,33 @@ public class Covariance implements Comparable<Covariance>{
      * @param x
      * @param y
      */
-    public void increment(Double x, Double y){
-        if(x!=null & y!=null){
-            N++;
-            deltaX = x - meanX;
-            deltaY = y - meanY;
-            meanX += deltaX/N;
-            meanY += deltaY/N;
-            covarianceNumerator += ((N-1.0)/N)*deltaX*deltaY;
-            varNumeratorX += deltaX*(x-meanX);
-            varNumeratorY += deltaY*(y-meanY);
-        }
-        
+    public void increment(double x, double y){
+        N++;
+        deltaX = x - meanX;
+        deltaY = y - meanY;
+        meanX += deltaX/N;
+        meanY += deltaY/N;
+        covarianceNumerator += ((N-1.0)/N)*deltaX*deltaY;
+        varNumeratorX += deltaX*(x-meanX);
+        varNumeratorY += deltaY*(y-meanY);
     }
 
     public double value(){
-        if(fixedValue) return covariance;
-        if(N<1) return Double.NaN;
         if(unbiased){
+            if(N<2) return Double.NaN;
             return covarianceNumerator/(N-1.0);
         }else{
+            if(N<1) return Double.NaN;
             return covarianceNumerator/N;
         }
     }
-
-//    public Double value(){
-//        return value();
-//    }
     
     public double varX(){
-        if(N<1) return Double.NaN;
         if(unbiased){
+            if(N<2) return Double.NaN;
             return varNumeratorX/(N-1.0);
         }else{
+            if(N<1) return Double.NaN;
             return varNumeratorX/N;
         }
     }
@@ -125,10 +103,11 @@ public class Covariance implements Comparable<Covariance>{
     }
     
     public double varY(){
-        if(N<1) return Double.NaN;
         if(unbiased){
+            if(N<2) return Double.NaN;
             return varNumeratorY/(N-1.0);
         }else{
+            if(N<1) return Double.NaN;
             return varNumeratorY/N;
         }
     }
@@ -138,14 +117,10 @@ public class Covariance implements Comparable<Covariance>{
     }
 
     public double correlation(){
-        double cv = this.value();
-        double r = cv/(Math.sqrt(this.varX())*Math.sqrt(this.varY()));
+        double cv = value();
+        double r = cv/(Math.sqrt(varX())*Math.sqrt(varY()));
         return r;
     }
-
-//    public double correlation(){
-//        return correlation(true);
-//    }
 
     public double correlationStandardError(){
         if(N<3) return Double.NaN;
@@ -157,7 +132,7 @@ public class Covariance implements Comparable<Covariance>{
 
     public double correlationPvalue(){
         double se = correlationStandardError();
-        if(se==0.0) return Double.NaN;
+        if(se<=0.0) return Double.NaN;
         double r = correlation();
         double tval = r/se;
         double df = N-2.0;

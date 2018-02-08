@@ -28,14 +28,10 @@ import java.util.Formatter;
  */
 public class FeldtBrennan extends AbstractScoreReliability{
 	
-	public FeldtBrennan(CovarianceMatrix matrix){
+	public FeldtBrennan(double[][] matrix){
 		this.matrix = matrix;
-        nItems = matrix.getNumberOfVariables();
+        nItems = matrix.length;
 	}
-
-    public FeldtBrennan(double[][] matrix){
-        this(new CovarianceMatrix(matrix));
-    }
 
     public ScoreReliabilityType getType(){
         return ScoreReliabilityType.FELDT_CLASSICAL_CONGENERIC;
@@ -44,7 +40,7 @@ public class FeldtBrennan extends AbstractScoreReliability{
 	private double squaredRowSums(){
 		double value=0.0;
 		for(int i=0;i<nItems;i++){
-			value+=Math.pow(matrix.rowSum(i), 2);
+			value+=Math.pow(this.rowSum(i), 2);
 		}
 		return value;
 	}
@@ -52,7 +48,7 @@ public class FeldtBrennan extends AbstractScoreReliability{
     private double squaredRowSumsWithoutItemAt(int index){
         double value=0.0;
         for(int i=0;i<nItems;i++){
-            if(i!=index) value+=Math.pow(matrix.rowSum(i), 2);
+            if(i!=index) value+=Math.pow(this.rowSum(i), 2);
         }
         return value;
     }
@@ -63,8 +59,8 @@ public class FeldtBrennan extends AbstractScoreReliability{
      * @return estimate of reliability
      */
 	public double value(){
-		double observedScoreVariance = matrix.totalVariance();
-		double componentVariance = matrix.diagonalSum();
+		double observedScoreVariance = this.totalVariance();
+		double componentVariance = this.diagonalSum();
 		double fcc=(observedScoreVariance*(observedScoreVariance-componentVariance))/(Math.pow(observedScoreVariance, 2)-this.squaredRowSums());
 		return fcc;
 	}
@@ -79,7 +75,7 @@ public class FeldtBrennan extends AbstractScoreReliability{
     public double[] itemDeletedReliability(){
         double[] rel = new double[nItems];
         double totalVariance = this.totalVariance();
-        double diagonalSum = matrix.diagonalSum();
+        double diagonalSum = this.diagonalSum();
         double totalVarianceAdjusted = 0;
         double diagonalSumAdjusted = 0;
         double reliabilityWithoutItem = 0;
@@ -87,12 +83,12 @@ public class FeldtBrennan extends AbstractScoreReliability{
 
         for(int i=0;i<nItems;i++){
             //Compute item variance
-            double itemVariance = matrix.getCovarianceAt(i,i);
+            double itemVariance = matrix[i][i];
 
             //Compute sum of covariance between this item and all others
             double itemCovariance = 0;
             for(int j=0;j<nItems;j++){
-                if(i!=j) itemCovariance += matrix.getCovarianceAt(i,j);
+                if(i!=j) itemCovariance += matrix[i][j];
             }
             itemCovariance *= 2;
 

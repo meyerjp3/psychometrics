@@ -533,6 +533,14 @@ public class DefaultItemScoring implements ItemScoring{
                 return obj1.toString().compareTo(obj2.toString());
             }
         }
+
+        public boolean equals(Object obj){
+            if(obj instanceof ItemResponseComparator){
+                return true;
+            }
+            return false;
+
+        }
     }
 
 

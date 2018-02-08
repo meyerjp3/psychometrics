@@ -17,13 +17,10 @@ package com.itemanalysis.psychometrics.measurement;
 
 import com.itemanalysis.psychometrics.polycor.PearsonCorrelation;
 import com.itemanalysis.psychometrics.polycor.PolyserialPlugin;
-import com.itemanalysis.psychometrics.scaling.RawScore;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 import java.util.Formatter;
-import java.util.Iterator;
-import java.util.TreeMap;
 
 public class ClassicalItemStatistics {
 
