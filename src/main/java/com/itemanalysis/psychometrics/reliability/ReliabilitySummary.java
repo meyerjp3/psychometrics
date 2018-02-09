@@ -32,7 +32,7 @@ import java.util.LinkedHashMap;
 public class ReliabilitySummary {
 
     private CoefficientAlpha alpha = null;
-    private GuttmanLambda lambda = null;
+    private GuttmanLambda2 lambda = null;
     private FeldtGilmer feldtGilmer = null;
     private FeldtBrennan feldtBrennan = null;
     private RajuBeta raju = null;
@@ -49,7 +49,7 @@ public class ReliabilitySummary {
         this.nPeople = matrix.getMinSampleSize();
 
         alpha = new CoefficientAlpha(cov);
-        lambda = new GuttmanLambda(cov);
+        lambda = new GuttmanLambda2(cov);
         feldtGilmer = new FeldtGilmer(cov);
         feldtBrennan = new FeldtBrennan(cov);
         raju = new RajuBeta(cov);
@@ -64,7 +64,7 @@ public class ReliabilitySummary {
         this.nPeople = matrix.getMaxSampleSize();
 
         alpha = new CoefficientAlpha(cov);
-        lambda = new GuttmanLambda(cov);
+        lambda = new GuttmanLambda2(cov);
         feldtGilmer = new FeldtGilmer(cov);
         feldtBrennan = new FeldtBrennan(cov);
         raju = new RajuBeta(cov);

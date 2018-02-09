@@ -16,7 +16,6 @@
 package com.itemanalysis.psychometrics.reliability;
 
 import com.itemanalysis.psychometrics.data.VariableAttributes;
-import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
 
 import java.util.ArrayList;
 import java.util.Formatter;
@@ -29,15 +28,15 @@ import java.util.Formatter;
  * @since January 29, 2008
  *
  */
-public class GuttmanLambda extends AbstractScoreReliability{
+public class GuttmanLambda2 extends AbstractScoreReliability{
 
-	public GuttmanLambda(double[][] matrix){
+	public GuttmanLambda2(double[][] matrix){
 		this.matrix = matrix;
         nItems = matrix.length;
 	}
 
     public ScoreReliabilityType getType(){
-        return ScoreReliabilityType.GUTTMAN_LAMBDA;
+        return ScoreReliabilityType.GUTTMAN_LAMBDA2;
     }
 	
 	public double value(){

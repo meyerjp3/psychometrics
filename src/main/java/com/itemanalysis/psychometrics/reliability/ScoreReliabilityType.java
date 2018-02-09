@@ -17,10 +17,45 @@ package com.itemanalysis.psychometrics.reliability;
  */
 public enum ScoreReliabilityType {
 
-    GUTTMAN_LAMBDA{
+    GUTTMAN_LAMBDA1 {
         @Override
         public String toString(){
-            return "LAMBDA";
+            return "LAMBDA1";
+        }
+    },
+
+    GUTTMAN_LAMBDA2 {
+        @Override
+        public String toString(){
+            return "LAMBDA2";
+        }
+    },
+
+    GUTTMAN_LAMBDA3 {
+        @Override
+        public String toString(){
+            return "LAMBDA3";
+        }
+    },
+
+    GUTTMAN_LAMBDA4 {
+        @Override
+        public String toString(){
+            return "LAMBDA4";
+        }
+    },
+
+    GUTTMAN_LAMBDA5 {
+        @Override
+        public String toString(){
+            return "LAMBDA5";
+        }
+    },
+
+    GUTTMAN_LAMBDA6 {
+        @Override
+        public String toString(){
+            return "LAMBDA6";
         }
     },
 

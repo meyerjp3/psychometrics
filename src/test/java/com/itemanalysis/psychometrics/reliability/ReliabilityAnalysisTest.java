@@ -51,7 +51,7 @@ public class ReliabilityAnalysisTest {
         System.out.println("  Raju's beta: " + beta.value());
         assertEquals("Testing alpha", 0.902653, beta.value(), 1e-6);//True value from from Brian Habing's R function;
 
-        GuttmanLambda lambda = new GuttmanLambda(CV);
+        GuttmanLambda2 lambda = new GuttmanLambda2(CV);
         System.out.println("  Guttman's lambda2: " + lambda.value());
         assertEquals("Testing lambda", 0.9033415, lambda.value(), 1e-6);//True value from from Brian Habing's R function;
     }
@@ -130,10 +130,10 @@ public class ReliabilityAnalysisTest {
                 assertEquals("Testing beta item deleted for exam1", trueDeletedReliability[i], deletedReliability[i], 1e-10);
             }
 
-            GuttmanLambda guttmanLambda = new GuttmanLambda(covarianceMatrix.value());
-            System.out.println("  Guttman's lambda for exam1: " + guttmanLambda.value());
+            GuttmanLambda2 guttmanLambda2 = new GuttmanLambda2(covarianceMatrix.value());
+            System.out.println("  Guttman's lambda for exam1: " + guttmanLambda2.value());
             //True value from SPSS
-            assertEquals("Testing Guttman's lambda for exam1", 0.911941572128058, guttmanLambda.value(), 1e-15);
+            assertEquals("Testing Guttman's lambda for exam1", 0.911941572128058, guttmanLambda2.value(), 1e-15);
 
         }catch(IOException ex){
             ex.printStackTrace();
@@ -178,7 +178,7 @@ public class ReliabilityAnalysisTest {
         };
 
         CoefficientAlpha alpha = new CoefficientAlpha(cov);
-        GuttmanLambda lambda = new GuttmanLambda(cov);
+        GuttmanLambda2 lambda = new GuttmanLambda2(cov);
         FeldtGilmer fg = new FeldtGilmer(cov);
         FeldtBrennan fb = new FeldtBrennan(cov);
 
