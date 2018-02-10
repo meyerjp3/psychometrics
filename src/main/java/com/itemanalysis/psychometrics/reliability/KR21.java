@@ -54,8 +54,10 @@ public class KR21 extends AbstractScoreReliability{
 
     @Override
     public double[] itemDeletedReliability(){
-        double[] delRel = new double[1];
-        delRel[0] = value();
+        double[] delRel = new double[nItems];
+        for(int i=0;i<nItems;i++){
+            delRel[i] = value();
+        }
         return delRel;
     }
 
@@ -68,9 +70,9 @@ public class KR21 extends AbstractScoreReliability{
 		return f.toString();
 	}
 
-    public String printItemDeletedSummary(ArrayList<VariableAttributes> var){
-        return "";
-    }
+//    public String printItemDeletedSummary(ArrayList<VariableAttributes> var){
+//        return "";
+//    }
 
 
 }

@@ -1,8 +1,20 @@
+/*
+ * Copyright 2018 J. Patrick Meyer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.itemanalysis.psychometrics.reliability;
 
-import com.itemanalysis.psychometrics.data.VariableAttributes;
-
-import java.util.ArrayList;
 import java.util.Formatter;
 
 public class GuttmanLambda3 extends AbstractScoreReliability {
@@ -17,9 +29,10 @@ public class GuttmanLambda3 extends AbstractScoreReliability {
     }
 
     public double value(){
+        double k = (double)nItems;
         double observedScoreVariance = this.totalVariance();
-        double lambda1 = 1-this.diagonalSum()/observedScoreVariance;
-        double lambda3 = lambda1*(nItems/(nItems-1));
+        double lambda1 = 1.0-this.diagonalSum()/observedScoreVariance;
+        double lambda3 = lambda1*(k/(k-1.0));
         return lambda3;
     }
 
@@ -38,7 +51,7 @@ public class GuttmanLambda3 extends AbstractScoreReliability {
         double diagonalSumAdjusted = 0;
         double lambda1Adjusted = 0;
         double lambda3Adjusted = 0;
-
+        double k = (double)nItems-1.0;
 
         for(int i=0;i<nItems;i++){
             //Compute item variance
@@ -54,7 +67,7 @@ public class GuttmanLambda3 extends AbstractScoreReliability {
             totalVarianceAdjusted = totalVariance - itemCovariance - itemVariance;
             diagonalSumAdjusted = diagonalSum - itemVariance;
             lambda1Adjusted = 1-diagonalSumAdjusted/totalVarianceAdjusted;
-            lambda3Adjusted = lambda1Adjusted*((nItems-1)/(nItems-2));
+            lambda3Adjusted = lambda1Adjusted*(k/(k-1.0));
             rel[i] = lambda3Adjusted;
 
         }
@@ -70,19 +83,5 @@ public class GuttmanLambda3 extends AbstractScoreReliability {
         f.format("%21s", "Guttman's Lambda-3 = "); f.format(f2,this.value());
         return f.toString();
     }
-
-    public String printItemDeletedSummary(ArrayList<VariableAttributes> var){
-        StringBuilder sb = new StringBuilder();
-        Formatter f = new Formatter(sb);
-        double[] del = itemDeletedReliability();
-        f.format("%-56s", " Guttman's Lambda-3 (SEM in Parentheses) if Item Deleted"); f.format("%n");
-        f.format("%-56s", "========================================================"); f.format("%n");
-        for(int i=0;i<del.length;i++){
-            f.format("%-10s", var.get(i)); f.format("%5s", " ");
-            f.format("%10.4f", del[i]); f.format("%5s", " ");f.format("%n");
-        }
-        return f.toString();
-    }
-
 
 }

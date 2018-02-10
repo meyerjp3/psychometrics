@@ -1,8 +1,20 @@
+/*
+ * Copyright 2018 J. Patrick Meyer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.itemanalysis.psychometrics.reliability;
 
-import com.itemanalysis.psychometrics.data.VariableAttributes;
-
-import java.util.ArrayList;
 import java.util.Formatter;
 
 /**
@@ -70,19 +82,5 @@ public class GuttmanLambda1 extends AbstractScoreReliability {
         f.format("%21s", "Guttman's Lambda-1 = "); f.format(f2,this.value());
         return f.toString();
     }
-
-    public String printItemDeletedSummary(ArrayList<VariableAttributes> var){
-        StringBuilder sb = new StringBuilder();
-        Formatter f = new Formatter(sb);
-        double[] del = itemDeletedReliability();
-        f.format("%-56s", " Guttman's Lambda-1 (SEM in Parentheses) if Item Deleted"); f.format("%n");
-        f.format("%-56s", "========================================================"); f.format("%n");
-        for(int i=0;i<del.length;i++){
-            f.format("%-10s", var.get(i)); f.format("%5s", " ");
-            f.format("%10.4f", del[i]); f.format("%5s", " ");f.format("%n");
-        }
-        return f.toString();
-    }
-
 
 }

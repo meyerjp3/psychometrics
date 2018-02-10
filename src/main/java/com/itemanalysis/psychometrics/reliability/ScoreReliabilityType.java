@@ -20,77 +20,77 @@ public enum ScoreReliabilityType {
     GUTTMAN_LAMBDA1 {
         @Override
         public String toString(){
-            return "LAMBDA1";
+            return "Guttman's L1";
         }
     },
 
     GUTTMAN_LAMBDA2 {
         @Override
         public String toString(){
-            return "LAMBDA2";
+            return "Guttman's L2";
         }
     },
 
     GUTTMAN_LAMBDA3 {
         @Override
         public String toString(){
-            return "LAMBDA3";
+            return "Guttman's L3";
         }
     },
 
     GUTTMAN_LAMBDA4 {
         @Override
         public String toString(){
-            return "LAMBDA4";
+            return "Guttman's L4";
         }
     },
 
     GUTTMAN_LAMBDA5 {
         @Override
         public String toString(){
-            return "LAMBDA5";
+            return "Guttman's L5";
         }
     },
 
     GUTTMAN_LAMBDA6 {
         @Override
         public String toString(){
-            return "LAMBDA6";
+            return "Guttman's L6";
         }
     },
 
     CRONBACH_ALPHA{
         @Override
         public String toString(){
-            return "ALPHA";
+            return "Coefficient Alpha";
         }
     },
 
     FELDT_GILMER{
         @Override
         public String toString(){
-            return "FG";
+            return "Feldt-Gilmer";
         }
     },
 
     FELDT_CLASSICAL_CONGENERIC{
         @Override
         public String toString(){
-            return "FB";
+            return "Feldt-Brennan";
         }
     },
 
     RAJU_BETA{
         @Override
         public String toString(){
-            return "RAJU";
+            return "Raju Beta";
         }
     },
 
     STRATIFIED_ALPHA{
         @Override
         public String toString(){
-            return "STRAT";
+            return "Stratified Alpha";
         }
     },
 

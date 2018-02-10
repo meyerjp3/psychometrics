@@ -99,17 +99,4 @@ public class CoefficientAlpha extends AbstractScoreReliability{
 		return f.toString();
 	}
 
-    public String printItemDeletedSummary(ArrayList<VariableAttributes> var){
-        StringBuilder sb = new StringBuilder();
-        Formatter f = new Formatter(sb);
-        double[] del = itemDeletedReliability();
-        f.format("%-56s", " Coefficient Alpha (SEM in Parentheses) if Item Deleted"); f.format("%n");
-		f.format("%-56s", "======================================================="); f.format("%n");
-        for(int i=0;i<del.length;i++){
-            f.format("%-10s", var.get(i)); f.format("%5s", " ");
-            f.format("%10.4f", del[i]); f.format("%5s", " ");f.format("%n");
-        }
-        return f.toString();
-    }
-
 }

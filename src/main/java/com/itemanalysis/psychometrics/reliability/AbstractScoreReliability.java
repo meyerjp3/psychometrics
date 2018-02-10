@@ -15,9 +15,11 @@
  */
 package com.itemanalysis.psychometrics.reliability;
 
+import com.itemanalysis.psychometrics.data.VariableAttributes;
 import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
 import org.apache.commons.math3.distribution.FDistribution;
 
+import java.util.ArrayList;
 import java.util.Formatter;
 
 /**
@@ -87,6 +89,74 @@ public abstract class AbstractScoreReliability implements ScoreReliability,  Com
         f.format("%6.4f)",confidenceInterval[1]);
 		return f.toString();
 	}
+
+    /**
+     * Creates a submatrix that is the covariance matrix without row itemIndex
+     * and column itemIndex;
+     *
+     * @param itemIndex index of row and column to be omitted.
+     * @return submatrix
+     */
+    protected double[][] matrixWithoutItemAt(int itemIndex){
+        double[][] m = new double[nItems-1][nItems-1];
+
+        int i2 = 0;
+        int j2 = 0;
+        for(int i=0;i<nItems;i++){
+            j2 = 0;
+            if(i!=itemIndex){
+                for(int j=0;j<nItems;j++){
+                    if(j!= itemIndex){
+                        m[i2][j2] = this.matrix[i][j];
+                        j2++;
+                    }
+                }
+                i2++;
+            }
+        }
+        return m;
+    }
+
+    protected double varianceWithoutItemAt(int itemIndex){
+        double var = 0.0;
+
+        for(int i=0;i<nItems;i++){
+            if(i!=itemIndex){
+                for(int j=0;j<nItems;j++){
+                    if(j!= itemIndex){
+                        var += this.matrix[i][j];
+                    }
+                }
+            }
+        }
+        return var;
+    }
+
+    public String printItemDeletedSummary(){
+        StringBuilder sb = new StringBuilder();
+        Formatter f = new Formatter(sb);
+        double[] del = itemDeletedReliability();
+        f.format("%-56s", " " + getType().toString() + " (SEM in Parentheses) if Item Deleted"); f.format("%n");
+        f.format("%-56s", "========================================================"); f.format("%n");
+        for(int i=0;i<del.length;i++){
+            f.format("%-10s", "Item "+(i+1)); f.format("%5s", " ");
+            f.format("%10.4f", del[i]); f.format("%5s", " ");f.format("%n");
+        }
+        return f.toString();
+    }
+
+    public String printItemDeletedSummary(ArrayList<VariableAttributes> variableAttributes){
+        StringBuilder sb = new StringBuilder();
+        Formatter f = new Formatter(sb);
+        double[] del = itemDeletedReliability();
+        f.format("%-56s", " " + getType().toString() + " (SEM in Parentheses) if Item Deleted"); f.format("%n");
+        f.format("%-56s", "========================================================"); f.format("%n");
+        for(int i=0;i<del.length;i++){
+            f.format("%-10s", variableAttributes.get(i)); f.format("%5s", " ");
+            f.format("%10.4f", del[i]); f.format("%5s", " ");f.format("%n");
+        }
+        return f.toString();
+    }
 
     public int compareTo(ScoreReliability that){
         double v1 = this.value();

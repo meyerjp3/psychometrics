@@ -1,8 +1,20 @@
+/*
+ * Copyright 2018 J. Patrick Meyer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.itemanalysis.psychometrics.reliability;
 
-import com.itemanalysis.psychometrics.data.VariableAttributes;
-
-import java.util.ArrayList;
 import java.util.Formatter;
 
 public class GuttmanLambda5 extends AbstractScoreReliability {
@@ -37,9 +49,18 @@ public class GuttmanLambda5 extends AbstractScoreReliability {
      */
     private double sumOfSquareCovariances(int itemIndex){
         double sum = 0;
-
         for(int i=0;i<nItems;i++){
             if(i!=itemIndex) sum += matrix[itemIndex][i]*matrix[itemIndex][i];
+        }
+
+        return sum;
+    }
+
+    private double sumOfSquareCovariancesWithoutItemAt(int itemIndex, int omittedItemIndex){
+        double sum = 0;
+
+        for(int i=0;i<nItems;i++){
+            if(i!=itemIndex  && i!=omittedItemIndex) sum += matrix[itemIndex][i]*matrix[itemIndex][i];
         }
 
         return sum;
@@ -70,8 +91,8 @@ public class GuttmanLambda5 extends AbstractScoreReliability {
             double largestSum = -1;
             for(int j=0;j<nItems;j++){
                 if(i!=j){
+                    largestSum = Math.max(largestSum, sumOfSquareCovariancesWithoutItemAt(j, i));
                     itemCovariance += matrix[i][j];
-                    largestSum = Math.max(largestSum, sumOfSquareCovariances(i));
                 }
             }
             itemCovariance *= 2;
@@ -80,6 +101,7 @@ public class GuttmanLambda5 extends AbstractScoreReliability {
             lambda1Adjusted = 1-diagonalSumAdjusted/totalVarianceAdjusted;
             lambda5Adjusted = lambda1Adjusted + 2.0*(Math.sqrt(largestSum)/totalVarianceAdjusted);
             rel[i] = lambda5Adjusted;
+
         }
 
         return rel;
@@ -91,19 +113,6 @@ public class GuttmanLambda5 extends AbstractScoreReliability {
         Formatter f = new Formatter(builder);
         String f2="%.2f";
         f.format("%21s", "Guttman's Lambda-5 = "); f.format(f2,this.value());
-        return f.toString();
-    }
-
-    public String printItemDeletedSummary(ArrayList<VariableAttributes> var){
-        StringBuilder sb = new StringBuilder();
-        Formatter f = new Formatter(sb);
-        double[] del = itemDeletedReliability();
-        f.format("%-56s", " Guttman's Lambda-5 (SEM in Parentheses) if Item Deleted"); f.format("%n");
-        f.format("%-56s", "========================================================"); f.format("%n");
-        for(int i=0;i<del.length;i++){
-            f.format("%-10s", var.get(i)); f.format("%5s", " ");
-            f.format("%10.4f", del[i]); f.format("%5s", " ");f.format("%n");
-        }
         return f.toString();
     }
 
