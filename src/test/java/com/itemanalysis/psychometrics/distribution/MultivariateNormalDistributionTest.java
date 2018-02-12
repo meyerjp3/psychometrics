@@ -212,5 +212,69 @@ public class MultivariateNormalDistributionTest {
 
     }
 
+    /**
+     * Compare MultivariateNormalDistribution to BivariateNormalDistributionImpl and R
+     */
+    @Test
+    public void testBvnor1() {
+        System.out.print("bvnor1: ");
+        double sh = 0.0;
+        double sk = 0.0;
+        double r = 0.5;
+        double trueResult = 0.333333333333333;//from R
+
+        BivariateNormalDistributionImpl bvnorm = new BivariateNormalDistributionImpl();
+
+        double[] M = {0.0, 0.0};
+        double[][] S = {
+                {1.0,r},
+                {r, 1.0}
+        };
+
+        double[] X = {sh, sk};
+
+        MultivariateNormalDistribution mvn = new MultivariateNormalDistribution(M, S);
+
+        double bivResult = bvnorm.cumulativeProbability(sh, sk, r);
+        double mvnResult = mvn.cdf(X, .001, 200000);
+//        System.out.println(bivResult);
+//        System.out.println(mvnResult);
+
+        assertEquals("bvnorm test 1", 0.333333333333333, mvnResult, 1e-3);
+        assertEquals("bvnorm test 1", bivResult, mvnResult, 1e-3);
+    }
+
+    /**
+     * Compare MultivariateNormalDistribution to BivariateNormalDistributionImpl and R
+     */
+    //@Test
+    public void testBvnor2() {
+        System.out.print("bvnor2: ");
+        double sh = 0.0;
+        double sk = 0.0;
+        double r = 0.99999;
+
+        BivariateNormalDistributionImpl bvnorm = new BivariateNormalDistributionImpl();
+
+        double[] M = {0.0, 0.0};
+        double[][] S = {
+                {1.0,r},
+                {r, 1.0}
+        };
+
+        double[] X = {sh, sk};
+
+        MultivariateNormalDistribution mvn = new MultivariateNormalDistribution(M, S);
+
+
+        double trueResult = 0.499288236863452;//from R
+        double bivResult = bvnorm.cumulativeProbability(sh, sk, r);
+        double mvnResult = mvn.cdf(X);
+        System.out.println(bivResult);
+        System.out.println(mvnResult);
+        assertEquals("bvnorm test 2", 0.499288236863448, mvnResult, 1e-15);
+        assertEquals("bvnorm test 2", bivResult, mvnResult, 1e-15);
+    }
+
 
 }
