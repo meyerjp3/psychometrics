@@ -162,42 +162,6 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
     }
 
     /**
-     * Converts the covariance matrix to a correlaiton matrix.
-     *
-     * @param cov covariance matrix
-     * @return correlation matrix
-     */
-    private double[][] covToCor(double[][] cov){
-        double[][] cor = new double[cov.length][cov.length];
-
-        for(int i=0;i<cov.length;i++){
-            for(int j=0;j<cov.length;j++){
-                cor[i][j] = cov[i][j]/(Math.sqrt(cov[i][i])*Math.sqrt(cov[j][j]));
-            }
-        }
-
-        return cor;
-    }
-
-    private double[] colMeans(double[][] data){
-        int ncol = data[0].length;
-        double[] m = new double[ncol];
-        Mean[] mean = new Mean[ncol];
-
-        for(int i=0;i<data.length;i++){
-            for(int j=0;j<data[0].length;j++){
-                if(i==0) mean[j] = new Mean();
-                mean[j].increment(data[i][j]);
-            }
-        }
-        for(int j=0;j<data[0].length;j++){
-            m[j] = mean[j].getResult();
-        }
-
-        return m;
-    }
-
-    /**
      * Constructor. Mean and covariance will be estimated from the data by MLE.
      * @param data the training data.
      * @param diagonal true if covariance matrix is diagonal.
@@ -223,11 +187,6 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
      */
     private void init() {
         dim = mu.length;
-
-//        System.out.println(sigma);
-//        sigma = new Array2DRowRealMatrix(covToCor(sigma.getData()));
-//        System.out.println(sigma);
-
         CholeskyDecomposition cholesky = new CholeskyDecomposition(sigma);
         DecompositionSolver solver = cholesky.getSolver();
         sigmaInv = solver.getInverse();
@@ -235,6 +194,24 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
         sigmaL = cholesky.getL();
         pdfConstant = (dim * Math.log(2 * Math.PI) + Math.log(sigmaDet)) / 2.0;
         normalDistribution = new NormalDistribution();
+    }
+
+    private double[] colMeans(double[][] data){
+        int ncol = data[0].length;
+        double[] m = new double[ncol];
+        Mean[] mean = new Mean[ncol];
+
+        for(int i=0;i<data.length;i++){
+            for(int j=0;j<data[0].length;j++){
+                if(i==0) mean[j] = new Mean();
+                mean[j].increment(data[i][j]);
+            }
+        }
+        for(int j=0;j<data[0].length;j++){
+            m[j] = mean[j].getResult();
+        }
+
+        return m;
     }
 
     /**
@@ -280,7 +257,7 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
 
         double[] v = x.clone();
         minus(v, mu);
-        double result = xax(v) / -2.0;//TODO check this
+        double result = xax(v) / -2.0;
         return result - pdfConstant;
     }
 
@@ -295,63 +272,6 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
     public double p(double[] x) {
         return Math.exp(logp(x));
     }
-
-//    /**
-//     * Algorithm from Alan Genz (1992) Numerical Computation of
-//     * Multivariate Normal Probabilities, Journal of Computational and
-//     * Graphical Statistics, pp. 141-149.
-//     *
-//     * The difference between returned value and the true value of the
-//     * CDF is less than 0.001 in 99.9% time. The maximum number of iterations
-//     * is set to 10000.
-//     */
-//    public double cdf(double[] x, double errMax, int nMax) {
-//        if (x.length != dim) {
-//            throw new IllegalArgumentException("Sample has different dimension.");
-//        }
-//
-//        double alpha = normalDistribution.inverseCumulativeProbability(1-errMax);
-//
-//        double[] v = x.clone();
-//
-//        minus(v, mu);
-//
-//        double p = 0.0;
-//        double varSum = 0.0;
-//
-//        // d is always zero
-//        double[] f = new double[dim];
-////        f[0] = normalDistribution.cumulativeProbability(v[0] / sigmaL.getEntry(0, 0));
-//
-//        double[] e = new double[dim];
-//        e[0] = normalDistribution.cumulativeProbability(v[0] / sigmaL.getEntry(0, 0));
-//        f[0] = e[0];
-//
-//        double[] y = new double[dim];
-//
-//        double err = 2 * errMax;
-//        int N;
-//        for (N = 1; err > errMax && N <= nMax; N++) {
-//            double[] w = uniformRandom(dim - 1);
-//            for (int i = 1; i < dim; i++) {
-//                y[i - 1] = normalDistribution.inverseCumulativeProbability(w[i - 1] * e[i - 1]);
-//                double q = 0.0;
-//                for (int j = 0; j < i; j++) {
-//                    q += sigmaL.getEntry(i, j) * y[j];
-//                }
-//                e[i] = normalDistribution.cumulativeProbability((v[i]-q)/sigmaL.getEntry(i,i));
-//                f[i] = e[i] * f[i-1];
-//            }
-//
-//            double delta = (f[dim - 1] - p) / N;
-//            p += delta;
-//            varSum = (N - 2) * varSum / N + delta * delta;
-//            err = alpha * Math.sqrt(varSum);
-//        }
-//        if(err>errMax) System.out.println("MultivariateNormalDistribution CDF failed to converge.");
-//
-//        return p;
-//    }
 
     /**
      * Algorithm from Alan Genz (1992) Numerical Computation of
@@ -378,7 +298,7 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
         }
 
         int N = 0;
-        double p = 0.0;
+        double intSum = 0.0;
         double delta = 0.0;
         double varSum = 0.0;
         double error = 2*errMax;
@@ -387,15 +307,16 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
         double[] f = new double[dim];
         double[] y = new double[dim];
 
-        double[] x = b.clone();
-        minus(x, mu);
+        double[] b2 = b.clone();
+        minus(b2, mu);
+
+        double[] a2 = a.clone();
+        minus(a2, mu);
 
         double alpha = normalDistribution.inverseCumulativeProbability(1.0-errMax);
-        d[0] = normalDistribution.cumulativeProbability(a[0]/sigmaL.getEntry(0,0));
-        e[0] = normalDistribution.cumulativeProbability(x[0]/sigmaL.getEntry(0,0));
+        d[0] = normalDistribution.cumulativeProbability(a2[0]/sigmaL.getEntry(0,0));
+        e[0] = normalDistribution.cumulativeProbability(b2[0]/sigmaL.getEntry(0,0));
         f[0] = e[0]-d[0];
-
-        f[0] = normalDistribution.cumulativeProbability(x[0] / sigmaL.getEntry(0, 0));
 
         for (N = 1; error > errMax && N <= nMax; N++) {
             double[] w = uniformRandom(dim - 1);
@@ -407,21 +328,22 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
                 for(int j=0;j<i;j++){
                     sumCY += sigmaL.getEntry(i,j) * y[j];
                 }
-                d[i] = normalDistribution.cumulativeProbability((a[i]-sumCY)/sigmaL.getEntry(i,i));
-                e[i] = normalDistribution.cumulativeProbability((x[i]-sumCY)/sigmaL.getEntry(i,i));
+                d[i] = normalDistribution.cumulativeProbability((a2[i]-sumCY)/sigmaL.getEntry(i,i));
+                e[i] = normalDistribution.cumulativeProbability((b2[i]-sumCY)/sigmaL.getEntry(i,i));
                 f[i] = (e[i] - d[i]) * f[i-1];
             }
 
-            delta = (f[dim - 1] - p) / N;
-            p += delta;
+            delta = (f[dim - 1] - intSum) / N;
+            intSum += delta;
             varSum = (N - 2) * varSum / N + delta * delta;
             error = alpha * Math.sqrt(varSum);
 
             //for debugging
-            //System.out.println("Iter: " +N + "  delta = " + delta +  "  varSum = " + varSum + "  Error = " + error);
+//            System.out.println("Iter: " +N + "  delta = " + delta +  "  varSum = " + varSum + "  Error = " + error);
         }
+
         if(error>errMax) System.out.println("  MVN CDF failed to converge. Error = " + Precision.round(error, 8));
-        return p;
+        return intSum;
     }
 
     /**
@@ -450,7 +372,11 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
      * @return probability
      */
     public double cdf(double[] b){
-        return cdf(b, 0.001, 10000);
+        return cdf(b, 0.001, 10000*dim*dim);
+    }
+
+    public double cdf(double[] a, double[] b){
+        return cdf(a, b, 0.001, 10000*dim*dim);
     }
 
     /**

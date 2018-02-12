@@ -19,6 +19,10 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+/**
+ * NOTE: some tests may occasionally fail because there is a random aspect to computing the cdf.
+ *
+ */
 public class MultivariateNormalDistributionTest {
 
     /**
@@ -134,7 +138,7 @@ public class MultivariateNormalDistributionTest {
 
         double[] X1 = {0.713919336274493, 0.584408785741822, 0.263119200077829, 0.732513610871908};
 
-        double prob = mvn.cdf(X1, .001, 20000);
+        double prob = mvn.cdf(X1);
         assertEquals("  Test 1: ", 0.0904191282120575, prob, TOL);
     }
 
@@ -143,7 +147,7 @@ public class MultivariateNormalDistributionTest {
      * This test is from teh smile library.
      */
     @Test
-    public void testCdf() {
+    public void smileTestCdf() {
         System.out.println("smile cdf test");
 
         double[] mu = {1.0, 0.0, -1.0};
@@ -179,13 +183,13 @@ public class MultivariateNormalDistributionTest {
                 0.900614371069787, 0.114312641623954, 0.697450174761431,
                 0.817816237124512, 0.00505963578875454, 0.00512904468757106, 0.441916904631481};
 
-        MultivariateNormalDistribution instance = new MultivariateNormalDistribution(mu, sigma);
+        MultivariateNormalDistribution mvn = new MultivariateNormalDistribution(mu, sigma);
 
 
         for (int i = 0; i < x.length; i++) {
             //Fails because of error in smile algorithm
 //            assertEquals("  Test " +(i+1), cdfSmile[i], instance.cdf(x[i]), TOL);
-            assertEquals("  Test " +(i+1), cdfR[i], instance.cdf(x[i]), 1e-2);
+            assertEquals("  Test " +(i+1), cdfR[i], mvn.cdf(x[i], .001, 500000), 1e-2);
         }
     }
 
@@ -209,6 +213,24 @@ public class MultivariateNormalDistributionTest {
 
 
         assertEquals("  Test 2", 0.000431981044177644, prob, TOL);
+
+    }
+
+    @Test
+    public void lowerUpperTest(){
+        System.out.println("Four dimension CDF test with lower and upper bounds");
+
+        double[] M = {0, 0, 0, 0};
+        MultivariateNormalDistribution mvn = new MultivariateNormalDistribution(M, 1.0);
+
+        double[] lower = {-1, -1, -1, -1};
+        double[] upper = {1.5, 1.5, 1.5, 1.5};
+
+        double prob = mvn.cdf(lower, upper);
+
+        //System.out.println(prob);
+
+        assertEquals("  Test 2", 0.359890098354227, prob, TOL);
 
     }
 
@@ -236,7 +258,7 @@ public class MultivariateNormalDistributionTest {
         MultivariateNormalDistribution mvn = new MultivariateNormalDistribution(M, S);
 
         double bivResult = bvnorm.cumulativeProbability(sh, sk, r);
-        double mvnResult = mvn.cdf(X, .001, 200000);
+        double mvnResult = mvn.cdf(X);
 //        System.out.println(bivResult);
 //        System.out.println(mvnResult);
 
@@ -244,37 +266,6 @@ public class MultivariateNormalDistributionTest {
         assertEquals("bvnorm test 1", bivResult, mvnResult, 1e-3);
     }
 
-    /**
-     * Compare MultivariateNormalDistribution to BivariateNormalDistributionImpl and R
-     */
-    //@Test
-    public void testBvnor2() {
-        System.out.print("bvnor2: ");
-        double sh = 0.0;
-        double sk = 0.0;
-        double r = 0.99999;
-
-        BivariateNormalDistributionImpl bvnorm = new BivariateNormalDistributionImpl();
-
-        double[] M = {0.0, 0.0};
-        double[][] S = {
-                {1.0,r},
-                {r, 1.0}
-        };
-
-        double[] X = {sh, sk};
-
-        MultivariateNormalDistribution mvn = new MultivariateNormalDistribution(M, S);
-
-
-        double trueResult = 0.499288236863452;//from R
-        double bivResult = bvnorm.cumulativeProbability(sh, sk, r);
-        double mvnResult = mvn.cdf(X);
-        System.out.println(bivResult);
-        System.out.println(mvnResult);
-        assertEquals("bvnorm test 2", 0.499288236863448, mvnResult, 1e-15);
-        assertEquals("bvnorm test 2", bivResult, mvnResult, 1e-15);
-    }
 
 
 }
