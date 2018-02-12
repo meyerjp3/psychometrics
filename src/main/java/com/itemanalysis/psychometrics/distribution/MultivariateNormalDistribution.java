@@ -161,6 +161,24 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
         this(data, false);
     }
 
+    /**
+     * Converts the covariance matrix to a correlaiton matrix.
+     *
+     * @param cov covariance matrix
+     * @return correlation matrix
+     */
+    private double[][] covToCor(double[][] cov){
+        double[][] cor = new double[cov.length][cov.length];
+
+        for(int i=0;i<cov.length;i++){
+            for(int j=0;j<cov.length;j++){
+                cor[i][j] = cov[i][j]/(Math.sqrt(cov[i][i])*Math.sqrt(cov[j][j]));
+            }
+        }
+
+        return cor;
+    }
+
     private double[] colMeans(double[][] data){
         int ncol = data[0].length;
         double[] m = new double[ncol];
@@ -205,6 +223,11 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
      */
     private void init() {
         dim = mu.length;
+
+//        System.out.println(sigma);
+//        sigma = new Array2DRowRealMatrix(covToCor(sigma.getData()));
+//        System.out.println(sigma);
+
         CholeskyDecomposition cholesky = new CholeskyDecomposition(sigma);
         DecompositionSolver solver = cholesky.getSolver();
         sigmaInv = solver.getInverse();
