@@ -16,6 +16,7 @@
 package com.itemanalysis.psychometrics.distribution;
 
 import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
+import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
@@ -32,7 +33,7 @@ import java.util.Random;
  *
  *
  */
-public class MultivariateNormalDistribution extends AbstractMultivariateDistribution{
+public class MultivariateNormalDistribution extends AbstractMultivariateDistribution implements MultivariateFunction {
 
     private static final double LOG2PIE = Math.log(2 * Math.PI * Math.E);
     private double[] mu;
@@ -46,6 +47,7 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
     private int numParameters;
     private NormalDistribution normalDistribution = null;
     private Random random = new SecureRandom();
+    private double idfTargetProb = 0.0;
 
     /**
      * Constructor. The distribution will have a diagonal covariance matrix of
@@ -269,7 +271,7 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
     }
 
     @Override
-    public double p(double[] x) {
+    public double pdf(double[] x) {
         return Math.exp(logp(x));
     }
 
@@ -377,6 +379,80 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
 
     public double cdf(double[] a, double[] b){
         return cdf(a, b, 0.001, 10000*dim*dim);
+    }
+
+    private double[] expandArray(double x, int size){
+        double[] y = new double[size];
+        for(int i=0;i<size;i++){
+            y[i] = x;
+        }
+        return y;
+    }
+
+    /**
+     * Finds the equi-coordinate quantile for p. It implements a modified bisection algorithm as
+     * done in Michael Grayling's (mjg211 at cam.ac.uk) stata module.
+     *
+     * Grayling, Michael J. and Mander, Adrian, (2017), MVTNORM: Stata module to work with the multivariate
+     * normal and multivariate t distributions, https://EconPapers.repec.org/RePEc:boc:bocode:s458043.
+     *
+     * @param prob probability
+     * @param errMax absolute error tolerance
+     * @param nMax maximum number of iterations
+     * @return equi-coordinate quantile
+     */
+    public double idf(double prob, double errMax, int nMax){
+        //TODO add alternate method calls
+        //TODO check probability
+        double a = -3;//TODO change to be sd unit
+        double b = 3;
+        double c = 0.0;
+        int iter = 0;
+//        int maxIter = 10000*dim*dim;
+
+        double fa = 0.0;
+        double fb = 0.0;
+        double fc = 0.0;
+        double mid = 0.0;
+
+        fa = cdf(expandArray(a, dim))-prob;
+        fb = cdf(expandArray(b, dim))-prob;
+
+        while(iter<nMax){
+            c = a - ((b - a)/(fb - fa))*fa;
+            fc = cdf(expandArray(c, dim))-prob;
+            mid = (b-a)/2.0;
+
+            if(fc==0 || mid < errMax){
+                break;
+            }else{
+                if((fa<0 && fc<0) || (fa>0 && fc>0)){
+                    a = c;
+                    fa = fc;
+                }else {
+                    b = c;
+                    fb = fc;
+                }
+                iter++;
+            }
+
+        }
+
+        if(mid > errMax) System.out.println("  MVN IDF failed to converge. Error = " + Precision.round(mid, 8));
+        return c;
+
+    }
+
+    public double value(double[] thresholds){
+
+        double[] c = thresholds.clone();
+        for(int i=0;i<c.length;i++){
+            c[i] = c[0];
+        }
+
+        double d = idfTargetProb-cdf(c);
+        d *= d;
+        return d;
     }
 
     /**

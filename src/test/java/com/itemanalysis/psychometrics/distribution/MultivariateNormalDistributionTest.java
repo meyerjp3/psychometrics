@@ -267,5 +267,17 @@ public class MultivariateNormalDistributionTest {
     }
 
 
+    @Test
+    public void bivariateIDFTest(){
+        System.out.println("Bivariate IDF test");
+        MultivariateNormalDistribution mvn = new MultivariateNormalDistribution(2);
+
+        double q = mvn.idf(0.75);
+        System.out.println(q);
+
+        assertEquals("  Test 1", 1.10785119419916, q, TOL);
+
+    }
+
 
 }

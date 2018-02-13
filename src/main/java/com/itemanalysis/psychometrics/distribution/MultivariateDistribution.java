@@ -41,7 +41,7 @@ public interface MultivariateDistribution {
      * The probability density function for continuous distribution
      * or probability mass function for discrete distribution at x.
      */
-    public double p(double[] x);
+    public double pdf(double[] x);
 
     /**
      * The density at x in log scale, which may prevents the underflow problem.
