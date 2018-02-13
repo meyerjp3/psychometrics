@@ -390,8 +390,11 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
     }
 
     /**
-     * Finds the equi-coordinate quantile for p. It implements a modified bisection algorithm as
-     * done in Michael Grayling's (mjg211 at cam.ac.uk) stata module.
+     * Finds the equi-coordinate quantile for p. Specifically, it finds the quantile x
+     * such that P(X <= x) = p.
+     *
+     * It implements a modified bisection algorithm as done in Michael Grayling's
+     * (mjg211 at cam.ac.uk) stata module.
      *
      * Grayling, Michael J. and Mander, Adrian, (2017), MVTNORM: Stata module to work with the multivariate
      * normal and multivariate t distributions, https://EconPapers.repec.org/RePEc:boc:bocode:s458043.
@@ -402,13 +405,19 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
      * @return equi-coordinate quantile
      */
     public double idf(double prob, double errMax, int nMax){
-        //TODO add alternate method calls
-        //TODO check probability
-        double a = -3;//TODO change to be sd unit
-        double b = 3;
+        if(prob <= 0 || prob >= 1) throw new IllegalArgumentException("Probability must be strictly between 0 and 1.");
+
+        //Find bounds of search
+        double largestScale = sigmaL.getEntry(0,0);
+        for(int i=1;i<dim;i++){
+            largestScale = Math.min(largestScale, sigmaL.getEntry(i,i));
+        }
+        double sd = 6.0;
+        double a = -sd*largestScale;
+        double b = sd*largestScale;
+
         double c = 0.0;
         int iter = 0;
-//        int maxIter = 10000*dim*dim;
 
         double fa = 0.0;
         double fb = 0.0;
@@ -441,6 +450,10 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
         if(mid > errMax) System.out.println("  MVN IDF failed to converge. Error = " + Precision.round(mid, 8));
         return c;
 
+    }
+
+    public double idf(double prob){
+        return idf(prob, 0.001, 10000*dim*dim);
     }
 
     public double value(double[] thresholds){

@@ -44,7 +44,7 @@ public class MultivariateNormalDistributionTest {
      */
     @Test
     public void bivariateCDFTest(){
-        System.out.println("Bivariate CDF test");
+        System.out.println("MVN bivariate CDF test");
         MultivariateNormalDistribution mvn = new MultivariateNormalDistribution(2);
 
         double[] v1 = {0, 0};
@@ -81,7 +81,7 @@ public class MultivariateNormalDistributionTest {
      */
     @Test
     public void fiveDimensionCDFTest(){
-        System.out.println("Five dimension CDF test");
+        System.out.println("MVN five dimension CDF test");
         MultivariateNormalDistribution mvn = new MultivariateNormalDistribution(5);
 
         double[] v1 = {0, 0, 0, 0, 0};
@@ -124,7 +124,7 @@ public class MultivariateNormalDistributionTest {
      */
     @Test
     public void multiDimTest(){
-        System.out.println("Multidimensional CDF test");
+        System.out.println("MVN multidimensional CDF test");
         double[][] S = {
                 {3.260127902272362, 2.343938296424249, 0.1409050254343716, -0.1628775438743266},
                 {2.343938296424249, 4.213034991388330, 1.3997210599608563,  0.3373448510018783},
@@ -148,7 +148,7 @@ public class MultivariateNormalDistributionTest {
      */
     @Test
     public void smileTestCdf() {
-        System.out.println("smile cdf test");
+        System.out.println("MVN smile cdf test");
 
         double[] mu = {1.0, 0.0, -1.0};
         double[][] sigma = {
@@ -195,7 +195,7 @@ public class MultivariateNormalDistributionTest {
 
     @Test
     public void fiveDimTest2(){
-        System.out.println("Five dimension CDF test2");
+        System.out.println("MVN five dimension CDF test2");
         double[] M = {1.26, 1.46, 1.70, 1.45, 1.40};
 
         double[][] S = {
@@ -218,7 +218,7 @@ public class MultivariateNormalDistributionTest {
 
     @Test
     public void lowerUpperTest(){
-        System.out.println("Four dimension CDF test with lower and upper bounds");
+        System.out.println("MVN four dimension CDF test with lower and upper bounds");
 
         double[] M = {0, 0, 0, 0};
         MultivariateNormalDistribution mvn = new MultivariateNormalDistribution(M, 1.0);
@@ -239,7 +239,7 @@ public class MultivariateNormalDistributionTest {
      */
     @Test
     public void testBvnor1() {
-        System.out.print("bvnor1: ");
+        System.out.print("MVN bvnor1");
         double sh = 0.0;
         double sk = 0.0;
         double r = 0.5;
@@ -259,25 +259,121 @@ public class MultivariateNormalDistributionTest {
 
         double bivResult = bvnorm.cumulativeProbability(sh, sk, r);
         double mvnResult = mvn.cdf(X);
-//        System.out.println(bivResult);
-//        System.out.println(mvnResult);
+        //System.out.println(bivResult);
+        //System.out.println(mvnResult);
 
         assertEquals("bvnorm test 1", 0.333333333333333, mvnResult, 1e-3);
         assertEquals("bvnorm test 1", bivResult, mvnResult, 1e-3);
     }
 
 
+    /**
+     * IDF tested against R.
+     *
+     * library(mvtnorm)
+     * M<-c(0, 0)
+     * S<-matrix(c(1, 0, 0, 1), nrow=2, byrow=TRUE)
+     * qmvnorm(p=.75, mean=M, sigma=S)
+     *
+     */
     @Test
-    public void bivariateIDFTest(){
-        System.out.println("Bivariate IDF test");
+    public void bivariateIDFTest1(){
+        System.out.println("MVN bivariate IDF test 1");
         MultivariateNormalDistribution mvn = new MultivariateNormalDistribution(2);
 
-        double q = mvn.idf(0.75, .01, 20000);
-        System.out.println(q);
+        double q = mvn.idf(0.75, .001, 20000);
+        //System.out.println(q);
 
         assertEquals("  Test 1", 1.10785119419916, q, TOL);
 
     }
 
+    /**
+     * IDF tested against R.
+     *
+     * library(mvtnorm)
+     *
+     * M<-c(100, 0)
+     * S<-matrix(c(15*15, 0, 0, 1), nrow=2, byrow=TRUE)
+     * qmvnorm(p=.75, mean=M, sigma=S)
+     *
+     */
+    @Test
+    public void bivariateIDFTest2(){
+        System.out.println("MVN bivariate IDF test 2");
+
+        double[] M = {100, 0};
+        double[][] S = {
+                {225,0},
+                {0,1}
+        };
+
+        MultivariateNormalDistribution mvn = new MultivariateNormalDistribution(M, S);
+        double q = mvn.idf(0.75, .001, 20000);
+        //System.out.println(q);
+
+        assertEquals("  Test 2", 110.1173, q, TOL);
+
+    }
+
+    /**
+     * IDF tested against R.
+     *
+     * library(mvtnorm)
+     *
+     * M<-c(100, 0, -50)
+     * S<-matrix(c(
+     * 15*15, 0, 0,
+     * 0, 1, 0,
+     * 0, 0, 25), nrow=3, byrow=TRUE)
+     * qmvnorm(p=.25, mean=M, sigma=S)
+     *
+     */
+    @Test
+    public void bivariateIDFTest3(){
+        System.out.println("MVN trivariate IDF test 3");
+
+        double[] M = {100, 0, -50};
+        double[][] S = {
+                {225,0,0},
+                {0,1,0},
+                {0,0,25}
+        };
+
+        MultivariateNormalDistribution mvn = new MultivariateNormalDistribution(M, S);
+        double q = mvn.idf(0.25, .001, 20000);
+        //System.out.println(q);
+
+        assertEquals("  Test 3", 89.88265, q, TOL);
+
+    }
+
+    /**
+     * IDF tested against R.
+     *
+     * library(mvtnorm)
+     *
+     * M<-c(-100, 0)
+     * S<-matrix(c(15*15, 0, 0, 1), nrow=2, byrow=TRUE)
+     * qmvnorm(p=.0001, mean=M, sigma=S)
+     *
+     */
+    @Test
+    public void bivariateIDFTest4(){
+        System.out.println("MVN bivariate IDF test 4");
+
+        double[] M = {-100, 0};
+        double[][] S = {
+                {225,0},
+                {0,1}
+        };
+
+        MultivariateNormalDistribution mvn = new MultivariateNormalDistribution(M, S);
+        double q = mvn.idf(0.0001);
+        //System.out.println(q);
+
+        assertEquals("  Test 4", -3.719016, q, TOL);
+
+    }
 
 }
