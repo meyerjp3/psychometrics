@@ -15,6 +15,7 @@
  */
 package com.itemanalysis.psychometrics.irt.equating;
 
+import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
 import com.itemanalysis.psychometrics.irt.model.IrmType;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
@@ -36,8 +37,8 @@ import java.util.LinkedHashMap;
 
 public class IrtScaleLinking {
 
-    private LinkedHashMap<String, ItemResponseModel> itemFormX = null;
-    private LinkedHashMap<String, ItemResponseModel> itemFormY = null;
+    private LinkedHashMap<VariableName, ItemResponseModel> itemFormX = null;
+    private LinkedHashMap<VariableName, ItemResponseModel> itemFormY = null;
     private DistributionApproximation distX = null;
     private DistributionApproximation distY = null;
     private int precision = 4;
@@ -53,7 +54,7 @@ public class IrtScaleLinking {
     private double fSL = 0.0;
 
 
-    public IrtScaleLinking(LinkedHashMap<String, ItemResponseModel> itemFormX, LinkedHashMap<String, ItemResponseModel> itemFormY,
+    public IrtScaleLinking(LinkedHashMap<VariableName, ItemResponseModel> itemFormX, LinkedHashMap<VariableName, ItemResponseModel> itemFormY,
                            DistributionApproximation distX, DistributionApproximation distY, boolean populationSd){
         this.itemFormX = itemFormX;
         this.itemFormY = itemFormY;
@@ -67,7 +68,7 @@ public class IrtScaleLinking {
 
     }
 
-    public IrtScaleLinking(LinkedHashMap<String, ItemResponseModel> itemFormX, LinkedHashMap<String, ItemResponseModel> itemFormY,
+    public IrtScaleLinking(LinkedHashMap<VariableName, ItemResponseModel> itemFormX, LinkedHashMap<VariableName, ItemResponseModel> itemFormY,
                            DistributionApproximation distX, DistributionApproximation distY){
         this(itemFormX, itemFormY, distX, distY, true);
     }
@@ -103,8 +104,8 @@ public class IrtScaleLinking {
      */
     private boolean checkRaschModel(){
         ItemResponseModel irm = null;
-        for(String s : itemFormY.keySet()){
-            irm = itemFormY.get(s);
+        for(VariableName v : itemFormY.keySet()){
+            irm = itemFormY.get(v);
 
             if(irm.getType()==IrmType.L3){
                 if(irm.getNumberOfParameters()>1) return false;

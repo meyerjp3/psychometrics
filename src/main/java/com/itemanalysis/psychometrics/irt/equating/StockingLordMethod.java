@@ -16,6 +16,7 @@
 package com.itemanalysis.psychometrics.irt.equating;
 
 import com.itemanalysis.psychometrics.analysis.AbstractMultivariateFunction;
+import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.scaling.LinearTransformation;
@@ -32,8 +33,8 @@ import java.util.Set;
 
 public class StockingLordMethod extends AbstractMultivariateFunction implements LinearTransformation, Uncmin_methods, UnivariateFunction {
 
-    private LinkedHashMap<String, ItemResponseModel> itemFormX = null;
-    private LinkedHashMap<String, ItemResponseModel> itemFormY = null;
+    private LinkedHashMap<VariableName, ItemResponseModel> itemFormX = null;
+    private LinkedHashMap<VariableName, ItemResponseModel> itemFormY = null;
     private DistributionApproximation xDistribution = null;
     private DistributionApproximation yDistribution = null;
     private int xDistributionSize = 0;
@@ -42,10 +43,10 @@ public class StockingLordMethod extends AbstractMultivariateFunction implements 
     private double intercept = 0.0;
     private double slope = 1.0;
     private int precision = 2;
-    private Set<String> sY = null;
+    private Set<VariableName> sY = null;
     private boolean standardized = true;
 
-    public StockingLordMethod(LinkedHashMap<String, ItemResponseModel> itemFormX, LinkedHashMap<String, ItemResponseModel> itemFormY,
+    public StockingLordMethod(LinkedHashMap<VariableName, ItemResponseModel> itemFormX, LinkedHashMap<VariableName, ItemResponseModel> itemFormY,
                               DistributionApproximation xDistribution, DistributionApproximation yDistribution,
                               EquatingCriterionType criterion)throws DimensionMismatchException{
         this.itemFormX = itemFormX;
@@ -57,17 +58,6 @@ public class StockingLordMethod extends AbstractMultivariateFunction implements 
         yDistributionSize = yDistribution.getNumberOfPoints();
         checkDimensions();
     }
-
-//    public StockingLordMethod(LinkedHashMap<String, ItemResponseModel> itemFormX, LinkedHashMap<String, ItemResponseModel> itemFormY,
-//                              DistributionApproximation yDistribution, EquatingCriterionType criterion)throws DimensionMismatchException{
-//        this.itemFormX = itemFormX;
-//        this.itemFormY = itemFormY;
-//        this.yDistribution = yDistribution;
-//        this.criterion = EquatingCriterionType.Q1;
-//        xDistributionSize = xDistribution.getNumberOfPoints();
-//        yDistributionSize = yDistribution.getNumberOfPoints();
-//        checkDimensions();
-//    }
 
     /**
      * For a common item linking design, both test form must have a set of items that are the same.
@@ -81,15 +71,15 @@ public class StockingLordMethod extends AbstractMultivariateFunction implements 
      * @throws DimensionMismatchException
      */
     private void checkDimensions()throws DimensionMismatchException{
-        Set<String> sX = itemFormX.keySet();
+        Set<VariableName> sX = itemFormX.keySet();
         sY = itemFormY.keySet();
         if(sX.size()!=sY.size()) throw new DimensionMismatchException(itemFormX.size(), itemFormY.size());
         int mismatch = 0;
-        for(String s : sX){
-            if(!sY.contains(s)) mismatch++;
+        for(VariableName v : sX){
+            if(!sY.contains(v)) mismatch++;
         }
-        for(String s : sY){
-            if(!sX.contains(s)) mismatch++;
+        for(VariableName v : sY){
+            if(!sX.contains(v)) mismatch++;
         }
         if(mismatch>0) throw new DimensionMismatchException(mismatch, 0);
     }
@@ -205,8 +195,8 @@ public class StockingLordMethod extends AbstractMultivariateFunction implements 
     public double getFormYTccAtTheta(double theta){
         double tcc = 0;
         ItemResponseModel m;
-        for(String s: sY){
-            m = itemFormY.get(s);
+        for(VariableName v: sY){
+            m = itemFormY.get(v);
             tcc += m.expectedValue(theta);
         }
         return tcc;
@@ -215,8 +205,8 @@ public class StockingLordMethod extends AbstractMultivariateFunction implements 
     public double getFormXTccAtTheta(double theta){
         double tcc = 0;
         ItemResponseModel m;
-        for(String s : sY){
-            m = itemFormX.get(s);
+        for(VariableName v : sY){
+            m = itemFormX.get(v);
             tcc += m.expectedValue(theta);
         }
         return tcc;
@@ -225,8 +215,8 @@ public class StockingLordMethod extends AbstractMultivariateFunction implements 
     public double getTStarAtTheta(double[] coefficient, double theta){
         double tStar=0.0;
         ItemResponseModel m;
-        for(String s : sY){
-            m = itemFormX.get(s);
+        for(VariableName v : sY){
+            m = itemFormX.get(v);
             if(coefficient.length==1){
                 tStar += m.tStarExpectedValue(theta, coefficient[0], 1.0);//For the Rasch family of models
             }else{
@@ -240,8 +230,8 @@ public class StockingLordMethod extends AbstractMultivariateFunction implements 
     public double getTSharpAtTheta(double[] coefficient, double theta){
         double tSharp = 0.0;
         ItemResponseModel m;
-        for(String s : sY){
-            m = itemFormY.get(s);
+        for(VariableName v : sY){
+            m = itemFormY.get(v);
             if(coefficient.length==1){
                 tSharp += m.tSharpExpectedValue(theta, coefficient[0], 1.0);//For the Rasch family of models
             }else{

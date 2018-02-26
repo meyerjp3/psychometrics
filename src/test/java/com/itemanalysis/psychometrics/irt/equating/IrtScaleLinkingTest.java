@@ -1,5 +1,6 @@
 package com.itemanalysis.psychometrics.irt.equating;
 
+import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.distribution.ContinuousDistributionApproximation;
 import com.itemanalysis.psychometrics.distribution.UniformDistributionApproximation;
 import com.itemanalysis.psychometrics.distribution.UserSuppliedDistributionApproximation;
@@ -52,26 +53,26 @@ public class IrtScaleLinkingTest {
     public void linkingTestRasch(){
         System.out.println("Rasch model linking test");
 
-        LinkedHashMap<String, ItemResponseModel> itemFormX = new LinkedHashMap<String, ItemResponseModel>();
-        LinkedHashMap<String, ItemResponseModel> itemFormY = new LinkedHashMap<String, ItemResponseModel>();
+        LinkedHashMap<VariableName, ItemResponseModel> itemFormX = new LinkedHashMap<VariableName, ItemResponseModel>();
+        LinkedHashMap<VariableName, ItemResponseModel> itemFormY = new LinkedHashMap<VariableName, ItemResponseModel>();
 
-        itemFormX.put("Item1", new Irm3PL(-3.188047976, 1.0));
-        itemFormX.put("Item2", new Irm3PL(1.031760328, 1.0));
-        itemFormX.put("Item3", new Irm3PL(0.819040914, 1.0));
-        itemFormX.put("Item4", new Irm3PL(-2.706947360, 1.0));
-        itemFormX.put("Item5", new Irm3PL(-0.094527077, 1.0));
-        itemFormX.put("Item6", new Irm3PL(0.689697135, 1.0));
-        itemFormX.put("Item7", new Irm3PL(-0.551837153, 1.0));
-        itemFormX.put("Item8", new Irm3PL(-0.359559276, 1.0));
+        itemFormX.put(new VariableName("Item1"), new Irm3PL(-3.188047976, 1.0));
+        itemFormX.put(new VariableName("Item2"), new Irm3PL(1.031760328, 1.0));
+        itemFormX.put(new VariableName("Item3"), new Irm3PL(0.819040914, 1.0));
+        itemFormX.put(new VariableName("Item4"), new Irm3PL(-2.706947360, 1.0));
+        itemFormX.put(new VariableName("Item5"), new Irm3PL(-0.094527077, 1.0));
+        itemFormX.put(new VariableName("Item6"), new Irm3PL(0.689697135, 1.0));
+        itemFormX.put(new VariableName("Item7"), new Irm3PL(-0.551837153, 1.0));
+        itemFormX.put(new VariableName("Item8"), new Irm3PL(-0.359559276, 1.0));
 
-        itemFormY.put("Item1", new Irm3PL(-3.074599226, 1.0));
-        itemFormY.put("Item2", new Irm3PL(1.012824350, 1.0));
-        itemFormY.put("Item3", new Irm3PL(0.868538408, 1.0));
-        itemFormY.put("Item4", new Irm3PL(-2.404483603, 1.0));
-        itemFormY.put("Item5", new Irm3PL(0.037402866, 1.0));
-        itemFormY.put("Item6", new Irm3PL(0.700747420, 1.0));
-        itemFormY.put("Item7", new Irm3PL(-0.602555046, 1.0));
-        itemFormY.put("Item8", new Irm3PL(-0.350426446, 1.0));
+        itemFormY.put(new VariableName("Item1"), new Irm3PL(-3.074599226, 1.0));
+        itemFormY.put(new VariableName("Item2"), new Irm3PL(1.012824350, 1.0));
+        itemFormY.put(new VariableName("Item3"), new Irm3PL(0.868538408, 1.0));
+        itemFormY.put(new VariableName("Item4"), new Irm3PL(-2.404483603, 1.0));
+        itemFormY.put(new VariableName("Item5"), new Irm3PL(0.037402866, 1.0));
+        itemFormY.put(new VariableName("Item6"), new Irm3PL(0.700747420, 1.0));
+        itemFormY.put(new VariableName("Item7"), new Irm3PL(-0.602555046, 1.0));
+        itemFormY.put(new VariableName("Item8"), new Irm3PL(-0.350426446, 1.0));
 
         UniformDistributionApproximation distX = new UniformDistributionApproximation(-4.0, 4.0, 161);//plink default
         UniformDistributionApproximation distY = new UniformDistributionApproximation(-4.0, 4.0, 161);//plink default
@@ -152,30 +153,30 @@ public class IrtScaleLinkingTest {
     public void linkingTestRaschPCM(){
         System.out.println("Mixed format linking test: Rasch and PCM");
 
-        LinkedHashMap<String, ItemResponseModel> itemFormX = new LinkedHashMap<String, ItemResponseModel>();
-        LinkedHashMap<String, ItemResponseModel> itemFormY = new LinkedHashMap<String, ItemResponseModel>();
+        LinkedHashMap<VariableName, ItemResponseModel> itemFormX = new LinkedHashMap<VariableName, ItemResponseModel>();
+        LinkedHashMap<VariableName, ItemResponseModel> itemFormY = new LinkedHashMap<VariableName, ItemResponseModel>();
 
-        itemFormX.put("Item1", new Irm3PL(-3.188047976, 1.0));
-        itemFormX.put("Item2", new Irm3PL(1.031760328, 1.0));
-        itemFormX.put("Item3", new Irm3PL(0.819040914, 1.0));
-        itemFormX.put("Item4", new Irm3PL(-2.706947360, 1.0));
-        itemFormX.put("Item5", new Irm3PL(-0.094527077, 1.0));
-        itemFormX.put("Item6", new Irm3PL(0.689697135, 1.0));
-        itemFormX.put("Item7", new Irm3PL(-0.551837153, 1.0));
-        itemFormX.put("Item8", new Irm3PL(-0.359559276, 1.0));
+        itemFormX.put(new VariableName("Item1"), new Irm3PL(-3.188047976, 1.0));
+        itemFormX.put(new VariableName("Item2"), new Irm3PL(1.031760328, 1.0));
+        itemFormX.put(new VariableName("Item3"), new Irm3PL(0.819040914, 1.0));
+        itemFormX.put(new VariableName("Item4"), new Irm3PL(-2.706947360, 1.0));
+        itemFormX.put(new VariableName("Item5"), new Irm3PL(-0.094527077, 1.0));
+        itemFormX.put(new VariableName("Item6"), new Irm3PL(0.689697135, 1.0));
+        itemFormX.put(new VariableName("Item7"), new Irm3PL(-0.551837153, 1.0));
+        itemFormX.put(new VariableName("Item8"), new Irm3PL(-0.359559276, 1.0));
         double[] step1x = {-0.146619694, -0.636399040, 0.783018734};
-        itemFormX.put("Item9", new IrmPCM(-1.451470831, step1x, 1.0));
+        itemFormX.put(new VariableName("Item9"), new IrmPCM(-1.451470831, step1x, 1.0));
 
-        itemFormY.put("Item1", new Irm3PL(-3.074599226, 1.0));
-        itemFormY.put("Item2", new Irm3PL(1.012824350, 1.0));
-        itemFormY.put("Item3", new Irm3PL(0.868538408, 1.0));
-        itemFormY.put("Item4", new Irm3PL(-2.404483603, 1.0));
-        itemFormY.put("Item5", new Irm3PL(0.037402866, 1.0));
-        itemFormY.put("Item6", new Irm3PL(0.700747420, 1.0));
-        itemFormY.put("Item7", new Irm3PL(-0.602555046, 1.0));
-        itemFormY.put("Item8", new Irm3PL(-0.350426446, 1.0));
+        itemFormY.put(new VariableName("Item1"), new Irm3PL(-3.074599226, 1.0));
+        itemFormY.put(new VariableName("Item2"), new Irm3PL(1.012824350, 1.0));
+        itemFormY.put(new VariableName("Item3"), new Irm3PL(0.868538408, 1.0));
+        itemFormY.put(new VariableName("Item4"), new Irm3PL(-2.404483603, 1.0));
+        itemFormY.put(new VariableName("Item5"), new Irm3PL(0.037402866, 1.0));
+        itemFormY.put(new VariableName("Item6"), new Irm3PL(0.700747420, 1.0));
+        itemFormY.put(new VariableName("Item7"), new Irm3PL(-0.602555046, 1.0));
+        itemFormY.put(new VariableName("Item8"), new Irm3PL(-0.350426446, 1.0));
         double[] step1y = {-0.185885988, -0.61535623, 0.801242218};
-        itemFormY.put("Item9", new IrmPCM(-1.267744832, step1y, 1.0));
+        itemFormY.put(new VariableName("Item9"), new IrmPCM(-1.267744832, step1y, 1.0));
 
         UniformDistributionApproximation distX = new UniformDistributionApproximation(-4.0, 4.0, 161);//plink default
         UniformDistributionApproximation distY = new UniformDistributionApproximation(-4.0, 4.0, 161);//plink default
@@ -216,34 +217,34 @@ public class IrtScaleLinkingTest {
     public void linkingTest3PL(){
         System.out.println("3PL linking test with actual distribution");
 
-        LinkedHashMap<String, ItemResponseModel> irmX = new LinkedHashMap<String, ItemResponseModel>();
-        LinkedHashMap<String, ItemResponseModel> irmY = new LinkedHashMap<String, ItemResponseModel>();
+        LinkedHashMap<VariableName, ItemResponseModel> irmX = new LinkedHashMap<VariableName, ItemResponseModel>();
+        LinkedHashMap<VariableName, ItemResponseModel> irmY = new LinkedHashMap<VariableName, ItemResponseModel>();
 
-        irmX.put("i1", new Irm3PL(0.4551, -0.7101, 0.2087, 1.7));
-        irmX.put("i2", new Irm3PL(0.5839, -0.8567, 0.2038, 1.7));
-        irmX.put("i3", new Irm3PL(0.7544, 0.0212, 0.1600, 1.7));
-        irmX.put("i4", new Irm3PL(0.6633, 0.0506, 0.1240, 1.7));
-        irmX.put("i5", new Irm3PL(1.0690, 0.9610, 0.2986, 1.7));
-        irmX.put("i6", new Irm3PL(0.9672, 0.1950, 0.0535, 1.7));
-        irmX.put("i7", new Irm3PL(0.3479, 2.2768, 0.1489, 1.7));
-        irmX.put("i8", new Irm3PL(1.4579, 1.0241, 0.2453, 1.7));
-        irmX.put("i9", new Irm3PL(1.8811, 1.4062, 0.1992, 1.7));
-        irmX.put("i10", new Irm3PL(0.7020, 2.2401, 0.0853, 1.7));
-        irmX.put("i11", new Irm3PL(1.4080, 1.5556, 0.0789, 1.7));
-        irmX.put("i12", new Irm3PL(1.2993, 2.1589, 0.1075, 1.7));
+        irmX.put(new VariableName("i1"), new Irm3PL(0.4551, -0.7101, 0.2087, 1.7));
+        irmX.put(new VariableName("i2"), new Irm3PL(0.5839, -0.8567, 0.2038, 1.7));
+        irmX.put(new VariableName("i3"), new Irm3PL(0.7544, 0.0212, 0.1600, 1.7));
+        irmX.put(new VariableName("i4"), new Irm3PL(0.6633, 0.0506, 0.1240, 1.7));
+        irmX.put(new VariableName("i5"), new Irm3PL(1.0690, 0.9610, 0.2986, 1.7));
+        irmX.put(new VariableName("i6"), new Irm3PL(0.9672, 0.1950, 0.0535, 1.7));
+        irmX.put(new VariableName("i7"), new Irm3PL(0.3479, 2.2768, 0.1489, 1.7));
+        irmX.put(new VariableName("i8"), new Irm3PL(1.4579, 1.0241, 0.2453, 1.7));
+        irmX.put(new VariableName("i9"), new Irm3PL(1.8811, 1.4062, 0.1992, 1.7));
+        irmX.put(new VariableName("i10"), new Irm3PL(0.7020, 2.2401, 0.0853, 1.7));
+        irmX.put(new VariableName("i11"), new Irm3PL(1.4080, 1.5556, 0.0789, 1.7));
+        irmX.put(new VariableName("i12"), new Irm3PL(1.2993, 2.1589, 0.1075, 1.7));
 
-        irmY.put("i1", new Irm3PL(0.4416, -1.3349, 0.1559, 1.7));
-        irmY.put("i2", new Irm3PL(0.5730, -1.3210, 0.1913, 1.7));
-        irmY.put("i3", new Irm3PL(0.5987, -0.7098, 0.1177, 1.7));
-        irmY.put("i4", new Irm3PL(0.6041, -0.3539, 0.0818, 1.7));
-        irmY.put("i5", new Irm3PL(0.9902,  0.5320, 0.3024, 1.7));
-        irmY.put("i6", new Irm3PL(0.8081, -0.1156, 0.0648, 1.7));
-        irmY.put("i7", new Irm3PL(0.4140,  2.5538, 0.2410, 1.7));
-        irmY.put("i8", new Irm3PL(1.3554,  0.5811, 0.2243, 1.7));
-        irmY.put("i9", new Irm3PL(1.0417,  0.9392, 0.1651, 1.7));
-        irmY.put("i10", new Irm3PL(0.6336,  1.8960, 0.0794, 1.7));
-        irmY.put("i11", new Irm3PL(1.1347,  1.0790, 0.0630, 1.7));
-        irmY.put("i12", new Irm3PL(0.9255,  2.1337, 0.1259, 1.7));
+        irmY.put(new VariableName("i1"), new Irm3PL(0.4416, -1.3349, 0.1559, 1.7));
+        irmY.put(new VariableName("i2"), new Irm3PL(0.5730, -1.3210, 0.1913, 1.7));
+        irmY.put(new VariableName("i3"), new Irm3PL(0.5987, -0.7098, 0.1177, 1.7));
+        irmY.put(new VariableName("i4"), new Irm3PL(0.6041, -0.3539, 0.0818, 1.7));
+        irmY.put(new VariableName("i5"), new Irm3PL(0.9902,  0.5320, 0.3024, 1.7));
+        irmY.put(new VariableName("i6"), new Irm3PL(0.8081, -0.1156, 0.0648, 1.7));
+        irmY.put(new VariableName("i7"), new Irm3PL(0.4140,  2.5538, 0.2410, 1.7));
+        irmY.put(new VariableName("i8"), new Irm3PL(1.3554,  0.5811, 0.2243, 1.7));
+        irmY.put(new VariableName("i9"), new Irm3PL(1.0417,  0.9392, 0.1651, 1.7));
+        irmY.put(new VariableName("i10"), new Irm3PL(0.6336,  1.8960, 0.0794, 1.7));
+        irmY.put(new VariableName("i11"), new Irm3PL(1.1347,  1.0790, 0.0630, 1.7));
+        irmY.put(new VariableName("i12"), new Irm3PL(0.9255,  2.1337, 0.1259, 1.7));
 
         double[] points = {-4.0000, -3.1110, -2.2220, -1.3330, -0.4444, 0.4444, 1.3330, 2.2220, 3.1110, 4.0000};
         double[] xDensity = {0.0001008, 0.002760, 0.03021, 0.1420, 0.3149, 0.3158, 0.1542, 0.03596, 0.003925, 0.0001862};
@@ -295,67 +296,67 @@ public class IrtScaleLinkingTest {
     @Test
     public void mixedFormatTest(){
         System.out.println("STUIRT example 2 with PARSCALE parameters");
-        LinkedHashMap<String, ItemResponseModel> irmX = new LinkedHashMap<String, ItemResponseModel>();
-        LinkedHashMap<String, ItemResponseModel> irmY = new LinkedHashMap<String, ItemResponseModel>();
+        LinkedHashMap<VariableName, ItemResponseModel> irmX = new LinkedHashMap<VariableName, ItemResponseModel>();
+        LinkedHashMap<VariableName, ItemResponseModel> irmY = new LinkedHashMap<VariableName, ItemResponseModel>();
 
         //Form X
-        irmX.put("v1", new Irm3PL(0.751335, -0.897391, 0.244001, 1.7));
-        irmX.put("v2", new Irm3PL(0.955947, -0.811477, 0.242883, 1.7));
-        irmX.put("v3", new Irm3PL(0.497206, -0.858681, 0.260893, 1.7));
-        irmX.put("v4", new Irm3PL(0.724000, -0.123911, 0.243497, 1.7));
-        irmX.put("v5", new Irm3PL(0.865200,  0.205889, 0.319135, 1.7));
-        irmX.put("v6", new Irm3PL(0.658129,  0.555228, 0.277826, 1.7));
-        irmX.put("v7", new Irm3PL(1.082118,  0.950549, 0.157979, 1.7));
-        irmX.put("v8", new Irm3PL(0.988294,  1.377501, 0.084828, 1.7));
-        irmX.put("v9", new Irm3PL(1.248923,  1.614355, 0.181874, 1.7));
-        irmX.put("v10", new Irm3PL(1.116682,  2.353932, 0.246856, 1.7));
-        irmX.put("v11", new Irm3PL(0.438171, 3.217965, 0.309243, 1.7));
-        irmX.put("v12", new Irm3PL(1.082206, 4.441864, 0.192339, 1.7));
+        irmX.put(new VariableName("v1"), new Irm3PL(0.751335, -0.897391, 0.244001, 1.7));
+        irmX.put(new VariableName("v2"), new Irm3PL(0.955947, -0.811477, 0.242883, 1.7));
+        irmX.put(new VariableName("v3"), new Irm3PL(0.497206, -0.858681, 0.260893, 1.7));
+        irmX.put(new VariableName("v4"), new Irm3PL(0.724000, -0.123911, 0.243497, 1.7));
+        irmX.put(new VariableName("v5"), new Irm3PL(0.865200,  0.205889, 0.319135, 1.7));
+        irmX.put(new VariableName("v6"), new Irm3PL(0.658129,  0.555228, 0.277826, 1.7));
+        irmX.put(new VariableName("v7"), new Irm3PL(1.082118,  0.950549, 0.157979, 1.7));
+        irmX.put(new VariableName("v8"), new Irm3PL(0.988294,  1.377501, 0.084828, 1.7));
+        irmX.put(new VariableName("v9"), new Irm3PL(1.248923,  1.614355, 0.181874, 1.7));
+        irmX.put(new VariableName("v10"), new Irm3PL(1.116682,  2.353932, 0.246856, 1.7));
+        irmX.put(new VariableName("v11"), new Irm3PL(0.438171, 3.217965, 0.309243, 1.7));
+        irmX.put(new VariableName("v12"), new Irm3PL(1.082206, 4.441864, 0.192339, 1.7));
 
         double[] step1 = {1.097268, -1.097268};
-        irmX.put("v13", new IrmGPCM2(0.269994, 0.003998, step1, 1.7));
+        irmX.put(new VariableName("v13"), new IrmGPCM2(0.269994, 0.003998, step1, 1.7));
 
         double[] step2 = {0.106514, -0.106514};
-        irmX.put("v14", new IrmGPCM2(0.972506, 1.632662, step2, 1.7));
+        irmX.put(new VariableName("v14"), new IrmGPCM2(0.972506, 1.632662, step2, 1.7));
 
         double[] step3 = {2.102301, -2.102301};
-        irmX.put("v15", new IrmGPCM2(0.378812, 3.464657, step3, 1.7));
+        irmX.put(new VariableName("v15"), new IrmGPCM2(0.378812, 3.464657, step3, 1.7));
 
         double[] step4 = {-0.476513,  1.081282, -0.604770};
-        irmX.put("v16", new IrmGPCM2(0.537706, 1.010053, step4, 1.7));
+        irmX.put(new VariableName("v16"), new IrmGPCM2(0.537706, 1.010053, step4, 1.7));
 
         double[] step5 = {1.007525, -0.197767, -0.809758};
-        irmX.put("v17", new IrmGPCM2(0.554506, 2.432938, step5, 1.7));
+        irmX.put(new VariableName("v17"), new IrmGPCM2(0.554506, 2.432938, step5, 1.7));
 
 
         //Form Y
-        irmY.put("v1", new Irm3PL(0.887276, -1.334798, 0.134406, 1.7));
-        irmY.put("v2", new Irm3PL(1.184412, -1.129004, 0.237765, 1.7));
-        irmY.put("v3", new Irm3PL(0.609412, -1.464546, 0.151393, 1.7));
-        irmY.put("v4", new Irm3PL(0.923812, -0.576435, 0.240097, 1.7));
-        irmY.put("v5", new Irm3PL(0.822776, -0.476357, 0.192369, 1.7));
-        irmY.put("v6", new Irm3PL(0.707818, -0.235189, 0.189557, 1.7));
-        irmY.put("v7", new Irm3PL(1.306976,  0.242986, 0.165553, 1.7));
-        irmY.put("v8", new Irm3PL(1.295471,  0.598029, 0.090557, 1.7));
-        irmY.put("v9", new Irm3PL(1.366841,  0.923206, 0.172993, 1.7));
-        irmY.put("v10", new Irm3PL(1.389624,  1.380666, 0.238008, 1.7));
-        irmY.put("v11", new Irm3PL(0.293806,  2.028070, 0.203448, 1.7));
-        irmY.put("v12", new Irm3PL(0.885347,  3.152928, 0.195473, 1.7));
+        irmY.put(new VariableName("v1"), new Irm3PL(0.887276, -1.334798, 0.134406, 1.7));
+        irmY.put(new VariableName("v2"), new Irm3PL(1.184412, -1.129004, 0.237765, 1.7));
+        irmY.put(new VariableName("v3"), new Irm3PL(0.609412, -1.464546, 0.151393, 1.7));
+        irmY.put(new VariableName("v4"), new Irm3PL(0.923812, -0.576435, 0.240097, 1.7));
+        irmY.put(new VariableName("v5"), new Irm3PL(0.822776, -0.476357, 0.192369, 1.7));
+        irmY.put(new VariableName("v6"), new Irm3PL(0.707818, -0.235189, 0.189557, 1.7));
+        irmY.put(new VariableName("v7"), new Irm3PL(1.306976,  0.242986, 0.165553, 1.7));
+        irmY.put(new VariableName("v8"), new Irm3PL(1.295471,  0.598029, 0.090557, 1.7));
+        irmY.put(new VariableName("v9"), new Irm3PL(1.366841,  0.923206, 0.172993, 1.7));
+        irmY.put(new VariableName("v10"), new Irm3PL(1.389624,  1.380666, 0.238008, 1.7));
+        irmY.put(new VariableName("v11"), new Irm3PL(0.293806,  2.028070, 0.203448, 1.7));
+        irmY.put(new VariableName("v12"), new Irm3PL(0.885347,  3.152928, 0.195473, 1.7));
 
         double[] step1Y = {0.893232, -0.893232};
-        irmY.put("v13", new IrmGPCM2(0.346324, -0.494115, step1Y, 1.7));
+        irmY.put(new VariableName("v13"), new IrmGPCM2(0.346324, -0.494115, step1Y, 1.7));
 
         double[] step2Y = {0.099750, -0.099750};
-        irmY.put("v14", new IrmGPCM2(1.252012, 0.856264, step2Y, 1.7));
+        irmY.put(new VariableName("v14"), new IrmGPCM2(1.252012, 0.856264, step2Y, 1.7));
 
         double[] step3Y = {1.850498, -1.850498};
-        irmY.put("v15", new IrmGPCM2(0.392282, 2.825801, step3Y, 1.7));
+        irmY.put(new VariableName("v15"), new IrmGPCM2(0.392282, 2.825801, step3Y, 1.7));
 
         double[] step4Y = {-0.300428,  0.761846, -0.461417};
-        irmY.put("v16", new IrmGPCM2(0.660841, 0.342977, step4Y, 1.7));
+        irmY.put(new VariableName("v16"), new IrmGPCM2(0.660841, 0.342977, step4Y, 1.7));
 
         double[] step5Y = {1.001974, -0.107221, -0.894753};
-        irmY.put("v17", new IrmGPCM2(0.669612, 1.643267, step5Y, 1.7));
+        irmY.put(new VariableName("v17"), new IrmGPCM2(0.669612, 1.643267, step5Y, 1.7));
 
         UniformDistributionApproximation uniform = new UniformDistributionApproximation(-3.0, 3.0, 25);
 
@@ -512,14 +513,14 @@ public class IrtScaleLinkingTest {
                 {-1.026435, -0.590928, 0.378912, 1.238451}
         };
 
-        LinkedHashMap<String, ItemResponseModel> irmX = new LinkedHashMap<String, ItemResponseModel>();
-        LinkedHashMap<String, ItemResponseModel> irmY = new LinkedHashMap<String, ItemResponseModel>();
+        LinkedHashMap<VariableName, ItemResponseModel> irmX = new LinkedHashMap<VariableName, ItemResponseModel>();
+        LinkedHashMap<VariableName, ItemResponseModel> irmY = new LinkedHashMap<VariableName, ItemResponseModel>();
 
         ItemResponseModel irm = null;
         int[] common = {1,3,5,7,9,11,13,15,17,19};//Common items are even numbered items, but with zero based index, their positions are odd numbers
         for(int j=0;j<common.length;j++){
-            irmX.put("i"+(j+1), new IrmPCM(bparamX[common[j]], thresholdX[common[j]], 1.0));
-            irmY.put("i"+(j+1), new IrmPCM(bparamY[common[j]], thresholdY[common[j]], 1.0));
+            irmX.put(new VariableName("i"+(j+1)), new IrmPCM(bparamX[common[j]], thresholdX[common[j]], 1.0));
+            irmY.put(new VariableName("i"+(j+1)), new IrmPCM(bparamY[common[j]], thresholdY[common[j]], 1.0));
         }
 
         UniformDistributionApproximation distX = new UniformDistributionApproximation(-4.0, 4.0, 51);
@@ -603,51 +604,51 @@ public class IrtScaleLinkingTest {
     @Test
     public void mixedFormatTestSTUIRT(){
         System.out.println("MIXED-MISSING STUIRT COMPARISON");
-        LinkedHashMap<String, ItemResponseModel> irmX = new LinkedHashMap<String, ItemResponseModel>();
-        LinkedHashMap<String, ItemResponseModel> irmY = new LinkedHashMap<String, ItemResponseModel>();
+        LinkedHashMap<VariableName, ItemResponseModel> irmX = new LinkedHashMap<VariableName, ItemResponseModel>();
+        LinkedHashMap<VariableName, ItemResponseModel> irmY = new LinkedHashMap<VariableName, ItemResponseModel>();
 
         //Form X
-        irmX.put("v1", new Irm3PL(0.76237,1.009476,0.109968, 1.0));
-        irmX.put("v2", new Irm3PL(1.336925,-0.43773,0.157718, 1.0));
-        irmX.put("v3", new Irm3PL(1.876282,1.093312,0.135095, 1.0));
-        irmX.put("v4", new Irm3PL(0.830231,-1.502055,0.227047, 1.0));
-        irmX.put("v5", new Irm3PL(1.274011,1.029875,0.280884, 1.0));
-        irmX.put("v6", new Irm3PL(1.139027,-0.14234,0.1323, 1.0));
-        irmX.put("v7", new Irm3PL(0.64504,0.785645,0.176663, 1.0));
-        irmX.put("v8", new Irm3PL(1.099075,-1.501227,0.18354, 1.0));
-        irmX.put("v9", new Irm3PL(1.173436,-0.055542,0.247029, 1.0));
-        irmX.put("v10", new Irm3PL(0.855866,1.022627,0.209809, 1.0));
+        irmX.put(new VariableName("v1"), new Irm3PL(0.76237,1.009476,0.109968, 1.0));
+        irmX.put(new VariableName("v2"), new Irm3PL(1.336925,-0.43773,0.157718, 1.0));
+        irmX.put(new VariableName("v3"), new Irm3PL(1.876282,1.093312,0.135095, 1.0));
+        irmX.put(new VariableName("v4"), new Irm3PL(0.830231,-1.502055,0.227047, 1.0));
+        irmX.put(new VariableName("v5"), new Irm3PL(1.274011,1.029875,0.280884, 1.0));
+        irmX.put(new VariableName("v6"), new Irm3PL(1.139027,-0.14234,0.1323, 1.0));
+        irmX.put(new VariableName("v7"), new Irm3PL(0.64504,0.785645,0.176663, 1.0));
+        irmX.put(new VariableName("v8"), new Irm3PL(1.099075,-1.501227,0.18354, 1.0));
+        irmX.put(new VariableName("v9"), new Irm3PL(1.173436,-0.055542,0.247029, 1.0));
+        irmX.put(new VariableName("v10"), new Irm3PL(0.855866,1.022627,0.209809, 1.0));
 
         double[] step1 = {0.0, -0.765898,-0.262353,1.077962};
-        irmX.put("v11", new IrmGPCM(0.871415, step1, 1.0));
+        irmX.put(new VariableName("v11"), new IrmGPCM(0.871415, step1, 1.0));
 
         double[] step2 = {0.0, -0.837283,-0.275441,1.136771};
-        irmX.put("v12", new IrmGPCM(0.978374, step2, 1.0));
+        irmX.put(new VariableName("v12"), new IrmGPCM(0.978374, step2, 1.0));
 
         double[] step3 = {0.0, -1.194004,0.318944,1.059092};
-        irmX.put("v13", new IrmGPCM(0.856862, step3, 1.0));
+        irmX.put(new VariableName("v13"), new IrmGPCM(0.856862, step3, 1.0));
 
 
         //Form Y
-        irmY.put("v1", new Irm3PL(1.05331,1.280453,0.220378, 1.0));
-        irmY.put("v2", new Irm3PL(1.525842,-0.384423,0.16641, 1.0));
-        irmY.put("v3", new Irm3PL(1.943304,1.073916,0.131654, 1.0));
-        irmY.put("v4", new Irm3PL(0.788018,-1.637711,0.24898, 1.0));
-        irmY.put("v5", new Irm3PL(1.005941,0.930207,0.2162, 1.0));
-        irmY.put("v6", new Irm3PL(1.230981,-0.224566,0.150033, 1.0));
-        irmY.put("v7", new Irm3PL(1.105784,1.082957,0.278372, 1.0));
-        irmY.put("v8", new Irm3PL(1.108659,-1.35829,0.192793, 1.0));
-        irmY.put("v9", new Irm3PL(1.122514,-0.130496,0.214603, 1.0));
-        irmY.put("v10", new Irm3PL(0.777442,1.077921,0.228847, 1.0));
+        irmY.put(new VariableName("v1"), new Irm3PL(1.05331,1.280453,0.220378, 1.0));
+        irmY.put(new VariableName("v2"), new Irm3PL(1.525842,-0.384423,0.16641, 1.0));
+        irmY.put(new VariableName("v3"), new Irm3PL(1.943304,1.073916,0.131654, 1.0));
+        irmY.put(new VariableName("v4"), new Irm3PL(0.788018,-1.637711,0.24898, 1.0));
+        irmY.put(new VariableName("v5"), new Irm3PL(1.005941,0.930207,0.2162, 1.0));
+        irmY.put(new VariableName("v6"), new Irm3PL(1.230981,-0.224566,0.150033, 1.0));
+        irmY.put(new VariableName("v7"), new Irm3PL(1.105784,1.082957,0.278372, 1.0));
+        irmY.put(new VariableName("v8"), new Irm3PL(1.108659,-1.35829,0.192793, 1.0));
+        irmY.put(new VariableName("v9"), new Irm3PL(1.122514,-0.130496,0.214603, 1.0));
+        irmY.put(new VariableName("v10"), new Irm3PL(0.777442,1.077921,0.228847, 1.0));
 
         double[] step1Y = {0.0, -0.681719,-0.412208,1.126726};
-        irmY.put("v11", new IrmGPCM(0.840509, step1Y, 1.0));
+        irmY.put(new VariableName("v11"), new IrmGPCM(0.840509, step1Y, 1.0));
 
         double[] step2Y = {0.0, -0.71703,-0.332964,1.010151};
-        irmY.put("v12", new IrmGPCM(0.968292, step2Y, 1.0));
+        irmY.put(new VariableName("v12"), new IrmGPCM(0.968292, step2Y, 1.0));
 
         double[] step3Y = {0.0, -1.360084,0.274189,1.085692};
-        irmY.put("v13", new IrmGPCM(0.809768, step3Y, 1.0));
+        irmY.put(new VariableName("v13"), new IrmGPCM(0.809768, step3Y, 1.0));
 
         //STUIRT default
         UniformDistributionApproximation uniform = new UniformDistributionApproximation(-3.0, 3.0, 25);

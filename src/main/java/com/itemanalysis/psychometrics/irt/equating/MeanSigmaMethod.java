@@ -15,6 +15,7 @@
  */
 package com.itemanalysis.psychometrics.irt.equating;
 
+import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.irt.model.IrmType;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.scaling.LinearTransformation;
@@ -28,15 +29,15 @@ import java.util.Set;
 
 public class MeanSigmaMethod implements LinearTransformation{
 
-    private LinkedHashMap<String, ItemResponseModel> itemFormX = null;
-    private LinkedHashMap<String, ItemResponseModel> itemFormY = null;
+    private LinkedHashMap<VariableName, ItemResponseModel> itemFormX = null;
+    private LinkedHashMap<VariableName, ItemResponseModel> itemFormY = null;
     private double intercept = 0.0;
     private double slope = 1.0;
     private int precision = 2;
-    Set<String> sY = null;
+    Set<VariableName> sY = null;
     private boolean populationStdDev = true;
 
-    public MeanSigmaMethod(LinkedHashMap<String, ItemResponseModel> itemFormX, LinkedHashMap<String, ItemResponseModel> itemFormY,
+    public MeanSigmaMethod(LinkedHashMap<VariableName, ItemResponseModel> itemFormX, LinkedHashMap<VariableName, ItemResponseModel> itemFormY,
                            boolean populationStdDev)throws DimensionMismatchException {
         this.itemFormX = itemFormX;
         this.itemFormY = itemFormY;
@@ -57,15 +58,15 @@ public class MeanSigmaMethod implements LinearTransformation{
      * @throws DimensionMismatchException
      */
     private void checkDimensions()throws DimensionMismatchException{
-        Set<String> sX = itemFormX.keySet();
+        Set<VariableName> sX = itemFormX.keySet();
         sY = itemFormY.keySet();
         if(sX.size()!=sY.size()) throw new DimensionMismatchException(itemFormX.size(), itemFormY.size());
         int mismatch = 0;
-        for(String s : sX){
-            if(!sY.contains(s)) mismatch++;
+        for(VariableName v : sX){
+            if(!sY.contains(v)) mismatch++;
         }
-        for(String s : sY){
-            if(!sX.contains(s)) mismatch++;
+        for(VariableName v : sY){
+            if(!sX.contains(v)) mismatch++;
         }
         if(mismatch>0) throw new DimensionMismatchException(mismatch, 0);
     }
@@ -78,9 +79,9 @@ public class MeanSigmaMethod implements LinearTransformation{
         ItemResponseModel irmX;
         ItemResponseModel irmY;
 
-        for(String s : sY){
-            irmX = itemFormX.get(s);
-            irmY = itemFormY.get(s);
+        for(VariableName v : sY){
+            irmX = itemFormX.get(v);
+            irmY = itemFormY.get(v);
 
             irmX.incrementMeanSigma(mX, sdX);
             irmY.incrementMeanSigma(mY, sdY);
@@ -104,8 +105,8 @@ public class MeanSigmaMethod implements LinearTransformation{
      */
     private boolean checkRaschModel(){
         ItemResponseModel irm = null;
-        for(String s : itemFormY.keySet()){
-            irm = itemFormY.get(s);
+        for(VariableName v : itemFormY.keySet()){
+            irm = itemFormY.get(v);
 
             if(irm.getType()== IrmType.L3){
                 if(irm.getNumberOfParameters()>1) return false;

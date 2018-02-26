@@ -48,16 +48,6 @@
   </build>
   <repositories>
   </repositories>
-  <scm>
-    <connection>scm:svn:https://svn.java.net/svn/psychometrics~repos/trunk</connection>
-    <developerConnection>scm:svn:https://svn.java.net/svn/psychometrics~repos/trunk</developerConnection>
-    <tag>HEAD</tag>
-    <url>http://java.net/projects/psychometrics/sources/repos/show</url>
-  </scm>
-  <issueManagement>
-    <system>jira</system>
-    <url>http://java.net/jira/browse/PSYCHOMETRICS</url>
-  </issueManagement>
    <developers>
     <developer>
       <id>meyerjp</id>

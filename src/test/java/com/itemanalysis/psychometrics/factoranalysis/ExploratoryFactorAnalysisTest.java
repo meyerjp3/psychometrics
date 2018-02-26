@@ -78,6 +78,50 @@ public class ExploratoryFactorAnalysisTest {
         return harman74;
     }
 
+    /**
+     * Test start values for the communality.
+     * The true vaues are the squared multiple correlation (SMC) computed in the psych package in R.
+     *
+     * library(psych)
+     * options(digits=15)
+     * R<-matrix(c(
+     * 1,0.6602,0.5649,0.5324,0.5203,0.3789,0.2628,0.3069,0.4448,0.3101,0.531,0.4303,
+     * 0.6602,1,0.6265,0.4898,0.5344,0.4143,0.3082,0.3089,0.4194,0.3109,0.5374,0.431,
+     * 0.5649,0.6265,1,0.5135,0.5708,0.4618,0.3659,0.3491,0.4782,0.3528,0.5738,0.4344,
+     * 0.5324,0.4898,0.5135,1,0.5736,0.3951,0.318,0.3284,0.4206,0.3305,0.454,0.4174,
+     * 0.5203,0.5344,0.5708,0.5736,1,0.5663,0.4524,0.3863,0.5677,0.4309,0.6025,0.4988,
+     * 0.3789,0.4143,0.4618,0.3951,0.5663,1,0.6306,0.457,0.5393,0.5091,0.559,0.4551,
+     * 0.2628,0.3082,0.3659,0.318,0.4524,0.6306,1,0.4096,0.4777,0.4629,0.4331,0.3561,
+     * 0.3069,0.3089,0.3491,0.3284,0.3863,0.457,0.4096,1,0.3895,0.3754,0.3984,0.356,
+     * 0.4448,0.4194,0.4782,0.4206,0.5677,0.5393,0.4777,0.3895,1,0.4878,0.605,0.4814,
+     * 0.3101,0.3109,0.3528,0.3305,0.4309,0.5091,0.4629,0.3754,0.4878,1,0.4922,0.4348,
+     * 0.531,0.5374,0.5738,0.454,0.6025,0.559,0.4331,0.3984,0.605,0.4922,1,0.6827,
+     * 0.4303,0.431,0.4344,0.4174,0.4988,0.4551,0.3561,0.356,0.4814,0.4348,0.6827,1), nrow=12, byrow=TRUE)
+     *
+     * smc(R)
+     */
+    @Test
+    public void smcTest(){
+        System.out.println("SMC test: m255 data");
+        RealMatrix R = new Array2DRowRealMatrix(readM255());
+        ExploratoryFactorAnalysis fa = new ExploratoryFactorAnalysis(R, 2);
+        fa.estimateParameters(EstimationMethod.MINRES);
+
+        //System.out.println(fa.printOutput(3));
+
+        double[] trueStartValues = {0.531585981070840, 0.551247464024654, 0.527292132264549,
+                0.432978821972321, 0.566918817558485, 0.559797287040695, 0.453127105279017,
+                0.284772895724122, 0.493299407818581, 0.377457545259643, 0.645814037220527,
+                0.497023187312404};
+
+        double[] startValues = fa.getFactorMethod().getSquaredMultipleCorrelation();
+        //System.out.println(fa.getFactorMethod().printStartValues());
+
+        for(int i=0;i<trueStartValues.length;i++){
+            assertEquals("  start value at " + (i+1), trueStartValues[i], startValues[i], 1e-15);
+        }
+    }
+
     @Test
     public void harmanTestMINRES(){
         System.out.println("MINRES Factor Analysis Test: Harman data");

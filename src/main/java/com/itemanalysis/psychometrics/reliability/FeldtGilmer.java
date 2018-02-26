@@ -70,47 +70,6 @@ public class FeldtGilmer extends AbstractScoreReliability{
 		}
 		return d;
 	}
-
-	private int getEllWithoutItemAt(int index){
-		double[] offDiag= new double[nItems];
-		for(int i=0;i<nItems;i++){
-			if(i!=index) offDiag[i]=this.rowSum(i)-matrix[i][i];
-		}
-
-		int maxIndex=0;
-		double maxValue=Double.MIN_VALUE;
-		for(int i=0;i<nItems;i++){
-			if(i!=index){
-				if(offDiag[i]>maxValue){
-					maxIndex=i;
-					maxValue=offDiag[i];
-				}
-			}
-
-		}
-		return maxIndex;
-	}
-
-	private double[] DwithoutItemAt(int ell, int index){
-		double[] d = new double[nItems];
-		double num=0.0;
-		double denom=0.0;
-		double covAt = 0;
-
-		for(int i=0;i<nItems;i++){
-			if(i!=index){
-				if(i==ell){
-					d[i]=1.0;
-				}else{
-					covAt = matrix[i][ell];
-					num=this.rowSum(i)-covAt-matrix[i][i];
-					denom=this.rowSum(ell)-covAt-matrix[ell][ell];
-					d[i]=num/denom;
-				}
-			}
-		}
-		return d;
-	}
 	
 	public double value(){
 		if(nItems<3) return Double.NaN;
@@ -138,46 +97,15 @@ public class FeldtGilmer extends AbstractScoreReliability{
      * @return array of item deleted estimates.
      */
     public double[] itemDeletedReliability(){
-		double[] rel = new double[nItems];
-		double totalVariance = this.totalVariance();
-		double diagonalSum = this.diagonalSum();
-		double totalVarianceAdjusted = 0;
-		double diagonalSumAdjusted = 0;
-		double reliabilityWithoutItem = 0;
+        double[] rel = new double[nItems];
 
-		int ellAdj = 0;
-		double[] dAdj=null;
-		double sumDadj=0.0;
-		double sumD2adj=0.0;
-		double sumDadj2 = 0.0;
+        FeldtGilmer fg = null;
+        for(int i=0;i<nItems;i++){
+            fg = new FeldtGilmer(matrixWithoutItemAt(i));
+            rel[i] = fg.value();
+        }
 
-		for(int i=0;i<nItems;i++){
-			//Compute item variance
-			double itemVariance = matrix[i][i];
-
-			//Compute sum of covariance between this item and all others
-			double itemCovariance = 0;
-			for(int j=0;j<nItems;j++){
-				if(i!=j) itemCovariance += matrix[i][j];
-			}
-			itemCovariance *= 2;
-
-			totalVarianceAdjusted = totalVariance - itemCovariance - itemVariance;
-			diagonalSumAdjusted = diagonalSum - itemVariance;
-
-			ellAdj = getEllWithoutItemAt(i);
-			dAdj = DwithoutItemAt(ellAdj, i);
-			for(int j=0;j<nItems;j++){
-				if(i!=j) sumDadj+=dAdj[i];
-				sumD2adj+=Math.pow(dAdj[i], 2);
-			}
-
-			sumDadj2 = Math.pow(sumDadj, 2);
-			reliabilityWithoutItem = (sumDadj2/(sumDadj2-sumD2adj))*
-					((totalVarianceAdjusted-diagonalSumAdjusted)/totalVarianceAdjusted);
-			rel[i] = reliabilityWithoutItem;
-		}
-		return rel;
+        return rel;
     }
 
     @Override

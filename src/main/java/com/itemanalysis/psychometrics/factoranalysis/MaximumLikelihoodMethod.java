@@ -52,24 +52,9 @@ public class MaximumLikelihoodMethod extends AbstractFactorMethod {
         this.R = correlationMatrix;
     }
 
-    public double[] getStartValues(){
-        double[] start = new double[nVariables];
-
-        if(nFactors==1){
-            for(int i=0;i<nVariables;i++){
-                start[i] = 0.5;
-            }
-        }else{
-            RealMatrix rInverse = new LUDecomposition(R).getSolver().getInverse();
-            for(int i=0;i<nVariables;i++){
-                start[i] = Math.min(1.0/rInverse.getEntry(i,i), 1.0);
-            }
-        }
-
-        return start;
-    }
-
     public double estimateParameters(){
+
+        Sinv = new LUDecomposition(R).getSolver().getInverse();
 
         MLObjectiveFunction objectiveFunction = new MLObjectiveFunction();
 

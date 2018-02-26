@@ -34,7 +34,6 @@ public class GeneralizedLeastSquaresMethod extends AbstractFactorMethod{
 
     private NonLinearConjugateGradientOptimizer optimizer = null;
     private PointValuePair solution = null;
-    private RealMatrix Sinv = null;
     private RealMatrix R2 = null;
 
     public GeneralizedLeastSquaresMethod(RealMatrix R, int nFactors, RotationMethod rotationMethod){
@@ -136,22 +135,6 @@ public class GeneralizedLeastSquaresMethod extends AbstractFactorMethod{
             proportionOfVariance[j] = sumsOfSquares[j]/nVariables;
         }
 
-    }
-
-    public double[] getStartValues(){
-        double[] start = new double[nVariables];
-
-        if(nFactors==1){
-            for(int i=0;i<nVariables;i++){
-                start[i] = 0.5;
-            }
-        }else{
-            for(int i=0;i<nVariables;i++){
-                start[i] = Math.min(1.0/Sinv.getEntry(i,i), 1.0);
-            }
-        }
-
-        return start;
     }
 
     /**

@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 
@@ -134,6 +135,78 @@ public class ReliabilityAnalysisTest {
             System.out.println("  Guttman's lambda for exam1: " + guttmanLambda2.value());
             //True value from SPSS
             assertEquals("Testing Guttman's lambda for exam1", 0.911941572128058, guttmanLambda2.value(), 1e-15);
+
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Test
+    public void exam1DeletedReliabilityTest(){
+        System.out.println("Reliability item deleted test for exam1 data");
+        int nItems = 10;
+        CovarianceMatrix covarianceMatrix = new CovarianceMatrix(nItems, false);
+
+        try{
+            File f = FileUtils.toFile(this.getClass().getResource("/testdata/exam1-items-scored.txt"));
+            BufferedReader br = new BufferedReader(new FileReader(f));
+            String line = "";
+            String[] s = null;
+            double v1 = 0;
+            double v2 = 0;
+            br.readLine();//eliminate column names by skipping first row
+            while((line=br.readLine())!=null){
+                s = line.split(",");
+                for(int i=0;i<nItems;i++){
+                    v1 = Double.parseDouble(s[i]);
+                    for(int j=0;j<nItems;j++){
+                        v2 = Double.parseDouble(s[j]);
+                        covarianceMatrix.increment(i, j, v1, v2);
+                    }
+                }
+            }
+            br.close();
+
+            CoefficientAlpha coefficientAlpha = new CoefficientAlpha(covarianceMatrix.value());
+            GuttmanLambda2 lambda2 = new GuttmanLambda2(covarianceMatrix.value());
+            FeldtGilmer fg = new FeldtGilmer(covarianceMatrix.value());
+            FeldtBrennan fb = new FeldtBrennan(covarianceMatrix.value());
+            RajuBeta raju = new RajuBeta(covarianceMatrix.value());
+
+            //Test reliability estimates
+            assertEquals(" Lambda2 reliability.", 0.6481, lambda2.value(), 1e-4);
+            assertEquals(" Alpha reliability.", 0.6467, coefficientAlpha.value(), 1e-4);
+            assertEquals(" Feldt-Gilmer reliability.",  0.6479, fg.value(), 1e-4);
+            assertEquals(" Feldt-Brennan reliability.", 0.6469, fb.value(), 1e-4);
+            assertEquals(" Raju reliability.", 0.6467, raju.value(), 1e-4);
+
+            double[] lambda2Deleted = lambda2.itemDeletedReliability();
+            double[] alphaDeleted = coefficientAlpha.itemDeletedReliability();
+            double[] fgDeleted = fg.itemDeletedReliability();
+            double[] fbDeleted = fb.itemDeletedReliability();
+            double[] rajuDeleted = raju.itemDeletedReliability();
+
+            //From older version of jmetrik (before changes to covariance and reliability classes)
+            double[][] trueDeletedReliability = {
+                    {0.6259, 0.6242, 0.6259, 0.6245, 0.6242},
+                    {0.6420, 0.6408, 0.6419, 0.6411, 0.6408},
+                    {0.6029, 0.6016, 0.6027, 0.6019, 0.6016},
+                    {0.6394, 0.6380, 0.6393, 0.6382, 0.6380},
+                    {0.6304, 0.6290, 0.6303, 0.6293, 0.6290},
+                    {0.6162, 0.6148, 0.6162, 0.6151, 0.6148},
+                    {0.6343, 0.6327, 0.6342, 0.6329, 0.6327},
+                    {0.6069, 0.6055, 0.6068, 0.6056, 0.6055},
+                    {0.6343, 0.6327, 0.6342, 0.6329, 0.6327},
+                    {0.6041, 0.6028, 0.6039, 0.6031, 0.6028}
+            };
+
+            for(int i=0;i<nItems;i++){
+                assertEquals(" Lambda2 item deleted for item " + (i+1) + ". ", trueDeletedReliability[i][0], lambda2Deleted[i], 1e-4);
+                assertEquals(" Alpha item deleted for item " + (i+1) + ". ", trueDeletedReliability[i][1], alphaDeleted[i], 1e-4);
+                assertEquals(" Feldt-Gilmer item deleted for item " + (i+1) + ". ", trueDeletedReliability[i][2], fgDeleted[i], 1e-4);
+                assertEquals(" Feldt-Brennan item deleted for item " + (i+1) + ". ", trueDeletedReliability[i][3], fbDeleted[i], 1e-4);
+                assertEquals(" Raju item deleted for item " + (i+1) + ". ", trueDeletedReliability[i][4], rajuDeleted[i], 1e-4);
+            }
 
         }catch(IOException ex){
             ex.printStackTrace();

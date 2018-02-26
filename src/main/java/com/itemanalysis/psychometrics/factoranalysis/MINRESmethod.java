@@ -48,6 +48,8 @@ public class MINRESmethod extends AbstractFactorMethod {
     }
 
     public double estimateParameters(){
+        Sinv = new LUDecomposition(R).getSolver().getInverse();
+
         MINRESObjectiveFunction objectiveFunction = new MINRESObjectiveFunction();
 
         optimizer = new NonLinearConjugateGradientOptimizer(
@@ -142,34 +144,6 @@ public class MINRESmethod extends AbstractFactorMethod {
             proportionOfVariance[j] = sumsOfSquares[j]/nVariables;
         }
 
-    }
-
-    public double[] getStartValues(){
-        double[] start = new double[nVariables];
-
-        if(nFactors==1){
-            for(int i=0;i<nVariables;i++){
-                start[i] = 0.5;
-            }
-        }else{
-            RealMatrix rInverse = new LUDecomposition(R2).getSolver().getInverse();
-            for(int i=0;i<nVariables;i++){
-                start[i] = Math.min(1.0/rInverse.getEntry(i,i), 1.0);
-            }
-        }
-
-        return start;
-    }
-
-    public String printStartValues(){
-        StringBuilder sb = new StringBuilder();
-        Formatter f = new Formatter(sb);
-
-        double[] start = getStartValues();
-        for(int i=0;i<start.length;i++){
-            f.format("%8.4f", start[i]);f.format("%n");
-        }
-        return f.toString();
     }
 
     /**

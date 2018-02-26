@@ -18,6 +18,8 @@ package com.itemanalysis.psychometrics.factoranalysis;
 import com.itemanalysis.psychometrics.data.VariableName;
 import org.apache.commons.math3.linear.RealMatrix;
 
+import java.util.Formatter;
+
 /**
  * An abstract implementation of FactorMethod. It includes methods that are common
  * to all specific instances of FactorMethod.
@@ -27,6 +29,7 @@ import org.apache.commons.math3.linear.RealMatrix;
 public abstract class AbstractFactorMethod implements FactorMethod{
 
     protected RealMatrix R = null;//the correlation matrix
+    protected RealMatrix Sinv = null;
     protected int nVariables = 0;
     protected int nFactors = 1;
     protected int nParam = 0;
@@ -63,6 +66,56 @@ public abstract class AbstractFactorMethod implements FactorMethod{
         return upper;
     }
 
+    /**
+     * If the number of factors is greater than 1, compute the squared multiple correlation (SMC)
+     * to use as start values for the communality.
+     *
+     * @return start values
+     */
+    public double[] getStartValues(){
+        double[] start = new double[nVariables];
+        double smc = 0.0;
+
+        if(null==Sinv){
+            for(int i=0;i<nVariables;i++){
+                start[i] = 1.0;
+            }
+            return start;
+        }
+
+        if(nFactors==1){
+            for(int i=0;i<nVariables;i++){
+                start[i] = 0.5;
+            }
+        }else{
+            for(int i=0;i<nVariables;i++){
+                smc = 1.0-(1.0/Sinv.getEntry(i,i));
+                start[i] = Math.min(R.getEntry(i,i)-smc, 1.0); //from psych package
+//                start[i] = Math.min((1.0/Sinv.getEntry(i,i)), 1.0);
+            }
+        }
+
+        return start;
+    }
+
+    public double[] getSquaredMultipleCorrelation(){
+        double[] smc = new double[nVariables];
+        for(int i=0;i<nVariables;i++){
+            smc[i] =1.0-(1.0/Sinv.getEntry(i,i)); //from psych package
+        }
+        return smc;
+    }
+
+    public String printStartValues(){
+        StringBuilder sb = new StringBuilder();
+        Formatter f = new Formatter(sb);
+
+        double[] start = getStartValues();
+        for(int i=0;i<start.length;i++){
+            f.format("%8.4f", start[i]);f.format("%n");
+        }
+        return f.toString();
+    }
 
     public double[][] getFactorLoading(){
         return factorLoading;

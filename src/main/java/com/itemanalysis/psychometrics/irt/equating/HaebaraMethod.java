@@ -16,6 +16,7 @@
 package com.itemanalysis.psychometrics.irt.equating;
 
 import com.itemanalysis.psychometrics.analysis.AbstractMultivariateFunction;
+import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.scaling.LinearTransformation;
@@ -30,8 +31,8 @@ import java.util.Set;
 
 public class HaebaraMethod extends AbstractMultivariateFunction implements LinearTransformation, Uncmin_methods, UnivariateFunction {
 
-    private HashMap<String, ItemResponseModel> itemFormX = null;
-    private HashMap<String, ItemResponseModel> itemFormY = null;
+    private HashMap<VariableName, ItemResponseModel> itemFormX = null;
+    private HashMap<VariableName, ItemResponseModel> itemFormY = null;
     private DistributionApproximation xDistribution = null;
     private DistributionApproximation yDistribution = null;
     private int xDistributionSize = 0;
@@ -40,10 +41,10 @@ public class HaebaraMethod extends AbstractMultivariateFunction implements Linea
     private double intercept = 0.0;
     private double slope = 1.0;
     private int precision = 2;
-    private Set<String> sY = null;
+    private Set<VariableName> sY = null;
     private boolean standardized = true;
 
-    public HaebaraMethod(HashMap<String, ItemResponseModel> itemFormX, HashMap<String, ItemResponseModel> itemFormY,
+    public HaebaraMethod(HashMap<VariableName, ItemResponseModel> itemFormX, HashMap<VariableName, ItemResponseModel> itemFormY,
                          DistributionApproximation xDistribution, DistributionApproximation yDistribution,
                          EquatingCriterionType criterion)throws DimensionMismatchException{
         this.itemFormX = itemFormX;
@@ -55,17 +56,6 @@ public class HaebaraMethod extends AbstractMultivariateFunction implements Linea
         yDistributionSize = yDistribution.getNumberOfPoints();
         checkDimensions();
     }
-
-//    public HaebaraMethod(HashMap<String, ItemResponseModel> itemFormX, HashMap<String, ItemResponseModel> itemFormY,
-//                         DistributionApproximation yDistribution, EquatingCriterionType criterion)throws DimensionMismatchException{
-//        this.itemFormX = itemFormX;
-//        this.itemFormY = itemFormY;
-//        this.yDistribution = yDistribution;
-//        this.criterion = EquatingCriterionType.Q1Q2;
-//        xDistributionSize = xDistribution.getNumberOfPoints();
-//        yDistributionSize = yDistribution.getNumberOfPoints();
-//        checkDimensions();
-//    }
 
     /**
      * For a common item linking design, both test form must have a set of items that are the same.
@@ -79,15 +69,15 @@ public class HaebaraMethod extends AbstractMultivariateFunction implements Linea
      * @throws org.apache.commons.math3.exception.DimensionMismatchException
      */
     private void checkDimensions()throws DimensionMismatchException {
-        Set<String> sX = itemFormX.keySet();
+        Set<VariableName> sX = itemFormX.keySet();
         sY = itemFormY.keySet();
         if(sX.size()!=sY.size()) throw new DimensionMismatchException(itemFormX.size(), itemFormY.size());
         int mismatch = 0;
-        for(String s : sX){
-            if(!sY.contains(s)) mismatch++;
+        for(VariableName v : sX){
+            if(!sY.contains(v)) mismatch++;
         }
-        for(String s : sY){
-            if(!sX.contains(s)) mismatch++;
+        for(VariableName v : sY){
+            if(!sX.contains(v)) mismatch++;
         }
         if(mismatch>0) throw new DimensionMismatchException(mismatch, 0);
     }
@@ -152,9 +142,9 @@ public class HaebaraMethod extends AbstractMultivariateFunction implements Linea
             theta = yDistribution.getPointAt(i);
             weight = yDistribution.getDensityAt(i);
             LW += weight;
-            for(String s : sY){
-                irmY = itemFormY.get(s);
-                irmX = itemFormX.get(s);
+            for(VariableName v : sY){
+                irmY = itemFormY.get(v);
+                irmX = itemFormX.get(v);
                 ncat = irmY.getNcat();
                 for(int k=0;k<ncat;k++){
                     dif = irmY.probability(theta, k) - irmX.tStarProbability(theta, k, intercept, slope);
@@ -195,9 +185,9 @@ public class HaebaraMethod extends AbstractMultivariateFunction implements Linea
             theta = xDistribution.getPointAt(i);
             weight = xDistribution.getDensityAt(i);
             LW += weight;
-            for(String s : sY){
-                irmY = itemFormY.get(s);
-                irmX = itemFormX.get(s);
+            for(VariableName v : sY){
+                irmY = itemFormY.get(v);
+                irmX = itemFormX.get(v);
                 ncat = irmY.getNcat();
                 for(int k=0;k<ncat;k++){
                     dif = irmX.probability(theta, k) - irmY.tSharpProbability(theta, k, intercept, slope);

@@ -53,13 +53,7 @@ public class CovarianceMatrix {
         this.unbiased = unbiased;
 		this.numberOfVariables= variableNames.size();
 		covMat = new Covariance[numberOfVariables][numberOfVariables];
-
-        //Initialize covariance matrix
-		for(int i=0;i<numberOfVariables;i++){
-            for(int j=0;j<numberOfVariables;j++){
-                covMat[i][j] = new Covariance(unbiased);
-            }
-        }
+        initializeMatrix();
 
 	}
 
@@ -76,13 +70,7 @@ public class CovarianceMatrix {
 
 		this.numberOfVariables= variableNames.size();
 		covMat = new Covariance[numberOfVariables][numberOfVariables];
-
-        //Initialize covariance matrix
-        for(int i=0;i<numberOfVariables;i++){
-            for(int j=0;j<numberOfVariables;j++){
-                covMat[i][j] = new Covariance(unbiased);
-            }
-        }
+        initializeMatrix();
 	}
 
     public CovarianceMatrix(LinkedHashMap<VariableName, VariableAttributes> variableAttributeMap){
@@ -97,7 +85,7 @@ public class CovarianceMatrix {
     public CovarianceMatrix(int numberOfVariables, boolean unbiased){
         this.numberOfVariables=numberOfVariables;
         this.unbiased = unbiased;
-		covMat = new Covariance[numberOfVariables][numberOfVariables];
+
         this.variableNames = new ArrayList<VariableName>();
         VariableName v = null;
         for(int i=0;i<numberOfVariables;i++){
@@ -105,12 +93,8 @@ public class CovarianceMatrix {
             this.variableNames.add(v);
         }
 
-        //Initialize covariance matrix
-        for(int i=0;i<numberOfVariables;i++){
-            for(int j=0;j<numberOfVariables;j++){
-                covMat[i][j] = new Covariance(unbiased);
-            }
-        }
+        covMat = new Covariance[numberOfVariables][numberOfVariables];
+        initializeMatrix();
     }
 
     public CovarianceMatrix(int numberOfVariables){
@@ -120,7 +104,6 @@ public class CovarianceMatrix {
     public CovarianceMatrix(double[][] x, boolean unbiased){
         this.numberOfVariables=numberOfVariables;
         this.unbiased = unbiased;
-        covMat = new Covariance[numberOfVariables][numberOfVariables];
         this.variableNames = new ArrayList<VariableName>();
         VariableName v = null;
         for(int i=0;i<numberOfVariables;i++){
@@ -128,12 +111,8 @@ public class CovarianceMatrix {
             this.variableNames.add(v);
         }
 
-        //Initialize covariance matrix
-        for(int i=0;i<numberOfVariables;i++){
-            for(int j=0;j<numberOfVariables;j++){
-                covMat[i][j] = new Covariance(unbiased);
-            }
-        }
+        covMat = new Covariance[numberOfVariables][numberOfVariables];
+        initializeMatrix();
 
         //loop over data and increment covariance matrix
         for(int i=0;i<x.length;i++){
@@ -147,6 +126,15 @@ public class CovarianceMatrix {
 
     public CovarianceMatrix(double[][] x){
         this(x, true);
+    }
+
+    //Initialize covariance matrix
+    private void initializeMatrix(){
+        for(int i=0;i<numberOfVariables;i++){
+            for(int j=0;j<numberOfVariables;j++){
+                covMat[i][j] = new Covariance(unbiased);
+            }
+        }
     }
 
     public void setNameAt(int index, VariableName name){
@@ -186,7 +174,7 @@ public class CovarianceMatrix {
      * @param x value of variable x
      * @param y value of variable y
      */
-	public void increment(int xIndex, int yIndex, Double x, Double y){
+	public void increment(int xIndex, int yIndex, double x, double y){
         if(yIndex>=xIndex){
             covMat[xIndex][yIndex].increment(x, y);
         }

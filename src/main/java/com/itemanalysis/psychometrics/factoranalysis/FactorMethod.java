@@ -23,6 +23,13 @@ import com.itemanalysis.psychometrics.data.VariableName;
  */
 public interface FactorMethod {
 
+
+    public double[] getStartValues();
+
+    public double[] getSquaredMultipleCorrelation();
+
+    public String printStartValues();
+
     /**
      * A method for estimating parameters. The returned value is the value of the criterion function at the 
      * estimated values. It should be the smallest possible value. This value is returned for display in the output.
