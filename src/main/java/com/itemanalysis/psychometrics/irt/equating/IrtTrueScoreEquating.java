@@ -15,6 +15,7 @@
  */
 package com.itemanalysis.psychometrics.irt.equating;
 
+import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.texttable.TextTable;
 import com.itemanalysis.psychometrics.texttable.TextTableColumnFormat;
@@ -25,9 +26,9 @@ import java.util.LinkedHashMap;
 
 public class IrtTrueScoreEquating {
 
-    private LinkedHashMap<String, ItemResponseModel> itemFormX = null;
+    private LinkedHashMap<VariableName, ItemResponseModel> itemFormX = null;
 
-    private LinkedHashMap<String, ItemResponseModel> itemFormY = null;
+    private LinkedHashMap<VariableName, ItemResponseModel> itemFormY = null;
 
     private double minScoreX = 0.0;
 
@@ -50,7 +51,7 @@ public class IrtTrueScoreEquating {
     private double lowScale = 1.0;
 
 
-    public IrtTrueScoreEquating(LinkedHashMap<String, ItemResponseModel> itemFormX, LinkedHashMap<String, ItemResponseModel> itemFormY){
+    public IrtTrueScoreEquating(LinkedHashMap<VariableName, ItemResponseModel> itemFormX, LinkedHashMap<VariableName, ItemResponseModel> itemFormY){
         this.itemFormX = itemFormX;
         this.itemFormY = itemFormY;
         computeScoreBounds();
@@ -65,16 +66,16 @@ public class IrtTrueScoreEquating {
         double c = 0.0;
         double max = 0.0;
 
-        for(String s : itemFormX.keySet()){
-            irm = itemFormX.get(s);
+        for(VariableName v : itemFormX.keySet()){
+            irm = itemFormX.get(v);
             c = irm.getGuessing();
             max = irm.getMaxScoreWeight();
             minScoreX += irm.getMinScoreWeight()*(1.0-c) + max*c;
             maxScore += max;
         }
 
-        for(String s : itemFormY.keySet()){
-            irm = itemFormY.get(s);
+        for(VariableName v : itemFormY.keySet()){
+            irm = itemFormY.get(v);
             c = irm.getGuessing();
             max = irm.getMaxScoreWeight();
             minScoreY += irm.getMinScoreWeight()*(1.0-c) + max*c;
@@ -134,8 +135,8 @@ public class IrtTrueScoreEquating {
     private double xTccAt(double theta){
         ItemResponseModel irm;
         double tcc = 0.0;
-        for(String s : itemFormX.keySet()){
-            irm = itemFormX.get(s);
+        for(VariableName v : itemFormX.keySet()){
+            irm = itemFormX.get(v);
             tcc += irm.expectedValue(theta);
         }
 
@@ -152,8 +153,8 @@ public class IrtTrueScoreEquating {
     private double xTccDerivAt(double theta){
         ItemResponseModel irm;
         double tccDeriv = 0.0;
-        for(String s : itemFormX.keySet()){
-            irm = itemFormX.get(s);
+        for(VariableName v : itemFormX.keySet()){
+            irm = itemFormX.get(v);
             tccDeriv += irm.derivTheta(theta);
         }
         return tccDeriv;
@@ -168,8 +169,8 @@ public class IrtTrueScoreEquating {
         ItemResponseModel irm;
         double tcc = 0.0;
 
-        for(String s : itemFormY.keySet()){
-            irm = itemFormY.get(s);
+        for(VariableName v : itemFormY.keySet()){
+            irm = itemFormY.get(v);
             tcc += irm.expectedValue(theta);
         }
         return tcc;
