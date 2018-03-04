@@ -192,6 +192,69 @@ public class Irm4PL extends AbstractItemResponseModel {
     }
 
     /**
+     * Hessian or matrix of second derivatives. Computed using an array of item parameters.
+     *
+     * @param theta person ability value.
+     * @return a two-way array containing the Hessian matrix values.
+     */
+    public double[][] hessian(double theta, double[] iparam){
+        double[][] deriv = new double[numberOfParameters][numberOfParameters];
+
+        double a = iparam[0]; //Discrimination
+        double b = iparam[1]; //Difficulty
+        double c = iparam[2]; //Guessing
+        double u = iparam[3]; //Slipping
+
+        double e1 = theta - b;
+        double e2 = D * a;
+        double e4 = Math.exp(-(e2 * e1));
+        double e5 = 1 + e4;
+        double e6 = e5*e5;
+        double e7 = 2 * (e4/e5);
+        double e9 = e2 * e4/e6;
+        double e12 = D * e4 * e1/e6;
+        double e13 = u - c;
+        double e14 = -e9;
+        double e15 = -e12;
+        double e16 = 1 - e7;
+        double e17 = e7 - 1;
+        double e18 = D*D;
+
+        deriv[0][0] = e18 * e17 * e4 * e1*e1 * e13/e6;
+        deriv[0][1] = -(D * (1 + e2 * e17 * e1) * e4 * e13/e6);
+        deriv[0][2] = e15;
+        deriv[0][3] = e12;
+
+        deriv[1][0] = D * (e2 * e16 * e1 - 1) * e4 * e13/e6;
+        deriv[1][1] = -(deriv[1][0]*deriv[1][0] * e18 * e16 * e4 * e13/e6);
+        deriv[1][2] = e9;
+        deriv[1][3] = e14;
+
+        deriv[2][0] = e15;
+        deriv[2][1] = e9;
+        deriv[2][2] = 0;
+        deriv[2][3] = 0;
+
+        deriv[3][0] = e12;
+        deriv[3][1] = e14;
+        deriv[3][2] = 0;
+        deriv[3][3] = 0;
+
+        return deriv;
+    }
+
+    /**
+     * Hessian using existing item parameters
+     *
+     * @param theta person ability
+     * @return hessian
+     */
+    public double[][] hessian(double theta){
+        double[] iparam = {discrimination, difficulty, guessing, slipping};
+        return hessian(theta, iparam);
+    }
+
+    /**
      * Computes gradientAt using item parameters stored in the object.
      *
      * @param theta person ability value
@@ -203,8 +266,32 @@ public class Irm4PL extends AbstractItemResponseModel {
         return gradient(theta, iparam, k, D);
     }
 
+    /**
+     * First derivative of response function with respect to theta.
+     *
+     * @param theta a person ability value.
+     * @return first derivative
+     */
     public double derivTheta(double theta){
-        return Double.NaN;
+        double L = discrimination*(theta-difficulty);
+        double top = (slipping-guessing)*D*discrimination;
+        double bot = Math.exp(D*L) + 2.0 + Math.exp(-D*L);
+        return top/bot;
+    }
+
+    /**
+     * Second derivative wrt theta
+     *
+     * @param theta person ability
+     * @return second derivative wrt theta
+     */
+    public double deriv2Theta(double theta){
+        double L = discrimination*(theta-difficulty);
+        double eDL = Math.exp(D*L);
+        double eNDL = Math.exp(-D*L);
+        double top = -(slipping-guessing)*D*D*discrimination*discrimination*(eDL-eNDL);
+        double bot = eDL + 2.0 + eNDL;
+        return top/(bot*bot);
     }
 
     public double itemInformationAt(double theta){

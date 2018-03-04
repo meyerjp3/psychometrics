@@ -494,6 +494,14 @@ public interface ItemResponseModel {
      */
     public double itemInformationAt(double theta);
 
+
+    /**
+     * Gets the type of item response model.
+     *
+     * @return type of item response model.
+     */
+    public IrmType getType();
+
     //====================================================================================================
     // Methods below are mainly used for implementation of IRT linking methods
     //====================================================================================================
@@ -567,12 +575,5 @@ public interface ItemResponseModel {
      * @param meanDifficulty item difficulty mean.
      */
     public void incrementMeanMean(Mean meanDiscrimination, Mean meanDifficulty);
-
-    /**
-     * Gets the type of item response model.
-     *
-     * @return type of item response model.
-     */
-    public IrmType getType();
 
 }

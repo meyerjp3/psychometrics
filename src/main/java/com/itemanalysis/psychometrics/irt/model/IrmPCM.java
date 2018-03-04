@@ -597,15 +597,11 @@ public class IrmPCM extends AbstractItemResponseModel{
     }
 
     public double[] getStepStdError(){
-        double[] sp = new double[ncat];
-        for(int k=0;k<ncat;k++){
-            sp[k] = Double.NaN;
-        }
-        return sp;
+        return thresholdStdError;
     }
 
     public void setStepStdError(double[] stdError){
-
+        thresholdStdError = stdError;
     }
 
     public double acceptAllProposalValues(){
