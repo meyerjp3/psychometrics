@@ -123,14 +123,22 @@ public class IrmGPCM extends AbstractItemResponseModel {
     }
 
     /**
-     * Not implemented. Only implemented for the graded response model.
+     * Compute probability of scoring at or above a response category.
      *
      * @param theta a person ability value
      * @param category response category
      * @return
      */
     public double cumulativeProbability(double theta, int category){
-        return Double.NaN;
+        if(category==0){
+            return this.probability(theta, 0);
+        }else{
+            double cp = 0;
+            for(int k=category;k<ncat;k++){
+                cp += this.probability(theta, k);
+            }
+            return cp;
+        }
     }
 
     /**

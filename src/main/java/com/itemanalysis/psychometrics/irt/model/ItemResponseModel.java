@@ -15,6 +15,7 @@
  */
 package com.itemanalysis.psychometrics.irt.model;
 
+import com.itemanalysis.psychometrics.data.VariableLabel;
 import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.irt.estimation.ItemFitStatistic;
 import com.itemanalysis.psychometrics.irt.estimation.ItemParamPrior;
@@ -437,6 +438,10 @@ public interface ItemResponseModel {
      * @return item name.
      */
     public VariableName getName();
+
+    public void setLabel(VariableLabel label);
+
+    public VariableLabel getLabel();
 
     /**
      * An item may be assigned to a group of items. The group membership code is the group ID. This method sets

@@ -1474,5 +1474,108 @@ public class MarginalMaximumLikelihoodEstimationTest {
 
     }
 
+    /**
+     * Test using GPCM and compare to flexmirt
+     * flexmirt results obtained via:
+     *
+     * <Project>
+     * Title = "jalabert example data";
+     * Description = "All polytomous items with four categories";
+     *
+     * <Options>
+     * Mode = Calibration;
+     * saveSCO = Yes;
+     * Score = SSC;
+     * savePRM = Yes;
+     * saveINF = Yes;
+     *
+     * <Groups>
+     * %Group1%
+     * File = "jalabert-jan15.csv";
+     * Varnames = v1-v20;
+     * N = 1000;
+     * Ncats(v1-v20) = 4;
+     * Model(v1-v20) = GPC(4);
+     *
+     * <Constraints>
+     *
+     */
+    @Test
+    public void flexmirtTest1(){
+
+        //Read file and create response vectors
+        ItemResponseFileSummary fileSummary = new ItemResponseFileSummary();
+        File f = FileUtils.toFile(this.getClass().getResource("/testdata/jalabert-jan15.csv"));
+        ItemResponseVector[] responseData = fileSummary.getResponseVectors(f, true);
+
+        //parameter estimates obtained via flexmirt
+        double[] discrim = {0.8394110,0.7102702,1.7039103,1.4830470,0.8997456,0.8253240,0.9683615,1.2983270,1.2805537,
+                0.8031567,0.6862014,1.2226806,1.0817097,1.0218629,1.1329739,2.3774277,0.9701314,1.1953485,0.8509222,1.3877313};
+
+        //parameter estimates obtained via flexmirt
+        double[][] steps = {
+                {0,-1.3060559,0.56056889,2.22146303},
+                {0,-1.40989994,-0.35107515,2.44159988},
+                {0,-2.37941184,-0.54161875,1.89071227},
+                {0,-2.20242392,0.10156236,2.4350894},
+                {0,-2.15299582,0.3582214,2.41711733},
+                {0,-1.07979372,-0.44671346,2.2774479},
+                {0,-2.33621766,-0.85396376,2.45347958},
+                {0,-2.24003252,0.17744523,1.49137449},
+                {0,-2.13580827,-0.275253,1.52042755},
+                {0,-1.57293473,0.53992416,1.95820337},
+                {0,-1.34337148,0.61110075,2.27082559},
+                {0,-2.1696931,-0.347896,2.32252908},
+                {0,-1.23592978,0.83746712,1.39476601},
+                {0,-2.01038227,0.75318445,1.17156804},
+                {0,-1.70110802,0.20741073,1.63270323},
+                {0,-1.13278944,0.80443177,2.12201171},
+                {0,-1.06952395,0.59690567,2.36683879},
+                {0,-2.02145233,0.16970583,1.29051001},
+                {0,-1.05601695,-0.32656962,1.33890878},
+                {0,-1.10822402,-0.38249974,1.27934624}
+        };
+
+        //Create array of item response models
+        ItemResponseModel[] irm = new ItemResponseModel[20];
+        IrmGPCM gpcm = null;
+        double[] initialStep = {0,0,0,0};
+        for(int j=0;j<20;j++) {
+            gpcm = new IrmGPCM(1.0, initialStep, 1.0);
+            gpcm.setName(new VariableName("Item" + (j+1)));
+            irm[j] = gpcm;
+        }
+
+        //flexmirt default quadrature
+        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-6.0, 6.0, 49);
+
+        //estimate parameters
+        MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
+        DefaultEMStatusListener emStatus = new DefaultEMStatusListener();
+        mmle.addEMStatusListener(emStatus);
+        mmle.setVerbose(true);
+        mmle.estimateParameters(1e-4, 500);
+        mmle.computeItemStandardErrors();
+        System.out.println();
+        System.out.println(mmle.printItemParameters());
+//        System.out.println();
+//        System.out.println(mmle.printLatentDistribution());
+//        System.out.println();
+//        mmle.computeG2ItemFit(10, 5);
+//        mmle.computeSX2ItemFit(1);
+//        System.out.println(mmle.printItemFitStatistics());
+
+        double[] step = null;
+        for(int j=0;j<discrim.length;j++){
+            step = irm[j].getStepParameters();
+            assertEquals("GPCM items - disc   test", discrim[j], irm[j].getDiscrimination(), 1e-3);
+            assertEquals("GPCM items - step 1 test", steps[j][1], step[1], 1e-3);
+            assertEquals("GPCM items - Step 2 test", steps[j][2], step[2], 1e-3);
+            assertEquals("GPCM items - Step 3 test", steps[j][3], step[3], 1e-3);
+        }
+
+
+    }
+
 
 }

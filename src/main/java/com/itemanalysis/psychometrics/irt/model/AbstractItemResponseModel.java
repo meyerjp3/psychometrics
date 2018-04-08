@@ -15,6 +15,7 @@
  */
 package com.itemanalysis.psychometrics.irt.model;
 
+import com.itemanalysis.psychometrics.data.VariableLabel;
 import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.irt.estimation.ItemFitStatistic;
 import com.itemanalysis.psychometrics.measurement.ItemScoring;
@@ -23,7 +24,8 @@ import org.apache.commons.math3.exception.DimensionMismatchException;
 public abstract class AbstractItemResponseModel implements ItemResponseModel{
 
     protected String groupId = "";
-    protected VariableName name = null;
+    protected VariableName name = new VariableName("");
+    protected VariableLabel label = new VariableLabel("");
     protected double[] scoreWeight;
     protected int ncat = 0;
     protected int ncatM1 = 0;
@@ -42,6 +44,14 @@ public abstract class AbstractItemResponseModel implements ItemResponseModel{
 
     public VariableName getName(){
         return name;
+    }
+
+    public void setLabel(VariableLabel label){
+        this.label = label;
+    }
+
+    public VariableLabel getLabel() {
+        return label;
     }
 
     public void setGroupId(String groupId){

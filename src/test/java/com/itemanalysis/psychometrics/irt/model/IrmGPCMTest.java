@@ -15,8 +15,12 @@
  */
 package com.itemanalysis.psychometrics.irt.model;
 
+import com.itemanalysis.psychometrics.irt.estimation.ItemResponseFileSummary;
+import com.itemanalysis.psychometrics.irt.estimation.ItemResponseVector;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.Arrays;
 
 import static junit.framework.Assert.assertEquals;
@@ -526,6 +530,8 @@ public class IrmGPCMTest {
 
 
     }
+
+
 
 
 }

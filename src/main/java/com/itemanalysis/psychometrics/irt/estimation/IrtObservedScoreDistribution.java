@@ -173,6 +173,10 @@ public class IrtObservedScoreDistribution {
         return eap/summedScoreDensity[summedScore];
     }
 
+    public double getDensity(int summedScore){
+        return summedScoreDensity[summedScore];
+    }
+
     public int getNumberOfScores(){
         return maxPL1;
     }

@@ -15,6 +15,7 @@
  */
 package com.itemanalysis.psychometrics.irt.model;
 
+import com.itemanalysis.psychometrics.data.VariableLabel;
 import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.irt.estimation.ItemFitStatistic;
 import com.itemanalysis.psychometrics.measurement.ItemScoring;
@@ -26,6 +27,7 @@ public abstract class AbstractItemResponseModelWithGradient implements ItemRespo
 
     protected String groupId = "";
     protected VariableName name = new VariableName("");
+    protected VariableLabel label = label = new VariableLabel("");
     protected double[] scoreWeight;
     protected int ncat = 0;
     protected int minCategory = 0;
@@ -43,6 +45,14 @@ public abstract class AbstractItemResponseModelWithGradient implements ItemRespo
 
     public VariableName getName(){
         return name;
+    }
+
+    public void setLabel(VariableLabel label){
+        this.label = label;
+    }
+
+    public VariableLabel getLabel() {
+        return label;
     }
 
     public void setGroupId(String groupId){

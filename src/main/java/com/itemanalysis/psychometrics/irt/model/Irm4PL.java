@@ -140,14 +140,14 @@ public class Irm4PL extends AbstractItemResponseModel {
     }
 
     /**
-     * Not implemented. Only implemented for the graded response model.
+     * Compute probability of scoring at or above a response category
      *
      * @param theta a person ability value
      * @param category response category
      * @return
      */
     public double cumulativeProbability(double theta, int category){
-        return Double.NaN;
+        return this.probability(theta, category);
     }
 
     /**
