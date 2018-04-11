@@ -78,12 +78,15 @@ public class WrightMap {
 
         for(ItemResponseModel model : irm){
             ncat = model.getNcat();
-            for(int j=0;j<ncat;j++){
-                id = "["+model.getName().toString() + "_" + j +"]";
+            String[] cl = responseLabels.get(model.getName());
 
-                String[] cl = responseLabels.get(model.getName());
-                if(null!=cl){
-                    id += " " + cl[j];
+            for(int j=0;j<ncat;j++){
+                id = "["+model.getName().toString();
+
+                if(null!=cl && cl.length==ncat){
+                    id += "_" + j + "] " + cl[j].trim();
+                }else{
+                    id += "] " + j;
                 }
 
                 VariableLabel l = model.getLabel();

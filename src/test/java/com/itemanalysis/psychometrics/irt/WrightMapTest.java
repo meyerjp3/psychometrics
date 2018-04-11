@@ -42,7 +42,6 @@ public class WrightMapTest {
         itMap.createMap(0.65, -10, 10, 250);
 
         System.out.println(itMap.toString());
-//        System.out.println(itMap.printClustMap());
 
     }
 
