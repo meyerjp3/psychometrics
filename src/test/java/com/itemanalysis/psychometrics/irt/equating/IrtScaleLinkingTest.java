@@ -1,9 +1,8 @@
 package com.itemanalysis.psychometrics.irt.equating;
 
 import com.itemanalysis.psychometrics.data.VariableName;
-import com.itemanalysis.psychometrics.distribution.ContinuousDistributionApproximation;
-import com.itemanalysis.psychometrics.distribution.UniformDistributionApproximation;
-import com.itemanalysis.psychometrics.distribution.UserSuppliedDistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.ContinuousQuadratureRule;
+import com.itemanalysis.psychometrics.quadrature.UniformQuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.*;
 import org.junit.Test;
 
@@ -74,8 +73,8 @@ public class IrtScaleLinkingTest {
         itemFormY.put(new VariableName("Item7"), new Irm3PL(-0.602555046, 1.0));
         itemFormY.put(new VariableName("Item8"), new Irm3PL(-0.350426446, 1.0));
 
-        UniformDistributionApproximation distX = new UniformDistributionApproximation(-4.0, 4.0, 161);//plink default
-        UniformDistributionApproximation distY = new UniformDistributionApproximation(-4.0, 4.0, 161);//plink default
+        UniformQuadratureRule distX = new UniformQuadratureRule(-4.0, 4.0, 161);//plink default
+        UniformQuadratureRule distY = new UniformQuadratureRule(-4.0, 4.0, 161);//plink default
 
         IrtScaleLinking irtScaleLinking = new IrtScaleLinking(itemFormX, itemFormY, distX, distY);
         irtScaleLinking.setPrecision(6);
@@ -178,8 +177,8 @@ public class IrtScaleLinkingTest {
         double[] step1y = {-0.185885988, -0.61535623, 0.801242218};
         itemFormY.put(new VariableName("Item9"), new IrmPCM(-1.267744832, step1y, 1.0));
 
-        UniformDistributionApproximation distX = new UniformDistributionApproximation(-4.0, 4.0, 161);//plink default
-        UniformDistributionApproximation distY = new UniformDistributionApproximation(-4.0, 4.0, 161);//plink default
+        UniformQuadratureRule distX = new UniformQuadratureRule(-4.0, 4.0, 161);//plink default
+        UniformQuadratureRule distY = new UniformQuadratureRule(-4.0, 4.0, 161);//plink default
 
         IrtScaleLinking irtScaleLinking = new IrtScaleLinking(itemFormX, itemFormY, distX, distY);
         irtScaleLinking.setPrecision(6);
@@ -215,7 +214,7 @@ public class IrtScaleLinkingTest {
      */
     @Test
     public void linkingTest3PL(){
-        System.out.println("3PL linking test with actual distribution");
+        System.out.println("3PL linking test with actual quadrature");
 
         LinkedHashMap<VariableName, ItemResponseModel> irmX = new LinkedHashMap<VariableName, ItemResponseModel>();
         LinkedHashMap<VariableName, ItemResponseModel> irmY = new LinkedHashMap<VariableName, ItemResponseModel>();
@@ -250,8 +249,8 @@ public class IrtScaleLinkingTest {
         double[] xDensity = {0.0001008, 0.002760, 0.03021, 0.1420, 0.3149, 0.3158, 0.1542, 0.03596, 0.003925, 0.0001862};
         double[] yDensity = {0.0001173, 0.003242, 0.03449, 0.1471, 0.3148, 0.3110, 0.1526, 0.03406, 0.002510, 0.0001116};
 
-        ContinuousDistributionApproximation distX = new ContinuousDistributionApproximation(points, xDensity);
-        ContinuousDistributionApproximation distY = new ContinuousDistributionApproximation(points, yDensity);
+        ContinuousQuadratureRule distX = new ContinuousQuadratureRule(points, xDensity);
+        ContinuousQuadratureRule distY = new ContinuousQuadratureRule(points, yDensity);
 
         IrtScaleLinking irtScaleLinking = new IrtScaleLinking(irmX, irmY, distX, distY);
         irtScaleLinking.setPrecision(6);
@@ -358,7 +357,7 @@ public class IrtScaleLinkingTest {
         double[] step5Y = {1.001974, -0.107221, -0.894753};
         irmY.put(new VariableName("v17"), new IrmGPCM2(0.669612, 1.643267, step5Y, 1.7));
 
-        UniformDistributionApproximation uniform = new UniformDistributionApproximation(-3.0, 3.0, 25);
+        UniformQuadratureRule uniform = new UniformQuadratureRule(-3.0, 3.0, 25);
 
         IrtScaleLinking irtScaleLinking = new IrtScaleLinking(irmX, irmY, uniform, uniform);
         irtScaleLinking.setPrecision(6);
@@ -523,8 +522,8 @@ public class IrtScaleLinkingTest {
             irmY.put(new VariableName("i"+(j+1)), new IrmPCM(bparamY[common[j]], thresholdY[common[j]], 1.0));
         }
 
-        UniformDistributionApproximation distX = new UniformDistributionApproximation(-4.0, 4.0, 51);
-        UniformDistributionApproximation distY = new UniformDistributionApproximation(-4.0, 4.0, 51);
+        UniformQuadratureRule distX = new UniformQuadratureRule(-4.0, 4.0, 51);
+        UniformQuadratureRule distY = new UniformQuadratureRule(-4.0, 4.0, 51);
 
         IrtScaleLinking irtScaleLinking = new IrtScaleLinking(irmX, irmY, distX, distY);
         irtScaleLinking.setPrecision(6);
@@ -651,7 +650,7 @@ public class IrtScaleLinkingTest {
         irmY.put(new VariableName("v13"), new IrmGPCM(0.809768, step3Y, 1.0));
 
         //STUIRT default
-        UniformDistributionApproximation uniform = new UniformDistributionApproximation(-3.0, 3.0, 25);
+        UniformQuadratureRule uniform = new UniformQuadratureRule(-3.0, 3.0, 25);
 
         IrtScaleLinking irtScaleLinking = new IrtScaleLinking(irmX, irmY, uniform, uniform);
         irtScaleLinking.setPrecision(6);

@@ -52,7 +52,7 @@ public class ItemParamPriorBeta implements ItemParamPrior {
     }
 
     public double logDensityDeriv1(double p){
-        //Outside limits of distribution density does not change, so derivative is zero
+        //Outside limits of quadrature density does not change, so derivative is zero
         if (zeroDensity(p)) return 0.0;
         double value = (alpha - 1.0) / (p - 0);
         value -= (beta - 1.0) / (1 - p);
@@ -66,7 +66,7 @@ public class ItemParamPriorBeta implements ItemParamPrior {
      * @return
      */
     public double logDensityDeriv2(double p){
-        //Outside limits of distribution density does not change so derivative is zero
+        //Outside limits of quadrature density does not change so derivative is zero
         if (zeroDensity(p)){
             return 0.0;
         }
@@ -82,7 +82,7 @@ public class ItemParamPriorBeta implements ItemParamPrior {
     }
 
     public String distributionName(){
-        return "beta distribution";
+        return "beta quadrature";
     }
 
     public int getNumberOfParameters(){

@@ -106,7 +106,7 @@ public class PolychoricTwoStep extends AbstractPolychoricCorrelation{
 
     /**
      * Likelihood function for the two-step approximation. Thresholds are obtained from the inverse
-     * cumulative normal distribution, and teh correlation is found by Brent's method.
+     * cumulative normal quadrature, and teh correlation is found by Brent's method.
      */
     public class TwoStepLikelihoodFunction implements Fmin_methods {
         private double maxCorrelation = 0.9999;

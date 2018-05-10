@@ -1,4 +1,4 @@
-package com.itemanalysis.psychometrics.distribution;
+package com.itemanalysis.psychometrics.quadrature;
 
 import org.junit.Test;
 

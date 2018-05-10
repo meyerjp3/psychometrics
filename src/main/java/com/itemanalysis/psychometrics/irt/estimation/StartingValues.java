@@ -15,7 +15,7 @@
  */
 package com.itemanalysis.psychometrics.irt.estimation;
 
-import com.itemanalysis.psychometrics.distribution.ContinuousDistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.ContinuousQuadratureRule;
 import com.itemanalysis.psychometrics.histogram.*;
 import com.itemanalysis.psychometrics.irt.model.IrmType;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
@@ -94,9 +94,9 @@ public class StartingValues {
 
 //        System.out.println("ESTEP completed");
 
-        //The histogram will return frequencies, but relative frequencies are needed for the latent distribution.
-        //Create a new latent distribution with relative frequencies.
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(hist.getNumberOfPoints(), hist.getMinimum(), hist.getMaximum());
+        //The histogram will return frequencies, but relative frequencies are needed for the latent quadrature.
+        //Create a new latent quadrature with relative frequencies.
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule(hist.getNumberOfPoints(), hist.getMinimum(), hist.getMaximum());
         double sum = hist.getSumOfValues();
         for(int k=0;k<hist.getNumberOfPoints();k++){
             latentDistribution.setPointAt(k, hist.getPointAt(k));

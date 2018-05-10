@@ -15,10 +15,9 @@
  */
 package com.itemanalysis.psychometrics.irt.estimation;
 
-import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
-import org.apache.commons.math3.stat.descriptive.moment.Mean;
 
 import java.util.Formatter;
 
@@ -58,7 +57,7 @@ public class ItemFitSX2 extends AbstractItemFitStatistic {
 
     int end = 0;
 
-    private DistributionApproximation latentDistribution = null;
+    private QuadratureRule latentDistribution = null;
 
     private IrtObservedScoreDistribution irtObservedScoreDistribution = null;
 

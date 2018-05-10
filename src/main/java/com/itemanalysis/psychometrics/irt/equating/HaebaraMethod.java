@@ -17,13 +17,12 @@ package com.itemanalysis.psychometrics.irt.equating;
 
 import com.itemanalysis.psychometrics.analysis.AbstractMultivariateFunction;
 import com.itemanalysis.psychometrics.data.VariableName;
-import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.scaling.LinearTransformation;
 import com.itemanalysis.psychometrics.uncmin.Uncmin_methods;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.exception.DimensionMismatchException;
-import org.apache.commons.math3.util.Pair;
 import org.apache.commons.math3.util.Precision;
 
 import java.util.HashMap;
@@ -33,8 +32,8 @@ public class HaebaraMethod extends AbstractMultivariateFunction implements Linea
 
     private HashMap<VariableName, ItemResponseModel> itemFormX = null;
     private HashMap<VariableName, ItemResponseModel> itemFormY = null;
-    private DistributionApproximation xDistribution = null;
-    private DistributionApproximation yDistribution = null;
+    private QuadratureRule xDistribution = null;
+    private QuadratureRule yDistribution = null;
     private int xDistributionSize = 0;
     private int yDistributionSize = 0;
     private EquatingCriterionType criterion = null;
@@ -45,7 +44,7 @@ public class HaebaraMethod extends AbstractMultivariateFunction implements Linea
     private boolean standardized = true;
 
     public HaebaraMethod(HashMap<VariableName, ItemResponseModel> itemFormX, HashMap<VariableName, ItemResponseModel> itemFormY,
-                         DistributionApproximation xDistribution, DistributionApproximation yDistribution,
+                         QuadratureRule xDistribution, QuadratureRule yDistribution,
                          EquatingCriterionType criterion)throws DimensionMismatchException{
         this.itemFormX = itemFormX;
         this.itemFormY = itemFormY;

@@ -16,8 +16,8 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.data.VariableName;
-import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
-import com.itemanalysis.psychometrics.distribution.NormalDistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.NormalQuadratureRule;
+import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.analysis.differentiation.UnivariateDifferentiableFunction;
@@ -49,7 +49,7 @@ public class IrtExaminee implements UnivariateDifferentiableFunction {
 
     private ItemResponseModel[] irm = null;
     private NormalDistribution mapPrior = null;
-    private DistributionApproximation distributionApproximation = null;
+    private QuadratureRule quadratureRule = null;
     private EstimationMethod method = EstimationMethod.ML;
     private double estimatedTheta = 0.0;
     private double MinPRS = 0.0;//minimum possible raw (i.e. sum) score
@@ -257,10 +257,10 @@ public class IrtExaminee implements UnivariateDifferentiableFunction {
 
     /**
      * Maximum a Posteriori (MAP) estimate of examinee ability using a normal prior
-     * distribution.
+     * quadrature.
      *
-     * @param mean mean of normal prior distribution
-     * @param sd standard deviation of prior distribution
+     * @param mean mean of normal prior quadrature
+     * @param sd standard deviation of prior quadrature
      * @param thetaMin smallest possible ability estimate (lower bound on BrentOptimizer)
      * @param thetaMax largest possible ability estimate (upper bound on BrentOptimizer)
      * @return MAP estimate of examinee ability
@@ -282,10 +282,10 @@ public class IrtExaminee implements UnivariateDifferentiableFunction {
     }
 
     /**
-     * Expected a Posteriori (EAP) estimate of examinee ability using a normal distribution.
+     * Expected a Posteriori (EAP) estimate of examinee ability using a normal quadrature.
      *
-     * @param mean mean of normal distribution
-     * @param sd standard deviation of normal distribution
+     * @param mean mean of normal quadrature
+     * @param sd standard deviation of normal quadrature
      * @param thetaMin smallest possible ability score
      * @param thetaMax largest possible ability score
      * @param numPoints number of quadrature points
@@ -293,21 +293,21 @@ public class IrtExaminee implements UnivariateDifferentiableFunction {
      */
     public double eapEstimate(double mean, double sd, double thetaMin, double thetaMax, int numPoints){
         method = EstimationMethod.EAP;
-        distributionApproximation = new NormalDistributionApproximation(mean, sd, thetaMin, thetaMax, numPoints);
+        quadratureRule = new NormalQuadratureRule(mean, sd, thetaMin, thetaMax, numPoints);
 
-        return eapEstimate(distributionApproximation);
+        return eapEstimate(quadratureRule);
     }
 
     /**
-     * EAP estimate using a distribution provided by the user such as quadrature points
+     * EAP estimate using a quadrature provided by the user such as quadrature points
      * and weights from item calibration.
      *
      * @param dist User specified quadrature points and weights.
      * @return
      */
-    public double eapEstimate(DistributionApproximation dist){
+    public double eapEstimate(QuadratureRule dist){
         method = EstimationMethod.EAP;
-        distributionApproximation = dist;
+        quadratureRule = dist;
         int numPoints = dist.getNumberOfPoints();
 
         double point = 0.0;
@@ -316,8 +316,8 @@ public class IrtExaminee implements UnivariateDifferentiableFunction {
         double denom = 0.0;
 
         for(int i=0;i<numPoints;i++){
-            point = distributionApproximation.getPointAt(i);
-            w = Math.exp(logLikelihood(point))*distributionApproximation.getDensityAt(i);
+            point = quadratureRule.getPointAt(i);
+            w = Math.exp(logLikelihood(point))* quadratureRule.getDensityAt(i);
             numer += point*w;
             denom += w;
         }
@@ -415,7 +415,7 @@ public class IrtExaminee implements UnivariateDifferentiableFunction {
      */
     public double eapStandardErrorAt(double theta){
         method = EstimationMethod.EAP;
-        int numPoints = distributionApproximation.getNumberOfPoints();
+        int numPoints = quadratureRule.getNumberOfPoints();
         double point = 0.0;
         double w = 0.0;
         double numer = 0.0;
@@ -424,8 +424,8 @@ public class IrtExaminee implements UnivariateDifferentiableFunction {
         double var = 0.0;
 
         for(int i=0;i<numPoints;i++){
-            point = distributionApproximation.getPointAt(i);
-            w = Math.exp(logLikelihood(point))*distributionApproximation.getDensityAt(i);
+            point = quadratureRule.getPointAt(i);
+            w = Math.exp(logLikelihood(point))* quadratureRule.getDensityAt(i);
             dif = point-theta;
             numer += dif*dif*w;
             denom += w;

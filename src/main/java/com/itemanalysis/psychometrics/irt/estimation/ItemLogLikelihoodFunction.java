@@ -15,7 +15,7 @@
  */
 package com.itemanalysis.psychometrics.irt.estimation;
 
-import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.optimization.DiffFunction;
 import com.itemanalysis.psychometrics.uncmin.Uncmin_methods;
@@ -23,9 +23,9 @@ import com.itemanalysis.psychometrics.uncmin.Uncmin_methods;
 public interface ItemLogLikelihoodFunction extends DiffFunction, Uncmin_methods {
 
 
-//    public void setModel(ItemResponseModel model, DistributionApproximation latentDistribution, double[] rjk, double[] nk);
+//    public void setModel(ItemResponseModel model, QuadratureRule latentDistribution, double[] rjk, double[] nk);
 
-    public void setModel(ItemResponseModel model, DistributionApproximation latentDistribution, EstepItemEstimates r, double[] nk);
+    public void setModel(ItemResponseModel model, QuadratureRule latentDistribution, EstepItemEstimates r, double[] nk);
 
     /**
      * Item loglikelihood function.

@@ -1,8 +1,8 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.data.VariableName;
-import com.itemanalysis.psychometrics.distribution.ContinuousDistributionApproximation;
-import com.itemanalysis.psychometrics.distribution.NormalDistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.ContinuousQuadratureRule;
+import com.itemanalysis.psychometrics.quadrature.NormalQuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.util.Precision;
@@ -90,7 +90,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         double quadPoints = 41;
         double min = -.8 * Math.sqrt(quadPoints);
         double max = -1*min;
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation((int)quadPoints, min, max, 0, 1);
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule((int)quadPoints, min, max, 0, 1);
 
         StartingValues startingValues = new StartingValues(responseData, irm);
         irm = startingValues.computeStartingValues();
@@ -152,7 +152,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         double quadPoints = 41;
         double min = -.8 * Math.sqrt(quadPoints);
         double max = -1*min;
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation((int)quadPoints, min, max, 0, 1);
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule((int)quadPoints, min, max, 0, 1);
 
         StartingValues startingValues = new StartingValues(responseData, irm);
         irm = startingValues.computeStartingValues();
@@ -231,8 +231,8 @@ public class MarginalMaximumLikelihoodEstimationTest {
         startValues.addEMStatusListener(emStatus);
         irm = startValues.computeStartingValues();
 
-        //set latent distribution
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
+        //set latent quadrature
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -307,8 +307,8 @@ public class MarginalMaximumLikelihoodEstimationTest {
         StartingValues startValues = new StartingValues(responseData, irm);
         irm = startValues.computeStartingValues();
 
-        //set latent distribution
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
+        //set latent quadrature
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -366,8 +366,8 @@ public class MarginalMaximumLikelihoodEstimationTest {
         StartingValues startValues = new StartingValues(responseData, irm);
         irm = startValues.computeStartingValues();
 
-        //set latent distribution
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(49, -6, 6, 0, 1);
+        //set latent quadrature
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule(49, -6, 6, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -466,7 +466,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         }
 
 
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule(40, -4, 4, 0, 1);
 
 
 
@@ -476,7 +476,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         //Gauss-Hermite quadrature
 //        HermiteRuleFactory gaussHermite = new HermiteRuleFactory();
 //        Pair<double[], double[]> dist = gaussHermite.getRule(41);
-//        UserSuppliedDistributionApproximation latentDistribution = new UserSuppliedDistributionApproximation(dist.getKey(), dist.getValue());
+//        UserSuppliedQuadratureRule latentDistribution = new UserSuppliedQuadratureRule(dist.getKey(), dist.getValue());
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -590,7 +590,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         StartingValues startValues = new StartingValues(responseData, irm);
         irm = startValues.computeStartingValues();
 
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -713,7 +713,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         startValues.addEMStatusListener(emStatus);
         irm = startValues.computeStartingValues();
 
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -827,7 +827,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         StartingValues startValues = new StartingValues(responseData, irm);
         irm = startValues.computeStartingValues();
 
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -958,7 +958,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         StartingValues startValues = new StartingValues(responseData, irm);
         irm = startValues.computeStartingValues();
 
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -999,7 +999,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         double quadPoints = 41;
         double min = -.8 * Math.sqrt(quadPoints);
         double max = -1*min;
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(min, max, (int)quadPoints);
+        NormalQuadratureRule latentDistribution = new NormalQuadratureRule(min, max, (int)quadPoints);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -1034,9 +1034,9 @@ public class MarginalMaximumLikelihoodEstimationTest {
 //        double quadPoints = 41;
 //        double min = -.8 * Math.sqrt(quadPoints);
 //        double max = -1*min;
-//        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(min, max, (int)quadPoints);
+//        NormalQuadratureRule latentDistribution = new NormalQuadratureRule(min, max, (int)quadPoints);
 
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule(40, -4, 4, 0, 1);
 
         //Estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -1072,7 +1072,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         }
 
         //ICL default quadrature
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -1111,7 +1111,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         double quadPoints = 41;
         double min = -.8 * Math.sqrt(quadPoints);
         double max = -1*min;
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation((int)quadPoints, min, max, 0, 1);
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule((int)quadPoints, min, max, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -1162,7 +1162,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
 
             //computation of quadrature points as done in the mirt R package
             double quadPoints = 40;
-            NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, (int)quadPoints);
+            NormalQuadratureRule latentDistribution = new NormalQuadratureRule(-4.0, 4.0, (int)quadPoints);
 
             //compute start values
             StartingValues startValues = new StartingValues(responseData, irm);
@@ -1222,7 +1222,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
             double quadPoints = 41;
             double min = -.8 * Math.sqrt(quadPoints);
             double max = -1*min;
-            NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(min, max, (int)quadPoints);
+            NormalQuadratureRule latentDistribution = new NormalQuadratureRule(min, max, (int)quadPoints);
 
             //compute start values
             StartingValues startValues = new StartingValues(responseData, irm);
@@ -1290,7 +1290,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
 //        System.out.println(startValues.toString());
 
         //ICL default quadrature
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -1365,7 +1365,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         }
 
         //ICL default quadrature
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -1444,7 +1444,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         }
 
         //ICL default quadrature
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(40, -4, 4, 0, 1);
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule(40, -4, 4, 0, 1);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -1547,7 +1547,7 @@ public class MarginalMaximumLikelihoodEstimationTest {
         }
 
         //flexmirt default quadrature
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-6.0, 6.0, 49);
+        NormalQuadratureRule latentDistribution = new NormalQuadratureRule(-6.0, 6.0, 49);
 
         //estimate parameters
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);

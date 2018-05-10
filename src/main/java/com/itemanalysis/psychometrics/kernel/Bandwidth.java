@@ -25,7 +25,7 @@ public interface Bandwidth {
     public double value();
 
     /**
-     * The bandwidth is multiplied by teh adjustment factor to increase or decrease smoothing. This
+     * The bandwidth is multiplied by the adjustment factor to increase or decrease smoothing. This
      * number must be greater than 0.
      *
      * @return adjustment factor

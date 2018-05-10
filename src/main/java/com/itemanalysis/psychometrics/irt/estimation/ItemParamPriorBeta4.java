@@ -16,7 +16,7 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
 /**
- * Implementation of an ItemParamPrior for the Beta4 distribution. This class is a translation
+ * Implementation of an ItemParamPrior for the Beta4 quadrature. This class is a translation
  * of ItemParamPriorBeta4.cpp in Brad Hanson's ETIRM library, Copyright (c) 2000, Bradley A. Hanson.
  *
  */
@@ -78,7 +78,7 @@ public class ItemParamPriorBeta4 implements ItemParamPrior {
      * @return
      */
     public double logDensity(double p){
-	    //Check for value outside limits of distribution
+	    //Check for value outside limits of quadrature
         if (zeroDensity(p)){
             return Double.MIN_VALUE;
         }
@@ -93,7 +93,7 @@ public class ItemParamPriorBeta4 implements ItemParamPrior {
      * @return
      */
     public double logDensityDeriv1(double p){
-        //Outside limits of distribution density does not change, so derivative is zero
+        //Outside limits of quadrature density does not change, so derivative is zero
         if (zeroDensity(p)) return 0.0;
         double value = (parameters[0] - 1.0) / (p - parameters[2]);
         value -= (parameters[1] - 1.0) / (parameters[3] - p);
@@ -107,7 +107,7 @@ public class ItemParamPriorBeta4 implements ItemParamPrior {
      * @return
      */
     public double logDensityDeriv2(double p){
-        //Outside limits of distribution density does not change so derivative is zero
+        //Outside limits of quadrature density does not change so derivative is zero
         if (zeroDensity(p)){
             return 0.0;
         }

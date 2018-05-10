@@ -15,7 +15,7 @@
  */
 package com.itemanalysis.psychometrics.irt.estimation;
 
-import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.IrmType;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.uncmin.DefaultUncminOptimizer;
@@ -31,7 +31,7 @@ import java.util.concurrent.RecursiveAction;
 public class MstepParallel extends RecursiveAction {
 
     private ItemResponseModel[] irm = null;
-    private DistributionApproximation latentDistribution = null;
+    private QuadratureRule latentDistribution = null;
     private EstepEstimates estepEstimates = null;
     private int start = 0;
     private int length = 0;
@@ -42,7 +42,7 @@ public class MstepParallel extends RecursiveAction {
 
 //    private QNMinimizer qn = null;
 
-    public MstepParallel(ItemResponseModel[] irm, DistributionApproximation latentDistribution, EstepEstimates estepEstimates, DensityEstimationType densityEstimationType, int start, int length){
+    public MstepParallel(ItemResponseModel[] irm, QuadratureRule latentDistribution, EstepEstimates estepEstimates, DensityEstimationType densityEstimationType, int start, int length){
         this.irm = irm;
         this.latentDistribution = latentDistribution;
         this.estepEstimates = estepEstimates;
@@ -152,7 +152,7 @@ public class MstepParallel extends RecursiveAction {
      *
      * @return
      */
-    public DistributionApproximation empiricalHistogramLatentDensityEstimation(){
+    public QuadratureRule empiricalHistogramLatentDensityEstimation(){
         double sumNk = estepEstimates.getSumNt();
         double[] nk = estepEstimates.getNt();
         double[] linTrans = null;

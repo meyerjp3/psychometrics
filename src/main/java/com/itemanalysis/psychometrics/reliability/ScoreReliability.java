@@ -57,9 +57,9 @@ public interface ScoreReliability {
     public ScoreReliabilityType getType();
 
     /**
-     * Confidence interval for the reliability estimate computed using the F-distribution.
+     * Confidence interval for the reliability estimate computed using the F-quadrature.
      * This computation is only correct for Coefficient Alpha because the sampling
-     * distribution for other reliability estimates is unknown. As such, this method
+     * quadrature for other reliability estimates is unknown. As such, this method
      * returns an approximation, at best, of the reliability estimate for all reliability
      * estimates other than coefficient alpha. Note that the confidence interval is computed
      * using the largest sample size in the covariance matrix. This value would be the sample

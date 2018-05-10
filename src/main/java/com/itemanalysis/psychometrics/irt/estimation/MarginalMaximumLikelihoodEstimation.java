@@ -15,7 +15,7 @@
  */
 package com.itemanalysis.psychometrics.irt.estimation;
 
-import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
 import com.itemanalysis.psychometrics.histogram.*;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.scaling.DefaultLinearTransformation;
@@ -31,7 +31,7 @@ import java.util.concurrent.ForkJoinPool;
  * Estimation is accomplished using teh EM algorithm. Computation is done in parallel to substantially
  * reduce the amount of time needed for the EM algorithm.
  *
- * Bayes modal estimates of item parameters are computed when a prior distribution has been included
+ * Bayes modal estimates of item parameters are computed when a prior quadrature has been included
  * in an item response model. The priors maye be specified for any or all item parameters. Any item
  * can use priors. As such, you can have some items with one or more priors and other items without any priors.
  *
@@ -46,7 +46,7 @@ public class MarginalMaximumLikelihoodEstimation {
     private int nResponseVectors = 0;
     private int nPoints = 0;
     private EstepEstimates estepEstimates = null;
-    private DistributionApproximation latentDistribution = null;
+    private QuadratureRule latentDistribution = null;
     private static int PROCESSORS =  Runtime.getRuntime().availableProcessors();
     private ArrayList<EMStatusListener> emStatusListeners = new ArrayList<EMStatusListener>();
     private ForkJoinPool pool = null;
@@ -67,7 +67,7 @@ public class MarginalMaximumLikelihoodEstimation {
      */
     private int[] codeCount = null;
 
-    public MarginalMaximumLikelihoodEstimation(ItemResponseVector[] responseVector, ItemResponseModel[] irm, DistributionApproximation latentDistribution){
+    public MarginalMaximumLikelihoodEstimation(ItemResponseVector[] responseVector, ItemResponseModel[] irm, QuadratureRule latentDistribution){
         this.responseVector = responseVector;
         this.irm = irm;
         this.latentDistribution = latentDistribution;
@@ -134,7 +134,7 @@ public class MarginalMaximumLikelihoodEstimation {
 
     /**
      * Estimate parameters using the specified convergence criterion and maximum number of iterations. If using this call
-     * the latent distribution is not estimated.
+     * the latent quadrature is not estimated.
      *
      * @param converge convergence criterion should be a positivie number close to zero such as 1e-3. If it is a negative number algorithm will run to maximum number of iterations.
      * @param maxIter maximum number of iterations. Algorithm will stop if the maximum is reached evne if convergence criterion is not satistfied.
@@ -152,7 +152,7 @@ public class MarginalMaximumLikelihoodEstimation {
      *
      * @param converge maximum change in parameter estimate convergence criterion.
      * @param maxIter maximum number of EM cycles.
-     * @param densityEstimationType method to estimate (or not estimate) latent distribution
+     * @param densityEstimationType method to estimate (or not estimate) latent quadrature
      */
     public void estimateParameters(double converge, int maxIter, DensityEstimationType densityEstimationType){
         this.densityEstimationType = densityEstimationType;
@@ -202,7 +202,7 @@ public class MarginalMaximumLikelihoodEstimation {
         return irm[j];
     }
 
-    public DistributionApproximation getLatentDistribution(){
+    public QuadratureRule getLatentDistribution(){
         return latentDistribution;
     }
 
@@ -225,8 +225,8 @@ public class MarginalMaximumLikelihoodEstimation {
 //     * @param scoreType type of person score
 //     * @param min minimum possible score value
 //     * @param max maximum possible score value
-//     * @param mean mean of normal distribution (for MAP and EAP)
-//     * @param sd standard deviation of normal distribution (for MAP and EAP)
+//     * @param mean mean of normal quadrature (for MAP and EAP)
+//     * @param sd standard deviation of normal quadrature (for MAP and EAP)
 //     * @param nPoints number of quadrature points (for EAP estimation)
 //     */
 //    public void estimatePersonAbility(PersonScoringType scoreType, double min, double max, double mean, double sd, int nPoints){
@@ -272,8 +272,8 @@ public class MarginalMaximumLikelihoodEstimation {
 //     * @param scoreType type of person score
 //     * @param min minimum possible score value
 //     * @param max maximum possible score value
-//     * @param mean mean of normal distribution
-//     * @param sd standard deviation of normal distribution
+//     * @param mean mean of normal quadrature
+//     * @param sd standard deviation of normal quadrature
 //     */
 //    public void estimatePersonAbility(PersonScoringType scoreType, double min, double max, double mean, double sd){
 //        estimatePersonAbility(scoreType, min, max, mean, sd, 60);
@@ -400,7 +400,7 @@ public class MarginalMaximumLikelihoodEstimation {
         double A = linearTransformation.getScale();
         for(int i=0;i<responseVector.length;i++){
             //Estimate EAP standard deviation should be the same as the standard deviation
-            //of the latent distribution used to estimate the item parameters.
+            //of the latent quadrature used to estimate the item parameters.
             eapEstimate[i] = eapEstimate[i]*A;
 
             for(int N=0;N<responseVector[i].getFrequency();N++) {//Expand table

@@ -15,10 +15,9 @@
  */
 package com.itemanalysis.psychometrics.irt.estimation;
 
-import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 
-import java.util.Arrays;
 import java.util.concurrent.RecursiveTask;
 
 /**
@@ -33,7 +32,7 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
     private int nPoints = 0;
     private int[] ncat = null;
     private ItemResponseVector[] responseVector = null;
-    private DistributionApproximation latentDistribution = null;
+    private QuadratureRule latentDistribution = null;
     private ItemResponseModel[] irm = null;
     private static int PARALLEL_THRESHOLD = 250;//A threshold of 250 works best in my tests, but could scale it according to the user's processor.
 
@@ -42,12 +41,12 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
      *
      * @param responseVector response vectors for a given set of data
      * @param irm an array of item response models whose parameters are being estimated
-     * @param latentDistribution latent distribution quadrature used for computing the marginal likelihood
+     * @param latentDistribution latent quadrature quadrature used for computing the marginal likelihood
      * @param start beginning index for the response vector. Manual calls should always be 0, recursive calls are done automatically.
      * @param length length of the response vector segment. This length is manually set to the length of the response vector.
      *               Recursive calls use the value specified by estepParallelThreshold.
      */
-    public EstepParallel(ItemResponseVector[] responseVector, ItemResponseModel[] irm, DistributionApproximation latentDistribution, int start, int length){
+    public EstepParallel(ItemResponseVector[] responseVector, ItemResponseModel[] irm, QuadratureRule latentDistribution, int start, int length){
         this.responseVector = responseVector;
         this.irm = irm;
         this.latentDistribution = latentDistribution;

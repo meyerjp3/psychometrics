@@ -17,7 +17,7 @@ package com.itemanalysis.psychometrics.irt.estimation;
 
 /**
  *
- * Implementation of an ItemParamPrior for the Normal distribution. This class is a translation
+ * Implementation of an ItemParamPrior for the Normal quadrature. This class is a translation
  * of ItemParamPriorNormal.cpp in Brad Hanson's ETIRM library, Copyright (c) 2000, Bradley A. Hanson.
  */
 public class ItemParamPriorNormal implements ItemParamPrior {
@@ -26,7 +26,7 @@ public class ItemParamPriorNormal implements ItemParamPrior {
     private double variance = 0;
 
     /**
-     * Constructor for the standard normal distribution
+     * Constructor for the standard normal quadrature
      */
     public ItemParamPriorNormal(){
         this(0.0, 1.0);
@@ -36,7 +36,7 @@ public class ItemParamPriorNormal implements ItemParamPrior {
      * A constructor for an array of parameters. The first element must be the mean and the second element
      * must be the standard deviation.
      *
-     * @param parameters parameters for the normal distribution
+     * @param parameters parameters for the normal quadrature
      */
     public ItemParamPriorNormal(double[] parameters){
         this.parameters = parameters;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.itemanalysis.psychometrics.distribution;
+package com.itemanalysis.psychometrics.quadrature;
 
 import java.util.Formatter;
 
@@ -23,16 +23,16 @@ import java.util.Formatter;
  * computed.
  *
  */
-public final class UniformDistributionApproximation extends AbstractDistributionApproximation {
+public final class UniformQuadratureRule extends AbstractQuadratureRule {
 
     /**
-     * Create a uniform distribution with a specified number of evaluation points between the min and max values.
+     * Create a uniform quadrature with a specified number of evaluation points between the min and max values.
      *
-     * @param min minimum value of the distribution.
-     * @param max maximum value of the distribution.
-     * @param numberOfPoints number of points in the distribution.
+     * @param min minimum value of the quadrature.
+     * @param max maximum value of the quadrature.
+     * @param numberOfPoints number of points in the quadrature.
      */
-    public UniformDistributionApproximation(double min, double max, int numberOfPoints){
+    public UniformQuadratureRule(double min, double max, int numberOfPoints){
         this.numberOfPoints = numberOfPoints;
         this.min = min;
         this.max = max;
@@ -67,7 +67,7 @@ public final class UniformDistributionApproximation extends AbstractDistribution
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
 
-        f.format("%-35s", "Uniform Distribution Approximation"); f.format("%n");
+        f.format("%-35s", "Uniform Quadrature                "); f.format("%n");
         f.format("%35s", "==================================="); f.format("%n");
         f.format("%10s", "Value");f.format("%5s", "");f.format("%10s", "Density");f.format("%10s", "");f.format("%n");
         f.format("%35s", "-----------------------------------"); f.format("%n");

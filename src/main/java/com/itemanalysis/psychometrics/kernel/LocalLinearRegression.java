@@ -15,7 +15,7 @@
  */
 package com.itemanalysis.psychometrics.kernel;
 
-import com.itemanalysis.psychometrics.distribution.UniformDistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.UniformQuadratureRule;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 
 public class LocalLinearRegression {
@@ -30,7 +30,7 @@ public class LocalLinearRegression {
 
     private int numPoints = 50;
 
-    public LocalLinearRegression(KernelFunction kernel, Bandwidth bandwidth, UniformDistributionApproximation uniform){
+    public LocalLinearRegression(KernelFunction kernel, Bandwidth bandwidth, UniformQuadratureRule uniform){
         this.kernel = kernel;
         this.bandwidth = bandwidth.value();
         this.points = uniform.getPoints();

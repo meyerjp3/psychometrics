@@ -15,10 +15,7 @@
  */
 package com.itemanalysis.psychometrics.kernel;
 
-import com.itemanalysis.psychometrics.distribution.UniformDistributionApproximation;
-import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.integration.BaseAbstractUnivariateIntegrator;
-import org.apache.commons.math3.analysis.integration.LegendreGaussIntegrator;
+import com.itemanalysis.psychometrics.quadrature.UniformQuadratureRule;
 import org.junit.Test;
 import static junit.framework.Assert.assertEquals;
 
@@ -59,13 +56,13 @@ public class KernelDensityTest {
             0.00714906657758102,0.0212566747848107,0.0184219115821315,0.00467163374877514,0.00034559424553365,
             3.40323324507272e-05,0.000649033888000387,0.00433774288948667,0.00795541129287286,0.00398644267497938};
 
-    private UniformDistributionApproximation points = null;
+    private UniformQuadratureRule points = null;
 
     private UserSuppliedBandwidth bw = null;
 
     public KernelDensityTest(){
         bw = new UserSuppliedBandwidth(1.0);
-        points = new UniformDistributionApproximation(80.0, 136.0, 50);
+        points = new UniformQuadratureRule(80.0, 136.0, 50);
 
     }
 

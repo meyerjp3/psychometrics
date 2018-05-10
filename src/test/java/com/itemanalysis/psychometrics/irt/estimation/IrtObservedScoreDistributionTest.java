@@ -1,10 +1,9 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.data.VariableName;
-import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
-import com.itemanalysis.psychometrics.distribution.NormalDistributionApproximation;
-import com.itemanalysis.psychometrics.distribution.UniformDistributionApproximation;
-import com.itemanalysis.psychometrics.distribution.UserSuppliedDistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.*;
+import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
+import com.itemanalysis.psychometrics.quadrature.UniformQuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.*;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
@@ -26,7 +25,7 @@ public class IrtObservedScoreDistributionTest {
 
         double[] points = {-3, -2, -1, 0, 1, 2, 3};
         double[] density = {1, 1, 1, 1, 1, 1, 1};
-        DistributionApproximation latentDistribution = new UserSuppliedDistributionApproximation(points, density);
+        QuadratureRule latentDistribution = new UserSuppliedQuadratureRule(points, density);
 
         IrtObservedScoreDistribution irtObservedScoreDistribution = new IrtObservedScoreDistribution(irm, latentDistribution);
         irtObservedScoreDistribution.computeAllBinaryItems();
@@ -45,7 +44,7 @@ public class IrtObservedScoreDistributionTest {
 
         double[] points = {-3, -2, -1, 0, 1, 2, 3};
         double[] density = {1, 1, 1, 1, 1, 1, 1};
-        DistributionApproximation latentDistribution = new UserSuppliedDistributionApproximation(points, density);
+        QuadratureRule latentDistribution = new UserSuppliedQuadratureRule(points, density);
 
         IrtObservedScoreDistribution irtObservedScoreDistribution = new IrtObservedScoreDistribution(irm, latentDistribution);
         irtObservedScoreDistribution.compute();
@@ -129,7 +128,7 @@ public class IrtObservedScoreDistributionTest {
         }
 
         //Estimate person ability using EAP
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
+        NormalQuadratureRule latentDistribution = new NormalQuadratureRule(-4.0, 4.0, 40);
 
         IrtObservedScoreDistribution irtObservedScoreDistribution = new IrtObservedScoreDistribution(irm, latentDistribution);
         irtObservedScoreDistribution.compute();
@@ -140,7 +139,7 @@ public class IrtObservedScoreDistributionTest {
 
     @Test
     public void partialCreditModelTest(){
-        System.out.println("Partial Credit Model Observed score distribution test");
+        System.out.println("Partial Credit Model Observed score quadrature test");
 
         //Read file and create response vectors
         ItemResponseFileSummary fileSummary = new ItemResponseFileSummary();
@@ -171,7 +170,7 @@ public class IrtObservedScoreDistributionTest {
         }
 
         //ICL default quadrature
-        UniformDistributionApproximation latentDistribution = new UniformDistributionApproximation(-6.0, 6.0, 49);
+        UniformQuadratureRule latentDistribution = new UniformQuadratureRule(-6.0, 6.0, 49);
 
         IrtObservedScoreDistribution irtObservedScoreDistribution = new IrtObservedScoreDistribution(irm, latentDistribution);
         irtObservedScoreDistribution.compute();
@@ -183,7 +182,7 @@ public class IrtObservedScoreDistributionTest {
 
     /**
      * Test using 2PL item parameters ob tained from flexmirt example 2_1
-     * IRT observed score distribution also obtained from flexmirt.
+     * IRT observed score quadrature also obtained from flexmirt.
      *
      * <Project>
      * Title = "2PLM example";
@@ -251,7 +250,7 @@ public class IrtObservedScoreDistributionTest {
         }
 
         //flexmirt default quadrature
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-6.0, 6.0, 49);
+        NormalQuadratureRule latentDistribution = new NormalQuadratureRule(-6.0, 6.0, 49);
 
         IrtObservedScoreDistribution irtObservedScoreDistribution = new IrtObservedScoreDistribution(irm, latentDistribution);
         irtObservedScoreDistribution.compute();
@@ -399,7 +398,7 @@ public class IrtObservedScoreDistributionTest {
         }
 
         //flexmirt default quadrature
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-6.0, 6.0, 49);
+        NormalQuadratureRule latentDistribution = new NormalQuadratureRule(-6.0, 6.0, 49);
 
         IrtObservedScoreDistribution irtObservedScoreDistribution = new IrtObservedScoreDistribution(irm, latentDistribution);
         irtObservedScoreDistribution.compute();

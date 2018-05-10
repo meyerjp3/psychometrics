@@ -15,7 +15,7 @@
  */
 package com.itemanalysis.psychometrics.kernel;
 
-import com.itemanalysis.psychometrics.distribution.UniformDistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.UniformQuadratureRule;
 
 /**
  *
@@ -68,9 +68,9 @@ public class KernelRegression{
      *
      * @param kernel type of kernel function
      * @param bandwidth bandwidth
-     * @param uniform distribution representing the evaluation points
+     * @param uniform quadrature representing the evaluation points
      */
-    public KernelRegression(KernelFunction kernel, Bandwidth bandwidth, UniformDistributionApproximation uniform){
+    public KernelRegression(KernelFunction kernel, Bandwidth bandwidth, UniformQuadratureRule uniform){
         this.kernel = kernel;
         this.bandwidth = bandwidth.value();
         this.points = uniform.getPoints();

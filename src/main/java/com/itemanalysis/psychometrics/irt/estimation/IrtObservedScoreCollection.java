@@ -15,12 +15,12 @@
  */
 package com.itemanalysis.psychometrics.irt.estimation;
 
-import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 
 /**
- * This class computes the IRT observed score distribution for an entire test. It also creates
- * an IRT observed score distribution for the entire test without a particular item. This class is
+ * This class computes the IRT observed score quadrature for an entire test. It also creates
+ * an IRT observed score quadrature for the entire test without a particular item. This class is
  * mainly used to create observed score distributions that are needed for IRT ItemFitStatistics.
  */
 public class IrtObservedScoreCollection {
@@ -31,13 +31,13 @@ public class IrtObservedScoreCollection {
 
     private ItemResponseModel[] irm = null;
 
-    private DistributionApproximation latentDistribution = null;
+    private QuadratureRule latentDistribution = null;
 
     private IrtObservedScoreDistribution irtObservedScoreDistribution = null;
 
     private IrtObservedScoreDistribution[] irtObservedScoreWithout = null;
 
-    public IrtObservedScoreCollection(ItemResponseModel[] irm, DistributionApproximation latentDistribution){
+    public IrtObservedScoreCollection(ItemResponseModel[] irm, QuadratureRule latentDistribution){
         this.irm = irm;
         this.latentDistribution = latentDistribution;
         this.nItems = irm.length;
@@ -58,14 +58,14 @@ public class IrtObservedScoreCollection {
     }
 
     private void initialize(){
-        //IRT observed score distribution
+        //IRT observed score quadrature
         irtObservedScoreDistribution = new IrtObservedScoreDistribution(irm, latentDistribution);
         irtObservedScoreDistribution.compute();
 
         //Observed score distributions without studied item (item at given index)
         irtObservedScoreWithout = new IrtObservedScoreDistribution[nItems];
 
-        //Compute IRT observed score distribution for each item by excluding studied item. (Could be done in parallel)
+        //Compute IRT observed score quadrature for each item by excluding studied item. (Could be done in parallel)
         for(int j=0;j<nItems;j++){
             irtObservedScoreWithout[j] = new IrtObservedScoreDistribution(removeItemAt(j), latentDistribution);
             irtObservedScoreWithout[j].compute();

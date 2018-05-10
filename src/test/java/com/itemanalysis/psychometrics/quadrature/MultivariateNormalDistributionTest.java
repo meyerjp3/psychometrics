@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.itemanalysis.psychometrics.distribution;
+package com.itemanalysis.psychometrics.quadrature;
 
 import org.junit.Test;
 

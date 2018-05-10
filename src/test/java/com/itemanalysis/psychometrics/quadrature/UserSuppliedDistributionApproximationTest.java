@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.itemanalysis.psychometrics.distribution;
-
-import org.junit.Test;
+package com.itemanalysis.psychometrics.quadrature;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -29,7 +27,7 @@ public class UserSuppliedDistributionApproximationTest {
 //    @Test
     public void distributionTest1(){
         System.out.println("Density Test 1");
-        UserSuppliedDistributionApproximation dist = new UserSuppliedDistributionApproximation(points, xDensity);
+        UserSuppliedQuadratureRule dist = new UserSuppliedQuadratureRule(points, xDensity);
         for(int i=0;i<dist.getNumberOfPoints();i++){
             assertEquals("  Density test at point: " + i, xDensity[i], dist.getDensityAt(i), 1e-5);
         }
@@ -38,7 +36,7 @@ public class UserSuppliedDistributionApproximationTest {
 //    @Test
     public void distributionTest2(){
         System.out.println("Density Test 2");
-        UserSuppliedDistributionApproximation dist = new UserSuppliedDistributionApproximation(points, yDensity);
+        UserSuppliedQuadratureRule dist = new UserSuppliedQuadratureRule(points, yDensity);
         for(int i=0;i<dist.getNumberOfPoints();i++){
             assertEquals("  Density test at point: " + i, yDensity[i], dist.getDensityAt(i), 1e-5);
         }

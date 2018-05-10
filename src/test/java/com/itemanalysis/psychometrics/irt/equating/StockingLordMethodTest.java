@@ -16,12 +16,11 @@
 package com.itemanalysis.psychometrics.irt.equating;
 
 import com.itemanalysis.psychometrics.data.VariableName;
-import com.itemanalysis.psychometrics.distribution.ContinuousDistributionApproximation;
-import com.itemanalysis.psychometrics.distribution.NormalDistributionApproximation;
-import com.itemanalysis.psychometrics.distribution.UniformDistributionApproximation;
-import com.itemanalysis.psychometrics.distribution.UserSuppliedDistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.ContinuousQuadratureRule;
+import com.itemanalysis.psychometrics.quadrature.NormalQuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.*;
 import com.itemanalysis.psychometrics.optimization.BOBYQAOptimizer;
+import com.itemanalysis.psychometrics.quadrature.UniformQuadratureRule;
 import com.itemanalysis.psychometrics.uncmin.DefaultUncminOptimizer;
 import com.itemanalysis.psychometrics.uncmin.UncminException;
 import org.apache.commons.math3.optim.*;
@@ -31,10 +30,8 @@ import org.apache.commons.math3.optim.univariate.SearchInterval;
 import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 import org.apache.commons.math3.random.*;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import java.awt.*;
 import java.util.LinkedHashMap;
 
 import static junit.framework.Assert.assertEquals;
@@ -98,8 +95,8 @@ public class StockingLordMethodTest {
         double[] points = {-4.0000, -3.1110, -2.2220, -1.3330, -0.4444, 0.4444, 1.3330, 2.2220, 3.1110, 4.0000};
         double[] xDensity = {0.0001008, 0.002760, 0.03021, 0.1420, 0.3149, 0.3158, 0.1542, 0.03596, 0.003925, 0.0001862};
         double[] yDensity = {0.0001173, 0.003242, 0.03449, 0.1471, 0.3148, 0.3110, 0.1526, 0.03406, 0.002510, 0.0001116};
-        ContinuousDistributionApproximation distX = new ContinuousDistributionApproximation(points, xDensity);
-        ContinuousDistributionApproximation distY = new ContinuousDistributionApproximation(points, yDensity);
+        ContinuousQuadratureRule distX = new ContinuousQuadratureRule(points, xDensity);
+        ContinuousQuadratureRule distY = new ContinuousQuadratureRule(points, yDensity);
 
 
         StockingLordMethod sl = new StockingLordMethod(irmX, irmY, distX, distY, EquatingCriterionType.Q1Q2);
@@ -184,8 +181,8 @@ public class StockingLordMethodTest {
             irmY.put(name, irm);
         }
 
-        ContinuousDistributionApproximation distX = new ContinuousDistributionApproximation(points, xDensity);
-        ContinuousDistributionApproximation distY = new ContinuousDistributionApproximation(points, yDensity);
+        ContinuousQuadratureRule distX = new ContinuousQuadratureRule(points, xDensity);
+        ContinuousQuadratureRule distY = new ContinuousQuadratureRule(points, yDensity);
 
         StockingLordMethod sl = new StockingLordMethod(irmX, irmY, distX, distY, EquatingCriterionType.Q1Q2);
         sl.setPrecision(4);
@@ -234,7 +231,7 @@ public class StockingLordMethodTest {
             irmY.put(name, irm);
         }
 
-        UniformDistributionApproximation uniform = new UniformDistributionApproximation(-4, 4, 10);
+        UniformQuadratureRule uniform = new UniformQuadratureRule(-4, 4, 10);
 
         StockingLordMethod sl = new StockingLordMethod(irmX, irmY, uniform, uniform, EquatingCriterionType.Q1Q2);
         sl.setPrecision(4);
@@ -283,7 +280,7 @@ public class StockingLordMethodTest {
             irmY.put(name, irm);
         }
 
-        NormalDistributionApproximation normal = new NormalDistributionApproximation(0, 1, -4, 4, 10);
+        NormalQuadratureRule normal = new NormalQuadratureRule(0, 1, -4, 4, 10);
 
         StockingLordMethod sl = new StockingLordMethod(irmX, irmY, normal, normal, EquatingCriterionType.Q1Q2);
         sl.setPrecision(4);
@@ -332,8 +329,8 @@ public class StockingLordMethodTest {
             irmY.put(name, irm);
         }
 
-        ContinuousDistributionApproximation distX = new ContinuousDistributionApproximation(points, xDensity);
-        ContinuousDistributionApproximation distY = new ContinuousDistributionApproximation(points, yDensity);
+        ContinuousQuadratureRule distX = new ContinuousQuadratureRule(points, xDensity);
+        ContinuousQuadratureRule distY = new ContinuousQuadratureRule(points, yDensity);
 
         StockingLordMethod sl = new StockingLordMethod(irmX, irmY, distX, distY, EquatingCriterionType.Q1);
         sl.setPrecision(4);
@@ -497,7 +494,7 @@ public class StockingLordMethodTest {
 //        double[] step5Y = {1.001974, -0.107221, -0.894753};
 //        irmY.put("v17", new IrmGPCM2(0.669612, 1.643267, step5Y, 1.7));
 
-        UniformDistributionApproximation uniform = new UniformDistributionApproximation(-3.0, 3.0, 25);
+        UniformQuadratureRule uniform = new UniformQuadratureRule(-3.0, 3.0, 25);
 
         StockingLordMethod sl = new StockingLordMethod(irmX, irmY, uniform, uniform, EquatingCriterionType.Q1Q2);
         sl.setPrecision(6);
@@ -664,7 +661,7 @@ public class StockingLordMethodTest {
 //        double[] step5Y = {0.0, 2.645241,  1.536046,  0.748514};
 //        irmY.put("v17", new IrmGPCM(0.669612, step5Y, 1.7));
 
-        UniformDistributionApproximation uniform = new UniformDistributionApproximation(-3.0, 3.0, 25);
+        UniformQuadratureRule uniform = new UniformQuadratureRule(-3.0, 3.0, 25);
 
         StockingLordMethod sl = new StockingLordMethod(irmX, irmY, uniform, uniform, EquatingCriterionType.Q1Q2);
         sl.setPrecision(6);
@@ -849,7 +846,7 @@ public class StockingLordMethodTest {
 //        double[] step10 = {-1.9355, -0.2267, 1.88991};
 //        irmY.put("v15", new IrmGRM(1.0117, step10, 1.7));
 
-        UniformDistributionApproximation uniform = new UniformDistributionApproximation(-3.0, 3.0, 25);
+        UniformQuadratureRule uniform = new UniformQuadratureRule(-3.0, 3.0, 25);
 
         StockingLordMethod sl = new StockingLordMethod(irmX, irmY, uniform, uniform, EquatingCriterionType.Q1Q2);
         sl.setPrecision(4);
@@ -1004,8 +1001,8 @@ public class StockingLordMethodTest {
 //        double[] step10 = {-1.9355, -0.2267, 1.88991};
 //        irmY.put("v15", new IrmGRM(1.0117, step10, 1.7));
 
-        ContinuousDistributionApproximation distX = new ContinuousDistributionApproximation(points, xDensity);
-        ContinuousDistributionApproximation distY = new ContinuousDistributionApproximation(points, yDensity);
+        ContinuousQuadratureRule distX = new ContinuousQuadratureRule(points, xDensity);
+        ContinuousQuadratureRule distY = new ContinuousQuadratureRule(points, yDensity);
 
         StockingLordMethod sl = new StockingLordMethod(irmX, irmY, distX, distY, EquatingCriterionType.Q1Q2);
         sl.setPrecision(4);
@@ -1159,8 +1156,8 @@ public class StockingLordMethodTest {
 //        double[] step10 = {-1.9355, -0.2267, 1.88991};
 //        irmY.put("v15", new IrmGRM(1.0117, step10, 1.7));
 
-        ContinuousDistributionApproximation distX = new ContinuousDistributionApproximation(points, xDensity);
-        ContinuousDistributionApproximation distY = new ContinuousDistributionApproximation(points, yDensity);
+        ContinuousQuadratureRule distX = new ContinuousQuadratureRule(points, xDensity);
+        ContinuousQuadratureRule distY = new ContinuousQuadratureRule(points, yDensity);
 
         StockingLordMethod sl = new StockingLordMethod(irmX, irmY, distX, distY, EquatingCriterionType.Q1);
         sl.setPrecision(4);
@@ -1247,8 +1244,8 @@ public class StockingLordMethodTest {
         double[] param1 = new double[2];
         double[] param2 = new double[2];
 
-        UniformDistributionApproximation distX = new UniformDistributionApproximation(-4.0, 4.0, 161);//plink default
-        UniformDistributionApproximation distY = new UniformDistributionApproximation(-4.0, 4.0, 161);//plink default
+        UniformQuadratureRule distX = new UniformQuadratureRule(-4.0, 4.0, 161);//plink default
+        UniformQuadratureRule distY = new UniformQuadratureRule(-4.0, 4.0, 161);//plink default
 
         StockingLordMethod sl = new StockingLordMethod(itemFormX, itemFormY, distX, distY, EquatingCriterionType.Q1Q2);
         sl.setPrecision(6);
@@ -1419,8 +1416,8 @@ public class StockingLordMethodTest {
         double[] param1 = new double[2];
         double[] param2 = new double[2];
 
-        UniformDistributionApproximation distX = new UniformDistributionApproximation(-4.0, 4.0, 161);//plink default
-        UniformDistributionApproximation distY = new UniformDistributionApproximation(-4.0, 4.0, 161);//plink default
+        UniformQuadratureRule distX = new UniformQuadratureRule(-4.0, 4.0, 161);//plink default
+        UniformQuadratureRule distY = new UniformQuadratureRule(-4.0, 4.0, 161);//plink default
 
         StockingLordMethod sl = new StockingLordMethod(itemFormX, itemFormY, distX, distY, EquatingCriterionType.Q1Q2);
         sl.setPrecision(6);

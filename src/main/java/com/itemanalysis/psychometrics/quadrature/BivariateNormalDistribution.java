@@ -1,4 +1,4 @@
-package com.itemanalysis.psychometrics.distribution;
+package com.itemanalysis.psychometrics.quadrature;
 
 //****************************************************************************80
 
@@ -13,7 +13,7 @@ import org.apache.commons.math3.special.Erf;
 //  Discussion:
 //
 //    FXY is the probability that two variables A and B, which are
-//    related by a bivariate normal distribution with correlation R,
+//    related by a bivariate normal quadrature with correlation R,
 //    respectively satisfy A <= X and B <= Y.
 //
 //    Mathematica can evaluate the bivariate normal CDF via the commands:

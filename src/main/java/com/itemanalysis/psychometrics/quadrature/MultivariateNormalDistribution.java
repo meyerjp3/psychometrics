@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.itemanalysis.psychometrics.distribution;
+package com.itemanalysis.psychometrics.quadrature;
 
 import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
 import org.apache.commons.math3.analysis.MultivariateFunction;
@@ -50,7 +50,7 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
     private double idfTargetProb = 0.0;
 
     /**
-     * Constructor. The distribution will have a diagonal covariance matrix of
+     * Constructor. The quadrature will have a diagonal covariance matrix of
      * the same variance.
      *
      * @param mean mean vector.
@@ -75,7 +75,7 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
     }
 
     /**
-     * Creates a standard multivariate normal distribution with a diagonal covariance matrix
+     * Creates a standard multivariate normal quadrature with a diagonal covariance matrix
      * @param dim number of dimensions
      */
     public MultivariateNormalDistribution(int dim) {
@@ -105,7 +105,7 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
     }
 
     /**
-     * Constructor. The distribution will have a diagonal covariance matrix.
+     * Constructor. The quadrature will have a diagonal covariance matrix.
      * Each element has different variance.
      *
      * @param mean mean vector.
@@ -245,7 +245,7 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
     }
 
     /**
-     * Returns the scatter of distribution, which is defined as |&Sigma;|.
+     * Returns the scatter of quadrature, which is defined as |&Sigma;|.
      */
     public double scatter() {
         return sigmaDet;
@@ -588,7 +588,7 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
 //        c.priori = alpha;
 //        MultivariateGaussianDistribution g = new MultivariateGaussianDistribution(mean, cov);
 //        g.diagonal = diagonal;
-//        c.distribution = g;
+//        c.quadrature = g;
 //
 //        return c;
 //    }

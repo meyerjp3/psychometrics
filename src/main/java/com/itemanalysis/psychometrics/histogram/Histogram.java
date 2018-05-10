@@ -16,10 +16,9 @@
 package com.itemanalysis.psychometrics.histogram;
 
 
-import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
-import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
@@ -46,7 +45,7 @@ import java.util.Iterator;
  * @author J. Patrick Meyer
  *
  */
-public class Histogram implements DistributionApproximation {
+public class Histogram implements QuadratureRule {
 
     private int numberOfBins = 1;
 
@@ -307,7 +306,7 @@ public class Histogram implements DistributionApproximation {
     }
 
     /**
-     * Gets an array of evaluation points. This method is required by the {@link DistributionApproximation} interface.
+     * Gets an array of evaluation points. This method is required by the {@link QuadratureRule} interface.
      * The evaluation points are the bin midpoints.
      *
      * @return an array of evaluation points
@@ -325,7 +324,7 @@ public class Histogram implements DistributionApproximation {
     }
 
     /**
-     * Gets an array of value values. This method is required by the {@link DistributionApproximation} interface.
+     * Gets an array of value values. This method is required by the {@link QuadratureRule} interface.
      *
      * @return an array of value values.
      */
@@ -359,7 +358,7 @@ public class Histogram implements DistributionApproximation {
 
     /**
      * Gets an evaluation points at the specified index. This method is required by the
-     * {@link DistributionApproximation} interface. The evaluation points are the bin midpoints.
+     * {@link QuadratureRule} interface. The evaluation points are the bin midpoints.
      *
      * @param index array index of evaluation point.
      * @return an evaluation point.
@@ -371,7 +370,7 @@ public class Histogram implements DistributionApproximation {
 
     /**
      * Gets a value value at the specified index.  This method is required by the
-     * {@link DistributionApproximation} interface.
+     * {@link QuadratureRule} interface.
      *
      * @param index array index of value value.
      * @return value value.
@@ -420,7 +419,7 @@ public class Histogram implements DistributionApproximation {
 
     /**
      * Gets the number of evaluation points (and corresponding number of value values).
-     *  This method is required by the {@link DistributionApproximation} interface.
+     *  This method is required by the {@link QuadratureRule} interface.
      *
      * @return number of evaluation points.
      */
@@ -439,14 +438,14 @@ public class Histogram implements DistributionApproximation {
 
     /**
      * Uses current quadrature points and weights to compute the mean and standard deviation of the
-     * density, and tehn standardizes the distribution to have a mean of zero and a standard deviation of one.
+     * density, and tehn standardizes the quadrature to have a mean of zero and a standard deviation of one.
      * It achieves standardization in one of two possible ways. If keepPoints is true, the original points are
-     * retained and linear interpolation of the empiricial cumulative distribution is used to obtain the new
-     * weights. That is, the points are never changed, but the distribution is standardized. If keepPoints is
-     * false, the original weights are retained, but the points are transformed to standardize the distribution.
+     * retained and linear interpolation of the empiricial cumulative quadrature is used to obtain the new
+     * weights. That is, the points are never changed, but the quadrature is standardized. If keepPoints is
+     * false, the original weights are retained, but the points are transformed to standardize the quadrature.
      *
      * @param keepPoints if true original points are retained and weights are computed at these points using
-     *                   linear interpolation of the empirical cumulative distribution. If false, original weights
+     *                   linear interpolation of the empirical cumulative quadrature. If false, original weights
      *                   are retained and standardization is achieved by linearly transforming the original points.
      * @return transformation coefficients as a double array with two values used for the linear transformation of
      * the points. The first value is the slope and the second value is the intercept.
@@ -462,7 +461,7 @@ public class Histogram implements DistributionApproximation {
         double intercept = -slope*newMean;
         double[] coef = {slope, intercept};
 
-        //Keep points and change weights to standardize the distribution.
+        //Keep points and change weights to standardize the quadrature.
         if(keepPoints){
             //Transform points and compute cumulative sum of weights (i.e. cumulative probabilities)
             double[] x = new double[numberOfBins+2];
@@ -496,7 +495,7 @@ public class Histogram implements DistributionApproximation {
                 value[i] = interpolationFunction.value(points[i])-interpolationFunction.value(points[i-1]);
             }
         }
-        //Keep weights and linearly transform points to standardize the distribution
+        //Keep weights and linearly transform points to standardize the quadrature
         else{
             for(int i=0;i<numberOfBins;i++){
                 points[i] = points[i]*slope+intercept;

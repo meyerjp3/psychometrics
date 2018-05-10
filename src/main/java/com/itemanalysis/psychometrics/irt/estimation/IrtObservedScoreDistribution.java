@@ -15,14 +15,14 @@
  */
 package com.itemanalysis.psychometrics.irt.estimation;
 
-import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 
 import java.util.Arrays;
 import java.util.Formatter;
 
 /**
- * This class computes the distribution of summed scores for a given set of item response models.
+ * This class computes the quadrature of summed scores for a given set of item response models.
  * It uses the recursive algorithm developed by Thissen, et al. It assumes that test scores range
  * from 0 to the sum of the maximum points awarded by each item. The value of the test score is
  * also the index of the score in the array.
@@ -42,11 +42,11 @@ public class IrtObservedScoreDistribution {
     private int nPoints = 50;
     private int maxObservedScore = 0;
     private int maxPL1 = 0;
-    private DistributionApproximation latentDistribution = null;
+    private QuadratureRule latentDistribution = null;
     private double[][] L = null;
     private double[] summedScoreDensity = null;
 
-    public IrtObservedScoreDistribution(ItemResponseModel[] irm, DistributionApproximation latentDistribution){
+    public IrtObservedScoreDistribution(ItemResponseModel[] irm, QuadratureRule latentDistribution){
         this.irm = irm;
         this.nItems = irm.length;
         this.latentDistribution = latentDistribution;
@@ -63,7 +63,7 @@ public class IrtObservedScoreDistribution {
     }
 
     /**
-     * Computes the IRT observed score distribution for a test that contains only binary items.
+     * Computes the IRT observed score quadrature for a test that contains only binary items.
      * This recursive algorithm is described in the book Test Scoring.
      *
      * Thissen, D., and Wainer, H. (2001). Test scoring. Mahwah, NJ: Lawrence Erlbuam.
@@ -102,7 +102,7 @@ public class IrtObservedScoreDistribution {
     }
 
     /**
-     * Computes the IRT observed score distribution for a test that contains binary items, polytomous items, or
+     * Computes the IRT observed score quadrature for a test that contains binary items, polytomous items, or
      * binary and polytomous items. This method is preferred over computeAllBinaryItems() because it is more
      * general and can handle binary item, polytomous item, and mixed format tests. It is an implementation
      * of the recursive algorithm described in:
@@ -181,14 +181,14 @@ public class IrtObservedScoreDistribution {
         return maxPL1;
     }
 
-    public DistributionApproximation getLatentDistribution(){
+    public QuadratureRule getLatentDistribution(){
         return latentDistribution;
     }
 
     /**
      * Provides the probability of a summed score given a value of theta.
      *
-     * @param thetaIndex position of the quadrature point (latent distribution value) in the array.
+     * @param thetaIndex position of the quadrature point (latent quadrature value) in the array.
      * @param summedScore a summed score.
      * @return probability of a summed score.
      */

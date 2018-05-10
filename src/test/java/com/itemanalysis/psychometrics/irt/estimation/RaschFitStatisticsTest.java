@@ -1,6 +1,6 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
-import com.itemanalysis.psychometrics.distribution.NormalDistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.NormalQuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.Irm3PL;
 import org.junit.Test;
 
@@ -14,7 +14,7 @@ public class RaschFitStatisticsTest {
         Irm3PL rasch = new Irm3PL(0.0, 1.0);
         RaschFitStatistics fit = new RaschFitStatistics();
 
-        NormalDistributionApproximation norm = new NormalDistributionApproximation(-4.0, 4.0, 150);
+        NormalQuadratureRule norm = new NormalQuadratureRule(-4.0, 4.0, 150);
         double[] theta = norm.getPoints();
 
         for(int i=0;i<theta.length;i++){

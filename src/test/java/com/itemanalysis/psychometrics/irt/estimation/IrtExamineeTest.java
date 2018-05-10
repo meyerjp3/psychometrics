@@ -2,8 +2,8 @@ package com.itemanalysis.psychometrics.irt.estimation;
 
 
 import com.itemanalysis.psychometrics.data.VariableName;
-import com.itemanalysis.psychometrics.distribution.NormalDistributionApproximation;
-import com.itemanalysis.psychometrics.distribution.UserSuppliedDistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.NormalQuadratureRule;
+import com.itemanalysis.psychometrics.quadrature.UserSuppliedQuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.Irm3PL;
 import com.itemanalysis.psychometrics.irt.model.IrmGPCM;
 import com.itemanalysis.psychometrics.irt.model.IrmGPCM2;
@@ -269,7 +269,7 @@ public class IrtExamineeTest {
             eap = iVec.eapEstimate(0.0, 1.0, -6.0, 6.0, 40);//ICL defaults
             System.out.println("  EAP" + j + ": " + eap + " True EAP: " + trueEAP_mixed[j]);
 
-            //Not sure if ICL is using final quadrature or normal distribution values when computing EAP.
+            //Not sure if ICL is using final quadrature or normal quadrature values when computing EAP.
             // May be a reason for low accuracy of the results
             assertEquals("  EAP Test" + j, trueEAP_mixed[j], eap, 1e-4);
         }
@@ -298,7 +298,7 @@ public class IrtExamineeTest {
 
 
         IrtExaminee iVec = new IrtExaminee(irmArray);
-        UserSuppliedDistributionApproximation dist = new UserSuppliedDistributionApproximation(quad_point, quad_weight);
+        UserSuppliedQuadratureRule dist = new UserSuppliedQuadratureRule(quad_point, quad_weight);
 
         double eap = 0.0;
         double mle = 0.0;
@@ -349,7 +349,7 @@ public class IrtExamineeTest {
 
 
         IrtExaminee iVec = new IrtExaminee(irmArray);
-        UserSuppliedDistributionApproximation dist = new UserSuppliedDistributionApproximation(quad_point, quad_weight);
+        UserSuppliedQuadratureRule dist = new UserSuppliedQuadratureRule(quad_point, quad_weight);
 
         double eap = 0.0;
         double mle = 0.0;
@@ -443,7 +443,7 @@ public class IrtExamineeTest {
             irm[j] = pl3;
         }
 
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
+        NormalQuadratureRule latentDistribution = new NormalQuadratureRule(-4.0, 4.0, 40);
 
         //estimate person ability
         IrtExaminee irtExaminee = new IrtExaminee(irm);

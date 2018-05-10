@@ -59,9 +59,9 @@ public abstract class AbstractScoreReliability implements ScoreReliability,  Com
     }
 
     /**
-     * This confidence interval applies to Coefficient alpha because it has a known sampling distribution.
+     * This confidence interval applies to Coefficient alpha because it has a known sampling quadrature.
      * For other reliabilty methods it is only an approximation of the confidence interval because the
-     * sampling distribution of other reliability estimates is not known.
+     * sampling quadrature of other reliability estimates is not known.
      *
      * @return confidence interval as an array with the lower bound in position 0 and the upper bound in position 1.
      */

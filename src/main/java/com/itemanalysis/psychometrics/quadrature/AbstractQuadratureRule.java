@@ -13,21 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.itemanalysis.psychometrics.distribution;
+package com.itemanalysis.psychometrics.quadrature;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
-import java.util.Arrays;
-
-public abstract class AbstractDistributionApproximation implements DistributionApproximation{
+public abstract class AbstractQuadratureRule implements QuadratureRule {
 
     protected int numberOfPoints = 49;
-    protected double min = Double.NEGATIVE_INFINITY;
-    protected double max = Double.POSITIVE_INFINITY;
-    protected double range = Double.POSITIVE_INFINITY;
+    protected double min = -Double.MAX_VALUE;
+    protected double max = Double.MAX_VALUE;
+    protected double range = max-min;
     protected double step = 0;
     protected double[] points = null;//quadrature point
     protected double[] weights = null;//quadrature weight
@@ -181,9 +179,9 @@ public abstract class AbstractDistributionApproximation implements DistributionA
 //        double[] coef = {slope, intercept};
 //        double cumSum = 0;
 //
-//        //Keep points and change weights to standardize the distribution.
+//        //Keep points and change weights to standardize the quadrature.
 //        if(keepPoints) {
-//            //Compute empirical cumulative distribution function (ECDF)
+//            //Compute empirical cumulative quadrature function (ECDF)
 //            double[] x = new double[numberOfPoints];
 //            double[] w = new double[numberOfPoints];
 //            for (int i = 0; i < numberOfPoints; i++) {
@@ -196,7 +194,7 @@ public abstract class AbstractDistributionApproximation implements DistributionA
 //                weights[i] = ecdfToProbability(points[i], x, w);
 //            }
 //        }
-//        //Keep weights and linearly transform points to standardize the distribution
+//        //Keep weights and linearly transform points to standardize the quadrature
 //        else{
 //            for(int i=0;i<numberOfPoints;i++){
 //                points[i] = points[i]*slope+intercept;
@@ -209,14 +207,14 @@ public abstract class AbstractDistributionApproximation implements DistributionA
 
     /**
      * Uses current quadrature points and weights to compute the mean and standard deviation of the
-     * density, and then standardizes the distribution to have a mean of zero and a standard deviation of one.
+     * density, and then standardizes the quadrature to have a mean of zero and a standard deviation of one.
      * It achieves standardization in one of two possible ways. If keepPoints is true, the original points are
-     * retained and linear interpolation of the empiricial cumulative distribution is used to obtain the new
-     * weights. That is, the points are never changed, but the distribution is standardized. If keepPoints is
-     * false, the original weights are retained, but the points are transformed to standardize the distribution.
+     * retained and linear interpolation of the empiricial cumulative quadrature is used to obtain the new
+     * weights. That is, the points are never changed, but the quadrature is standardized. If keepPoints is
+     * false, the original weights are retained, but the points are transformed to standardize the quadrature.
      *
      * @param keepPoints if true original points are retained and weights are computed at these points using
-     *                   linear interpolation of the empirical cumulative distribution. If false, original weights
+     *                   linear interpolation of the empirical cumulative quadrature. If false, original weights
      *                   are retained and standardization is achieved by linearly transforming the original points.
      * @return transformation coefficients as a double array with two values used for the linear transformation of
      * the points. The first value is the slope and the second value is the intercept.
@@ -232,7 +230,7 @@ public abstract class AbstractDistributionApproximation implements DistributionA
         double intercept = -slope*newMean;
         double[] coef = {intercept, slope};
 
-        //Keep points and change weights to standardize the distribution.
+        //Keep points and change weights to standardize the quadrature.
         if(keepPoints){
             //Transform points and compute cumulative sum of weights (i.e. cumulative probabilities)
             double[] x = new double[numberOfPoints+2];
@@ -265,7 +263,7 @@ public abstract class AbstractDistributionApproximation implements DistributionA
                 weights[i] = interpolationFunction.value(points[i])-interpolationFunction.value(points[i-1]);
             }
         }
-        //Keep weights and linearly transform points to standardize the distribution
+        //Keep weights and linearly transform points to standardize the quadrature
         else{
             for(int i=0;i<numberOfPoints;i++){
                 points[i] = points[i]*slope+intercept;

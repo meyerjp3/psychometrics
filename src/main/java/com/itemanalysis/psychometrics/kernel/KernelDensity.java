@@ -15,14 +15,13 @@
  */
 package com.itemanalysis.psychometrics.kernel;
 
-import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
-import com.itemanalysis.psychometrics.distribution.UniformDistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
+import com.itemanalysis.psychometrics.quadrature.UniformQuadratureRule;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
-import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
 
-public class KernelDensity implements DistributionApproximation {
+public class KernelDensity implements QuadratureRule {
 
 	private KernelFunction kernel = null;
 
@@ -57,7 +56,7 @@ public class KernelDensity implements DistributionApproximation {
     //Cubic spline interpolator
     private UnivariateFunction interpolationFunction = null;
 
-	public KernelDensity(KernelFunction kernel, Bandwidth h, UniformDistributionApproximation uniform){
+	public KernelDensity(KernelFunction kernel, Bandwidth h, UniformQuadratureRule uniform){
         this.kernel = kernel;
         this.bandwidth = h;
         this.h = h.value();
@@ -223,14 +222,14 @@ public class KernelDensity implements DistributionApproximation {
 
     /**
      * Uses current quadrature points and weights to compute the mean and standard deviation of the
-     * density, and tehn standardizes the distribution to have a mean of zero and a standard deviation of one.
+     * density, and tehn standardizes the quadrature to have a mean of zero and a standard deviation of one.
      * It achieves standardization in one of two possible ways. If keepPoints is true, the original points are
-     * retained and linear interpolation of the empiricial cumulative distribution is used to obtain the new
-     * weights. That is, the points are never changed, but the distribution is standardized. If keepPoints is
-     * false, the original weights are retained, but the points are transformed to standardize the distribution.
+     * retained and linear interpolation of the empiricial cumulative quadrature is used to obtain the new
+     * weights. That is, the points are never changed, but the quadrature is standardized. If keepPoints is
+     * false, the original weights are retained, but the points are transformed to standardize the quadrature.
      *
      * @param keepPoints if true original points are retained and weights are computed at these points using
-     *                   linear interpolation of the empirical cumulative distribution. If false, original weights
+     *                   linear interpolation of the empirical cumulative quadrature. If false, original weights
      *                   are retained and standardization is achieved by linearly transforming the original points.
      * @return transformation coefficients as a double array with two values used for the linear transformation of
      * the points. The first value is the slope and the second value is the intercept.
@@ -246,7 +245,7 @@ public class KernelDensity implements DistributionApproximation {
         double intercept = -slope*newMean;
         double[] coef = {slope, intercept};
 
-        //Keep points and change weights to standardize the distribution.
+        //Keep points and change weights to standardize the quadrature.
         if(keepPoints){
             //Transform points and compute cumulative sum of weights (i.e. cumulative probabilities)
             double[] x = new double[numPoints+2];
@@ -280,7 +279,7 @@ public class KernelDensity implements DistributionApproximation {
                 density[i] = interpolationFunction.value(points[i])-interpolationFunction.value(points[i-1]);
             }
         }
-        //Keep weights and linearly transform points to standardize the distribution
+        //Keep weights and linearly transform points to standardize the quadrature
         else{
             for(int i=0;i<numPoints;i++){
                 points[i] = points[i]*slope+intercept;

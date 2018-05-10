@@ -13,33 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.itemanalysis.psychometrics.distribution;
+package com.itemanalysis.psychometrics.quadrature;
 
 public interface MultivariateDistribution {
 
     /**
-     * The number of parameters of the distribution.
+     * The number of parameters of the quadrature.
      */
     public int npara();
 
     /**
-     * Shannon entropy of the distribution.
+     * Shannon entropy of the quadrature.
      */
     public double entropy();
 
     /**
-     * The mean vector of distribution.
+     * The mean vector of quadrature.
      */
     public double[] mean();
 
     /**
-     * The covariance matrix of distribution.
+     * The covariance matrix of quadrature.
      */
     public double[][] cov();
 
     /**
-     * The probability density function for continuous distribution
-     * or probability mass function for discrete distribution at x.
+     * The probability density function for continuous quadrature
+     * or probability mass function for discrete quadrature at x.
      */
     public double pdf(double[] x);
 
@@ -49,19 +49,19 @@ public interface MultivariateDistribution {
     public double logp(double[] x);
 
     /**
-     * Cumulative distribution function. That is the probability to the left of x.
+     * Cumulative quadrature function. That is the probability to the left of x.
      */
     public double cdf(double[] x);
 
     /**
-     * The likelihood of the sample set following this distribution.
+     * The likelihood of the sample set following this quadrature.
      *
      * @param x sample set. Each row is a sample.
      */
     public double likelihood(double[][] x);
 
     /**
-     * The log likelihood of the sample set following this distribution.
+     * The log likelihood of the sample set following this quadrature.
      *
      * @param x sample set. Each row is a sample.
      */

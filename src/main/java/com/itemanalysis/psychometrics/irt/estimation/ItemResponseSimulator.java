@@ -54,7 +54,7 @@ public class ItemResponseSimulator {
 
     /**
      * Allows users to specify the number of examinee ability parameters that will be drawn from
-     * a standrad normal distribution. It also allows the user to provide the item response models.
+     * a standrad normal quadrature. It also allows the user to provide the item response models.
      *
      * @param nPeople number of examinee ability parameter to create.
      * @param irm an array of item response models.
@@ -69,7 +69,7 @@ public class ItemResponseSimulator {
     }
 
     /**
-     * Creates an array of examinee ability parameters using random draws from a standard normal distribution.
+     * Creates an array of examinee ability parameters using random draws from a standard normal quadrature.
      */
     private void drawSimulees(){
         theta = new double[nPeople];

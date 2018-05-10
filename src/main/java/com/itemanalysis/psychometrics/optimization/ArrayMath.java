@@ -1274,7 +1274,7 @@ public class ArrayMath {
      * Makes the values in this array sum to 1.0. Does it in place.
      * If the total is 0.0, throws a RuntimeException.
      * If the total is Double.NEGATIVE_INFINITY, then it replaces the
-     * array with a normalized uniform distribution. CDM: This last bit is
+     * array with a normalized uniform quadrature. CDM: This last bit is
      * weird!  Do we really want that?
      */
     public static void logNormalize(double[] a) {
@@ -1291,10 +1291,10 @@ public class ArrayMath {
     }
 
     /**
-     * Samples from the distribution over values 0 through d.length given by d.
-     * Assumes that the distribution sums to 1.0.
+     * Samples from the quadrature over values 0 through d.length given by d.
+     * Assumes that the quadrature sums to 1.0.
      *
-     * @param d the distribution to sample from
+     * @param d the quadrature to sample from
      * @return a value from 0 to d.length
      */
     public static int sampleFromDistribution(double[] d) {
@@ -1302,10 +1302,10 @@ public class ArrayMath {
     }
 
     /**
-     * Samples from the distribution over values 0 through d.length given by d.
-     * Assumes that the distribution sums to 1.0.
+     * Samples from the quadrature over values 0 through d.length given by d.
+     * Assumes that the quadrature sums to 1.0.
      *
-     * @param d the distribution to sample from
+     * @param d the quadrature to sample from
      * @return a value from 0 to d.length
      */
     public static int sampleFromDistribution(double[] d, Random random) {
@@ -1326,10 +1326,10 @@ public class ArrayMath {
     }
 
     /**
-     * Samples from the distribution over values 0 through d.length given by d.
-     * Assumes that the distribution sums to 1.0.
+     * Samples from the quadrature over values 0 through d.length given by d.
+     * Assumes that the quadrature sums to 1.0.
      *
-     * @param d the distribution to sample from
+     * @param d the quadrature to sample from
      * @return a value from 0 to d.length
      */
     public static int sampleFromDistribution(float[] d, Random random) {

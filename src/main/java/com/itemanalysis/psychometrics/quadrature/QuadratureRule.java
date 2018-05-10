@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.itemanalysis.psychometrics.distribution;
+package com.itemanalysis.psychometrics.quadrature;
 
 /**
- * An interface for distribution approximations such as those used for quadrature points and weights in
+ * An interface for quadrature approximations such as those used for quadrature points and weights in
  * numeric integration. Each approximation has an array of evaluation points (x-axis) and an array
  * of density values (y-axis). The minimum and maximum values and the number of evaluation points
  * (and corresponding density values) are usually provided by the user.
  *
  */
-public interface DistributionApproximation {
+public interface QuadratureRule {
 
     /**
      * Gets an array of evaluation points.

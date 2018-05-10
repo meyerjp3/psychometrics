@@ -16,10 +16,9 @@
 package com.itemanalysis.psychometrics.irt.equating;
 
 import com.itemanalysis.psychometrics.data.VariableName;
-import com.itemanalysis.psychometrics.distribution.ContinuousDistributionApproximation;
-import com.itemanalysis.psychometrics.distribution.NormalDistributionApproximation;
-import com.itemanalysis.psychometrics.distribution.UniformDistributionApproximation;
-import com.itemanalysis.psychometrics.distribution.UserSuppliedDistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.ContinuousQuadratureRule;
+import com.itemanalysis.psychometrics.quadrature.NormalQuadratureRule;
+import com.itemanalysis.psychometrics.quadrature.UniformQuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.*;
 import com.itemanalysis.psychometrics.optimization.BOBYQAOptimizer;
 import com.itemanalysis.psychometrics.uncmin.DefaultUncminOptimizer;
@@ -93,8 +92,8 @@ public class HaebaraMethodTest {
         double[] points = {-4.0000, -3.1110, -2.2220, -1.3330, -0.4444, 0.4444, 1.3330, 2.2220, 3.1110, 4.0000};
         double[] xDensity = {0.0001008, 0.002760, 0.03021, 0.1420, 0.3149, 0.3158, 0.1542, 0.03596, 0.003925, 0.0001862};
         double[] yDensity = {0.0001173, 0.003242, 0.03449, 0.1471, 0.3148, 0.3110, 0.1526, 0.03406, 0.002510, 0.0001116};
-        ContinuousDistributionApproximation distX = new ContinuousDistributionApproximation(points, xDensity);
-        ContinuousDistributionApproximation distY = new ContinuousDistributionApproximation(points, yDensity);
+        ContinuousQuadratureRule distX = new ContinuousQuadratureRule(points, xDensity);
+        ContinuousQuadratureRule distY = new ContinuousQuadratureRule(points, yDensity);
 
         HaebaraMethod hb = new HaebaraMethod(irmX, irmY, distX, distY, EquatingCriterionType.Q1Q2);
         hb.setPrecision(6);
@@ -143,7 +142,7 @@ public class HaebaraMethodTest {
             irmY.put(name, irm);
         }
 
-        UniformDistributionApproximation uniform = new UniformDistributionApproximation(-4, 4, 10);
+        UniformQuadratureRule uniform = new UniformQuadratureRule(-4, 4, 10);
 
         HaebaraMethod hb = new HaebaraMethod(irmX, irmY, uniform, uniform, EquatingCriterionType.Q1Q2);
         hb.setPrecision(4);
@@ -192,7 +191,7 @@ public class HaebaraMethodTest {
             irmY.put(name, irm);
         }
 
-        NormalDistributionApproximation normal = new NormalDistributionApproximation(0, 1, -4, 4, 10);
+        NormalQuadratureRule normal = new NormalQuadratureRule(0, 1, -4, 4, 10);
 
         HaebaraMethod hb = new HaebaraMethod(irmX, irmY, normal, normal, EquatingCriterionType.Q1Q2);
         hb.setPrecision(4);
@@ -241,8 +240,8 @@ public class HaebaraMethodTest {
             irmY.put(name, irm);
         }
 
-        ContinuousDistributionApproximation distX = new ContinuousDistributionApproximation(points, xDensity);
-        ContinuousDistributionApproximation distY = new ContinuousDistributionApproximation(points, yDensity);
+        ContinuousQuadratureRule distX = new ContinuousQuadratureRule(points, xDensity);
+        ContinuousQuadratureRule distY = new ContinuousQuadratureRule(points, yDensity);
 
         HaebaraMethod hb = new HaebaraMethod(irmX, irmY, distX, distY, EquatingCriterionType.Q1);
         hb.setPrecision(4);
@@ -339,7 +338,7 @@ public class HaebaraMethodTest {
         double[] step5Y = {0.0, 2.645241,  1.536046,  0.748514};
         irmY.put(new VariableName("v17"), new IrmGPCM(0.669612, step5Y, 1.7));
 
-        UniformDistributionApproximation uniform = new UniformDistributionApproximation(-3.0, 3.0, 25);
+        UniformQuadratureRule uniform = new UniformQuadratureRule(-3.0, 3.0, 25);
 
         HaebaraMethod hb = new HaebaraMethod(irmX, irmY, uniform, uniform, EquatingCriterionType.Q1Q2);
         hb.setPrecision(4);
@@ -436,7 +435,7 @@ public class HaebaraMethodTest {
         double[] step5Y = {1.001974, -0.107221, -0.894753};
         irmY.put(new VariableName("v17"), new IrmGPCM2(0.669612, 1.643267, step5Y, 1.7));
 
-        UniformDistributionApproximation uniform = new UniformDistributionApproximation(-3.0, 3.0, 25);
+        UniformQuadratureRule uniform = new UniformQuadratureRule(-3.0, 3.0, 25);
 
         HaebaraMethod hb = new HaebaraMethod(irmX, irmY, uniform, uniform, EquatingCriterionType.Q1Q2);
         hb.setPrecision(4);
@@ -530,7 +529,7 @@ public class HaebaraMethodTest {
         double[] step10 = {-1.9355, -0.2267, 1.88991};
         irmY.put(new VariableName("v15"), new IrmGRM(1.0117, step10, 1.7));
 
-        UniformDistributionApproximation uniform = new UniformDistributionApproximation(-3.0, 3.0, 25);
+        UniformQuadratureRule uniform = new UniformQuadratureRule(-3.0, 3.0, 25);
 
         HaebaraMethod hb = new HaebaraMethod(irmX, irmY, uniform, uniform, EquatingCriterionType.Q1Q2);
         hb.setPrecision(4);
@@ -624,8 +623,8 @@ public class HaebaraMethodTest {
         double[] step10 = {-1.9355, -0.2267, 1.88991};
         irmY.put(new VariableName("v15"), new IrmGRM(1.0117, step10, 1.7));
 
-        ContinuousDistributionApproximation distX = new ContinuousDistributionApproximation(points, xDensity);
-        ContinuousDistributionApproximation distY = new ContinuousDistributionApproximation(points, yDensity);
+        ContinuousQuadratureRule distX = new ContinuousQuadratureRule(points, xDensity);
+        ContinuousQuadratureRule distY = new ContinuousQuadratureRule(points, yDensity);
 
         HaebaraMethod hb = new HaebaraMethod(irmX, irmY, distX, distY, EquatingCriterionType.Q1Q2);
         hb.setPrecision(4);
@@ -719,8 +718,8 @@ public class HaebaraMethodTest {
         double[] step10 = {-1.9355, -0.2267, 1.88991};
         irmY.put(new VariableName("v15"), new IrmGRM(1.0117, step10, 1.7));
 
-        ContinuousDistributionApproximation distX = new ContinuousDistributionApproximation(points, xDensity);
-        ContinuousDistributionApproximation distY = new ContinuousDistributionApproximation(points, yDensity);
+        ContinuousQuadratureRule distX = new ContinuousQuadratureRule(points, xDensity);
+        ContinuousQuadratureRule distY = new ContinuousQuadratureRule(points, yDensity);
 
         HaebaraMethod hb = new HaebaraMethod(irmX, irmY, distX, distY, EquatingCriterionType.Q1);
         hb.setPrecision(4);
@@ -786,8 +785,8 @@ public class HaebaraMethodTest {
         double[] param1 = new double[2];
         double[] param2 = new double[2];
 
-        UniformDistributionApproximation distX = new UniformDistributionApproximation(-4.0, 4.0, 161);//plink default
-        UniformDistributionApproximation distY = new UniformDistributionApproximation(-4.0, 4.0, 161);//plink default
+        UniformQuadratureRule distX = new UniformQuadratureRule(-4.0, 4.0, 161);//plink default
+        UniformQuadratureRule distY = new UniformQuadratureRule(-4.0, 4.0, 161);//plink default
 
         HaebaraMethod hb = new HaebaraMethod(itemFormX, itemFormY, distX, distY, EquatingCriterionType.Q1Q2);
         hb.setPrecision(6);
@@ -933,8 +932,8 @@ public class HaebaraMethodTest {
         double[] param1 = new double[2];
         double[] param2 = new double[2];
 
-        UniformDistributionApproximation distX = new UniformDistributionApproximation(-4.0, 4.0, 161);//plink default
-        UniformDistributionApproximation distY = new UniformDistributionApproximation(-4.0, 4.0, 161);//plink default
+        UniformQuadratureRule distX = new UniformQuadratureRule(-4.0, 4.0, 161);//plink default
+        UniformQuadratureRule distY = new UniformQuadratureRule(-4.0, 4.0, 161);//plink default
 
         HaebaraMethod hb = new HaebaraMethod(itemFormX, itemFormY, distX, distY, EquatingCriterionType.Q1Q2);
         hb.setPrecision(6);

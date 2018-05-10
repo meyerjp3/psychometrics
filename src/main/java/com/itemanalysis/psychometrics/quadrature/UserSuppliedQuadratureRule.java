@@ -13,30 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.itemanalysis.psychometrics.distribution;
+package com.itemanalysis.psychometrics.quadrature;
 
 import org.apache.commons.math3.util.ResizableDoubleArray;
 
 import java.util.Formatter;
 
 /**
- * A distribution approximation that allows the user to provide the evaluation points and the density values.
+ * A quadrature approximation that allows the user to provide the evaluation points and the density values.
  * This is a class that can be used for numeric integration with user provided quadrature points and weights.
  */
 @Deprecated
-public final class UserSuppliedDistributionApproximation extends AbstractDistributionApproximation{
+public final class UserSuppliedQuadratureRule extends AbstractQuadratureRule {
 
     private ResizableDoubleArray pointsStore = new ResizableDoubleArray();
     private ResizableDoubleArray densityStore = new ResizableDoubleArray();
 
     /**
-     * Create the distribution approximation with an array of evaluation points and an array of density values
+     * Create the quadrature approximation with an array of evaluation points and an array of density values
      * provided by the user.
      *
      * @param points array of evaluation points.
      * @param density array of density values.
      */
-    public UserSuppliedDistributionApproximation(double[] points, double[] density){
+    public UserSuppliedQuadratureRule(double[] points, double[] density){
         this.pointsStore.addElements(points);
         this.densityStore.addElements(density);
         this.numberOfPoints = points.length;
@@ -45,11 +45,11 @@ public final class UserSuppliedDistributionApproximation extends AbstractDistrib
     }
 
     /**
-     * Creates the distribution approximation with no evaluation points or density values. This constructor
+     * Creates the quadrature approximation with no evaluation points or density values. This constructor
      * is useful when the evaluation points and weights are provided incrementally with {@link #increment(double)}
      * or {@link #increment(double)};
      */
-    public UserSuppliedDistributionApproximation(){
+    public UserSuppliedQuadratureRule(){
         points = new double[numberOfPoints];
         weights = new double[numberOfPoints];
     }

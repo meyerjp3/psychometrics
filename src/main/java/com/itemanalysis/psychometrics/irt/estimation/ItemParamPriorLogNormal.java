@@ -18,7 +18,7 @@ package com.itemanalysis.psychometrics.irt.estimation;
 import org.apache.commons.math3.util.Precision;
 
 /**
- * Implementation of an ItemParamPrior for the LogNormal distribution. This class is a translation
+ * Implementation of an ItemParamPrior for the LogNormal quadrature. This class is a translation
  * of ItemParamPriorLogNormal.cpp in Brad Hanson's ETIRM library, Copyright (c) 2000, Bradley A. Hanson.
  */
 public class ItemParamPriorLogNormal implements ItemParamPrior {
@@ -28,7 +28,7 @@ public class ItemParamPriorLogNormal implements ItemParamPrior {
 
 
     /**
-     * Constructor for the standard lognormal distribution
+     * Constructor for the standard lognormal quadrature
      */
     public ItemParamPriorLogNormal(){
         this(0.0, 1.0);
@@ -81,7 +81,7 @@ public class ItemParamPriorLogNormal implements ItemParamPrior {
      * @return
      */
     public double logDensity(double p){
-        //Check for value outside limits of distribution
+        //Check for value outside limits of quadrature
         if (zeroDensity(p)){
             return Double.MIN_VALUE;
         }
@@ -100,7 +100,7 @@ public class ItemParamPriorLogNormal implements ItemParamPrior {
      * @return
      */
     public double logDensityDeriv1(double p){
-       //Outside limits of distribution density does not change, so derivative is zero
+       //Outside limits of quadrature density does not change, so derivative is zero
         if (zeroDensity(p)) return 0.0;
         double value = Math.log(p) - parameters[0] + variance;
         value /= variance * p;
@@ -114,7 +114,7 @@ public class ItemParamPriorLogNormal implements ItemParamPrior {
      * @return
      */
     public double logDensityDeriv2(double p){
-       //Outside limits of distribution density does not change, so derivative is zero
+       //Outside limits of quadrature density does not change, so derivative is zero
         if (zeroDensity(p)) return 0.0;
         double value = Math.log(p) - parameters[0] + variance - 1.0;
         value /= p * p * variance;

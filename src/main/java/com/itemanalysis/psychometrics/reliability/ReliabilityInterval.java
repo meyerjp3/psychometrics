@@ -21,7 +21,7 @@ import java.util.Formatter;
 
 /**
  *
- * Confidence interval is based on the sampling distribution derived for
+ * Confidence interval is based on the sampling quadrature derived for
  * Cronbach's alpha. It may or may not be appropriate for other methods
  * of estimating reliability.
  *

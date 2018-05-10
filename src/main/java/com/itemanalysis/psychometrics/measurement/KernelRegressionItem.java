@@ -16,7 +16,7 @@
 package com.itemanalysis.psychometrics.measurement;
 
 import com.itemanalysis.psychometrics.data.VariableAttributes;
-import com.itemanalysis.psychometrics.distribution.UniformDistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.UniformQuadratureRule;
 import com.itemanalysis.psychometrics.kernel.Bandwidth;
 import com.itemanalysis.psychometrics.kernel.KernelFunction;
 import com.itemanalysis.psychometrics.kernel.KernelRegression;
@@ -33,11 +33,11 @@ public class KernelRegressionItem {
 
     private Bandwidth bandwidth = null;
 
-    private UniformDistributionApproximation uniform = null;
+    private UniformQuadratureRule uniform = null;
 
     private KernelRegression expectedScore = null;
 
-    public KernelRegressionItem(VariableAttributes variableAttributes, KernelFunction kernel, Bandwidth bandwidth, UniformDistributionApproximation uniform){
+    public KernelRegressionItem(VariableAttributes variableAttributes, KernelFunction kernel, Bandwidth bandwidth, UniformQuadratureRule uniform){
         this.variableAttributes = variableAttributes;
         this.kernel = kernel;
         this.bandwidth = bandwidth;

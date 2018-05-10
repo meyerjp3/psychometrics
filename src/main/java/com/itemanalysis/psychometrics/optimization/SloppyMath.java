@@ -423,7 +423,7 @@ public final class SloppyMath {
     }
 
     /**
-     * Find a hypergeometric distribution.  This uses exact math, trying
+     * Find a hypergeometric quadrature.  This uses exact math, trying
      * fairly hard to avoid numeric overflow by interleaving
      * multiplications and divisions.
      * (To do: make it even better at avoiding overflow, by using loops
@@ -697,7 +697,7 @@ public final class SloppyMath {
     }
 
     /**
-     * Tests the hypergeometric distribution code, or other functions
+     * Tests the hypergeometric quadrature code, or other functions
      * provided in this module.
      *
      * @param args Either none, and the log add rountines are tested, or the

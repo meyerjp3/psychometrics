@@ -16,7 +16,7 @@
 package com.itemanalysis.psychometrics.irt.equating;
 
 import com.itemanalysis.psychometrics.data.VariableName;
-import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.IrmType;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.optimization.BOBYQAOptimizer;
@@ -39,8 +39,8 @@ public class IrtScaleLinking {
 
     private LinkedHashMap<VariableName, ItemResponseModel> itemFormX = null;
     private LinkedHashMap<VariableName, ItemResponseModel> itemFormY = null;
-    private DistributionApproximation distX = null;
-    private DistributionApproximation distY = null;
+    private QuadratureRule distX = null;
+    private QuadratureRule distY = null;
     private int precision = 4;
     private boolean useUncmin = true;
     private boolean raschFamily = false;
@@ -55,7 +55,7 @@ public class IrtScaleLinking {
 
 
     public IrtScaleLinking(LinkedHashMap<VariableName, ItemResponseModel> itemFormX, LinkedHashMap<VariableName, ItemResponseModel> itemFormY,
-                           DistributionApproximation distX, DistributionApproximation distY, boolean populationSd){
+                           QuadratureRule distX, QuadratureRule distY, boolean populationSd){
         this.itemFormX = itemFormX;
         this.itemFormY = itemFormY;
         this.distX = distX;
@@ -69,7 +69,7 @@ public class IrtScaleLinking {
     }
 
     public IrtScaleLinking(LinkedHashMap<VariableName, ItemResponseModel> itemFormX, LinkedHashMap<VariableName, ItemResponseModel> itemFormY,
-                           DistributionApproximation distX, DistributionApproximation distY){
+                           QuadratureRule distX, QuadratureRule distY){
         this(itemFormX, itemFormY, distX, distY, true);
     }
 

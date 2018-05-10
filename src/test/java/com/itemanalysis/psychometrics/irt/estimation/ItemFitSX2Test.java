@@ -1,7 +1,7 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.data.VariableName;
-import com.itemanalysis.psychometrics.distribution.NormalDistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.NormalQuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.Irm3PL;
 import com.itemanalysis.psychometrics.irt.model.IrmGPCM;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
@@ -56,9 +56,9 @@ public class ItemFitSX2Test {
         double quadPoints = 41;
         double min = -.8 * Math.sqrt(quadPoints);
         double max = -1*min;
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(min, max, (int)quadPoints);
+        NormalQuadratureRule latentDistribution = new NormalQuadratureRule(min, max, (int)quadPoints);
 
-        //IRT observed score distribution
+        //IRT observed score quadrature
         IrtObservedScoreCollection obsScoreCollection = new IrtObservedScoreCollection(irm, latentDistribution);
         IrtObservedScoreDistribution mainScoreDistribution = obsScoreCollection.getIrtObservedScoreDistribution();
 
@@ -142,9 +142,9 @@ public class ItemFitSX2Test {
         double quadPoints = 41;
         double min = -.8 * Math.sqrt(quadPoints);
         double max = -1*min;
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(min, max, (int)quadPoints);
+        NormalQuadratureRule latentDistribution = new NormalQuadratureRule(min, max, (int)quadPoints);
 
-        //IRT observed score distribution
+        //IRT observed score quadrature
         IrtObservedScoreCollection obsScoreCollection = new IrtObservedScoreCollection(irm, latentDistribution);
         IrtObservedScoreDistribution mainScoreDistribution = obsScoreCollection.getIrtObservedScoreDistribution();
 
@@ -222,9 +222,9 @@ public class ItemFitSX2Test {
         double quadPoints = 41;
         double min = -.8 * Math.sqrt(quadPoints);
         double max = -1*min;
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(min, max, (int)quadPoints);
+        NormalQuadratureRule latentDistribution = new NormalQuadratureRule(min, max, (int)quadPoints);
 
-        //IRT observed score distribution
+        //IRT observed score quadrature
         IrtObservedScoreCollection obsScoreCollection = new IrtObservedScoreCollection(irm, latentDistribution);
         IrtObservedScoreDistribution mainScoreDistribution = obsScoreCollection.getIrtObservedScoreDistribution();
 

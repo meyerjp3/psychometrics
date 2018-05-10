@@ -1,7 +1,7 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.data.VariableName;
-import com.itemanalysis.psychometrics.distribution.NormalDistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.NormalQuadratureRule;
 import com.itemanalysis.psychometrics.histogram.Cut;
 import com.itemanalysis.psychometrics.irt.model.Irm3PL;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
@@ -94,7 +94,7 @@ public class ItemFitG2Test {
         }
 
         //Estimate person ability using EAP
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(-4.0, 4.0, 40);
+        NormalQuadratureRule latentDistribution = new NormalQuadratureRule(-4.0, 4.0, 40);
         double[] eap = new double[responseData.length];
         IrtExaminee irtExaminee = new IrtExaminee(irm);
 

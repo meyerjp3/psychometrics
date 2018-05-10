@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.itemanalysis.psychometrics.distribution;
+package com.itemanalysis.psychometrics.quadrature;
 
 import org.apache.commons.math3.stat.descriptive.rank.Max;
 import org.apache.commons.math3.stat.descriptive.rank.Min;
@@ -21,39 +21,39 @@ import org.apache.commons.math3.stat.descriptive.rank.Min;
 import java.util.Formatter;
 
 /**
- * A class that provides a discrete approximation of a univariate continuous probability distribution.
- * Initial values may be from a normal distribution or a uniform distribution. The points and weights
- * may be updated, which may result in something other than a normal or uniform distribution (i.e. an
- * empirical histogram). Methods allow the distribution to be standardized to have a mean of zero and
+ * A class that provides a discrete approximation of a univariate continuous probability quadrature.
+ * Initial values may be from a normal quadrature or a uniform quadrature. The points and weights
+ * may be updated, which may result in something other than a normal or uniform quadrature (i.e. an
+ * empirical histogram). Methods allow the quadrature to be standardized to have a mean of zero and
  * a standard deviaiton of one.
  *
  */
-public class ContinuousDistributionApproximation extends AbstractDistributionApproximation{
+public class ContinuousQuadratureRule extends AbstractQuadratureRule {
 
     /**
-     * Constructor for using starting values from a uniform distribution. Points and weight may be updated to
+     * Constructor for using starting values from a uniform quadrature. Points and weight may be updated to
      * something other than normal.
      *
      * @param numberOfPoints number of qudrature points
      * @param min minimum quadrature point
      * @param max maximum qudrature point
      */
-    public ContinuousDistributionApproximation(int numberOfPoints, double min, double max){
+    public ContinuousQuadratureRule(int numberOfPoints, double min, double max){
         initialize(numberOfPoints, min, max);
         this.setUniformPointsAndWeights();
     }
 
     /**
-     * Constructor for using starting values from a normal distribution. Points and weight may be updated to
+     * Constructor for using starting values from a normal quadrature. Points and weight may be updated to
      * something other than normal.
      *
      * @param numberOfPoints number of qudrature points
      * @param min minimum quadrature point
      * @param max maximum qudrature point
-     * @param mean mean of normal distribution for starting values.
-     * @param standardDeviation standard deviation of normal distribution for starting values.
+     * @param mean mean of normal quadrature for starting values.
+     * @param standardDeviation standard deviation of normal quadrature for starting values.
      */
-    public ContinuousDistributionApproximation(int numberOfPoints, double min, double max, double mean, double standardDeviation){
+    public ContinuousQuadratureRule(int numberOfPoints, double min, double max, double mean, double standardDeviation){
         initialize(numberOfPoints, min, max);
         this.setNormalPointsAndWeights(mean, standardDeviation);
     }
@@ -64,7 +64,7 @@ public class ContinuousDistributionApproximation extends AbstractDistributionApp
      * @param points discrete real points
      * @param weights weights for the points
      */
-    public ContinuousDistributionApproximation(double[] points, double[] weights){
+    public ContinuousQuadratureRule(double[] points, double[] weights){
         Min min = new Min();
         Max max = new Max();
 

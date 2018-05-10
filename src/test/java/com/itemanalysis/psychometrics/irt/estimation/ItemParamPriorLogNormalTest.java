@@ -1,9 +1,6 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
-import com.itemanalysis.psychometrics.distribution.UniformDistributionApproximation;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import com.itemanalysis.psychometrics.quadrature.UniformQuadratureRule;
 
 public class ItemParamPriorLogNormalTest {
 
@@ -11,7 +8,7 @@ public class ItemParamPriorLogNormalTest {
     public void logDensityTest(){
         System.out.println("ItemParamPriorLogNormal: log density test");
 
-        UniformDistributionApproximation uniform = new UniformDistributionApproximation(-6, 6, 50);
+        UniformQuadratureRule uniform = new UniformQuadratureRule(-6, 6, 50);
         ItemParamPriorLogNormal dlnorm = new ItemParamPriorLogNormal(0.0, 0.5);
 
 

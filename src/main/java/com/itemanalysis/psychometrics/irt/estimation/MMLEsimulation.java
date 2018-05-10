@@ -15,7 +15,7 @@
  */
 package com.itemanalysis.psychometrics.irt.estimation;
 
-import com.itemanalysis.psychometrics.distribution.NormalDistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.NormalQuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.Irm3PL;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import org.apache.commons.math3.util.Precision;
@@ -58,11 +58,11 @@ public class MMLEsimulation {
         double quadPoints = 41;
         double min = -.8 * Math.sqrt(quadPoints);
         double max = -1*min;
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(min, max, (int)quadPoints);
+        NormalQuadratureRule latentDistribution = new NormalQuadratureRule(min, max, (int)quadPoints);
 
 //        HermiteRuleFactory gaussHermite = new HermiteRuleFactory();
 //        Pair<double[], double[]> dist = gaussHermite.getRule(41);
-//        UserSuppliedDistributionApproximation latentDistribution = new UserSuppliedDistributionApproximation(dist.getKey(), dist.getValue());
+//        UserSuppliedQuadratureRule latentDistribution = new UserSuppliedQuadratureRule(dist.getKey(), dist.getValue());
 
         //compute start values
         StartingValues startValues = new StartingValues(responseData, irm);

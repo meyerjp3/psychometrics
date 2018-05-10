@@ -15,7 +15,7 @@
  */
 package com.itemanalysis.psychometrics.irt.estimation;
 
-import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.optimization.DiffFunction;
 import com.itemanalysis.psychometrics.uncmin.Uncmin_methods;
@@ -39,7 +39,7 @@ public class ItemLogLikelihood implements DiffFunction, Uncmin_methods{
     private ItemResponseModel model = null;
     private EstepItemEstimates r = null;
     private double[] nk = null;
-    private DistributionApproximation latentDistribution = null;
+    private QuadratureRule latentDistribution = null;
     private int nPar = 1;
     private int nPoints = 0;
 //    private static double LOG_ZERO = Math.log(1e-8);
@@ -49,7 +49,7 @@ public class ItemLogLikelihood implements DiffFunction, Uncmin_methods{
 
     }
 
-    public void setModel(ItemResponseModel model, DistributionApproximation latentDistribution, EstepItemEstimates r, double[] nk){
+    public void setModel(ItemResponseModel model, QuadratureRule latentDistribution, EstepItemEstimates r, double[] nk){
         this.model = model;
         this.r = r;
         this.nk = nk;

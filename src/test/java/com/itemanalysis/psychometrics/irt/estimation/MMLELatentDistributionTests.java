@@ -16,9 +16,9 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.data.VariableName;
-import com.itemanalysis.psychometrics.distribution.ContinuousDistributionApproximation;
-import com.itemanalysis.psychometrics.distribution.DistributionApproximation;
-import com.itemanalysis.psychometrics.distribution.NormalDistributionApproximation;
+import com.itemanalysis.psychometrics.quadrature.ContinuousQuadratureRule;
+import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
+import com.itemanalysis.psychometrics.quadrature.NormalQuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.util.Precision;
@@ -113,7 +113,7 @@ public class MMLELatentDistributionTests {
         double quadPoints = 20;
         double min = -4.75;
         double max =  4.75;
-        NormalDistributionApproximation latentDistribution = new NormalDistributionApproximation(min, max, (int)quadPoints);
+        NormalQuadratureRule latentDistribution = new NormalQuadratureRule(min, max, (int)quadPoints);
 
         //Setup estimation object
         MarginalMaximumLikelihoodEstimation mmle = new MarginalMaximumLikelihoodEstimation(responseData, irm, latentDistribution);
@@ -128,8 +128,8 @@ public class MMLELatentDistributionTests {
         //Display the results
         System.out.println(mmle.printItemParameters());
 
-        //Display estimated mean and SD of latent distribution
-        DistributionApproximation dist = mmle.getLatentDistribution();
+        //Display estimated mean and SD of latent quadrature
+        QuadratureRule dist = mmle.getLatentDistribution();
         System.out.println(" Latent mean = " + Precision.round(dist.getMean(), 4));
         System.out.println(" Latent s.d. = " + Precision.round(dist.getStandardDeviation(), 4));
         System.out.println();
@@ -184,7 +184,7 @@ public class MMLELatentDistributionTests {
             irm[j] = pl3;
         }
 
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(49, -6, 6, 0, 1);
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule(49, -6, 6, 0, 1);
 
         StartingValues startingValues = new StartingValues(responseData, irm);
         irm = startingValues.computeStartingValues();
@@ -266,7 +266,7 @@ public class MMLELatentDistributionTests {
             irm[j] = pl3;
         }
 
-        ContinuousDistributionApproximation latentDistribution = new ContinuousDistributionApproximation(49, -6, 6, 0, 1);
+        ContinuousQuadratureRule latentDistribution = new ContinuousQuadratureRule(49, -6, 6, 0, 1);
 
         StartingValues startingValues = new StartingValues(responseData, irm);
         irm = startingValues.computeStartingValues();

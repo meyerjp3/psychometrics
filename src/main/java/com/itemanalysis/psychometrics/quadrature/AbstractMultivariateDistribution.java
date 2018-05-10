@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.itemanalysis.psychometrics.distribution;
+package com.itemanalysis.psychometrics.quadrature;
 
 public abstract class AbstractMultivariateDistribution implements MultivariateDistribution {
 
@@ -32,7 +32,7 @@ public abstract class AbstractMultivariateDistribution implements MultivariateDi
     }
 
 //    /**
-//     * The likelihood given a sample set following the distribution.
+//     * The likelihood given a sample set following the quadrature.
 //     */
 //    @Override
 //    public double likelihood(double[][] x) {
@@ -40,7 +40,7 @@ public abstract class AbstractMultivariateDistribution implements MultivariateDi
 //    }
 //
 //    /**
-//     * The likelihood given a sample set following the distribution.
+//     * The likelihood given a sample set following the quadrature.
 //     */
 //    @Override
 //    public double logLikelihood(double[][] x) {
