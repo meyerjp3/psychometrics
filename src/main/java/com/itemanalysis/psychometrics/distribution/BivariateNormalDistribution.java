@@ -1,4 +1,4 @@
-package com.itemanalysis.psychometrics.quadrature;
+package com.itemanalysis.psychometrics.distribution;
 
 //****************************************************************************80
 

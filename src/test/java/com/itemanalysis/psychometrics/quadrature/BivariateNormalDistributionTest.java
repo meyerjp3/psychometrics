@@ -1,5 +1,6 @@
 package com.itemanalysis.psychometrics.quadrature;
 
+import com.itemanalysis.psychometrics.distribution.BivariateNormalDistribution;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

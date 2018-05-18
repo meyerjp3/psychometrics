@@ -1,6 +1,6 @@
 package com.itemanalysis.psychometrics.polycor;
 
-import com.itemanalysis.psychometrics.quadrature.BivariateNormalDistributionImpl;
+import com.itemanalysis.psychometrics.distribution.BivariateNormalDistributionImpl;
 import com.itemanalysis.psychometrics.statistics.TwoWayTable;
 import org.apache.commons.math3.distribution.NormalDistribution;
 

@@ -21,6 +21,10 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
 
+/**
+ * @deprecated as of May 18, 2018. Replaced by {@link com.itemanalysis.psychometrics.distribution.KernelDensity}.
+ */
+@Deprecated
 public class KernelDensity implements QuadratureRule {
 
 	private KernelFunction kernel = null;

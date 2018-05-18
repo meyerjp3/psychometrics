@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.itemanalysis.psychometrics.quadrature;
+package com.itemanalysis.psychometrics.distribution;
 
 import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
 import org.apache.commons.math3.analysis.MultivariateFunction;
