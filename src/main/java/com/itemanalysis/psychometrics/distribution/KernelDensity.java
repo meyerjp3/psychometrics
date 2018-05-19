@@ -55,13 +55,41 @@ public class KernelDensity implements UnivariateDistribution {
      * Type of kernel
      */
     enum KernelType{
-        GAUSSIAN,
-        EPANECHNIKOV,
-        RECTANGULAR,
-        TRAIANGULAR,
-        BIWEIGHT,
-        COSINE,
-        OPTCOSINE
+        GAUSSIAN{
+            public String toString(){
+                return "Gaussian";
+            }
+        },
+        EPANECHNIKOV{
+            public String toString(){
+                return "Epanechnikov";
+            }
+        },
+        RECTANGULAR{
+            public String toString(){
+                return "Rectangular";
+            }
+        },
+        TRIANGULAR{
+            public String toString(){
+                return "Triangular";
+            }
+        },
+        BIWEIGHT{
+            public String toString(){
+                return "Biweight";
+            }
+        },
+        COSINE{
+            public String toString(){
+                return "Cosine";
+            }
+        },
+        OPTCOSINE{
+            public String toString(){
+                return "Optcosine";
+            }
+        }
     }
 
     /**
@@ -139,6 +167,12 @@ public class KernelDensity implements UnivariateDistribution {
     private Random random = new Random();
 
     /**
+     * Maximum number of function evaluations when computing integral in CDF
+     * and when finding root in IDF.
+     */
+    public int maxEvaluations = 500000;
+
+    /**
      * Constructor provides no options for creating the kernel density. Data points assumed to be
      * equaly weighted (1/N), where N is the sample size. Uses Scott's plugin rule as the default
      * bandwidth calculation. Kernel is estimated at 512 equally spaced points. No adjustment is
@@ -181,6 +215,25 @@ public class KernelDensity implements UnivariateDistribution {
     }
 
     /**
+     * Constructor provides some options for creating the kernel density. Data points assumed to be
+     * equaly weighted (1/N), where N is the sample size. Uses Scott's plugin rule as the default
+     * bandwidth calculation.
+     *
+     * @param x an array of data values.
+     * @param adjust an adjustment factor applied to the bandwidth.
+     * @param nPoints number of evaluation points.
+     */
+    public KernelDensity(double[] x, KernelType kernelType, double adjust, int nPoints){
+        this.x = x;
+        this.kernelType = kernelType;
+        this.adjust = adjust;
+        this.nPoints = nPoints;
+        this.w = new double[x.length];
+        Arrays.fill(w, 1.0/(double)x.length);
+        initialize();
+    }
+
+    /**
      * Constructor provides many options for creating the kernel density. Data points assumed to be
      * equaly weighted (1/N), where N is the sample size.
      *
@@ -210,8 +263,10 @@ public class KernelDensity implements UnivariateDistribution {
      * @param bandwidthType type of bandwidth.
      * @param adjust an adjustment factor applied to the bandwidth.
      * @param nPoints number of evaluation points.
+     * @param maxEvaluations maximum number of funciton evaluations in computing integral in CDF and finding root in
+     *                       IDF. The default is 500,000.
      */
-    public KernelDensity(double[] x, double[] w, KernelType kernelType, BandwidthType bandwidthType, double adjust, int nPoints){
+    public KernelDensity(double[] x, double[] w, KernelType kernelType, BandwidthType bandwidthType, double adjust, int nPoints, int maxEvaluations){
         if(x.length!=w.length) throw new IllegalArgumentException("Length of data not equal to length of weights");
         this.x = x;
         this.w = w;
@@ -219,6 +274,7 @@ public class KernelDensity implements UnivariateDistribution {
         this.bandwidthType = bandwidthType;
         this.adjust = adjust;
         this.nPoints = nPoints;
+        this.maxEvaluations = maxEvaluations;
         initialize();
     }
 
@@ -277,7 +333,7 @@ public class KernelDensity implements UnivariateDistribution {
                 }
             }
         }
-        else if(kernelType==KernelType.TRAIANGULAR){
+        else if(kernelType==KernelType.TRIANGULAR){
             double a = h*Math.sqrt(6);
             for(int i=0;i<kords.length;i++){
                 double ax = Math.abs(kords[i]);
@@ -293,7 +349,7 @@ public class KernelDensity implements UnivariateDistribution {
             for(int i=0;i<kords.length;i++){
                 double ax = Math.abs(kords[i]);
                 if(ax<a){
-                    k[i] = 3.0/4.0*(1.0 - Math.pow(ax/a, 2)/a);
+                    k[i] = 3.0/4.0*(1.0 - Math.pow(ax/a, 2))/a;
                 }else{
                     k[i] = 0;
                 }
@@ -311,7 +367,7 @@ public class KernelDensity implements UnivariateDistribution {
             }
         }
         else if(kernelType==KernelType.COSINE){
-            double a = h*Math.sqrt(1.0/3.0 - 2.0/Math.pow(Math.PI,2));
+            double a = h/Math.sqrt(1.0/3.0 - 2.0/Math.pow(Math.PI,2));
             for(int i=0;i<kords.length;i++){
                 double ax = Math.abs(kords[i]);
                 if(ax<a){
@@ -445,7 +501,7 @@ public class KernelDensity implements UnivariateDistribution {
     public double cdf(double x){
         if(x<=quadPoints[0]) return 0.0;
         if(x>=quadPoints[nPoints-1]) return 1.0;
-        double prob = integrator.integrate(5000, densityFunction, quadPoints[0], x);
+        double prob = integrator.integrate(500000, densityFunction, quadPoints[0], x);
         return Math.min(prob, 1.0);
     }
 
@@ -553,6 +609,7 @@ public class KernelDensity implements UnivariateDistribution {
 
         f.format("%-25s", "Kernel Density Estimate");f.format("%n");
         f.format("%-12s", "Bandwidth = "); f.format("%8.4f", h);f.format("%n");
+        f.format("%-12s", "Kernel Type = "); f.format("%-20s", kernelType.toString());f.format("%n");
         f.format("%-35s", "===================================");f.format("%n");
         f.format("%8s", "Point"); f.format("%10s", "PDF");f.format("%10s", "CDF");f.format("%n");
         f.format("%-35s", "-----------------------------------");f.format("%n");

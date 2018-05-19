@@ -160,6 +160,270 @@ public class KernelDensityTest {
     }
 
     @Test
+    public void densityTest4(){
+        System.out.println("Kernel density test with Epanechnikov kernel");
+        try{
+            File f = FileUtils.toFile(this.getClass().getResource("/testdata/density-test-data.csv"));
+            BufferedReader br = new BufferedReader(new FileReader(f));
+            String line = "";
+            String[] s = null;
+            double[] x = new double[1000];
+            int row = 0;
+            br.readLine();//remove header
+            while((line=br.readLine())!=null){
+                s = line.split(",");
+                x[row] = Double.parseDouble(s[0]);
+                row++;
+            }
+            br.close();
+
+            f = FileUtils.toFile(this.getClass().getResource("/testdata/density-test-results.csv"));
+            br = new BufferedReader(new FileReader(f));
+            double[] p1 = new double[512];
+            double[] d1 = new double[512];
+            row = 0;
+            br.readLine();//remove header
+            while((line=br.readLine())!=null){
+                s = line.split(",");
+                p1[row] = Double.parseDouble(s[0]);
+                d1[row] = Double.parseDouble(s[6]);
+                row++;
+            }
+            br.close();
+
+            KernelDensity density = new KernelDensity(x, KernelDensity.KernelType.EPANECHNIKOV, 1, 512);
+            System.out.println(density.toString());
+
+            for(int i=0;i<512;i++){
+                assertEquals("  Density at point " + (i+1), d1[i], density.pdf(p1[i]), 1e-6);
+            }
+
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Test
+    public void densityTest5(){
+        System.out.println("Kernel density test with Rectangular kernel");
+        try{
+            File f = FileUtils.toFile(this.getClass().getResource("/testdata/density-test-data.csv"));
+            BufferedReader br = new BufferedReader(new FileReader(f));
+            String line = "";
+            String[] s = null;
+            double[] x = new double[1000];
+            int row = 0;
+            br.readLine();//remove header
+            while((line=br.readLine())!=null){
+                s = line.split(",");
+                x[row] = Double.parseDouble(s[0]);
+                row++;
+            }
+            br.close();
+
+            f = FileUtils.toFile(this.getClass().getResource("/testdata/density-test-results.csv"));
+            br = new BufferedReader(new FileReader(f));
+            double[] p1 = new double[512];
+            double[] d1 = new double[512];
+            row = 0;
+            br.readLine();//remove header
+            while((line=br.readLine())!=null){
+                s = line.split(",");
+                p1[row] = Double.parseDouble(s[0]);
+                d1[row] = Double.parseDouble(s[7]);
+                row++;
+            }
+            br.close();
+
+            KernelDensity density = new KernelDensity(x, KernelDensity.KernelType.RECTANGULAR, 1, 512);
+            System.out.println(density.toString());
+
+            for(int i=0;i<512;i++){
+                assertEquals("  Density at point " + (i+1), d1[i], density.pdf(p1[i]), 1e-6);
+            }
+
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Test
+    public void densityTest6(){
+        System.out.println("Kernel density test with Triangular kernel");
+        try{
+            File f = FileUtils.toFile(this.getClass().getResource("/testdata/density-test-data.csv"));
+            BufferedReader br = new BufferedReader(new FileReader(f));
+            String line = "";
+            String[] s = null;
+            double[] x = new double[1000];
+            int row = 0;
+            br.readLine();//remove header
+            while((line=br.readLine())!=null){
+                s = line.split(",");
+                x[row] = Double.parseDouble(s[0]);
+                row++;
+            }
+            br.close();
+
+            f = FileUtils.toFile(this.getClass().getResource("/testdata/density-test-results.csv"));
+            br = new BufferedReader(new FileReader(f));
+            double[] p1 = new double[512];
+            double[] d1 = new double[512];
+            row = 0;
+            br.readLine();//remove header
+            while((line=br.readLine())!=null){
+                s = line.split(",");
+                p1[row] = Double.parseDouble(s[0]);
+                d1[row] = Double.parseDouble(s[8]);
+                row++;
+            }
+            br.close();
+
+            KernelDensity density = new KernelDensity(x, KernelDensity.KernelType.TRIANGULAR, 1, 512);
+            System.out.println(density.toString());
+
+            for(int i=0;i<512;i++){
+                assertEquals("  Density at point " + (i+1), d1[i], density.pdf(p1[i]), 1e-6);
+            }
+
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Test
+    public void densityTest7(){
+        System.out.println("Kernel density test with Biweight kernel");
+        try{
+            File f = FileUtils.toFile(this.getClass().getResource("/testdata/density-test-data.csv"));
+            BufferedReader br = new BufferedReader(new FileReader(f));
+            String line = "";
+            String[] s = null;
+            double[] x = new double[1000];
+            int row = 0;
+            br.readLine();//remove header
+            while((line=br.readLine())!=null){
+                s = line.split(",");
+                x[row] = Double.parseDouble(s[0]);
+                row++;
+            }
+            br.close();
+
+            f = FileUtils.toFile(this.getClass().getResource("/testdata/density-test-results.csv"));
+            br = new BufferedReader(new FileReader(f));
+            double[] p1 = new double[512];
+            double[] d1 = new double[512];
+            row = 0;
+            br.readLine();//remove header
+            while((line=br.readLine())!=null){
+                s = line.split(",");
+                p1[row] = Double.parseDouble(s[0]);
+                d1[row] = Double.parseDouble(s[9]);
+                row++;
+            }
+            br.close();
+
+            KernelDensity density = new KernelDensity(x, KernelDensity.KernelType.BIWEIGHT, 1, 512);
+            System.out.println(density.toString());
+
+            for(int i=0;i<512;i++){
+                assertEquals("  Density at point " + (i+1), d1[i], density.pdf(p1[i]), 1e-6);
+            }
+
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Test
+    public void densityTest8(){
+        System.out.println("Kernel density test with Cosine kernel");
+        try{
+            File f = FileUtils.toFile(this.getClass().getResource("/testdata/density-test-data.csv"));
+            BufferedReader br = new BufferedReader(new FileReader(f));
+            String line = "";
+            String[] s = null;
+            double[] x = new double[1000];
+            int row = 0;
+            br.readLine();//remove header
+            while((line=br.readLine())!=null){
+                s = line.split(",");
+                x[row] = Double.parseDouble(s[0]);
+                row++;
+            }
+            br.close();
+
+            f = FileUtils.toFile(this.getClass().getResource("/testdata/density-test-results.csv"));
+            br = new BufferedReader(new FileReader(f));
+            double[] p1 = new double[512];
+            double[] d1 = new double[512];
+            row = 0;
+            br.readLine();//remove header
+            while((line=br.readLine())!=null){
+                s = line.split(",");
+                p1[row] = Double.parseDouble(s[0]);
+                d1[row] = Double.parseDouble(s[10]);
+                row++;
+            }
+            br.close();
+
+            KernelDensity density = new KernelDensity(x, KernelDensity.KernelType.COSINE, 1, 512);
+            System.out.println(density.toString());
+
+            for(int i=0;i<512;i++){
+                assertEquals("  Density at point " + (i+1), d1[i], density.pdf(p1[i]), 1e-6);
+            }
+
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Test
+    public void densityTest9(){
+        System.out.println("Kernel density test with Optcosine kernel");
+        try{
+            File f = FileUtils.toFile(this.getClass().getResource("/testdata/density-test-data.csv"));
+            BufferedReader br = new BufferedReader(new FileReader(f));
+            String line = "";
+            String[] s = null;
+            double[] x = new double[1000];
+            int row = 0;
+            br.readLine();//remove header
+            while((line=br.readLine())!=null){
+                s = line.split(",");
+                x[row] = Double.parseDouble(s[0]);
+                row++;
+            }
+            br.close();
+
+            f = FileUtils.toFile(this.getClass().getResource("/testdata/density-test-results.csv"));
+            br = new BufferedReader(new FileReader(f));
+            double[] p1 = new double[512];
+            double[] d1 = new double[512];
+            row = 0;
+            br.readLine();//remove header
+            while((line=br.readLine())!=null){
+                s = line.split(",");
+                p1[row] = Double.parseDouble(s[0]);
+                d1[row] = Double.parseDouble(s[11]);
+                row++;
+            }
+            br.close();
+
+            KernelDensity density = new KernelDensity(x, KernelDensity.KernelType.OPTCOSINE, 1, 512);
+            System.out.println(density.toString());
+
+            for(int i=0;i<512;i++){
+                assertEquals("  Density at point " + (i+1), d1[i], density.pdf(p1[i]), 1e-6);
+            }
+
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Test
     public void testPoints10(){
         System.out.println("Density testing 10 points");
 
