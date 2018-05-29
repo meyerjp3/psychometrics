@@ -8,6 +8,14 @@ import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
 import java.util.Formatter;
 import java.util.LinkedHashMap;
 
+/**
+ * Performs IRT Observed Score Equating.
+ * For details see:
+ *
+ * Zeng, L., & Kolen, M. J. (1995). An alternative approach for IRT observed-score equating of
+ * number-correct scores. Applied Psychological Measurement, 19 (3), 231-240.
+ *
+ */
 public class IrtObservedScoreEquating {
 
     private LinkedHashMap<VariableName, ItemResponseModel> itemFormX = null;
