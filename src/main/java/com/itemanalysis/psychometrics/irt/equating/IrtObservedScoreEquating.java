@@ -4,6 +4,7 @@ import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.irt.estimation.IrtObservedScoreDistribution;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
+import org.apache.commons.math3.util.Precision;
 
 import java.util.Formatter;
 import java.util.LinkedHashMap;
@@ -556,15 +557,20 @@ public class IrtObservedScoreEquating {
 
         f.format("%-28s", "IRT Observed Score Equating");f.format("%n");
         f.format("%-28s", "(Form X Equated to Form Y)");f.format("%n");
-        f.format("%28s", "============================");f.format("%n");
-        f.format("%10s", "Raw Score"); f.format("%2s", "  "); f.format("%12s", "Y-Equivalent"); f.format("%n");
-        f.format("%28s", "----------------------------");f.format("%n");
+        f.format("%38s", "======================================");f.format("%n");
+        f.format("%38s", "Rounded");f.format("%n");
+        f.format("%10s", "Raw Score"); f.format("%2s", "  ");
+        f.format("%12s", "Y-Equivalent"); f.format("%2s", "  ");
+        f.format("%12s", "Y-Equivalent"); f.format("%n");
+        f.format("%38s", "--------------------------------------");f.format("%n");
 
         for(int i=0;i<rawScore.length;i++){
-            f.format("%10.4f", rawScore[i]); f.format("%4s", "  ");f.format("%10.4f", yEquivObservedScore[i]);f.format("%n");
+            f.format("%10.4f", rawScore[i]); f.format("%4s", "  ");
+            f.format("%10.4f", yEquivObservedScore[i]);f.format("%4s", "  ");
+            f.format("%10.4f", Precision.round(yEquivObservedScore[i], 0));f.format("%n");
         }
 
-        f.format("%28s", "============================");f.format("%n");
+        f.format("%38s", "======================================");f.format("%n");
 
         return f.toString();
 
