@@ -16,9 +16,9 @@
 package com.itemanalysis.psychometrics.kernel;
 
 
-public class TriangleKernel implements KernelFunction{
+public class TriangularKernel implements KernelFunction{
 
-    public TriangleKernel(){
+    public TriangularKernel(){
 
     }
 

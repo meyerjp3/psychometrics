@@ -28,6 +28,7 @@ import org.apache.commons.math3.stat.descriptive.rank.Min;
  * is still in development. It needs more work and testing. Not ready for use.
  *
  **/
+@Deprecated
  public class LeastSquaresCrossValidation implements Bandwidth, UnivariateFunction {
 
     private KernelFunction kernel = null;

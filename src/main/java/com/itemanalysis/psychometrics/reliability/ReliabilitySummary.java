@@ -32,7 +32,12 @@ import java.util.LinkedHashMap;
 public class ReliabilitySummary {
 
     private CoefficientAlpha alpha = null;
-    private GuttmanLambda2 lambda = null;
+    private GuttmanLambda1 guttmanLambda1 = null;
+    private GuttmanLambda2 guttmanLambda2 = null;
+    private GuttmanLambda3 guttmanLambda3 = null;
+    private GuttmanLambda4 guttmanLambda4 = null;
+    private GuttmanLambda5 guttmanLambda5 = null;
+    private GuttmanLambda6 guttmanLambda6 = null;
     private FeldtGilmer feldtGilmer = null;
     private FeldtBrennan feldtBrennan = null;
     private RajuBeta raju = null;
@@ -49,7 +54,12 @@ public class ReliabilitySummary {
         this.nPeople = matrix.getMinSampleSize();
 
         alpha = new CoefficientAlpha(cov);
-        lambda = new GuttmanLambda2(cov);
+        guttmanLambda1 = new GuttmanLambda1(cov);
+        guttmanLambda2 = new GuttmanLambda2(cov);
+        guttmanLambda3 = new GuttmanLambda3(cov);
+        guttmanLambda4 = new GuttmanLambda4(cov);
+        guttmanLambda5 = new GuttmanLambda5(cov);
+        guttmanLambda6 = new GuttmanLambda6(cov);
         feldtGilmer = new FeldtGilmer(cov);
         feldtBrennan = new FeldtBrennan(cov);
         raju = new RajuBeta(cov);
@@ -64,7 +74,12 @@ public class ReliabilitySummary {
         this.nPeople = matrix.getMaxSampleSize();
 
         alpha = new CoefficientAlpha(cov);
-        lambda = new GuttmanLambda2(cov);
+        guttmanLambda1 = new GuttmanLambda1(cov);
+        guttmanLambda2 = new GuttmanLambda2(cov);
+        guttmanLambda3 = new GuttmanLambda3(cov);
+        guttmanLambda4 = new GuttmanLambda4(cov);
+        guttmanLambda5 = new GuttmanLambda5(cov);
+        guttmanLambda6 = new GuttmanLambda6(cov);
         feldtGilmer = new FeldtGilmer(cov);
         feldtBrennan = new FeldtBrennan(cov);
         raju = new RajuBeta(cov);
@@ -77,7 +92,7 @@ public class ReliabilitySummary {
     }
 
     public ScoreReliability value(){
-        return lambda;
+        return guttmanLambda2;
     }
 
     @Override
@@ -85,15 +100,25 @@ public class ReliabilitySummary {
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
 
-        double totalVariance = lambda.totalVariance();
+        double totalVariance = guttmanLambda2.totalVariance();
 
-        double gl = lambda.value();
+        double g1 = guttmanLambda1.value();
+        double g2 = guttmanLambda2.value();
+        double g3 = guttmanLambda3.value();
+        double g4 = guttmanLambda4.value();
+        double g5 = guttmanLambda5.value();
+        double g6 = guttmanLambda6.value();
         double ca = alpha.value();
         double fg = feldtGilmer.value();
         double fb = feldtBrennan.value();
         double rj = raju.value();
 
-        double[] glCI = lambda.confidenceInterval(nPeople);
+        double[] g1CI = guttmanLambda1.confidenceInterval(nPeople);
+        double[] g2CI = guttmanLambda2.confidenceInterval(nPeople);
+        double[] g3CI = guttmanLambda3.confidenceInterval(nPeople);
+        double[] g4CI = guttmanLambda4.confidenceInterval(nPeople);
+        double[] g5CI = guttmanLambda5.confidenceInterval(nPeople);
+        double[] g6CI = guttmanLambda6.confidenceInterval(nPeople);
         double[] caCI = alpha.confidenceInterval(nPeople);
         double[] fgCI = feldtGilmer.confidenceInterval(nPeople);
         double[] fbCI = feldtBrennan.confidenceInterval(nPeople);
@@ -106,8 +131,18 @@ public class ReliabilitySummary {
         f.format("%-60s", "===========================================================================");f.format("%n");
         f.format("%-20s",  " Method             ");f.format("%10s",  "Estimate");f.format("%5s",  ""); f.format("%20s",  "95% Conf. Int. ");f.format("%5s",  ""); f.format("%10s",  "SEM"); f.format("%n");
         f.format("%-60s", "---------------------------------------------------------------------------");f.format("%n");
-        f.format("%-20s",  " Guttman's L2 ");f.format("%10.4f", gl);f.format("%5s",  "");
-            f.format("%20s", lambda.confidenceIntervalToString(glCI));f.format("%5s",  ""); f.format("% 10.4f", sem.value(totalVariance, gl));f.format("%n");
+        f.format("%-20s",  " Guttman's L1 ");f.format("%10.4f", g1);f.format("%5s",  "");
+        f.format("%20s", guttmanLambda1.confidenceIntervalToString(g1CI));f.format("%5s",  ""); f.format("% 10.4f", sem.value(totalVariance, g1));f.format("%n");
+        f.format("%-20s",  " Guttman's L2 ");f.format("%10.4f", g2);f.format("%5s",  "");
+        f.format("%20s", guttmanLambda2.confidenceIntervalToString(g2CI));f.format("%5s",  ""); f.format("% 10.4f", sem.value(totalVariance, g2));f.format("%n");
+        f.format("%-20s",  " Guttman's L3 ");f.format("%10.4f", g3);f.format("%5s",  "");
+        f.format("%20s", guttmanLambda3.confidenceIntervalToString(g3CI));f.format("%5s",  ""); f.format("% 10.4f", sem.value(totalVariance, g3));f.format("%n");
+        f.format("%-20s",  " Guttman's L4 ");f.format("%10.4f", g4);f.format("%5s",  "");
+        f.format("%20s", guttmanLambda4.confidenceIntervalToString(g4CI));f.format("%5s",  ""); f.format("% 10.4f", sem.value(totalVariance, g4));f.format("%n");
+        f.format("%-20s",  " Guttman's L5 ");f.format("%10.4f", g5);f.format("%5s",  "");
+        f.format("%20s", guttmanLambda5.confidenceIntervalToString(g5CI));f.format("%5s",  ""); f.format("% 10.4f", sem.value(totalVariance, g5));f.format("%n");
+        f.format("%-20s",  " Guttman's L6 ");f.format("%10.4f", g6);f.format("%5s",  "");
+        f.format("%20s", guttmanLambda6.confidenceIntervalToString(g6CI));f.format("%5s",  ""); f.format("% 10.4f", sem.value(totalVariance, g6));f.format("%n");
         f.format("%-20s",  " Coefficient Alpha  ");f.format("%10.4f", ca);f.format("%5s",  "");
             f.format("%20s", alpha.confidenceIntervalToString(caCI));f.format("%5s",  ""); f.format("% 10.4f", sem.value(totalVariance, ca));f.format("%n");
         f.format("%-20s",  " Feldt-Gilmer       ");f.format("%10.4f", fg);f.format("%5s",  "");
@@ -125,7 +160,7 @@ public class ReliabilitySummary {
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
 
-        double[] glDeleted = lambda.itemDeletedReliability();
+        double[] glDeleted = guttmanLambda2.itemDeletedReliability();
         double[] caDeleted = alpha.itemDeletedReliability();
         double[] fgDeleted = feldtGilmer.itemDeletedReliability();
         double[] fbDeleted = feldtBrennan.itemDeletedReliability();
@@ -146,7 +181,7 @@ public class ReliabilitySummary {
             f.format("%n");
         }
         f.format("%-60s", "=================================================================");f.format("%n");
-        f.format("%-30s", "L2: Guttman's lambda-2");f.format("%n");
+        f.format("%-30s", "L2: Guttman's guttmanLambda2-2");f.format("%n");
         f.format("%-30s", "Alpha: Coefficient alpha");f.format("%n");
         f.format("%-30s", "F-G: Feldt-Gilmer coefficient");f.format("%n");
         f.format("%-30s", "F-B: Feldt-Brennan coefficient");f.format("%n");

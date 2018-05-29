@@ -27,6 +27,7 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
  * Silverman, B. W. (1986). Density estimation for statistics and data analysis. Boca Raton, FL: Chapman Hall.
  *
  */
+@Deprecated
 public class LikelihoodCrossValidation implements Bandwidth, UnivariateFunction {
 
     private KernelDensity density = null;

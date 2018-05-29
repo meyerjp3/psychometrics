@@ -46,50 +46,19 @@ public class KernelDensity implements UnivariateDistribution {
     /**
      * Type of bandwidth calculation
      */
-    enum BandwidthType{
-        BW_NRD, //Silverman's simple plugin bandwidth
-        BW_NRD0 //Scott's plugin bandwidth. The default bandwidth here and in R
-    }
-
-    /**
-     * Type of kernel
-     */
-    enum KernelType{
-        GAUSSIAN{
-            public String toString(){
-                return "Gaussian";
+    public enum BandwidthType{
+        BW_NRD{
+            @Override
+            public String toString() {
+                return "bwnrd";
             }
-        },
-        EPANECHNIKOV{
-            public String toString(){
-                return "Epanechnikov";
+        }, //Silverman's simple plugin bandwidth
+        BW_NRD0{
+            @Override
+            public String toString() {
+                return "bwnrd0";
             }
-        },
-        RECTANGULAR{
-            public String toString(){
-                return "Rectangular";
-            }
-        },
-        TRIANGULAR{
-            public String toString(){
-                return "Triangular";
-            }
-        },
-        BIWEIGHT{
-            public String toString(){
-                return "Biweight";
-            }
-        },
-        COSINE{
-            public String toString(){
-                return "Cosine";
-            }
-        },
-        OPTCOSINE{
-            public String toString(){
-                return "Optcosine";
-            }
-        }
+        } //Scott's plugin bandwidth. The default bandwidth here and in R
     }
 
     /**
@@ -249,6 +218,29 @@ public class KernelDensity implements UnivariateDistribution {
         this.bandwidthType = bandwidthType;
         this.adjust = adjust;
         this.nPoints = nPoints;
+        this.w = new double[x.length];
+        Arrays.fill(w, 1.0/(double)x.length);
+        initialize();
+    }
+
+    /**
+     * Constructor provides the most options for creating the kernel density.
+     *
+     * @param x an array of data values.
+     * @param kernelType type of kernel.
+     * @param bandwidthType type of bandwidth.
+     * @param adjust an adjustment factor applied to the bandwidth.
+     * @param nPoints number of evaluation points.
+     * @param maxEvaluations maximum number of funciton evaluations in computing integral in CDF and finding root in
+     *                       IDF. The default is 500,000.
+     */
+    public KernelDensity(double[] x, KernelType kernelType, BandwidthType bandwidthType, double adjust, int nPoints, int maxEvaluations){
+        this.x = x;
+        this.kernelType = kernelType;
+        this.bandwidthType = bandwidthType;
+        this.adjust = adjust;
+        this.nPoints = nPoints;
+        this.maxEvaluations = maxEvaluations;
         this.w = new double[x.length];
         Arrays.fill(w, 1.0/(double)x.length);
         initialize();
@@ -600,6 +592,18 @@ public class KernelDensity implements UnivariateDistribution {
             }
         }
         return y;
+    }
+
+    public double[] getPoints(){
+        return quadPoints;
+    }
+
+    public double[] getDensity(){
+        double[] d = new double[quadPoints.length];
+        for(int i=0;i<quadPoints.length;i++){
+            d[i] = densityFunction.value(quadPoints[i]);
+        }
+        return d;
     }
 
     @Override

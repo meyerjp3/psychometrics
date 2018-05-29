@@ -15,9 +15,12 @@
  */
 package com.itemanalysis.psychometrics.kernel;
 
+import com.itemanalysis.psychometrics.distribution.KernelType;
+
 /**
  * A factory class for returning either the kernel class or the name of the type of kernel
  */
+@Deprecated
 public class KernelFactory {
 
     private KernelType type = KernelType.GAUSSIAN;
@@ -31,13 +34,13 @@ public class KernelFactory {
         if("epanechnikov".equals(checkType)){
             this.type = KernelType.EPANECHNIKOV;
         }else if("uniform".equals(checkType)){
-            this.type = KernelType.UNIFORM;
+            this.type = KernelType.RECTANGULAR;
+        }else if("rectangular".equals(checkType)){
+            this.type = KernelType.RECTANGULAR;
         }else if("triangle".equals(checkType)){
-            this.type = KernelType.TRIANGLE;
+            this.type = KernelType.TRIANGULAR;
         }else if("biweight".equals(checkType)){
             this.type = KernelType.BIWEIGHT;
-        }else if("triweight".equals(checkType)){
-            this.type = KernelType.TRIWEIGHT;
         }else if("cosine".equals(checkType)){
             this.type = KernelType.COSINE;
         }else{
@@ -50,9 +53,8 @@ public class KernelFactory {
             case BIWEIGHT: return new BiweightKernel();
             case COSINE: return new CosineKernel();
             case EPANECHNIKOV: return new EpanechnikovKernel();
-            case TRIANGLE: return new TriangleKernel();
-            case TRIWEIGHT: return new TriweightKernel();
-            case UNIFORM: return new UniformKernel();
+            case TRIANGULAR: return new TriangularKernel();
+            case RECTANGULAR: return new UniformKernel();
         }
         return new GaussianKernel();//default
     }
@@ -62,9 +64,8 @@ public class KernelFactory {
             case BIWEIGHT: return "Biweight Kernel";
             case COSINE: return "Cosine Kernel";
             case EPANECHNIKOV: return "Epanechnikov Kernel";
-            case TRIANGLE: return "Triangle Kernel";
-            case TRIWEIGHT: return "Triweight Kernel";
-            case UNIFORM: return "Uniform Kernel";
+            case TRIANGULAR: return "Triangle Kernel";
+            case RECTANGULAR: return "Uniform Kernel";
         }
         return "Gaussian Kernel";
     }

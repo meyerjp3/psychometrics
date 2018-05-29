@@ -15,19 +15,16 @@
  */
 package com.itemanalysis.psychometrics.quadrature;
 
-import org.apache.commons.math3.util.ResizableDoubleArray;
-
 import java.util.Formatter;
 
 /**
  * A quadrature approximation that allows the user to provide the evaluation points and the density values.
  * This is a class that can be used for numeric integration with user provided quadrature points and weights.
  */
-@Deprecated
 public final class UserSuppliedQuadratureRule extends AbstractQuadratureRule {
 
-    private ResizableDoubleArray pointsStore = new ResizableDoubleArray();
-    private ResizableDoubleArray densityStore = new ResizableDoubleArray();
+//    private ResizableDoubleArray pointsStore = new ResizableDoubleArray();
+//    private ResizableDoubleArray densityStore = new ResizableDoubleArray();
 
     /**
      * Create the quadrature approximation with an array of evaluation points and an array of density values
@@ -37,44 +34,65 @@ public final class UserSuppliedQuadratureRule extends AbstractQuadratureRule {
      * @param density array of density values.
      */
     public UserSuppliedQuadratureRule(double[] points, double[] density){
-        this.pointsStore.addElements(points);
-        this.densityStore.addElements(density);
+//        this.pointsStore.addElements(points);
+//        this.densityStore.addElements(density);
         this.numberOfPoints = points.length;
         this.points = new double[numberOfPoints];
         this.weights = new double[numberOfPoints];
     }
 
     /**
-     * Creates the quadrature approximation with no evaluation points or density values. This constructor
-     * is useful when the evaluation points and weights are provided incrementally with {@link #increment(double)}
-     * or {@link #increment(double)};
+     * Constructor when input is a two-dimensional array. The first column gives the
+     * poinhts and the second column gives the weights.
+     *
+     * @param pointsAndWeights two dimensional array with only two columns
      */
-    public UserSuppliedQuadratureRule(){
-        points = new double[numberOfPoints];
-        weights = new double[numberOfPoints];
+    public UserSuppliedQuadratureRule(double[][] pointsAndWeights){
+        this.numberOfPoints = pointsAndWeights.length;
+        this.points = new double[numberOfPoints];
+        this.weights = new double[numberOfPoints];
+
+        for(int i=0;i<numberOfPoints;i++){
+            this.points[i] = pointsAndWeights[i][0];
+            this.weights[i] = pointsAndWeights[i][1];
+        }
+//        this.pointsStore.addElements(this.points);
+//        this.densityStore.addElements((this.weights));
     }
 
-    /**
-     * Increment the array of evaluation points and weights with the provided values.
-     *
-     * @param point an evaluation point.
-     * @param density a density value.
-     */
-    public void increment(double point, double density){
-        this.pointsStore.addElement(point);
-        this.densityStore.addElement(density);
-        numberOfPoints++;
-    }
-
-    /**
-     * An evaluation points. This method will result in uniform density values.
-     *
-     * @param point
-     */
-    public void increment(double point){
-        this.pointsStore.addElement(point);
-        numberOfPoints++;
-    }
+//    /**
+//     * Creates the quadrature approximation with no evaluation points or density values. The array defaults
+//     * to having 49 elements.
+//     */
+//    @Deprecated
+//    public UserSuppliedQuadratureRule(){
+//        points = new double[numberOfPoints];
+//        weights = new double[numberOfPoints];
+//    }
+//
+//    /**
+//     * Increment the array of evaluation points and weights with the provided values.
+//     *
+//     * @param point an evaluation point.
+//     * @param density a density value.
+//     */
+//    @Deprecated
+//    public void increment(double point, double density){
+//        this.pointsStore.addElement(point);
+//        this.densityStore.addElement(density);
+//        numberOfPoints++;
+//    }
+//
+//    /**
+//     * An evaluation points. This method will result in uniform density values.
+//     *
+//     * @param point
+//     */
+//    @Deprecated
+//    public void increment(double point){
+//        this.pointsStore.addElement(point);
+//        numberOfPoints++;
+//    }
 
 
 

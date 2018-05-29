@@ -191,7 +191,7 @@ public class KernelDensityTest {
             }
             br.close();
 
-            KernelDensity density = new KernelDensity(x, KernelDensity.KernelType.EPANECHNIKOV, 1, 512);
+            KernelDensity density = new KernelDensity(x, KernelType.EPANECHNIKOV, 1, 512);
             System.out.println(density.toString());
 
             for(int i=0;i<512;i++){
@@ -235,7 +235,7 @@ public class KernelDensityTest {
             }
             br.close();
 
-            KernelDensity density = new KernelDensity(x, KernelDensity.KernelType.RECTANGULAR, 1, 512);
+            KernelDensity density = new KernelDensity(x, KernelType.RECTANGULAR, 1, 512);
             System.out.println(density.toString());
 
             for(int i=0;i<512;i++){
@@ -279,7 +279,7 @@ public class KernelDensityTest {
             }
             br.close();
 
-            KernelDensity density = new KernelDensity(x, KernelDensity.KernelType.TRIANGULAR, 1, 512);
+            KernelDensity density = new KernelDensity(x, KernelType.TRIANGULAR, 1, 512);
             System.out.println(density.toString());
 
             for(int i=0;i<512;i++){
@@ -323,7 +323,7 @@ public class KernelDensityTest {
             }
             br.close();
 
-            KernelDensity density = new KernelDensity(x, KernelDensity.KernelType.BIWEIGHT, 1, 512);
+            KernelDensity density = new KernelDensity(x, KernelType.BIWEIGHT, 1, 512);
             System.out.println(density.toString());
 
             for(int i=0;i<512;i++){
@@ -367,7 +367,7 @@ public class KernelDensityTest {
             }
             br.close();
 
-            KernelDensity density = new KernelDensity(x, KernelDensity.KernelType.COSINE, 1, 512);
+            KernelDensity density = new KernelDensity(x, KernelType.COSINE, 1, 512);
             System.out.println(density.toString());
 
             for(int i=0;i<512;i++){
@@ -411,7 +411,7 @@ public class KernelDensityTest {
             }
             br.close();
 
-            KernelDensity density = new KernelDensity(x, KernelDensity.KernelType.OPTCOSINE, 1, 512);
+            KernelDensity density = new KernelDensity(x, KernelType.OPTCOSINE, 1, 512);
             System.out.println(density.toString());
 
             for(int i=0;i<512;i++){

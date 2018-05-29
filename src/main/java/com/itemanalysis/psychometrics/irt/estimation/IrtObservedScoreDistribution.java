@@ -15,11 +15,13 @@
  */
 package com.itemanalysis.psychometrics.irt.estimation;
 
+import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 
 import java.util.Arrays;
 import java.util.Formatter;
+import java.util.LinkedHashMap;
 
 /**
  * This class computes the quadrature of summed scores for a given set of item response models.
@@ -49,6 +51,22 @@ public class IrtObservedScoreDistribution {
     public IrtObservedScoreDistribution(ItemResponseModel[] irm, QuadratureRule latentDistribution){
         this.irm = irm;
         this.nItems = irm.length;
+        this.latentDistribution = latentDistribution;
+        this.nPoints = latentDistribution.getNumberOfPoints();
+        initialize();
+    }
+
+    public IrtObservedScoreDistribution(LinkedHashMap<VariableName, ItemResponseModel> irm, QuadratureRule latentDistribution){
+        this.nItems = irm.size();
+        this.irm = new ItemResponseModel[this.nItems];
+
+        //Convert map to array
+        int i=0;
+        for(VariableName v : irm.keySet()){
+            this.irm[i] = irm.get(v);
+            i++;
+        }
+
         this.latentDistribution = latentDistribution;
         this.nPoints = latentDistribution.getNumberOfPoints();
         initialize();
@@ -173,7 +191,24 @@ public class IrtObservedScoreDistribution {
         return eap/summedScoreDensity[summedScore];
     }
 
-    public double getDensity(int summedScore){
+    /**
+     * Returns estimated IRT summed score density
+     *
+     * @return array of density values
+     */
+    public double[] getDensity(){
+        return summedScoreDensity;
+    }
+
+    /**
+     * Gets the density of a summed score.
+     *
+     * @param summedScore target summed score
+     * @return density for the summed score.
+     */
+    public double getDensityAt(int summedScore){
+        if(summedScore>maxObservedScore) return 0.0;
+        if(summedScore<0) return 0.0;
         return summedScoreDensity[summedScore];
     }
 

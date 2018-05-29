@@ -259,7 +259,7 @@ public class IrtObservedScoreDistributionTest {
 
         for(int i=0;i<12;i++){
             assertEquals(" EAP for score " + (i+1) + ": ", flexmirt[i][0], irtObservedScoreDistribution.getEAP(i), 1e-3);
-            assertEquals(" Prob for score " + (i+1) + ": ", flexmirt[i][1], irtObservedScoreDistribution.getDensity(i), 1e-3);
+            assertEquals(" Prob for score " + (i+1) + ": ", flexmirt[i][1], irtObservedScoreDistribution.getDensityAt(i), 1e-3);
         }
 
     }
@@ -406,7 +406,7 @@ public class IrtObservedScoreDistributionTest {
         //System.out.println(irtObservedScoreDistribution.toString());
         for(int i=0;i<ni;i++){
             assertEquals(" EAP for score " + (i+1) + ": ", flexmirt[i][1], irtObservedScoreDistribution.getEAP(i), 1e-3);
-            assertEquals(" Prob for score " + (i+1) + ": ", flexmirt[i][3], irtObservedScoreDistribution.getDensity(i), 1e-5);
+            assertEquals(" Prob for score " + (i+1) + ": ", flexmirt[i][3], irtObservedScoreDistribution.getDensityAt(i), 1e-5);
         }
 
     }
