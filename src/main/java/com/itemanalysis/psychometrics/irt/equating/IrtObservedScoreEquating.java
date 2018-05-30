@@ -6,6 +6,7 @@ import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
 import org.apache.commons.math3.util.Precision;
 
+import java.util.Arrays;
 import java.util.Formatter;
 import java.util.LinkedHashMap;
 
@@ -17,7 +18,7 @@ import java.util.LinkedHashMap;
  * number-correct scores. Applied Psychological Measurement, 19 (3), 231-240.
  *
  */
-public class IrtObservedScoreEquating {
+public class IrtObservedScoreEquating implements IrtEquating{
 
     private LinkedHashMap<VariableName, ItemResponseModel> itemFormX = null;
 
@@ -200,7 +201,7 @@ public class IrtObservedScoreEquating {
         return moments;
     }
 
-    public double[] getyEquivObservedScore(){
+    public double[] getYEquivalentScores(){
         return yEquivObservedScore;
     }
 
@@ -248,6 +249,27 @@ public class IrtObservedScoreEquating {
 
     public double getFormYKurtosis(){
         return formYMoments[3];
+    }
+
+    public double[] getFormXScores(){
+        return rawScore;
+    }
+
+
+    public double[] getFormXThetaValues(){
+        //Not implemented
+        return null;
+    }
+
+    /**
+     * Not really necessary here. Only implemented because required by interface.
+     *
+     * @return array
+     */
+    public char[] getStatus(){
+        char[] status = new char[rawScore.length];
+        Arrays.fill(status, 'Y');
+        return status;
     }
 
     /**

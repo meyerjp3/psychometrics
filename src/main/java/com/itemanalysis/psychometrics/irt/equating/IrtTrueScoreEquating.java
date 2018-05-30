@@ -24,7 +24,7 @@ import org.apache.commons.math3.util.Precision;
 
 import java.util.LinkedHashMap;
 
-public class IrtTrueScoreEquating {
+public class IrtTrueScoreEquating implements IrtEquating{
 
     private LinkedHashMap<VariableName, ItemResponseModel> itemFormX = null;
 
@@ -215,7 +215,7 @@ public class IrtTrueScoreEquating {
      * Score points at which y equivalent is sought
      * @return
      */
-    public double[] getScorePoints(){
+    public double[] getFormXScores(){
         return rawScore;
     }
 
@@ -231,7 +231,7 @@ public class IrtTrueScoreEquating {
      *
      * @return Form X true scores that are equivalent to Form Y true scores.
      */
-    public double[] getYEquivalentTrueScores(){
+    public double[] getYEquivalentScores(){
         return yEquivTrueScore;
     }
 
@@ -248,7 +248,8 @@ public class IrtTrueScoreEquating {
      *
      * @return
      */
-    public String printResults(){
+    @Override
+    public String toString(){
 
         TextTableColumnFormat[] cformats = new TextTableColumnFormat[5];
         cformats[0] = new TextTableColumnFormat();

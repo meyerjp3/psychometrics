@@ -56,7 +56,7 @@ public class IrtTrueScoreEquatingTest {
 
 //        System.out.println(irtEq.printResults());
 
-        double[] yequivEst = irtEq.getYEquivalentTrueScores();
+        double[] yequivEst = irtEq.getYEquivalentScores();
         double[] yequivTheta = irtEq.getFormXThetaValues();
 
         for(int i=0;i<yequivTheta.length;i++){
@@ -90,7 +90,7 @@ public class IrtTrueScoreEquatingTest {
 
 //        System.out.println(irtEq.printResults());
 
-        double[] yequivEst = irtEq.getYEquivalentTrueScores();
+        double[] yequivEst = irtEq.getYEquivalentScores();
         double[] yequivTheta = irtEq.getFormXThetaValues();
 
         for(int i=0;i<yequivTheta.length;i++){
@@ -123,7 +123,7 @@ public class IrtTrueScoreEquatingTest {
 
 //        System.out.println(irtEq.printResults());
 
-        double[] yequivEst = irtEq.getYEquivalentTrueScores();
+        double[] yequivEst = irtEq.getYEquivalentScores();
         double[] yequivTheta = irtEq.getFormXThetaValues();
 
         for(int i=0;i<yequivTheta.length;i++){
@@ -206,7 +206,7 @@ public class IrtTrueScoreEquatingTest {
 
 //        System.out.println(irtEq.printResults());
 
-        double[] yequivEst = irtEq.getYEquivalentTrueScores();
+        double[] yequivEst = irtEq.getYEquivalentScores();
         double[] yequivTheta = irtEq.getFormXThetaValues();
 
         for(int i=0;i<yequivTheta.length;i++){
