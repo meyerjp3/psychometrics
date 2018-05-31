@@ -29,5 +29,10 @@ public class StandardErrorOfMeasurement {
         return Math.sqrt(testVariance*(1-reliability.value()));
     }
 
+    public double value(ScoreReliability reliability){
+        double testVariance = reliability.totalVariance();
+        return Math.sqrt(testVariance*(1-reliability.value()));
+    }
+
 
 }

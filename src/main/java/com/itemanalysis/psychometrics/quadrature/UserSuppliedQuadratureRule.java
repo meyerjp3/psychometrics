@@ -23,9 +23,6 @@ import java.util.Formatter;
  */
 public final class UserSuppliedQuadratureRule extends AbstractQuadratureRule {
 
-//    private ResizableDoubleArray pointsStore = new ResizableDoubleArray();
-//    private ResizableDoubleArray densityStore = new ResizableDoubleArray();
-
     /**
      * Create the quadrature approximation with an array of evaluation points and an array of density values
      * provided by the user.
@@ -34,11 +31,9 @@ public final class UserSuppliedQuadratureRule extends AbstractQuadratureRule {
      * @param density array of density values.
      */
     public UserSuppliedQuadratureRule(double[] points, double[] density){
-//        this.pointsStore.addElements(points);
-//        this.densityStore.addElements(density);
         this.numberOfPoints = points.length;
-        this.points = new double[numberOfPoints];
-        this.weights = new double[numberOfPoints];
+        this.points = points;
+        this.weights = density;
     }
 
     /**
@@ -56,45 +51,7 @@ public final class UserSuppliedQuadratureRule extends AbstractQuadratureRule {
             this.points[i] = pointsAndWeights[i][0];
             this.weights[i] = pointsAndWeights[i][1];
         }
-//        this.pointsStore.addElements(this.points);
-//        this.densityStore.addElements((this.weights));
     }
-
-//    /**
-//     * Creates the quadrature approximation with no evaluation points or density values. The array defaults
-//     * to having 49 elements.
-//     */
-//    @Deprecated
-//    public UserSuppliedQuadratureRule(){
-//        points = new double[numberOfPoints];
-//        weights = new double[numberOfPoints];
-//    }
-//
-//    /**
-//     * Increment the array of evaluation points and weights with the provided values.
-//     *
-//     * @param point an evaluation point.
-//     * @param density a density value.
-//     */
-//    @Deprecated
-//    public void increment(double point, double density){
-//        this.pointsStore.addElement(point);
-//        this.densityStore.addElement(density);
-//        numberOfPoints++;
-//    }
-//
-//    /**
-//     * An evaluation points. This method will result in uniform density values.
-//     *
-//     * @param point
-//     */
-//    @Deprecated
-//    public void increment(double point){
-//        this.pointsStore.addElement(point);
-//        numberOfPoints++;
-//    }
-
-
 
     public void setDensityAt(int index, double value){
         weights[index] = value;

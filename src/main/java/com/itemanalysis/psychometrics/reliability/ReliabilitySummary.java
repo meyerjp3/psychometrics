@@ -95,6 +95,25 @@ public class ReliabilitySummary {
         return guttmanLambda2;
     }
 
+    public double getSampleSize(){
+        return nPeople;
+    }
+
+    public ScoreReliability getReliability(ScoreReliabilityType type){
+        switch(type){
+            case GUTTMAN_LAMBDA1: return guttmanLambda1;
+            case GUTTMAN_LAMBDA2: return guttmanLambda2;
+            case GUTTMAN_LAMBDA3: return guttmanLambda3;
+            case GUTTMAN_LAMBDA4: return guttmanLambda4;
+            case GUTTMAN_LAMBDA5: return guttmanLambda5;
+            case GUTTMAN_LAMBDA6: return guttmanLambda6;
+            case FELDT_GILMER:    return feldtGilmer;
+            case FELDT_CLASSICAL_CONGENERIC: return feldtBrennan;
+            case RAJU_BETA: return raju;
+        }
+        return alpha;
+    }
+
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();

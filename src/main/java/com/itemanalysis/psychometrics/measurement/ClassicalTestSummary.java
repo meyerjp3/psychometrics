@@ -113,6 +113,10 @@ public class ClassicalTestSummary {
         return numberOfItems;
     }
 
+    public ReliabilitySummary getReliabilitySummary(){
+        return reliability;
+    }
+
     private double computeMaximumPossibleTestScore(){
         Iterator<VariableAttributes> iter = variableAttributes.iterator();
         double sum = 0.0;
