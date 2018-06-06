@@ -22,6 +22,10 @@ import org.apache.commons.math3.distribution.NormalDistribution;
  * @author J. Patrick Meyer
  */
 public class NormalScores {
+
+    public enum ScoreType{
+        BLOM, TUKEY, VANDERWAERDEN;
+    }
     
     NormalDistribution norm = null;
 
@@ -42,6 +46,14 @@ public class NormalScores {
     public double vanderWaerden(double rank, double n){
         double p = rank/(n+1.0);
         return norm.inverseCumulativeProbability(p);
+    }
+
+    public double getNormalScore(double rank, double n, ScoreType normalScoreType){
+        switch(normalScoreType){
+            case BLOM: return blom(rank, n);
+            case TUKEY: return tukey(rank, n);
+        }
+        return vanderWaerden(rank, n);
     }
 
 }

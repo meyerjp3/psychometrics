@@ -329,8 +329,16 @@ public class CochranMantelHaenszel {
     }
 
     public String smdDifClass(){
-        double MPiS = itemVariable.getMaximumPossibleItemScore();
-        double mPiS = itemVariable.getMinimumPossibleItemScore();
+        double MPiS = 1;
+        double mPiS = 0;
+        if(itemVariable.hasScoring()){
+            MPiS = itemVariable.getMaximumPossibleItemScore();
+            mPiS = itemVariable.getMinimumPossibleItemScore();
+        }else{
+            MPiS = itemVariable.getMaxItemScore();
+            mPiS = itemVariable.getMaxItemScore();
+        }
+
         double ES = pF()/(MPiS-mPiS); //divide by item score range to limit ES to the interval from -1 to +1.
         double aES = Math.abs(ES);
         String difClass = "";

@@ -94,6 +94,8 @@ public class CategoryResponseSummary {
         if(categoryID.equals(response)){
             mean.increment(1.0);
             sd.increment(1.0);
+            observedMaxItemScore = Math.max(observedMaxItemScore, 1.0);
+            observedMinItemScore = Math.min(observedMinItemScore, 1.0);
             if(discriminationType==DiscriminationType.PEARSON){
                 pearsonCorrelation.increment(testScore, 1.0);
             }else if(discriminationType==DiscriminationType.POLYSERIAL){
@@ -103,6 +105,8 @@ public class CategoryResponseSummary {
         }else{
             mean.increment(0.0);
             sd.increment(0.0);
+            observedMaxItemScore = Math.max(observedMaxItemScore, 0.0);
+            observedMinItemScore = Math.min(observedMinItemScore, 0.0);
             if(discriminationType==DiscriminationType.PEARSON){
                 pearsonCorrelation.increment(testScore, 0.0);
             }else if(discriminationType==DiscriminationType.POLYSERIAL){
@@ -123,6 +127,8 @@ public class CategoryResponseSummary {
     public void increment(double itemScore, double testScore){
         mean.increment(itemScore);
         sd.increment(itemScore);
+        observedMaxItemScore = Math.max(observedMaxItemScore, itemScore);
+        observedMinItemScore = Math.min(observedMinItemScore, itemScore);
         if(discriminationType==DiscriminationType.PEARSON){
             pearsonCorrelation.increment(testScore, itemScore);
         }else if(discriminationType==DiscriminationType.POLYSERIAL){
@@ -164,9 +170,6 @@ public class CategoryResponseSummary {
      * @param upperBound the value at the 100-pth percentile
      */
     public void incrementDindex(double itemScore, double testScore, double lowerBound, double upperBound){
-        observedMaxItemScore = Math.max(observedMaxItemScore, itemScore);
-        observedMinItemScore = Math.min(observedMinItemScore, itemScore);
-
         if(testScore <= lowerBound){
             lower.increment(itemScore);
         }else if (testScore >= upperBound){

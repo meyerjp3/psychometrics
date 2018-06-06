@@ -168,6 +168,7 @@ public class ClassicalItemSummary {
         }
 
         double pval = mainItemSummary.getDifficulty()/scoreRange;//convert to p-value
+
         if(pval < lowPvalue){
             return "LP ";
         }else if(pval > highPvalue){
