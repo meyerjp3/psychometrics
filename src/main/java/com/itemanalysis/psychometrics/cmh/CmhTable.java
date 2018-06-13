@@ -67,6 +67,10 @@ public class CmhTable {
         return referenceRow.rowTotal();
     }
 
+    public int numberOfScoreLevels(){
+        return columnMargin.getUniqueCount();
+    }
+
     /**
      * Table calculation for standardized p-dif
      *

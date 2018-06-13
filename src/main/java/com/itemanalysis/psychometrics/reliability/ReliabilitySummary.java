@@ -18,6 +18,7 @@ package com.itemanalysis.psychometrics.reliability;
 import com.itemanalysis.psychometrics.data.VariableAttributes;
 import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
+import org.apache.commons.math3.linear.SingularMatrixException;
 
 import java.util.ArrayList;
 import java.util.Formatter;
@@ -126,7 +127,13 @@ public class ReliabilitySummary {
         double g3 = guttmanLambda3.value();
         double g4 = guttmanLambda4.value();
         double g5 = guttmanLambda5.value();
-        double g6 = guttmanLambda6.value();
+        double g6 = Double.NaN;
+
+        try{
+            g6 = guttmanLambda6.value();
+        }catch(SingularMatrixException ex){
+            ex.printStackTrace();
+        }
         double ca = alpha.value();
         double fg = feldtGilmer.value();
         double fb = feldtBrennan.value();
@@ -160,8 +167,15 @@ public class ReliabilitySummary {
         f.format("%20s", guttmanLambda4.confidenceIntervalToString(g4CI));f.format("%5s",  ""); f.format("% 10.4f", sem.value(totalVariance, g4));f.format("%n");
         f.format("%-20s",  " Guttman's L5 ");f.format("%10.4f", g5);f.format("%5s",  "");
         f.format("%20s", guttmanLambda5.confidenceIntervalToString(g5CI));f.format("%5s",  ""); f.format("% 10.4f", sem.value(totalVariance, g5));f.format("%n");
-        f.format("%-20s",  " Guttman's L6 ");f.format("%10.4f", g6);f.format("%5s",  "");
-        f.format("%20s", guttmanLambda6.confidenceIntervalToString(g6CI));f.format("%5s",  ""); f.format("% 10.4f", sem.value(totalVariance, g6));f.format("%n");
+
+        if(Double.isNaN(g6)){
+            f.format("%-20s",  " Guttman's L6 "); f.format("%-20s", "Singular maxtrix"); f.format("%n");
+        }else{
+            f.format("%-20s",  " Guttman's L6 ");f.format("%10.4f", g6);f.format("%5s",  "");
+            f.format("%20s", guttmanLambda6.confidenceIntervalToString(g6CI));f.format("%5s",  ""); f.format("% 10.4f", sem.value(totalVariance, g6));f.format("%n");
+        }
+
+
         f.format("%-20s",  " Coefficient Alpha  ");f.format("%10.4f", ca);f.format("%5s",  "");
             f.format("%20s", alpha.confidenceIntervalToString(caCI));f.format("%5s",  ""); f.format("% 10.4f", sem.value(totalVariance, ca));f.format("%n");
         f.format("%-20s",  " Feldt-Gilmer       ");f.format("%10.4f", fg);f.format("%5s",  "");
