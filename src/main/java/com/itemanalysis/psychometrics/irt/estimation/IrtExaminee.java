@@ -255,6 +255,10 @@ public class IrtExaminee implements UnivariateDifferentiableFunction {
         return maximumLikelihoodEstimate(thetaMin, thetaMax, 100, 1e-10);
     }
 
+    public double maximumLikelihoodEstimate(QuadratureRule dist, int maxIter, double tolerance){
+        return maximumLikelihoodEstimate(dist.getMinimum(), dist.getMaximum(), maxIter, tolerance);
+    }
+
     /**
      * Maximum a Posteriori (MAP) estimate of examinee ability using a normal prior
      * quadrature.
@@ -279,6 +283,10 @@ public class IrtExaminee implements UnivariateDifferentiableFunction {
 
     public double mapEstimate(double mean, double sd, double thetaMin, double thetaMax){
         return mapEstimate(mean, sd, thetaMin, thetaMax, 100, 1e-10);
+    }
+
+    public double mapEstimate(QuadratureRule dist, int maxIter, double tolerance){
+        return mapEstimate(dist.getMean(), dist.getStandardDeviation(), dist.getMinimum(), dist.getMaximum(), maxIter, tolerance);
     }
 
     /**

@@ -15,10 +15,6 @@
  */
 package com.itemanalysis.psychometrics.reliability;
 
-import com.itemanalysis.psychometrics.data.VariableAttributes;
-import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
-
-import java.util.ArrayList;
 import java.util.Formatter;
 
 

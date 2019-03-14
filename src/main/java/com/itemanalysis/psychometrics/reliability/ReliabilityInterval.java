@@ -49,8 +49,9 @@ public class ReliabilityInterval {
 		double df1=N-1.0;
 		double df2=(N-1.0)*(nI-1.0);
 		double[] ci=new double[2];
-        FDistribution fDist = new FDistribution(df1, df2);
+
         try{
+			FDistribution fDist = new FDistribution(df1, df2);
             ci[0] = 1.0-((1.0-reliability.value())*fDist.inverseCumulativeProbability(0.975));
             ci[1] = 1.0-((1.0-reliability.value())*fDist.inverseCumulativeProbability(0.025));
         }catch(Exception ex){

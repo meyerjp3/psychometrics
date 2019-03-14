@@ -104,16 +104,21 @@ public class IrtScaleLinking {
      */
     private boolean checkRaschModel(){
         ItemResponseModel irm = null;
-        for(VariableName v : itemFormY.keySet()){
+        int count = 0;
+        for(VariableName v : itemFormY.keySet()) {
             irm = itemFormY.get(v);
 
-            if(irm.getType()==IrmType.L3){
-                if(irm.getNumberOfParameters()>1) return false;
-            }else if(irm.getType()!=IrmType.PCM){
+            if(irm.getType() == IrmType.L3 || irm.getType() == IrmType.L4) {
+                if (irm.getGuessing() == 0 && irm.getDiscrimination() == 1.0 && irm.getSlipping() == 1.0) {
+                    count++;
+                }
+            }else if (irm.getType() == IrmType.PCM) {
+                count++;
+            }else {
                 return false;
             }
         }
-        return true;
+        return count==itemFormY.size();
     }
 
     public void computeCoefficients(){

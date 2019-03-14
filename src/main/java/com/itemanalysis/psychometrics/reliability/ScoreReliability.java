@@ -44,7 +44,7 @@ public interface ScoreReliability {
     /**
      * A String representation of all item deleted reliability estimates.
      *
-     * @param var VariableAttributes that provide the variable names.
+     * @param var DefaultVariableAttributes that provide the variable names.
      * @return
      */
     public String printItemDeletedSummary(ArrayList<VariableAttributes> var);

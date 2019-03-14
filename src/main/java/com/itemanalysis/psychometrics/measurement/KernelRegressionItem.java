@@ -16,6 +16,7 @@
 package com.itemanalysis.psychometrics.measurement;
 
 import com.itemanalysis.psychometrics.data.VariableAttributes;
+import com.itemanalysis.psychometrics.exceptions.ItemScoringException;
 import com.itemanalysis.psychometrics.quadrature.UniformQuadratureRule;
 import com.itemanalysis.psychometrics.kernel.Bandwidth;
 import com.itemanalysis.psychometrics.kernel.KernelFunction;
@@ -50,7 +51,7 @@ public class KernelRegressionItem {
         expectedScore = new KernelRegression(kernel, bandwidth, uniform);
     }
 
-    public void increment(double x, Object y){
+    public void increment(double x, Object y)throws ItemScoringException {
         KernelRegression kreg;
         double score;
 

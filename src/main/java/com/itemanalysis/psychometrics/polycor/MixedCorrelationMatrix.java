@@ -15,17 +15,6 @@
  */
 package com.itemanalysis.psychometrics.polycor;
 
-import com.itemanalysis.psychometrics.data.DataType;
-import com.itemanalysis.psychometrics.data.ItemType;
-import com.itemanalysis.psychometrics.data.VariableAttributes;
-import com.itemanalysis.psychometrics.texttable.TextTable;
-import com.itemanalysis.psychometrics.texttable.TextTablePosition;
-import com.itemanalysis.psychometrics.texttable.TextTableColumnFormat;
-import com.itemanalysis.psychometrics.texttable.TextTableColumnFormat.OutputAlignment;
-import org.apache.commons.math3.stat.descriptive.rank.Max;
-
-import java.util.ArrayList;
-
 /**
  *
  * @author J. Patrick Meyer
@@ -34,7 +23,7 @@ public class MixedCorrelationMatrix {
 
     //TODO this class needs a lot of work
 
-//    private ArrayList<VariableAttributes> variables = null;
+//    private ArrayList<DefaultVariableAttributes> variables = null;
 //
 //    private Object[][] matrix = null;
 //
@@ -51,7 +40,7 @@ public class MixedCorrelationMatrix {
 //        POLYCHORIC      //polychoric correlation
 //    }
 //
-//    public MixedCorrelationMatrix(ArrayList<VariableAttributes> variables, boolean maximumLikelihood){
+//    public MixedCorrelationMatrix(ArrayList<DefaultVariableAttributes> variables, boolean maximumLikelihood){
 //        this.variables = variables;
 //        this.maximumLikelihood = maximumLikelihood;
 //        this.numberOfVariables = variables.size();
@@ -300,7 +289,7 @@ public class MixedCorrelationMatrix {
 //        Max max = new Max();
 //        int index=0;
 //        int pIndex=0;
-//        for(VariableAttributes v : variables){
+//        for(DefaultVariableAttributes v : variables){
 //            o = matrix[index][index];
 //            if(corTypes[index][index]==CorrelationType.POLYCHORIC){
 //                if(maximumLikelihood){

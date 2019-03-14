@@ -17,7 +17,6 @@ package com.itemanalysis.psychometrics.scaling;
 
 import com.itemanalysis.psychometrics.data.ItemType;
 import com.itemanalysis.psychometrics.data.VariableAttributes;
-import com.itemanalysis.psychometrics.data.VariableType;
 import org.apache.commons.math3.util.Precision;
 
 import java.util.ArrayList;

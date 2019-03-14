@@ -69,6 +69,7 @@ public class JointMaximumLikelihoodEstimation{
     private int maxCategory = 2;
     private double[] minPossibleTestScore = null;//sum of min score points for nonextreme items completed by the examinee
     private double[] maxPossibleTestScore = null;//sum of max score points for nonextreme items completed by the examinee
+    private int[] numberOfCompletedItems = null;
     private double adjustment = 0.3;
     private int extremeCount = 0;
     private int droppedCount = 0;
@@ -103,6 +104,7 @@ public class JointMaximumLikelihoodEstimation{
         this.sumScore = new double[nPeople];
         this.minPossibleTestScore = new double[nPeople];
         this.maxPossibleTestScore = new double[nPeople];
+        this.numberOfCompletedItems = new int[nPeople];
         rsg = new LinkedHashMap<String, RaschRatingScaleGroup>();
 
         //initialize item summaries
@@ -175,6 +177,7 @@ public class JointMaximumLikelihoodEstimation{
                         itemSummary[j].increment(data[i][j]);
                     }
 
+                    numberOfCompletedItems[i]++;//count number of nonmissing item responses
                 }
 
             }
@@ -387,7 +390,7 @@ public class JointMaximumLikelihoodEstimation{
         if(maxCategory>2){
             //update thresholds
             for(String s:rsg.keySet()){
-                if(!rsg.get(s).isFixed()){
+                if(!rsg.get(s).isFixed() && !rsg.get(s).isPoissoncounts()){
                     maxDelta = Math.max(maxDelta, updateThresholds(rsg.get(s)));
                 }
             }
@@ -455,7 +458,6 @@ public class JointMaximumLikelihoodEstimation{
      */
     private double updateThresholds(RaschRatingScaleGroup raschRatingScaleGroup){
         double thresh = 0.0;
-//        int[] pos = raschRatingScaleGroup.getPositions();
         int nCat = raschRatingScaleGroup.getNumberOfCategories();
         double[] catKSum = new double[nCat];
         double[] thresholds = null;
@@ -1112,6 +1114,15 @@ public class JointMaximumLikelihoodEstimation{
     }
 
     /**
+     * The number of items (nonextreme and extreme) completed by each examinee
+     *
+     * @return an array of item counts.
+     */
+    public int getNumberOfCompletedItemsAt(int index){
+        return numberOfCompletedItems[index];
+    }
+
+    /**
      * An {@link ItemResponseModel} object is stored in an array for each item. Gets the item response model
      * at the given index.
      *
@@ -1375,6 +1386,9 @@ public class JointMaximumLikelihoodEstimation{
         Formatter f = new Formatter(sb);
         int index = 0;
 
+        f.format("%n");
+        f.format("%-20s", "ITERATION HISTORY");f.format("%n");
+        f.format("%62s", "=============================================================="); f.format("%n");
         f.format("%10s", "Iteration");  f.format("%5s","");  f.format("%17s", "Delta");  f.format("%5s",""); f.format("%20s", "Log-likelihood"); f.format("%n");
         f.format("%62s", "--------------------------------------------------------------"); f.format("%n");
         for(IterationRecord ir:iterationHistory){
@@ -1383,7 +1397,8 @@ public class JointMaximumLikelihoodEstimation{
             f.format("%42s", ir.toString());
             f.format("%n");
         }
-        f.format("%62s", "--------------------------------------------------------------"); f.format("%n");
+        f.format("%62s", "=============================================================="); f.format("%n");
+
         return f.toString();
     }
 
@@ -1446,12 +1461,12 @@ public class JointMaximumLikelihoodEstimation{
         textTable.getRowAt(0).addHeader(0, 7, title, TextTablePosition.CENTER);
         textTable.getRowAt(1).addHorizontalRule(0, 7, "=");
         textTable.getRowAt(2).addHeader(0, 1, "Item", TextTablePosition.LEFT);
-        textTable.getRowAt(2).addHeader(1, 1, "Difficulty", TextTablePosition.CENTER);
-        textTable.getRowAt(2).addHeader(2, 1, "Std. Error", TextTablePosition.CENTER);
-        textTable.getRowAt(2).addHeader(3, 1, "WMS", TextTablePosition.CENTER);
-        textTable.getRowAt(2).addHeader(4, 1, "Std. WMS", TextTablePosition.CENTER);
-        textTable.getRowAt(2).addHeader(5, 1, "UMS", TextTablePosition.CENTER);
-        textTable.getRowAt(2).addHeader(6, 1, "Std. UMS", TextTablePosition.CENTER);
+        textTable.getRowAt(2).addHeader(1, 1, "Difficulty", TextTablePosition.RIGHT);
+        textTable.getRowAt(2).addHeader(2, 1, "Std. Error", TextTablePosition.RIGHT);
+        textTable.getRowAt(2).addHeader(3, 1, "INFIT", TextTablePosition.RIGHT);
+        textTable.getRowAt(2).addHeader(4, 1, "Z-INFIT", TextTablePosition.RIGHT);
+        textTable.getRowAt(2).addHeader(5, 1, "OUTFIT", TextTablePosition.RIGHT);
+        textTable.getRowAt(2).addHeader(6, 1, "Z-OUTFIT", TextTablePosition.RIGHT);
         textTable.getRowAt(3).addHorizontalRule(0, 7, "-");
 
         int index = 4;

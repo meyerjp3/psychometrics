@@ -15,10 +15,6 @@
  */
 package com.itemanalysis.psychometrics.reliability;
 
-import com.itemanalysis.psychometrics.data.VariableAttributes;
-import org.apache.commons.math3.distribution.FDistribution;
-
-import java.util.ArrayList;
 import java.util.Formatter;
 
 /**
@@ -70,7 +66,7 @@ public class KR21 extends AbstractScoreReliability{
 		return f.toString();
 	}
 
-//    public String printItemDeletedSummary(ArrayList<VariableAttributes> var){
+//    public String printItemDeletedSummary(ArrayList<DefaultVariableAttributes> var){
 //        return "";
 //    }
 

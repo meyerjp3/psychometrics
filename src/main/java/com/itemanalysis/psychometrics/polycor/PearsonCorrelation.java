@@ -47,7 +47,7 @@ public class PearsonCorrelation implements Comparable<PearsonCorrelation>{
 	}
 
 	public void increment(Double X, Double Y){
-        if(X!=null || Y!=null){
+        if(X!=null && Y!=null){
             covariance.increment(X, Y);
         }
 	}

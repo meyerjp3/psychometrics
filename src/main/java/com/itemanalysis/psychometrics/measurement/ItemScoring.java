@@ -15,9 +15,11 @@
  */
 package com.itemanalysis.psychometrics.measurement;
 
+import com.itemanalysis.psychometrics.data.DataType;
 import com.itemanalysis.psychometrics.data.ItemType;
 import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.data.VariableType;
+import com.itemanalysis.psychometrics.exceptions.ItemScoringException;
 
 import java.util.Iterator;
 
@@ -27,60 +29,38 @@ import java.util.Iterator;
  */
 public interface ItemScoring {
 
-    public void addCategory(Object categoryID, double categoryScore);
+    void addCategory(Object categoryID, double categoryScore);
 
-    public int numberOfCategories();
+    int numberOfCategories();
 
-    public int numberOfScoreLevels();
+    int numberOfScoreLevels();
 
-    public double computeItemScore(Object response);
+    double computeItemScore(Object response) throws ItemScoringException;
 
-    public void isContinuous(boolean isContinuous);
+    void isContinuous(boolean isContinuous);
 
-    public double computeCategoryScore(Object categoryId, Object response);
+    double computeCategoryScore(Object categoryId, Object response);
 
-    public double maximumPossibleScore();
+    double maximumPossibleScore();
 
-    public double minimumPossibleScore();
+    double minimumPossibleScore();
 
-    public String getAnswerKey();
+    String getAnswerKey();
 
-    public ItemType getItemType();
+    ItemType getItemType();
 
-    public ItemType addAllCategories(String optionScoreKey, VariableType type);
+    ItemType addAllCategories(String optionScoreKey, DataType type);
 
-    public void clearCategory();
+    void clearCategory();
 
-    public double[] scoreArray();
+    double[] scoreArray();
 
-    public String printOptionScoreKey();
+    String printOptionScoreKey();
 
-    public Iterator<Object> categoryIterator();
+    Iterator<Object> categoryIterator();
 
-    public String getCategoryScoreString(Object response);
+    String getCategoryScoreString(Object response);
 
-    public VariableName getName();
-
-//    public void addCategory(Category cat);
-
-//    public void removeCategory(Category cat);
-
-//    public double computeItemScore(Object response, boolean scoreAsZero);
-//
-//    public double computeItemScore(Object response, boolean missingZero, boolean omitZero, boolean notreachedZero);
-
-//    public double computeItemScore(Object response, VariableType type);
-
-//    public double computeItemScore(Object response, VariableType type, boolean scoreAsZero);
-//
-//    public double computeItemScore(Object response, VariableType type, boolean missingZero, boolean omitZero, boolean notreachedZero);
-
-//    public void setOmitCode(Object omitCode, VariableType type);
-//
-//    public void setNotReachedCode(Object omitCode, VariableType type);
-//
-//    public Object getOmitCode();
-//
-//    public Object getNotReachedCode();
+    VariableName getName();
 
 }

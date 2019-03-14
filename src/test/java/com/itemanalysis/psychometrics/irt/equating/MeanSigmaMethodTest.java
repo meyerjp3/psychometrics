@@ -391,11 +391,8 @@ public class MeanSigmaMethodTest {
         double B = meanSigmaMethod.getIntercept();
         double A = meanSigmaMethod.getScale();
 
-//        System.out.println("Slope: " + A);
-//        System.out.println("Intercept: " + B);
-
-        assertEquals("Mean/sigma slope test", 0.950133, A, 1e-6);
-        assertEquals("Mean/sigma intercept test", 0.060406, B, 1e-6);
+        assertEquals("Mean/sigma slope test", 1.00, A, 1e-6);
+        assertEquals("Mean/sigma intercept test", 0.09991338, B, 1e-6);
 
     }
 

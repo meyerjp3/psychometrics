@@ -48,7 +48,7 @@ public class DefaultItemScoring implements ItemScoring{
 
     private TreeSet<Double> scoreLevels = null;
 
-    private SpecialDataCodes specialDataCodes = null;
+    private DefaultSpecialDataCodes specialDataCodes = null;
 
     private boolean isContinuous = false;
 
@@ -63,7 +63,7 @@ public class DefaultItemScoring implements ItemScoring{
         categoryMap = new TreeMap<Object, Category>(new ItemResponseComparator());
         maximumPossibleScore = new Max();
         minimumPossibleScore = new Min();
-        specialDataCodes = new SpecialDataCodes();
+        specialDataCodes = new DefaultSpecialDataCodes();
         scoreLevels = new TreeSet<Double>();
         variableName = new VariableName("");//To be consistent with past usage of this class.
     }
@@ -148,7 +148,7 @@ public class DefaultItemScoring implements ItemScoring{
         return s;
     }
 
-    public void setSpecialDataCodes(SpecialDataCodes specialDataCodes){
+    public void setSpecialDataCodes(DefaultSpecialDataCodes specialDataCodes){
         this.specialDataCodes = specialDataCodes;
     }
 
@@ -161,7 +161,7 @@ public class DefaultItemScoring implements ItemScoring{
      */
     public double computeItemScore(Object response){
         if(response==null){
-            return specialDataCodes.computeMissingScore(SpecialDataCodes.PERMANENT_MISSING_DATA_CODE);
+            return specialDataCodes.computeMissingScore(DefaultSpecialDataCodes.PERMANENT_MISSING_DATA_CODE);
         }
 
         if(specialDataCodes.isMissing(response)){
@@ -177,7 +177,7 @@ public class DefaultItemScoring implements ItemScoring{
 
         if(temp==null){
             //undefined categories scored same as missing data
-            return specialDataCodes.computeMissingScore(SpecialDataCodes.PERMANENT_MISSING_DATA_CODE);//return missing score
+            return specialDataCodes.computeMissingScore(DefaultSpecialDataCodes.PERMANENT_MISSING_DATA_CODE);//return missing score
         }else{
             score = temp.scoreValue();
         }
@@ -303,8 +303,8 @@ public class DefaultItemScoring implements ItemScoring{
      *
      *
      */
-    public ItemType addAllCategories(String optionScoreKey, VariableType type){
-        if(type.getItemType()==ItemType.CONTINUOUS_ITEM && optionScoreKey.trim().equals("")) {
+    public ItemType addAllCategories(String optionScoreKey, DataType type){
+        if(type==DataType.DOUBLE && optionScoreKey.trim().equals("")) {
             clearCategory();
             isContinuous = true;
             return ItemType.CONTINUOUS_ITEM;
@@ -385,7 +385,7 @@ public class DefaultItemScoring implements ItemScoring{
         for(int i=0;i<maxLength;i++){
             Category cat = null;
             Double cScore = null;
-            if(type.getDataType()==DataType.DOUBLE && !newOrig[i].equals("")){
+            if(type==DataType.DOUBLE && !newOrig[i].equals("")){
                 cScore = Double.parseDouble(newScor[i]);
                 cat = new Category(Double.parseDouble(newOrig[i]), cScore);
             }else{

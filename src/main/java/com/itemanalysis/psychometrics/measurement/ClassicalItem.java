@@ -18,6 +18,7 @@ package com.itemanalysis.psychometrics.measurement;
 import com.itemanalysis.psychometrics.data.ItemType;
 import com.itemanalysis.psychometrics.data.VariableAttributes;
 import com.itemanalysis.psychometrics.data.VariableName;
+import com.itemanalysis.psychometrics.exceptions.ItemScoringException;
 import com.itemanalysis.psychometrics.scaling.RawScore;
 
 import java.util.Formatter;
@@ -95,7 +96,7 @@ public class ClassicalItem {
      * @param rawScore sum score for the entire test
      * @param response observed item response (not the score value)
      */
-    public void increment(RawScore rawScore, Object response){
+    public void increment(RawScore rawScore, Object response)throws ItemScoringException{
         increment(rawScore.value(), response);
 //        double testScore = rawScore.value();
 //        double itemScore = itemScoring.computeItemScore(response);
@@ -116,7 +117,7 @@ public class ClassicalItem {
         
     }
 
-    public void increment(double sumScore, Object response){
+    public void increment(double sumScore, Object response)throws ItemScoringException{
         double itemScore = itemScoring.computeItemScore(response);
         double catScore = 0.0;
 
@@ -134,7 +135,7 @@ public class ClassicalItem {
         }
     }
 
-    public void incrementDindex(Object response, double testScore, double lowerCut, double upperCut){
+    public void incrementDindex(Object response, double testScore, double lowerCut, double upperCut)throws ItemScoringException {
         double itemScore = itemScoring.computeItemScore(response);
         itemStats.incrementDindex(itemScore, testScore, lowerCut, upperCut);
         double catScore = 0.0;

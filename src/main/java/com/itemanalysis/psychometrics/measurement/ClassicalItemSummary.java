@@ -17,6 +17,7 @@ package com.itemanalysis.psychometrics.measurement;
 
 import com.itemanalysis.psychometrics.data.ItemType;
 import com.itemanalysis.psychometrics.data.VariableAttributes;
+import com.itemanalysis.psychometrics.exceptions.ItemScoringException;
 
 import java.util.Formatter;
 import java.util.Iterator;
@@ -30,6 +31,7 @@ public class ClassicalItemSummary {
     private ItemScoring itemScoring = null;
     private CategoryResponseSummary mainItemSummary = null;
     private TreeMap<Object, CategoryResponseSummary> categorySummary = null;
+    private long missingCount = 0;
 
     //flag criteria
     private double lowPvalue = 0.1;
@@ -67,7 +69,14 @@ public class ClassicalItemSummary {
     }
 
     public void increment(String response, double testScore){
-        double itemScore = variableAttributes.computeItemScore(response);
+        double itemScore = 0;
+
+        try{
+            itemScore = variableAttributes.computeItemScore(response);
+        }catch(ItemScoringException ex){//Eat the exception. This method is for the old version of jmetrik
+            ex.printStackTrace();
+        }
+
         mainItemSummary.increment(itemScore, testScore);
 
         if(allCategories){
@@ -80,9 +89,60 @@ public class ClassicalItemSummary {
 
     }
 
+    /**
+     * Preferred method when item score is available
+     *
+     * @param response an item response
+     * @param responseScore the numeric value of the response
+     * @param testScore the testScore
+     */
+    public void increment(String response, double responseScore, double testScore) {
+        mainItemSummary.increment(responseScore, testScore);
+
+        if(allCategories){
+            CategoryResponseSummary crs = null;
+            for(Object k : categorySummary.keySet()){
+                crs = categorySummary.get(k);
+                crs.increment(response, testScore);
+            }
+        }
+
+    }
+
+    public void incrementMissing(){
+        missingCount++;
+    }
+
+    /**
+     * Preferred method when item score is available
+     *
+     * @param response an item response
+     * @param testScore the numeric value of teh response
+     * @param lowerCut the lower bound
+     * @param upperCut the upper bound
+     */
     public void incrementDindex(String response, double testScore, double lowerCut, double upperCut){
-        double itemScore = variableAttributes.computeItemScore(response);
+        double itemScore = 0;
+        try{
+            itemScore = variableAttributes.computeItemScore(response);
+        }catch(ItemScoringException ex){
+            //eat the exception. This method is for the old database version of jMetrik
+            ex.printStackTrace();
+        }
+
         mainItemSummary.incrementDindex(itemScore, testScore, lowerCut, upperCut);
+
+        if(allCategories){
+            CategoryResponseSummary crs = null;
+            for(Object k : categorySummary.keySet()){
+                crs = categorySummary.get(k);
+                crs.incrementDindex(response, testScore, lowerCut, upperCut);
+            }
+        }
+    }
+
+    public void incrementDindex(String response, double responseScore, double testScore, double lowerCut, double upperCut){
+        mainItemSummary.incrementDindex(responseScore, testScore, lowerCut, upperCut);
 
         if(allCategories){
             CategoryResponseSummary crs = null;
@@ -145,6 +205,14 @@ public class ClassicalItemSummary {
 
     public double getItemStandardDeviation(){
         return mainItemSummary.getStandardDeviation();
+    }
+
+    public long getSampleSize(){
+        return mainItemSummary.getSampleSize();
+    }
+
+    public long getMissingCount(){
+        return missingCount;
     }
 
     public double getItemDiscrimination(){
@@ -248,17 +316,20 @@ public class ClassicalItemSummary {
                     f.format("% 12.4f", crs.getDiscrimination());
                 }
 
-                //add flag for ambiguous key
-                if(variableAttributes.getItemType()==ItemType.BINARY_ITEM && variableAttributes.hasScoring()){
-                    if(variableAttributes.computeItemScore((String)k)==0 && crs.getDiscrimination() > 0){
-                        f.format("%10s", "key?");
-                    }
-                }
+//                //add flag for ambiguous key
+//                if(variableAttributes.getItemType()==ItemType.BINARY_ITEM && variableAttributes.hasScoring()){
+//                    if(variableAttributes.computeItemScore((String)k)==0 && crs.getDiscrimination() > 0){
+//                        f.format("%10s", "key?");
+//                    }
+//                }
 
                 f.format("%n");
             }//end loop over response options
 
         }//end if allCategories
+
+        f.format("%30s", "  Valid N"); f.format("% 12d", mainItemSummary.getSampleSize());f.format("%n");
+        f.format("%30s", "Missing N"); f.format("% 12d", missingCount);f.format("%n");
 
         return f.toString();
     }

@@ -16,7 +16,6 @@
 package com.itemanalysis.psychometrics.reliability;
 
 import com.itemanalysis.psychometrics.data.VariableAttributes;
-import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
 import org.apache.commons.math3.distribution.FDistribution;
 
 import java.util.ArrayList;
@@ -71,8 +70,9 @@ public abstract class AbstractScoreReliability implements ScoreReliability,  Com
         double numberOfItems = (double)nItems;
 		double df1=numberOfExaminees-1.0;
 		double df2=(numberOfExaminees-1.0)*(numberOfItems-1.0);
-        FDistribution fDist = new FDistribution(df1, df2);
+
         try{
+            FDistribution fDist = new FDistribution(df1, df2);
             confidenceInterval[0] = 1.0-((1.0-this.value())*fDist.inverseCumulativeProbability(0.975));
             confidenceInterval[1] = 1.0-((1.0-this.value())*fDist.inverseCumulativeProbability(0.025));
         }catch(Exception ex){

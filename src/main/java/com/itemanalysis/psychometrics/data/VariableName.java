@@ -32,16 +32,14 @@ public class VariableName implements Comparable<VariableName>{
      * The original name of the variable before special characters and white spaces have been removed
      */
 	private String originalVariableName = "";
-	private static int NAME_LENGTH = 20; //limit variable names to 20 characters
+	private static int NAME_LENGTH = 50; //limit variable names to 20 characters
     private int index = 0;//used for VariableNameListModel
 
 	public VariableName(String variableName){
-        String lcVarName = variableName.trim().toLowerCase();
-
-		if(lcVarName.toLowerCase().startsWith("x") && lcVarName.toLowerCase().endsWith("x")){
-			String temp = lcVarName.substring(1,lcVarName.length()-1);
-			int length=Math.min(temp.length(), NAME_LENGTH);
-			this.originalVariableName=temp.substring(0,length);
+        if(variableName.toLowerCase().startsWith("x") && variableName.toLowerCase().endsWith("x")){
+            String temp = variableName.substring(1,variableName.length()-1);
+            int length=Math.min(temp.length(), NAME_LENGTH);
+            this.originalVariableName=temp.substring(0,length);
 
             String temp2 = checkVariableName(temp);
             length=Math.min(temp2.length(), NAME_LENGTH);
@@ -49,12 +47,32 @@ public class VariableName implements Comparable<VariableName>{
         }
 
         else{
-			int length=Math.min(lcVarName.length(), NAME_LENGTH);
-			this.originalVariableName=lcVarName.substring(0,length);
-            String temp = checkVariableName(lcVarName);
+            int length=Math.min(variableName.length(), NAME_LENGTH);
+            this.originalVariableName=variableName.substring(0,length);
+            String temp = checkVariableName(variableName);
             length=Math.min(temp.length(), NAME_LENGTH);
-			this.variableName=temp.substring(0,length);
-		}
+            this.variableName=temp.substring(0,length);
+        }
+
+//        //String lcVarName = variableName.trim().toLowerCase(); removed Sept 29, 2018
+//
+//		if(lcVarName.toLowerCase().startsWith("x") && lcVarName.toLowerCase().endsWith("x")){
+//			String temp = lcVarName.substring(1,lcVarName.length()-1);
+//			int length=Math.min(temp.length(), NAME_LENGTH);
+//			this.originalVariableName=temp.substring(0,length);
+//
+//            String temp2 = checkVariableName(temp);
+//            length=Math.min(temp2.length(), NAME_LENGTH);
+//            this.variableName = temp2.substring(0,length);
+//        }
+//
+//        else{
+//			int length=Math.min(lcVarName.length(), NAME_LENGTH);
+//			this.originalVariableName=lcVarName.substring(0,length);
+//            String temp = checkVariableName(lcVarName);
+//            length=Math.min(temp.length(), NAME_LENGTH);
+//			this.variableName=temp.substring(0,length);
+//		}
 
 	}
 
@@ -133,7 +151,7 @@ public class VariableName implements Comparable<VariableName>{
 	}
 
     public int compareTo(VariableName o){
-        return this.variableName.compareTo(o.variableName);
+        return this.variableName.compareToIgnoreCase(o.variableName);//Case insensitive
 
 	}
     

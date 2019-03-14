@@ -80,6 +80,7 @@ public class IrtObservedScoreDistribution {
         L = new double[nPoints][maxPL1];
     }
 
+
     /**
      * Computes the IRT observed score quadrature for a test that contains only binary items.
      * This recursive algorithm is described in the book Test Scoring.

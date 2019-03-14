@@ -185,6 +185,10 @@ public class CategoryResponseSummary {
         return sd.getResult();
     }
 
+    public long getSampleSize(){
+        return mean.getN();
+    }
+
     /**
      * Returns the discrimination for the response category, which may also be the whole item.
      * @return discrimination value

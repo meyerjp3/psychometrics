@@ -48,6 +48,7 @@ public class RaschRatingScaleGroup {
     private boolean isFixed = false;
     private RaschCategoryFitStatistic[] fitStatistics = null;
     private int extremeCategory = 0;
+    private boolean poissonCountsModel = false;
 
     /**
      * Creates a rating scael group using an ID and set number of categories. Any item with the same group ID will
@@ -83,6 +84,7 @@ public class RaschRatingScaleGroup {
      */
     public void addItem(ItemResponseModel irm, ItemResponseSummary isum, int position){
         if(this.groupId.equals(irm.getGroupId()) && this.nCat==irm.getNcat()){
+            if(irm instanceof IrmPoissonCounts) poissonCountsModel = true;
             this.irm.add(irm);
             this.columnPosition.add(position);
             if(thresholds==null){
@@ -173,6 +175,9 @@ public class RaschRatingScaleGroup {
      */
     public void checkForDroppping(){
         if(isFixed) return;
+
+        if(poissonCountsModel) return;//Poisson counts is allowed to have zero counts in categories.
+
         for(int m=0;m<nCat;m++){
             if(Tpj[m]==0){
                 extremeCategory = -1;
@@ -268,6 +273,10 @@ public class RaschRatingScaleGroup {
 
     public boolean isFixed(){
         return isFixed;
+    }
+
+    public boolean isPoissoncounts(){
+        return poissonCountsModel;
     }
 
     /**

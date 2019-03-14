@@ -65,7 +65,7 @@ public class TestSummary {
     private boolean unbiased = false;
 
     public TestSummary(int numberOfItems, int numberOfSubscales, ArrayList<Integer> cutScores,
-            ArrayList<VariableAttributes> variableAttributes, boolean unbiased, boolean deletedReliability, boolean showCsem){
+                       ArrayList<VariableAttributes> variableAttributes, boolean unbiased, boolean deletedReliability, boolean showCsem){
         this.numberOfItems = numberOfItems;
 
         if(cutScores!=null){
@@ -89,7 +89,7 @@ public class TestSummary {
     }
 
     public TestSummary(int numberOfItems, int numberOfSubscales, int[] cutScores,
-            ArrayList<VariableAttributes> variableAttributes, boolean unbiased, boolean deletedReliability, boolean showCsem){
+                       ArrayList<VariableAttributes> variableAttributes, boolean unbiased, boolean deletedReliability, boolean showCsem){
         this.numberOfItems = numberOfItems;
         this.cutScores = cutScores;
         this.variableAttributes = variableAttributes;
@@ -104,8 +104,8 @@ public class TestSummary {
     }
 
     public TestSummary(int numberOfItems, int numberOfSubscales, int[] cutScores,
-            LinkedHashMap<VariableName, VariableAttributes> variableAttributeMap, boolean unbiased,
-            boolean deletedReliability, boolean showCsem){
+                       LinkedHashMap<VariableName, VariableAttributes> variableAttributeMap, boolean unbiased,
+                       boolean deletedReliability, boolean showCsem){
 
        this.variableAttributes = new ArrayList<VariableAttributes>();
         for(VariableName v : variableAttributeMap.keySet()){

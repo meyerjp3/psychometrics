@@ -15,7 +15,6 @@
  */
 package com.itemanalysis.psychometrics.cmh;
 
-import com.itemanalysis.psychometrics.data.ItemType;
 import com.itemanalysis.psychometrics.data.VariableAttributes;
 import com.itemanalysis.psychometrics.data.VariableName;
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
@@ -64,7 +63,7 @@ public class CochranMantelHaenszel {
 
 
     public CochranMantelHaenszel(String focalCode, String referenceCode, VariableAttributes groupVariable, VariableAttributes itemVariable,
-            boolean etsDelta){
+                                 boolean etsDelta){
         strata = new TreeMap<Double, CmhTable>();
         this.focalCode = focalCode;
         this.referenceCode = referenceCode;

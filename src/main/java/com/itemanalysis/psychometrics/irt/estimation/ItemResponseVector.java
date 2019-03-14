@@ -55,6 +55,16 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
     protected double sumScore = 0.0;
 
     /**
+     * Value of the IRT person latent trait score
+     */
+    protected double traitScore = Double.NaN;
+
+    /**
+     * Value of the IRT person latent trait score standard error
+     */
+    protected double traitScoreStdError = Double.NaN;
+
+    /**
      * Number of items in the response vector
      */
     protected int nItems = 0;
@@ -64,10 +74,15 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
      */
     private String groupID = "";
 
+    /**
+     * A unique identifier for one examinee. If using the object for multiple people, then make this the same as the groupID.
+     */
+    private String personID = "";
+
     private String responseString = "";
 
     /**
-     * Stores the posterior probability of teh response vector
+     * Stores the posterior probability of the response vector
      */
     private double posteriorProbability = 0;
 
@@ -76,7 +91,8 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
      */
     private HashMap<VariableName, Integer> nameIndexMap = null;
 
-    public ItemResponseVector(String groupID, byte[] response, VariableName[] itemName, double freq){
+    public ItemResponseVector(String personID, String groupID, byte[] response, VariableName[] itemName, double freq){
+        this.personID = personID;
         this.groupID = groupID;
         this.response = response;
         this.freq = freq;
@@ -92,7 +108,8 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
         }
     }
 
-    public ItemResponseVector(String groupID, byte[] response, ArrayList<VariableName>  itemName, double freq){
+    public ItemResponseVector(String personID, String groupID, byte[] response, ArrayList<VariableName>  itemName, double freq){
+        this.personID = personID;
         this.groupID = groupID;
         this.response = response;
         this.freq = freq;
@@ -108,7 +125,8 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
         }
     }
 
-    public ItemResponseVector(String groupID, ArrayList<Byte> response, ArrayList<VariableName> itemName, double freq){
+    public ItemResponseVector(String personID, String groupID, ArrayList<Byte> response, ArrayList<VariableName> itemName, double freq){
+        this.personID = personID;
         this.groupID = groupID;
         this.freq = freq;
         this.nItems = response.size();
@@ -129,7 +147,8 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
      * @param groupID a group indicator code.
      * @param response a response vector.
      */
-    public ItemResponseVector(String groupID, byte[] response, double freq){
+    public ItemResponseVector(String personID, String groupID, byte[] response, double freq){
+        this.personID = personID;
         this.groupID = groupID;
         this.response = response;
         this.freq = freq;
@@ -150,8 +169,17 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
      *
      * @param response a response vector.
      */
+    public ItemResponseVector(String personID, byte[] response, double freq){
+        this(personID, "", response, freq);
+    }
+
+    /**
+     * A constructor that is designed for storing all response vectors during MML estimation.
+     *
+     * @param response a response vector.
+     */
     public ItemResponseVector(byte[] response, double freq){
-        this("", response, freq);
+        this("", "", response, freq);
     }
 
     /**
@@ -160,6 +188,17 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
      * @param nItems the number of items in the response vector.
      */
     public ItemResponseVector(String groupID, int nItems){
+        this("", groupID, nItems);
+    }
+
+    /**
+     * A constructor that takes an argument for the group ID and number of items.
+     * @param personID a person id
+     * @param groupID the group ID code.
+     * @param nItems the number of items in the response vector.
+     */
+    public ItemResponseVector(String personID, String groupID, int nItems){
+        this.personID = personID;
         this.groupID = groupID;
         this.nItems = nItems;
         response = new byte[nItems];
@@ -174,7 +213,7 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
      * @param nItems the number of items in the response vector.
      */
     public ItemResponseVector(int nItems){
-        this("", nItems);
+        this("", "", nItems);
     }
 
     /**
@@ -185,6 +224,18 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
         sumScore = 0;
         validResponses = 0;
         responseString = "";
+    }
+
+    public void setTraitScore(double traitScore){
+        this.traitScore = traitScore;
+    }
+
+    public void setTraitScoreStdError(double traitScoreStdError){
+        this.traitScoreStdError = traitScoreStdError;
+    }
+
+    public void setResponseAt(int index, byte response){
+        this.response[index] = response;
     }
 
     /**
@@ -235,6 +286,10 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
         return groupID;
     }
 
+    public String getPersonID(){
+        return personID;
+    }
+
     /**
      * Get item response at given item position.
      *
@@ -274,6 +329,14 @@ public class ItemResponseVector implements Comparable<ItemResponseVector>{
 
     public double getSumScore(){
         return sumScore;
+    }
+
+    public double getTraitScore(){
+        return traitScore;
+    }
+
+    public double getTraitScoreStdError(){
+        return traitScoreStdError;
     }
 
     public int getNumberOfItems(){

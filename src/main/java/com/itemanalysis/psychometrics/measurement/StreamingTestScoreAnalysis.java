@@ -29,7 +29,7 @@ import java.util.Iterator;
 /**
  * A newer and more clear version of TestSummary.java. It does not include the part-test reliability statistics.
  */
-public class ClassicalTestSummary {
+public class StreamingTestScoreAnalysis {
 
     private ArrayList<VariableAttributes> variableAttributes = null;
 
@@ -57,7 +57,7 @@ public class ClassicalTestSummary {
 
     private int[] cutScores = null;
 
-    public ClassicalTestSummary(ArrayList<VariableAttributes> variableAttributes, boolean unbiased, boolean deletedReliability, boolean computeCSEM, int[] cutScores){
+    public StreamingTestScoreAnalysis(ArrayList<VariableAttributes> variableAttributes, boolean unbiased, boolean deletedReliability, boolean computeCSEM, int[] cutScores){
         this.variableAttributes = variableAttributes;
         this.numberOfItems = variableAttributes.size();
         this.unbiased = unbiased;

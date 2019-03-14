@@ -1,9 +1,9 @@
 package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.data.VariableName;
-import com.itemanalysis.psychometrics.factoranalysis.ExploratoryFactorAnalysis;
 import com.itemanalysis.psychometrics.irt.model.Irm3PL;
 import com.itemanalysis.psychometrics.irt.model.IrmPCM;
+import com.itemanalysis.psychometrics.irt.model.IrmPoissonCounts;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.scaling.DefaultLinearTransformation;
 import org.apache.commons.io.FileUtils;
@@ -222,6 +222,28 @@ public class JointMaximumLikelihoodEstimationTest {
                 s = line.split(",");
                 for(int j=0;j<s.length;j++){
                     if(j>0) data[row][j-1] = Byte.parseByte(s[j]);//first column contains and id. Skip it.
+                }
+                row++;
+            }
+            br.close();
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
+        return data;
+    }
+
+    private byte[][] readPoissonCountsData(){
+        byte[][] data = new byte[500][8];
+        try{
+            File f = FileUtils.toFile(this.getClass().getResource("/testdata/poisson-counts-example.csv"));
+            BufferedReader br = new BufferedReader(new FileReader(f));
+            String line = "";
+            String[] s = null;
+            int row = 0;
+            while((line=br.readLine())!=null){
+                s = line.split(",");
+                for(int j=1;j<s.length;j++){
+                    data[row][j-1] = Byte.parseByte(s[j]);//skip first variable. It is an id variable, not an item.
                 }
                 row++;
             }
@@ -1298,6 +1320,54 @@ public class JointMaximumLikelihoodEstimationTest {
         double[] theta_std_error = jmle.getPersonStdError();
         for(int i=0;i<data.length;i++){
             assertEquals("  JMLE pcm test: ability", true_theta_std_error[i], Precision.round(theta_std_error[i], 5), 1e-4);
+        }
+
+    }
+
+    //@Test
+    public void testPoissonCounts(){
+        System.out.println("JMLE POISSON COUNTS TEST");
+
+        byte[][] data = readPoissonCountsData();
+        int ni = data[0].length;
+        ItemResponseModel[] irm = new ItemResponseModel[ni];
+        ItemResponseModel poissonModel = null;
+
+        int maxCount = 30;
+
+        for(int i=0;i<ni;i++){
+            poissonModel = new IrmPoissonCounts(0, maxCount, 1.0);
+            irm[i] = poissonModel;
+        }
+
+        double[] winstepsResults = {0.16, -0.30, -0.50, -0.42, 0.20, 0.07, 0.35, 0.44};
+
+        irm[0] = new IrmPoissonCounts(winstepsResults[0], maxCount, 1.0);
+        irm[1] = new IrmPoissonCounts(winstepsResults[1], maxCount, 1.0);
+        irm[2] = new IrmPoissonCounts(winstepsResults[2], maxCount, 1.0);
+        irm[3] = new IrmPoissonCounts(winstepsResults[3], maxCount, 1.0);
+        irm[4] = new IrmPoissonCounts(winstepsResults[4], maxCount, 1.0);
+        irm[5] = new IrmPoissonCounts(winstepsResults[5], maxCount, 1.0);
+        irm[6] = new IrmPoissonCounts(winstepsResults[6], maxCount, 1.0);
+        irm[7] = new IrmPoissonCounts(winstepsResults[7], maxCount, 1.0);
+
+        JointMaximumLikelihoodEstimation jmle = new JointMaximumLikelihoodEstimation(data, irm);
+        jmle.summarizeData(0.3);
+        jmle.estimateParameters(10, 0.005);
+        jmle.computeItemStandardErrors();
+        jmle.computePersonStandardErrors();
+
+//        System.out.println(jmle.printFrequencyTables());
+//        System.out.println(jmle.printRatingScaleTables());
+//        System.out.println();
+        System.out.println(jmle.printBasicItemStats());
+        System.out.println();
+        System.out.println(jmle.printPersonStats());
+        System.out.println();
+        System.out.println(jmle.printIterationHistory());
+
+        for(int i=0;i<irm.length;i++){
+            assertEquals("  JMLE Poisson test: ability", winstepsResults[i], Precision.round(irm[i].getDifficulty(), 2), 1e-5);
         }
 
     }
