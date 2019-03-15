@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.itemanalysis.psychometrics.scaling;
+package com.itemanalysis.psychometrics.polycor;
 
 import com.itemanalysis.psychometrics.statistics.StreamingCovarianceMatrix;
-import com.itemanalysis.psychometrics.reliability.CoefficientAlpha;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -31,46 +30,66 @@ import static org.junit.Assert.assertEquals;
  *
  * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
  */
-public class KelleyRegressedScoreTest {
+public class StreamingStreamingCovarianceMatrixTest {
 
-    public KelleyRegressedScoreTest() {
+    public StreamingStreamingCovarianceMatrixTest() {
     }
 
     /**
-     * Test of rho method, of class KelleyRegressedScore.
+     * 
      */
-    //@Test
-    public void testValue() {
-        System.out.println("Kelley score test");
+    @Test
+    public void testCovariance() {
+        System.out.println("Testing covariance matrix");
         double[][] x = getData();
-        double[] sum = new double[1000];
-        Mean mean = new Mean();
+        double[][] trueCov = getCovariance();
         StreamingCovarianceMatrix S = new StreamingCovarianceMatrix(50);
-        for(int i=0;i<x.length;i++){
-            sum[i] = 0.0;
+        for(int i=0;i<1000;i++){
             for(int j=0;j<50;j++){
                 for(int k=0;k<50;k++){
                     S.increment(j, k, x[i][j], x[i][k]);
                 }
-                sum[i]+=x[i][j];
+            }
+        }
+        
+        double[][] obsCov = S.value();
+
+        for(int i=0;i<50;i++){
+            for(int j=0;j<50;j++){
+                assertEquals("Testing covariance", trueCov[i][j], obsCov[i][j], 1e-15);
+            }
+        }
+    }
+
+    @Test
+    public void testCorrelation() {
+        System.out.println("Testing correlation matrix");
+        double[][] x = getData();
+        double[][] trueCor = getCorrelation();
+        StreamingCovarianceMatrix S = new StreamingCovarianceMatrix(50);
+        for(int i=0;i<1000;i++){
+            for(int j=0;j<50;j++){
+                for(int k=0;k<50;k++){
+                    S.increment(j, k, x[i][j], x[i][k]);
+                }
             }
         }
 
-        CoefficientAlpha alpha = new CoefficientAlpha(S.value());
-        KelleyRegressedScore kscore = new KelleyRegressedScore(mean.evaluate(sum), alpha);
+        double[][] obsCor = S.correlation();
 
-        double[] kscores = this.getKelleyScores();
-        double kelley = 0.0;
-        for(int i=0;i<kscores.length;i++){
-            kelley = kscore.value(sum[i]);
-            assertEquals(kscores[i], kelley, 1e-5);
+        for(int i=0;i<50;i++){
+            for(int j=0;j<50;j++){
+                assertEquals("Testing covariance", trueCor[i][j], obsCor[i][j], 1e-14);
+            }
         }
     }
+
 
     public double[][] getData(){
         double[][] x = new double[1000][50];
         try{
             File f = FileUtils.toFile(this.getClass().getResource("/testdata/scaling.txt"));
+
             BufferedReader br = new BufferedReader(new FileReader(f));
             String line = "";
             String[] s = null;
@@ -90,10 +109,10 @@ public class KelleyRegressedScoreTest {
         return x;
     }
 
-    public double[] getKelleyScores(){
-        double[] x = new double[1000];
+    public double[][] getCovariance(){
+        double[][] x = new double[50][50];
         try{
-            File f = FileUtils.toFile(this.getClass().getResource("/testdata/scaling.txt"));
+            File f = FileUtils.toFile(this.getClass().getResource("/testdata/covariance-scaling-data.txt"));
             BufferedReader br = new BufferedReader(new FileReader(f));
             String line = "";
             String[] s = null;
@@ -101,7 +120,9 @@ public class KelleyRegressedScoreTest {
             br.readLine();//eliminate column names by skipping first row
             while((line=br.readLine())!=null){
                 s = line.split(",");
-                x[row] = Double.parseDouble(s[52]);//kelley scores in column 53
+                for(int j=0;j<50;j++){
+                    x[row][j] = Double.parseDouble(s[j]);
+                }
                 row++;
             }
             br.close();
@@ -111,5 +132,29 @@ public class KelleyRegressedScoreTest {
         return x;
     }
 
+    public double[][] getCorrelation(){
+        double[][] x = new double[50][50];
+        try{
+            File f = FileUtils.toFile(this.getClass().getResource("/testdata/correlation-scaling-data.txt"));
+            BufferedReader br = new BufferedReader(new FileReader(f));
+            String line = "";
+            String[] s = null;
+            int row = 0;
+            br.readLine();//eliminate column names by skipping first row
+            while((line=br.readLine())!=null){
+                s = line.split(",");
+                for(int j=0;j<50;j++){
+                    x[row][j] = Double.parseDouble(s[j]);
+                }
+                row++;
+            }
+            br.close();
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
+        return x;
+    }
+
+    
 
 }

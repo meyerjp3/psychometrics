@@ -13,31 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.itemanalysis.psychometrics.statistics;
+package com.itemanalysis.psychometrics.factoranalysis;
+
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 
 /**
  *
- * @author J. Patrick Meyer
+ * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
  */
-@Deprecated
-public class UniformDensity {
+public class IdentityVector extends Array2DRowRealMatrix {
 
-    public UniformDensity(){
+    int cols = 1;
+    int rows = 0;
 
+    public IdentityVector(int rows){
+        super(rows, 1);
+        this.cols = 1;
+        this.rows = rows;
+//        data = new double[rows][1];
+        setMatrix();
     }
 
-    @Deprecated
-    public double[][] value(double min, double max, int numPoints){
-        numPoints = Math.max(1, numPoints);
-        double[][] density = new double[numPoints][numPoints];
-		double increment=(max-min)/(numPoints-1);
-		double val=min;
-		for(int i=0;i<numPoints;i++){
-            density[i][0] = val;
-            density[i][1] = 1/numPoints;
-			val+=increment;
-		}
-        return density;
-	}
+    public void setMatrix(){
+        for(int i=0;i<rows;i++){
+            this.setEntry(i, 0, 1.0);
+        }
+    }
 
 }

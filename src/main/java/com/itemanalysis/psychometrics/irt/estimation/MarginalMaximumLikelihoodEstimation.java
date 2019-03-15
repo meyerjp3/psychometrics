@@ -19,7 +19,7 @@ import com.itemanalysis.psychometrics.quadrature.QuadratureRule;
 import com.itemanalysis.psychometrics.histogram.*;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.scaling.DefaultLinearTransformation;
-import com.itemanalysis.psychometrics.tools.StopWatch;
+import com.itemanalysis.psychometrics.utils.StopWatch;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.util.ArrayList;

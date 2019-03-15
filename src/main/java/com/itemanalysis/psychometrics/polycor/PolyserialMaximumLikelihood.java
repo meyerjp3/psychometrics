@@ -15,6 +15,7 @@
  */
 package com.itemanalysis.psychometrics.polycor;
 
+@Deprecated
 public class PolyserialMaximumLikelihood extends AbstractPolyserialCorrelation{
 
 

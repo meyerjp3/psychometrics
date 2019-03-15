@@ -1,6 +1,6 @@
 package com.itemanalysis.psychometrics.reliability;
 
-import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
+import com.itemanalysis.psychometrics.statistics.StreamingCovarianceMatrix;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
@@ -77,7 +77,7 @@ public class GuttmanTests {
     public void exam1Test(){
         System.out.println("Guttman test for 10 items from exam1 data");
         int nItems = 10;
-        CovarianceMatrix covarianceMatrix = new CovarianceMatrix(nItems);
+        StreamingCovarianceMatrix covarianceMatrix = new StreamingCovarianceMatrix(nItems);
 
         try{
             File f = FileUtils.toFile(this.getClass().getResource("/testdata/exam1-items-scored.txt"));
@@ -141,7 +141,7 @@ public class GuttmanTests {
     public void exam1ItemDeletedTest(){
         System.out.println("Guttman item deleted test for 4 items from exam1 data");
         int nItems = 4;
-        CovarianceMatrix covarianceMatrix = new CovarianceMatrix(nItems);
+        StreamingCovarianceMatrix covarianceMatrix = new StreamingCovarianceMatrix(nItems);
 
         try{
             File f = FileUtils.toFile(this.getClass().getResource("/testdata/exam1-items-scored.txt"));
@@ -220,7 +220,7 @@ public class GuttmanTests {
     public void guttman4OddTest(){
         System.out.println("Guttman 4 odd length test");
         int nItems = 3;
-        CovarianceMatrix covarianceMatrix = new CovarianceMatrix(nItems);
+        StreamingCovarianceMatrix covarianceMatrix = new StreamingCovarianceMatrix(nItems);
 
         try{
             File f = FileUtils.toFile(this.getClass().getResource("/testdata/exam1-items-scored.txt"));

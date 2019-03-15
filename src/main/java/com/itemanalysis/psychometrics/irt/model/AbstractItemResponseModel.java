@@ -18,7 +18,7 @@ package com.itemanalysis.psychometrics.irt.model;
 import com.itemanalysis.psychometrics.data.VariableLabel;
 import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.irt.estimation.ItemFitStatistic;
-import com.itemanalysis.psychometrics.measurement.ItemScoring;
+import com.itemanalysis.psychometrics.classicalitemanalysis.ItemScoring;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 
 public abstract class AbstractItemResponseModel implements ItemResponseModel{

@@ -15,11 +15,8 @@
  */
 package com.itemanalysis.psychometrics.factoranalysis;
 
-import com.itemanalysis.psychometrics.measurement.DiagonalMatrix;
-import com.itemanalysis.psychometrics.statistics.IdentityMatrix;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.exception.ConvergenceException;
-import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.linear.*;
 
 /**

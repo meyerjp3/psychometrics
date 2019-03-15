@@ -16,7 +16,6 @@
 package com.itemanalysis.psychometrics.factoranalysis;
 
 import com.itemanalysis.psychometrics.analysis.AbstractMultivariateFunction;
-import com.itemanalysis.psychometrics.measurement.DiagonalMatrix;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.linear.*;
@@ -26,8 +25,6 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 import org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer;
 import org.apache.commons.math3.stat.descriptive.summary.Sum;
-
-import java.util.Formatter;
 
 /**
  * Harman's minimum residual (MINRES) method of factor analysis.

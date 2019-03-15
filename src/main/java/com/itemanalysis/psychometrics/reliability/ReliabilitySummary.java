@@ -17,7 +17,7 @@ package com.itemanalysis.psychometrics.reliability;
 
 import com.itemanalysis.psychometrics.data.VariableAttributes;
 import com.itemanalysis.psychometrics.data.VariableName;
-import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
+import com.itemanalysis.psychometrics.statistics.StreamingCovarianceMatrix;
 import org.apache.commons.math3.linear.SingularMatrixException;
 
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ public class ReliabilitySummary {
     private ArrayList<VariableAttributes> var = null;
     private boolean itemDeleted = false;
 
-    public ReliabilitySummary(CovarianceMatrix matrix, ArrayList<VariableAttributes> var, boolean itemDeleted){
+    public ReliabilitySummary(StreamingCovarianceMatrix matrix, ArrayList<VariableAttributes> var, boolean itemDeleted){
         this.nItems = matrix.getNumberOfVariables();
         this.itemDeleted = itemDeleted;
 
@@ -67,7 +67,7 @@ public class ReliabilitySummary {
         this.var = var;
     }
 
-    public ReliabilitySummary(CovarianceMatrix matrix, LinkedHashMap<VariableName, VariableAttributes> variableAttributeMap, boolean itemDeleted){
+    public ReliabilitySummary(StreamingCovarianceMatrix matrix, LinkedHashMap<VariableName, VariableAttributes> variableAttributeMap, boolean itemDeleted){
         this.nItems = matrix.getNumberOfVariables();
         this.itemDeleted = itemDeleted;
 

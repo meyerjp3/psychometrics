@@ -22,6 +22,7 @@ import org.apache.commons.math3.stat.descriptive.rank.Percentile;
  *
  * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
  */
+@Deprecated
 public class Bootstrap {
 
     private Percentile percentile = null;

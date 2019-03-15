@@ -15,7 +15,7 @@
  */
 package com.itemanalysis.psychometrics.distribution;
 
-import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
+import com.itemanalysis.psychometrics.statistics.StreamingCovarianceMatrix;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.linear.*;
@@ -174,9 +174,9 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
         double temp = 0.0;
 
         if (diagonal) {
-            sigma = (new CovarianceMatrix(data)).diagonalMatrixAsMatrix();
+            sigma = (new StreamingCovarianceMatrix(data)).diagonalMatrixAsMatrix();
         } else {
-            sigma = (new CovarianceMatrix(data)).valueAsMatrix();
+            sigma = (new StreamingCovarianceMatrix(data)).valueAsMatrix();
         }
 
         numParameters = mu.length + mu.length * (mu.length + 1) / 2;

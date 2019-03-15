@@ -20,7 +20,7 @@ import com.itemanalysis.psychometrics.factoranalysis.*;
 import com.itemanalysis.psychometrics.factoranalysis.EstimationMethod;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.irt.model.RaschRatingScaleGroup;
-import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
+import com.itemanalysis.psychometrics.statistics.StreamingCovarianceMatrix;
 import com.itemanalysis.psychometrics.scaling.DefaultLinearTransformation;
 import com.itemanalysis.psychometrics.texttable.TextTable;
 import com.itemanalysis.psychometrics.texttable.TextTableColumnFormat;
@@ -945,7 +945,7 @@ public class JointMaximumLikelihoodEstimation{
             if(extremeItem[j]==0 && droppedStatus[j]==0) validItemCount++;
         }
 
-        CovarianceMatrix covMatrix = new CovarianceMatrix(validItemCount, true);
+        StreamingCovarianceMatrix covMatrix = new StreamingCovarianceMatrix(validItemCount, true);
 
         for(int i=0;i<nPeople;i++) {
             if(extremePerson[i]==0){

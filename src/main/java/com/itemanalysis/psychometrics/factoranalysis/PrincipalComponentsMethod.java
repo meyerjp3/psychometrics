@@ -15,7 +15,6 @@
  */
 package com.itemanalysis.psychometrics.factoranalysis;
 
-import com.itemanalysis.psychometrics.measurement.DiagonalMatrix;
 import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.stat.descriptive.summary.Sum;

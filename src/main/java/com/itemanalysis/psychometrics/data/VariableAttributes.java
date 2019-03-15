@@ -1,7 +1,7 @@
 package com.itemanalysis.psychometrics.data;
 
 import com.itemanalysis.psychometrics.exceptions.ItemScoringException;
-import com.itemanalysis.psychometrics.measurement.ItemScoring;
+import com.itemanalysis.psychometrics.classicalitemanalysis.ItemScoring;
 
 public interface VariableAttributes {
 

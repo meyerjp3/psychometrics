@@ -19,7 +19,7 @@ import com.itemanalysis.psychometrics.data.VariableLabel;
 import com.itemanalysis.psychometrics.data.VariableName;
 import com.itemanalysis.psychometrics.irt.estimation.ItemFitStatistic;
 import com.itemanalysis.psychometrics.irt.estimation.ItemParamPrior;
-import com.itemanalysis.psychometrics.measurement.ItemScoring;
+import com.itemanalysis.psychometrics.classicalitemanalysis.ItemScoring;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;

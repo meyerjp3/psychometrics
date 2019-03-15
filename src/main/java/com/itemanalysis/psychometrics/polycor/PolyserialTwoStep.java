@@ -15,6 +15,7 @@
  */
 package com.itemanalysis.psychometrics.polycor;
 
+import com.itemanalysis.psychometrics.statistics.PearsonCorrelation;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
@@ -22,6 +23,7 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
  *
  * @author J. Patrick Meyer <meyerjp at itemanalysis.com>
  */
+@Deprecated
 public class PolyserialTwoStep {
     
     private Mean meanX = null;

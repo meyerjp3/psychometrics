@@ -16,8 +16,8 @@
 package com.itemanalysis.psychometrics.data;
 
 import com.itemanalysis.psychometrics.exceptions.ItemScoringException;
-import com.itemanalysis.psychometrics.measurement.DefaultItemScoring;
-import com.itemanalysis.psychometrics.measurement.ItemScoring;
+import com.itemanalysis.psychometrics.classicalitemanalysis.DefaultItemScoring;
+import com.itemanalysis.psychometrics.classicalitemanalysis.ItemScoring;
 
 /**
  * This class holds descriptive information about the variables in the database.

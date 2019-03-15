@@ -1,6 +1,6 @@
 package com.itemanalysis.psychometrics.reliability;
 
-import com.itemanalysis.psychometrics.polycor.CovarianceMatrix;
+import com.itemanalysis.psychometrics.statistics.StreamingCovarianceMatrix;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
@@ -8,7 +8,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 
@@ -32,7 +31,7 @@ public class ReliabilityAnalysisTest {
     public void genericTest1() {
         System.out.println("Reliability test comparing to Habing's R code");
         double[][] x = getData();
-        CovarianceMatrix S = new CovarianceMatrix(50);
+        StreamingCovarianceMatrix S = new StreamingCovarianceMatrix(50);
         for(int i=0;i<1000;i++){
             for(int j=0;j<50;j++){
                 for(int k=0;k<50;k++){
@@ -61,7 +60,7 @@ public class ReliabilityAnalysisTest {
     public void exam1Test(){
         System.out.println("Reliability and item deleted reliability test for exam1 data comparing to SPSS");
         int nItems = 56;
-        CovarianceMatrix covarianceMatrix = new CovarianceMatrix(nItems);
+        StreamingCovarianceMatrix covarianceMatrix = new StreamingCovarianceMatrix(nItems);
 
         try{
             File f = FileUtils.toFile(this.getClass().getResource("/testdata/exam1-items-scored.txt"));
@@ -145,7 +144,7 @@ public class ReliabilityAnalysisTest {
     public void exam1DeletedReliabilityTest(){
         System.out.println("Reliability item deleted test for exam1 data");
         int nItems = 10;
-        CovarianceMatrix covarianceMatrix = new CovarianceMatrix(nItems, false);
+        StreamingCovarianceMatrix covarianceMatrix = new StreamingCovarianceMatrix(nItems, false);
 
         try{
             File f = FileUtils.toFile(this.getClass().getResource("/testdata/exam1-items-scored.txt"));

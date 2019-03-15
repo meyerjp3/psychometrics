@@ -15,6 +15,7 @@
  */
 package com.itemanalysis.psychometrics.polycor;
 
+import com.itemanalysis.psychometrics.statistics.PearsonCorrelation;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.stat.Frequency;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
