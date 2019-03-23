@@ -18,11 +18,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.itemanalysis</groupId>
+  <groupId>com.itemanalysis.psychometrics</groupId>
   <artifactId>psychometrics</artifactId>
-  <packaging>jar</packaging>
-  <version>1.4</version>
-  <name>Psychometrics</name>
+  <packaging>pom</packaging>
+    <version>2.0</version>
+    <modules>
+      <module>psychometrics-core</module>
+      <module>psychometrics-ctt</module>
+      <module>psychometrics-factor</module>
+      <module>psychometrics-optim</module>
+      <module>psychometrics-fmm</module>
+      <module>psychometrics-irt</module>
+      <module>psychometrics-nirt</module>
+    </modules>
+    <name>Psychometrics</name>
   <inceptionYear>2012</inceptionYear>
   <description>A library of statistical and psychometric methods not available in Apache commons math.</description>
   <url>http://java.net/projects/psychometrics</url>
@@ -55,47 +64,47 @@
       <email>meyerjp3 at gmail dot com</email>
     </developer>
   </developers>
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.4</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.15</version>
-      <scope>provided</scope>
-      <exclusions>
-          <exclusion>
-            <groupId>com.sun.jdmk</groupId>
-            <artifactId>jmxtools</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>com.sun.jmx</groupId>
-            <artifactId>jmxri</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>javax.jms</groupId>
-            <artifactId>jms</artifactId>
-           </exclusion>
-      </exclusions>
-    </dependency>
-      <dependency>
-          <groupId>org.apache.commons</groupId>
-          <artifactId>commons-math3</artifactId>
-          <version>3.5</version>
-      </dependency>
-      <dependency>
-      	<groupId>commons-io</groupId>
-      	<artifactId>commons-io</artifactId>
-      	<version>2.1</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.commons</groupId>
-          <artifactId>commons-csv</artifactId>
-          <version>1.0</version>
-      </dependency>
-  </dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.15</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.jdmk</groupId>
+                    <artifactId>jmxtools</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jmx</groupId>
+                    <artifactId>jmxri</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.jms</groupId>
+                    <artifactId>jms</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.5</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
 </project>

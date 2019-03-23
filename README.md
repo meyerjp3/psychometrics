@@ -12,6 +12,17 @@ A Java library for psychometric analysis. [View the psychometrics API](https://i
 
 The library is licensed under the Apache License, Version 2.0.
 
+The psychometrics library was refactored into seven modules. These are:
+--psychometrics-code the base module required by all other module. It contains basic classes for data, exceptoins, and statistics
+--psychometrics-ctt contains classes for classical test theory including item analysis, test scaling, DIF, and reliability estimation.
+--psychometrics-factor has classes for exploratory factor analysis, and for computing polychoric correlations. This module is still in development.
+--psychometrics-fmm contains a few classes for multivariate normal mixture models (i.e. finite mixture models).
+--psychometrics-irt includes classes for item response theory. Joint maximum likelihood for the Rasch family of models is supported.
+Marginal maximum likelihood estimation for the 2PL, 3PL, 4PL, and GPCM is also supported. Classes for scale linking (e.g. Stocking-Lord) and score equating are in this module.
+--psychometrics-nirt has classes for nonparametric item resposne theory. Specifically, it support Ramsay's kernel regression approach for estimating ICCs.
+--psychometrics-optim is a module for optimization, and it includes the UNCMIN method, a BOBYQAO optimizer, and a Quasi-Newton optimizer.
+
+
 
 Item Response Theory (IRT)
 --------------------------
