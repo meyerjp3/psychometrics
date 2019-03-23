@@ -4,13 +4,14 @@ psychometrics
 A Java library for psychometric analysis. [View the psychometrics API](https://itemanalysis.com/psychometrics-javadoc/1.4/)
  to learn more about the library. It includes mathematical and statistical procedures that are not part of the Apache
  commons math library. It is a key component of [jMetrik](http://www.ItemAnalysis.com) an open source application for
- psychometrics. See http://www.ItemAnalysis.com for more information about jMetrik and the psychometrics library. 
+ psychometrics. See http://www.ItemAnalysis.com for more information about jMetrik and the psychometrics library.
+ The library is licensed under the Apache License, Version 2.0.
  
  Recommended Citation:
  
  Meyer, J. P. (2015). Psychometrics: An open source Java<sup>TM</sup> library for measurement [computer software]. Available from https://github.com/meyerjp3/psychometrics. 
 
-The library is licensed under the Apache License, Version 2.0.
+
 
 The psychometrics library was refactored into seven modules. These are:
 * **psychometrics-core** the base module required by all other module. It contains basic classes for data, exceptoins, and statistics
@@ -28,7 +29,10 @@ Item Response Theory (IRT)
 --------------------------
 This library provides classes for IRT parameter estimation, scale linking, and score equating.
 Estimation currently involves joint maximum likelihood for the Rasch, partial credit, and
-rating scale models. Marginal maximum likelihood estimation procedures for binary item response models (Rasch, 2PL, 3PL, 4PL) and polytomous item response models (GPCM, PCM) are also available. Scale linking and score equating classes support a variety of item response models. Scale linking procedures available in the library include the Stocking-Lord and Haebara procedures.
+rating scale models. Marginal maximum likelihood estimation procedures for binary item response models (Rasch,
+2PL, 3PL, 4PL) and polytomous item response models (GPCM, PCM) are also available. Scale linking and score equating
+classes support a variety of item response models. Scale linking procedures available in the library include the
+Stocking-Lord and Haebara procedures.
 
 Factor Analysis
 ---------------
