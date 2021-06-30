@@ -231,7 +231,7 @@ public class BivariateNormalDistribution {
 //
 //    Input, double AH, AK, the lower limits of integration.
 //
-//    Input, double R, the correlation between X and Y.
+//    Input, double R, the correlation includes X and Y.
 //
 //    Output, double BIVNOR, the bivariate normal CDF.
 //

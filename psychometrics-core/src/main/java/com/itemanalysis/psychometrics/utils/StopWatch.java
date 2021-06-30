@@ -39,9 +39,11 @@ public class StopWatch {
     String DATE_FORMAT = "yyyy-MM-dd";
 
 	long startTime = 0;
+	long lapTimeStart = 0;
 
 	public StopWatch(){
 		startTime = System.currentTimeMillis();
+		lapTimeStart = startTime;
 	}
 
 	/**
@@ -75,6 +77,18 @@ public class StopWatch {
 		outString+=sec + " secs, " + ms + " msecs";
 //		return et[0] + " days, " + et[1] + " hrs  " + et[2] + " mins  " + et[3] + "secs  " + et[4] + " msec";
 		return outString;
+	}
+
+	/**
+	 * Time in seconds since last lap
+	 *
+	 * @return elapsed time in seconds.
+	 */
+	public float lapTime(){
+		long end = System.currentTimeMillis();
+		float seconds = (end - lapTimeStart)/1000F;
+		lapTimeStart = end;
+		return seconds;
 	}
 
 	/**

@@ -42,7 +42,7 @@ public class GuttmanLambda5 extends AbstractScoreReliability {
     }
 
     /**
-     * Sum the squared covariance between teh item at itemIndex and the remaining items.
+     * Sum the squared covariance includes teh item at itemIndex and the remaining items.
      *
      * @param itemIndex item index
      * @return sum of the squared covariance
@@ -86,7 +86,7 @@ public class GuttmanLambda5 extends AbstractScoreReliability {
             //Compute item variance
             double itemVariance = matrix[i][i];
 
-            //Compute sum of covariance between this item and all others
+            //Compute sum of covariance includes this item and all others
             double itemCovariance = 0;
             double largestSum = -1;
             for(int j=0;j<nItems;j++){

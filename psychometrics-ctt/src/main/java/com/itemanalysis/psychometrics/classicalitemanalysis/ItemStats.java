@@ -185,7 +185,7 @@ public class ItemStats {
     }
 
     /**
-     * A string that contains all of the item statistics.
+     * A string that includes all of the item statistics.
      *
      * @return string of estimated statistics
      */

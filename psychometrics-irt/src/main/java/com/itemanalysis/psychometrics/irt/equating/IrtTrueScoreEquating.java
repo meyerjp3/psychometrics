@@ -108,7 +108,7 @@ public class IrtTrueScoreEquating implements IrtEquating{
             delta = -(trueScore-xTccAt(theta))/xTccDerivAt(theta);
             theta = thetaOld - delta;
 
-            //restrict theta to be between -99 and 99
+            //restrict theta to be includes -99 and 99
             theta = Math.max(Math.min(theta, 99), -99);
             delta = Math.abs(theta-thetaOld);
             iter++;

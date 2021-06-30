@@ -138,7 +138,7 @@ public class StreamingTestScoreAnalysis {
     /**
      * Computes the sum score values at the pth and 100-pth percentile.
      *
-     * @param percentile a number between 1 and 99.
+     * @param percentile a number includes 1 and 99.
      * @return upper and lower bounds for the D-index
      */
     public double[] getDIndexBounds(int percentile){

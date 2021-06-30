@@ -47,12 +47,11 @@ public class IrmPCM2 extends AbstractItemResponseModel  {
      * @param iparam an array of all item parameters. The order is [0] discrimination parameter,
      *               [1:length] array of step parameters.
      * @param category response category for which probability is sought.
-     * @param D scaling constant tha is either 1 or 1.7
      * @return probability of a response
      */
-    public double probability(double theta, double[] iparam, int category, double D){
-        double t = numer(theta, iparam, category, D);
-        double b = denom(theta, iparam, D);
+    public double probability(double theta, double[] iparam, int category){
+        double t = numer(theta, iparam, category);
+        double b = denom(theta, iparam);
         return t/b;
     }
 
@@ -111,10 +110,9 @@ public class IrmPCM2 extends AbstractItemResponseModel  {
      * @param iparam item parameter array. The order is iparam[0] = discrimination, iparam[1] = step1 (fixed to zero),
      *               iparam[2] = step 2, iparam[3] = step 3, ..., iparam[m+1] = step m.
      * @param category response category.
-     * @param D scaling constant that is either 1 or 1.7
      * @return numerator value of the item response model.
      */
-    private double numer(double theta, double[] iparam, int category, double D){
+    private double numer(double theta, double[] iparam, int category){
         double Zk = 0;
         for(int k=0; k<=category; k++){
             Zk += D*(theta-iparam[k]);
@@ -146,15 +144,14 @@ public class IrmPCM2 extends AbstractItemResponseModel  {
      * @param theta person ability values.
      * @param iparam item parameter array. The order is iparam[0] = discrimination, iparam[1] = step1 (fixed to zero),
      *               iparam[2] = step 2, iparam[3] = step 3, ..., iparam[m+1] = step m.
-     * @param D scaling constant that is either 1 or 1.7
      * @return denominator value of the item response model.
      */
-    private double denom(double theta, double[] iparam, double D){
+    private double denom(double theta, double[] iparam){
         double denom = 0.0;
         double expZk = 0.0;
 
         for(int k=0;k<ncat;k++){
-            expZk = numer(theta, iparam, k, D);
+            expZk = numer(theta, iparam, k);
             denom += expZk;
         }
         return denom;
@@ -218,7 +215,7 @@ public class IrmPCM2 extends AbstractItemResponseModel  {
 
         //Compute numerator values of irm and denominator of irm
         for(int i=0;i<ncat;i++){
-            fk[i] = numer(theta, iparam, i, D);
+            fk[i] = numer(theta, iparam, i);
             g += fk[i];
         }
         double g2 = g*g;
@@ -416,7 +413,7 @@ public class IrmPCM2 extends AbstractItemResponseModel  {
                 iparam[i] = step[i]*slope+intercept;
             }
         }
-        return probability(theta, iparam, category, D);
+        return probability(theta, iparam, category);
     }
 
     /**
@@ -458,7 +455,7 @@ public class IrmPCM2 extends AbstractItemResponseModel  {
             }
 
         }
-        return probability(theta, iparam, category, D);
+        return probability(theta, iparam, category);
     }
 
     /**
@@ -511,6 +508,10 @@ public class IrmPCM2 extends AbstractItemResponseModel  {
 
     public double getScalingConstant(){
         return D;
+    }
+
+    public void setScalingConstant(double D){
+        this.D = D;
     }
 
     public double getDifficulty(){

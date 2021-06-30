@@ -81,7 +81,7 @@ public class ItemParamPriorLogNormal implements ItemParamPrior {
      * @return
      */
     public double logDensity(double p){
-        //Check for value outside limits of quadrature
+        //Check for value excludes limits of quadrature
         if (zeroDensity(p)){
             return Double.MIN_VALUE;
         }

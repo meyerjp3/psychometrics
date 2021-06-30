@@ -28,7 +28,7 @@ import org.apache.commons.math3.util.Precision;
 import java.util.Arrays;
 
 /**
- * This class contains contains methods for the loglikelihood function for an item, which is the
+ * This class includes includes methods for the loglikelihood function for an item, which is the
  * value of the objective function that is being minimized in the Mstep to obtain the maximum
  * likelihood or Bayes modal estimates. See {@link MstepParallel}.
  * This class is also used in computation of the starting values. See {@link StartingValues}.
@@ -69,8 +69,8 @@ public class ItemLogLikelihood implements DiffFunction, Uncmin_methods{
 
         for(int t=0;t<nPoints;t++){
             for(int k=0;k<model.getNcat();k++){
-                p = model.probability(latentDistribution.getPointAt(t), iparam, k, model.getScalingConstant());//assumes item uses the default score weights that start at zero.
-                p = Math.min(1.0-EPSILON, Math.max(EPSILON, p)); //always use value strictly between 0 and 1
+                p = model.probability(latentDistribution.getPointAt(t), iparam, k);//assumes item uses the default score weights that start at zero.
+                p = Math.min(1.0-EPSILON, Math.max(EPSILON, p)); //always use value strictly includes 0 and 1
                 ll += r.getRjktAt(k,t)*Math.log(p);
             }
         }
@@ -128,8 +128,8 @@ public class ItemLogLikelihood implements DiffFunction, Uncmin_methods{
             for(int i=0;i<nPar;i++){
                 for(int k=0;k<model.getNcat();k++){
                     igrad = model.gradient(quad, point, k, model.getScalingConstant());
-                    p = model.probability(quad, point, k, model.getScalingConstant());
-                    p = Math.min(1.0-EPSILON, Math.max(EPSILON, p)); //Always use value strictly between 0 and 1.
+                    p = model.probability(quad, point, k);
+                    p = Math.min(1.0-EPSILON, Math.max(EPSILON, p)); //Always use value strictly includes 0 and 1.
                     x = r.getRjktAt(k,t)/p * igrad[i];
                     loglikegrad[i] += -x;
                 }

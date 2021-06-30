@@ -15,11 +15,14 @@
  */
 package com.itemanalysis.psychometrics.irt.estimation;
 
+import com.itemanalysis.psychometrics.data.TidyOutput;
 import com.itemanalysis.psychometrics.data.VariableName;
-import com.itemanalysis.psychometrics.factoranalysis.EstimationMethod;
 import com.itemanalysis.psychometrics.factoranalysis.ExploratoryFactorAnalysis;
+import com.itemanalysis.psychometrics.irt.model.IrmType;
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.irt.model.RaschRatingScaleGroup;
+import com.itemanalysis.psychometrics.statistics.InclusiveInterval;
+import com.itemanalysis.psychometrics.statistics.LinearTransformation;
 import com.itemanalysis.psychometrics.statistics.StreamingCovarianceMatrix;
 import com.itemanalysis.psychometrics.statistics.DefaultLinearTransformation;
 import com.itemanalysis.psychometrics.texttable.TextTable;
@@ -33,6 +36,7 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * Joint maximum likelihood estimation (JMLE) of the Rasch, partial credit, and rating scale models. Methods conduct item
@@ -74,6 +78,7 @@ public class JointMaximumLikelihoodEstimation{
     private int extremeCount = 0;
     private int droppedCount = 0;
     private Object[][] scoreConversionTable = null;
+    public static final byte MISSING_DATA_CODE = -1;
 
     /**
      * The object is created with a set of data and array of item response models (See {@link ItemResponseModel}.
@@ -165,7 +170,7 @@ public class JointMaximumLikelihoodEstimation{
         //summarize each item individually
         for(int i=0;i<nPeople;i++){
             for(int j=0;j<nItems;j++){
-                if(data[i][j]!=-1){
+                if(data[i][j]!=MISSING_DATA_CODE){
                     if(droppedStatus[j]==0 && extremeItem[j]==0){
                         //person scores should use only the nonextreme items
                         sumScore[i] += data[i][j];
@@ -184,7 +189,7 @@ public class JointMaximumLikelihoodEstimation{
 
             //check for extreme person
             if(sumScore[i]==minPossibleTestScore[i]){
-                extremePerson[i] = -1;
+                extremePerson[i] = MISSING_DATA_CODE;
                 extremePersonCount++;
             }else if(sumScore[i]==maxPossibleTestScore[i]){
                 extremePerson[i] = 1;
@@ -216,7 +221,7 @@ public class JointMaximumLikelihoodEstimation{
                 extremeItem[j] = 1;
                 extremeItemCount++;
             }else if(itemSummary[j].isExtremeMinimum()){
-                extremeItem[j] = -1;
+                extremeItem[j] = MISSING_DATA_CODE;
                 extremeItemCount++;
             }else{
                 extremeItem[j] += 0;
@@ -245,7 +250,6 @@ public class JointMaximumLikelihoodEstimation{
                 extremePersonCount <= nPeople)){
 
             summarizeData(adjustment);
-
         }
 
         if(extremeItemCount==nItems || extremePersonCount==nPeople){
@@ -417,7 +421,7 @@ public class JointMaximumLikelihoodEstimation{
 
         for(int i=0;i<nPeople;i++){
             //update items using nonextreme people who completed hte item
-            if(extremePerson[i]==0 && data[i][pos]!=-1){
+            if(extremePerson[i]==0 && data[i][pos]!=MISSING_DATA_CODE){
                 iTCC1+=irm.expectedValue(theta[i]);
                 irm.setDifficulty(difficulty+delta);
                 iTCC2+=irm.expectedValue(theta[i]);
@@ -552,7 +556,7 @@ public class JointMaximumLikelihoodEstimation{
 
         //adjust extreme person scores
         double adjustedSumScore = sumScore[index];
-        if(extremePerson[index]==-1){
+        if(extremePerson[index]==MISSING_DATA_CODE){
             adjustedSumScore += adjustment;
         }else if(extremePerson[index]==1){
             adjustedSumScore -= adjustment;
@@ -565,7 +569,7 @@ public class JointMaximumLikelihoodEstimation{
 
             for(int j=0;j<nItems;j++){
                 if(droppedStatus[j]==0){
-                    if(extremeItem[j]==0 && data[index][j]!=-1){
+                    if(extremeItem[j]==0 && data[index][j]!=MISSING_DATA_CODE){
                         TCC1 += irm[j].expectedValue(theta[index]);
                         shift = theta[index]+delta;
                         TCC2 += irm[j].expectedValue(shift);
@@ -624,7 +628,7 @@ public class JointMaximumLikelihoodEstimation{
         double thetaProx = 0.0;
         for(int i=0;i<nPeople;i++){
             aRS = sumScore[i];
-            if(extremePerson[i]==-1){
+            if(extremePerson[i]==MISSING_DATA_CODE){
                 aRS += adjustment;
             }else if(extremePerson[i]==1){
                 aRS -=adjustment;
@@ -692,7 +696,7 @@ public class JointMaximumLikelihoodEstimation{
         for(int i=0;i<nPeople;i++){
                 for(int j=0;j<nItems;j++){
                     if(droppedStatus[j]==0){
-                        if(data[i][j]>-1){
+                        if(data[i][j]>MISSING_DATA_CODE){
                             sum += Math.log(irm[j].probability(theta[i], data[i][j]));
                         }
                     }
@@ -740,7 +744,7 @@ public class JointMaximumLikelihoodEstimation{
             if(extremePerson[i]==0){
                 for(int j=0;j<nItems;j++){
                     if(droppedStatus[j]==0){
-                        if(data[i][j]!=-1){
+                        if(data[i][j]!=MISSING_DATA_CODE){
                             tempStdError = irm[j].getDifficultyStdError();
                             tempStdError+=irm[j].itemInformationAt(theta[i]);
                             irm[j].setDifficultyStdError(tempStdError);
@@ -778,7 +782,7 @@ public class JointMaximumLikelihoodEstimation{
         for(int i=0;i<nPeople;i++){
             info = 0.0;
             for(int j=0;j<nItems;j++){
-                if(data[i][j]!=-1 && extremeItem[j]==0 && droppedStatus[j]==0){
+                if(data[i][j]!=MISSING_DATA_CODE && extremeItem[j]==0 && droppedStatus[j]==0){
                     info += irm[j].itemInformationAt(theta[i]);
                 }
             }
@@ -916,13 +920,30 @@ public class JointMaximumLikelihoodEstimation{
         for(int i=0;i<nPeople;i++) {
             if (extremePerson[i] == 0) {
                 for (int j = 0; j < nItems; j++) {
-                    if (data[i][j] > -1 && droppedStatus[j] == 0) {
+                    if (data[i][j] > MISSING_DATA_CODE && droppedStatus[j] == 0) {
                         itemFit[j].increment(irm[j], theta[i], data[i][j]);
                     }
                 }
             }
         }
+    }
 
+    public void computeItemFitStatistics(InclusiveInterval infitBounds, InclusiveInterval outfitBounds){
+        itemFit = new RaschFitStatistics[nItems];
+
+        for(int j=0;j<nItems;j++){
+            itemFit[j] = new RaschFitStatistics(infitBounds, outfitBounds);
+        }
+
+        for(int i=0;i<nPeople;i++) {
+            if (extremePerson[i] == 0) {
+                for (int j = 0; j < nItems; j++) {
+                    if (data[i][j] > MISSING_DATA_CODE && droppedStatus[j] == 0) {
+                        itemFit[j].increment(irm[j], theta[i], data[i][j]);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -955,7 +976,7 @@ public class JointMaximumLikelihoodEstimation{
 
                     if(extremeItem[j]==0 && droppedStatus[j]==0){
 
-                        if (data[i][j] > -1){
+                        if (data[i][j] > MISSING_DATA_CODE){
                             residual1 = data[i][j] - irm[j].expectedValue(theta[i]);
                             residual1 /= Math.sqrt(irm[j].itemInformationAt(theta[i]));
                         }else{
@@ -966,7 +987,7 @@ public class JointMaximumLikelihoodEstimation{
                         validIndex2 = validIndex1;
                         for(int k=j;k<nItems;k++){
                             if(extremeItem[k]==0 && droppedStatus[k] == 0){
-                                if (data[i][k] > -1){
+                                if (data[i][k] > MISSING_DATA_CODE){
                                     residual2 = data[i][k] - irm[k].expectedValue(theta[i]);
                                     residual2 /= Math.sqrt(irm[k].itemInformationAt(theta[i]));
                                 }else{
@@ -1004,7 +1025,7 @@ public class JointMaximumLikelihoodEstimation{
             }
         }
 
-        efa.estimateParameters(EstimationMethod.PRINCOMP);
+        efa.estimateParameters(com.itemanalysis.psychometrics.factoranalysis.EstimationMethod.PRINCOMP);
 
 
 
@@ -1026,7 +1047,7 @@ public class JointMaximumLikelihoodEstimation{
         RaschFitStatistics fit = new RaschFitStatistics();
         for(int j=0;j<nItems;j++){
             if(extremeItem[j]==0){
-                if(data[index][j]>-1 && droppedStatus[j]==0){
+                if(data[index][j]>MISSING_DATA_CODE && droppedStatus[j]==0){
                     fit.increment(irm[j], theta[index], data[index][j]);
                 }
             }
@@ -1044,7 +1065,7 @@ public class JointMaximumLikelihoodEstimation{
             for(int i=0;i<nPeople;i++){
                 if(extremePerson[i]==0){
                     for(int j=0;j<nItems;j++){
-                        if(data[i][j]>-1 && droppedStatus[j]==0){
+                        if(data[i][j]>MISSING_DATA_CODE && droppedStatus[j]==0){
                             g = rsg.get(irm[j].getGroupId());
                             if(g!=null) g.incrementFitStatistics(irm[j], theta[i], data[i][j]);
                         }
@@ -1206,7 +1227,7 @@ public class JointMaximumLikelihoodEstimation{
     public double getSumScoreAt(int index){
         double sum = 0.0;
         for(int j=0;j<nItems;j++){
-            if(data[index][j]>-1) sum += data[index][j];
+            if(data[index][j]>MISSING_DATA_CODE) sum += data[index][j];
         }
         return sum;
     }
@@ -1224,7 +1245,7 @@ public class JointMaximumLikelihoodEstimation{
     }
 
     /**
-     * A residual is the difference between the observed and expected item response. Computes and returns the
+     * A residual is the difference includes the observed and expected item response. Computes and returns the
      * residual for person i to item j.
      *
      * @param i index of examinee in data array.
@@ -1232,7 +1253,7 @@ public class JointMaximumLikelihoodEstimation{
      * @return residual for person i to item j.
      */
     public double getResidualAt(int i, int j){
-        if(data[i][j]==-1) return Double.NaN;
+        if(data[i][j]==MISSING_DATA_CODE) return Double.NaN;
         double p = irm[j].expectedValue(theta[i]);
         double x = data[i][j];
         return x-p;
@@ -1255,6 +1276,14 @@ public class JointMaximumLikelihoodEstimation{
         return droppedStatus[index];
     }
 
+    public String[] getItemNames(){
+        String[] itemNames = new String[irm.length];
+        for(int i=0;i<irm.length;i++){
+            itemNames[i]= irm[i].getName().toString();
+        }
+        return itemNames;
+    }
+
     /**
      * This method is for displaying person parameter estimates, standard errors, and other information.
      * It will display statistic for every examinee.
@@ -1270,7 +1299,7 @@ public class JointMaximumLikelihoodEstimation{
             f.format("%12.2f", sumScore[i]);
             f.format("%12.2f", theta[i]);
             f.format("%12.2f", thetaStdError[i]);
-            if(extremePerson[i]==-1){
+            if(extremePerson[i]==MISSING_DATA_CODE){
                 f.format("%12s", "MINIMUM");
             }else if(extremePerson[i]==1){
                 f.format("%12s", "MAXIMUM");
@@ -1404,7 +1433,7 @@ public class JointMaximumLikelihoodEstimation{
 
     /**
      * The sum score is a sufficient statistic for the latent trait in the Rasch family of models. As such,
-     * it is easy to create a table that shows the 1:1 correspondence between the sum score and person ability.
+     * it is easy to create a table that shows the 1:1 correspondence includes the sum score and person ability.
      * A score table is created showing this correspondence. It requires its own set of iterations, which is why
      * some parameters concern the iteration.
      *
@@ -1416,7 +1445,7 @@ public class JointMaximumLikelihoodEstimation{
      * @return a score table that ranges from the minimum possible score to the maximum possible score.
      */
     public String printScoreTable(int maxIter, double converge, double adjustment,
-                                  DefaultLinearTransformation transformation, int precision){
+                                  LinearTransformation transformation, int precision){
         RaschScoreTable table = new RaschScoreTable(irm, extremeItem, droppedStatus, precision);
         table.updateScoreTable(maxIter, converge, adjustment);
         table.computePersonStandardErrors();
@@ -1491,7 +1520,7 @@ public class JointMaximumLikelihoodEstimation{
                     textTable.getRowAt(index).addDoubleAt(6, Double.NaN);
                 }
 
-                if(extremeItem[j]==-1){
+                if(extremeItem[j]==MISSING_DATA_CODE){
                     textTable.getRowAt(index).addStringAt(7, "Minimum");
                 }else if(extremeItem[j]==1){
                     textTable.getRowAt(index).addStringAt(7, "Maximum");
@@ -1642,5 +1671,202 @@ public class JointMaximumLikelihoodEstimation{
 ////
 ////        return f.toString();
 //    }
+
+
+    /**
+     * Formats output as a tidy dataset for a csv file
+     *
+     * @return a string array in tidy format
+     */
+    public TidyOutput getTidyOutput() {
+        TidyOutput tidyOutput = new TidyOutput();
+        String timeStamp = tidyOutput.getTimeStamp();
+
+
+        RaschRatingScaleGroup group = null;
+        String status = "";
+
+        for(int j=0;j<nItems;j++){
+            group = rsg.get(irm[j].getGroupId());
+
+            //status
+            if(group!=null && group.dropStatus()!=0){
+                status = "DROPPED due to unobserved categories.";
+            }else if(extremeItem[j]==MISSING_DATA_CODE){
+                status = "Minimum";
+            }else if(extremeItem[j]==1){
+                status = "Maximum";
+            }
+
+            String modelName = "rasch";
+            if(irm[j].getType()==IrmType.PCM)  modelName = "pcm";
+
+            tidyOutput.addValue("name", irm[j].getName().toString());
+            tidyOutput.addValue("date", timeStamp);
+            tidyOutput.addValue("part", "item");
+            tidyOutput.addValue("part_id", "");
+            tidyOutput.addValue("method", "jmle");
+            tidyOutput.addValue("model", "");
+            tidyOutput.addValue("statistic", "total_score");
+            tidyOutput.addValue("value", Integer.valueOf(Double.valueOf(itemSummary[j].SijAt(1)).intValue()).toString());
+            tidyOutput.addValue("status", status);
+            tidyOutput.nextRow();
+
+            tidyOutput.addValue("name", irm[j].getName().toString());
+            tidyOutput.addValue("date", timeStamp);
+            tidyOutput.addValue("part", "item");
+            tidyOutput.addValue("part_id", "");
+            tidyOutput.addValue("method", "jmle");
+            tidyOutput.addValue("model", "");
+            tidyOutput.addValue("statistic", "total_count");
+            tidyOutput.addValue("value", Integer.valueOf(Double.valueOf(itemSummary[j].Tip()).intValue()).toString());
+            tidyOutput.addValue("status", status);
+            tidyOutput.nextRow();
+
+            tidyOutput.addValue("name", irm[j].getName().toString());
+            tidyOutput.addValue("date", timeStamp);
+            tidyOutput.addValue("part", "item");
+            tidyOutput.addValue("part_id", "");
+            tidyOutput.addValue("method", "jmle");
+            tidyOutput.addValue("model", modelName);
+            tidyOutput.addValue("statistic", "irt_difficulty");
+            tidyOutput.addValue("value", Double.valueOf(irm[j].getDifficulty()).toString());
+            tidyOutput.addValue("status", status);
+            tidyOutput.nextRow();
+
+            tidyOutput.addValue("name", irm[j].getName().toString());
+            tidyOutput.addValue("date", timeStamp);
+            tidyOutput.addValue("part", "item");
+            tidyOutput.addValue("part_id", "");
+            tidyOutput.addValue("method", "jmle");
+            tidyOutput.addValue("model", modelName);
+            tidyOutput.addValue("statistic", "irt_difficulty_std_error");
+            tidyOutput.addValue("value", Double.valueOf(irm[j].getDifficultyStdError()).toString());
+            tidyOutput.addValue("status", status);
+            tidyOutput.nextRow();
+
+            if(itemFit!=null){
+                tidyOutput.addValue("name", irm[j].getName().toString());
+                tidyOutput.addValue("date", timeStamp);
+                tidyOutput.addValue("part", "item");
+                tidyOutput.addValue("part_id", "");
+                tidyOutput.addValue("method", "rasch_item_fit");
+                tidyOutput.addValue("model", modelName);
+                tidyOutput.addValue("statistic", "infit");
+                tidyOutput.addValue("value", Double.valueOf(itemFit[j].getWeightedMeanSquare()).toString());
+                if(itemFit[j].badInfit()){
+                    tidyOutput.addValue("status", "Warning");
+                }else{
+                    tidyOutput.addValue("status", "Good fit");
+                }
+                tidyOutput.nextRow();
+
+                tidyOutput.addValue("name", irm[j].getName().toString());
+                tidyOutput.addValue("date", timeStamp);
+                tidyOutput.addValue("part", "item");
+                tidyOutput.addValue("part_id", "");
+                tidyOutput.addValue("method", "rasch_item_fit");
+                tidyOutput.addValue("model", modelName);
+                tidyOutput.addValue("statistic", "outfit");
+                tidyOutput.addValue("value", Double.valueOf(itemFit[j].getUnweightedMeanSquare()).toString());
+                if(itemFit[j].badOutfit()){
+                    tidyOutput.addValue("status", "Warning");
+                }else{
+                    tidyOutput.addValue("status", "Good fit");
+                }
+
+                tidyOutput.nextRow();
+
+                //TODO add pt-measure correlation, mean ability at each category, observer and expected proportion average
+            }
+
+            if(irm[j].getNcat()>2){
+                RaschCategoryFitStatistic catFit = null;
+                double[] thresholds = null;
+                double[] thresholdsStdError = null;
+                thresholds = group.getThresholds();
+                thresholdsStdError = group.getThresholdStandardError();
+
+                for (int i = 0; i < group.getNumberOfCategories(); i++) {
+                    if(i>0) catFit = group.getCategoryFitAt(i-1);
+
+                    tidyOutput.addValue("name", irm[j].getName().toString());
+                    tidyOutput.addValue("date", timeStamp);
+                    tidyOutput.addValue("part", "category");
+                    tidyOutput.addValue("part_id", Integer.valueOf(i).toString());
+                    tidyOutput.addValue("method", "jmle");
+                    tidyOutput.addValue("model", "");
+                    tidyOutput.addValue("statistic", "count");
+                    tidyOutput.addValue("value", Double.valueOf(itemSummary[j].TijAt(i)).toString());
+                    tidyOutput.addValue("status", "");
+                    tidyOutput.nextRow();
+
+                    tidyOutput.addValue("name", irm[j].getName().toString());
+                    tidyOutput.addValue("date", timeStamp);
+                    tidyOutput.addValue("part", "category");
+                    tidyOutput.addValue("part_id", Integer.valueOf(i).toString());
+                    tidyOutput.addValue("method", "jmle");
+                    tidyOutput.addValue("model", modelName);
+                    tidyOutput.addValue("statistic", "andrich_threshold");
+                    if(i>0){
+                        tidyOutput.addValue("value", Double.valueOf(thresholds[i - 1]).toString());
+                    }else{
+                        tidyOutput.addValue("value", "");
+                    }
+                    tidyOutput.addValue("status", "");
+                    tidyOutput.nextRow();
+
+                    tidyOutput.addValue("name", irm[j].getName().toString());
+                    tidyOutput.addValue("date", timeStamp);
+                    tidyOutput.addValue("part", "category");
+                    tidyOutput.addValue("part_id", Integer.valueOf(i).toString());
+                    tidyOutput.addValue("method", "jmle");
+                    tidyOutput.addValue("model", modelName);
+                    tidyOutput.addValue("statistic", "threshold_std_error");
+                    if(i>0){
+                        tidyOutput.addValue("value", Double.valueOf(thresholdsStdError[i - 1]).toString());
+                    }else{
+                        tidyOutput.addValue("value", "");
+                    }
+                    tidyOutput.addValue("status", "");
+                    tidyOutput.nextRow();
+
+                    tidyOutput.addValue("name", irm[j].getName().toString());
+                    tidyOutput.addValue("date", timeStamp);
+                    tidyOutput.addValue("part", "category");
+                    tidyOutput.addValue("part_id", Integer.valueOf(i).toString());
+                    tidyOutput.addValue("method", "rasch_item_fit");
+                    tidyOutput.addValue("model", modelName);
+                    tidyOutput.addValue("statistic", "threshold_infit");
+                    if(i>0){
+                        tidyOutput.addValue("value", Double.valueOf(catFit.getWeightedMeanSquare()).toString());
+                    }else{
+                        tidyOutput.addValue("value", "");
+                    }
+                    tidyOutput.addValue("status", "");
+                    tidyOutput.nextRow();
+
+                    tidyOutput.addValue("name", irm[j].getName().toString());
+                    tidyOutput.addValue("date", timeStamp);
+                    tidyOutput.addValue("part", "category");
+                    tidyOutput.addValue("part_id", Integer.valueOf(i).toString());
+                    tidyOutput.addValue("method", "rasch_item_fit");
+                    tidyOutput.addValue("model", modelName);
+                    tidyOutput.addValue("statistic", "threshold_outfit");
+                    if(i>0){
+                        tidyOutput.addValue("value", Double.valueOf(catFit.getUnweightedMeanSquare()).toString());
+                    }else{
+                        tidyOutput.addValue("value", "");
+                    }
+                    tidyOutput.addValue("status", "");
+                    tidyOutput.nextRow();
+
+                }
+            }
+        }
+
+        return tidyOutput;
+    }
+
 
 }

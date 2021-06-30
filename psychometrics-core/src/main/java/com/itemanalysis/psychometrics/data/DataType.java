@@ -38,6 +38,13 @@ public enum DataType {
         }
     },
 
+    BYTE {
+        @Override
+        public String toString(){
+            return "BYTE";
+        }
+    },
+
     NO_DATATYPE_FILTER{
         @Override
         public String toString(){

@@ -77,9 +77,9 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
         defaultScoreWeights();
     }
 
-    public double probability(double theta, double[] iparam, int category, double D){
-        double t = numer(theta, iparam, category, D);
-        double b = denom(theta, iparam, D);
+    public double probability(double theta, double[] iparam, int category){
+        double t = numer(theta, iparam, category);
+        double b = denom(theta, iparam);
         return t/b;
     }
 
@@ -115,7 +115,7 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
         }
     }
 
-    private double numer(double theta, double[] iparam, int category, double D){
+    private double numer(double theta, double[] iparam, int category){
         double Zk = 0;
         double a = iparam[0];
         double b = iparam[1];
@@ -150,12 +150,12 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
         return Math.exp(Zk);
     }
 
-    private double denom(double theta, double[] iparam, double D){
+    private double denom(double theta, double[] iparam){
         double denom = 0.0;
         double expZk = 0.0;
 
         for(int k=0;k<ncat;k++){
-            expZk = numer(theta, iparam, k, D);
+            expZk = numer(theta, iparam, k);
             denom += expZk;
         }
         return denom;
@@ -366,7 +366,7 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
         for(int i=0;i<threshold.length;i++){
             iparam[i+2] = threshold[i]*slope;
         }
-        return probability(theta, iparam, category, D);
+        return probability(theta, iparam, category);
 
 //        double Zk = 0;
 //        double expZk = 0;
@@ -413,7 +413,7 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
         for(int i=0;i<threshold.length;i++){
             iparam[i+2] = threshold[i]/slope;
         }
-        return probability(theta, iparam, category, D);
+        return probability(theta, iparam, category);
 
 //        double Zk = 0;
 //        double expZk = 0;
@@ -479,6 +479,10 @@ public class IrmGPCM2 extends AbstractItemResponseModel{
         for(int k=0;k<ncatM1;k++){
             thresholdStdError[k] = x[k+2];
         }
+    }
+
+    public void setScalingConstant(double D){
+        this.D = D;
     }
 
     public double getDifficulty(){

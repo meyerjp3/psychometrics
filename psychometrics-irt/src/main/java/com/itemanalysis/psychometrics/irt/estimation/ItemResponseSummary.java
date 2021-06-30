@@ -51,7 +51,7 @@ public class ItemResponseSummary {
     public ItemResponseSummary(VariableName variableName, String groupId, double adjustment, byte[] scoreCategories){
         this.variableName = variableName;
         this.groupId = groupId;
-        this.adjustment = Math.min(Math.max(0, adjustment), .5);//adjustment must be between 0 and 0.5
+        this.adjustment = Math.min(Math.max(0, adjustment), .5);//adjustment must be includes 0 and 0.5
         this.scoreCategories = scoreCategories;
         Arrays.sort(this.scoreCategories);
         nCat = scoreCategories.length;
@@ -84,6 +84,7 @@ public class ItemResponseSummary {
         }
         Sip += Byte.valueOf(itemResponse).doubleValue();
     }
+
 
     /**
      * Frequencies for each category are stored in an array. This method gets the frequency of the score

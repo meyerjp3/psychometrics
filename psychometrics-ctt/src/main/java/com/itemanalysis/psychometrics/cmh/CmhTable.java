@@ -51,6 +51,14 @@ public class CmhTable {
         }
     }
 
+    public void increment(Object groupValue, Double itemScoreValue, long frequency){
+        focalRow.count(groupValue, itemScoreValue, frequency);
+        referenceRow.count(groupValue, itemScoreValue, frequency);
+        if(focalRow.validCode(groupValue) || referenceRow.validCode(groupValue)){
+            columnMargin.incrementValue(itemScoreValue, frequency);
+        }
+    }
+
     public double focalSumOfScores(){
         return focalRow.sumOfScores();
     }
@@ -69,6 +77,14 @@ public class CmhTable {
 
     public int numberOfScoreLevels(){
         return columnMargin.getUniqueCount();
+    }
+
+    public CmhTableRow getFocalRow(){
+        return focalRow;
+    }
+
+    public CmhTableRow getReferenceRow(){
+        return referenceRow;
     }
 
     /**
@@ -139,6 +155,7 @@ public class CmhTable {
         double p1 = 0.0;
         double p2 = 0.0;
         double var = 0.0;
+
         if(tableTotal>1){
             prop = (rTotal*fTotal)/(Math.pow(tableTotal,2)*(tableTotal-1.0));
             p1 = tableTotal*sumOfSquaredScores();

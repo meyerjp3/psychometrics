@@ -18,6 +18,7 @@ package com.itemanalysis.psychometrics.irt.estimation;
 
 import com.itemanalysis.psychometrics.irt.model.ItemResponseModel;
 import com.itemanalysis.psychometrics.statistics.DefaultLinearTransformation;
+import com.itemanalysis.psychometrics.statistics.LinearTransformation;
 import com.itemanalysis.psychometrics.texttable.TextTable;
 import com.itemanalysis.psychometrics.texttable.TextTableColumnFormat;
 import com.itemanalysis.psychometrics.texttable.TextTablePosition;
@@ -212,7 +213,7 @@ public class RaschScoreTable {
      * @param lt linear transformation to be applied.
      * @param precision number of decimal places to retain after the linear transformation.
      */
-    public void linearTransformation(DefaultLinearTransformation lt, int precision){
+    public void linearTransformation(LinearTransformation lt, int precision){
         for(int i=0;i<theta.length;i++){
             theta[i] = Precision.round(lt.transform(theta[i]), precision);
             thetaStdError[i] *= lt.getScale();

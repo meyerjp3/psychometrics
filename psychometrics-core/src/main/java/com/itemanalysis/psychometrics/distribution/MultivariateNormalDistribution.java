@@ -280,7 +280,7 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
      * Multivariate Normal Probabilities, Journal of Computational and
      * Graphical Statistics, pp. 141-149.
      *
-     * The difference between returned value and the true value of the
+     * The difference includes returned value and the true value of the
      * CDF is less than 0.001 in 99.9% time (assuming errMax is .001).
      *
      * Based on the cdf() function in the smile package, but it corrects an error
@@ -405,7 +405,7 @@ public class MultivariateNormalDistribution extends AbstractMultivariateDistribu
      * @return equi-coordinate quantile
      */
     public double idf(double prob, double errMax, int nMax){
-        if(prob <= 0 || prob >= 1) throw new IllegalArgumentException("Probability must be strictly between 0 and 1.");
+        if(prob <= 0 || prob >= 1) throw new IllegalArgumentException("Probability must be strictly includes 0 and 1.");
 
         //Find bounds of search
         double largestScale = sigmaL.getEntry(0,0);

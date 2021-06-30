@@ -82,7 +82,7 @@ public class IrtObservedScoreDistribution {
 
 
     /**
-     * Computes the IRT observed score quadrature for a test that contains only binary items.
+     * Computes the IRT observed score quadrature for a test that includes only binary items.
      * This recursive algorithm is described in the book Test Scoring.
      *
      * Thissen, D., and Wainer, H. (2001). Test scoring. Mahwah, NJ: Lawrence Erlbuam.
@@ -121,7 +121,7 @@ public class IrtObservedScoreDistribution {
     }
 
     /**
-     * Computes the IRT observed score quadrature for a test that contains binary items, polytomous items, or
+     * Computes the IRT observed score quadrature for a test that includes binary items, polytomous items, or
      * binary and polytomous items. This method is preferred over computeAllBinaryItems() because it is more
      * general and can handle binary item, polytomous item, and mixed format tests. It is an implementation
      * of the recursive algorithm described in:

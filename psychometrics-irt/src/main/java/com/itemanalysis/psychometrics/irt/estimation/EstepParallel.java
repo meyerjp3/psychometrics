@@ -35,6 +35,7 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
     private QuadratureRule latentDistribution = null;
     private ItemResponseModel[] irm = null;
     private static int PARALLEL_THRESHOLD = 250;//A threshold of 250 works best in my tests, but could scale it according to the user's processor.
+    public static final byte MISSING_DATA_CODE = -1;
 
     /**
      * Default constructor may be called recursively for parallel computations.
@@ -104,7 +105,7 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
                 for(int j=0;j<nItems;j++){
                     response = Byte.valueOf(responseVector[l].getResponseAt(j)).doubleValue();
 
-                    if(response!=-1){//Do not count missing responses
+                    if(response!=MISSING_DATA_CODE){//Do not count missing responses
                         for(int k=0;k<irm[j].getNcat();k++){
 
                             if((int)response==k){
@@ -159,7 +160,7 @@ public class EstepParallel extends RecursiveTask<EstepEstimates> {
         for(int j=0;j<nItems;j++){
 
             response = Byte.valueOf(responseVector.getResponseAt(j)).intValue();
-            if(response!=-1){
+            if(response!=MISSING_DATA_CODE){
                 value *= irm[j].probability(quadPoint, response);
             }
 

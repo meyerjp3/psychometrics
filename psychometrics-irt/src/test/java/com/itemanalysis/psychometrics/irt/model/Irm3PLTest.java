@@ -160,7 +160,7 @@ public class Irm3PLTest {
         //Guessing is fixed to the value set during instantiation of the object, 0.1.
         double[] iparam = {0.8, -1.2};
         for(int i=0;i<theta.length;i++){
-            assertEquals("  Probability test at theta using alternate call" + i, prob[i], model.probability(theta[i], iparam, 1, 1.0), 1e-6);
+            assertEquals("  Probability test at theta using alternate call" + i, prob[i], model.probability(theta[i], iparam, 1), 1e-6);
         }
 
     }

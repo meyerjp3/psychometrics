@@ -123,15 +123,14 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      *
      * @param theta person ability parameter.
      * @param iparam item parameter array that is one to three in length.
-     * @param D scaling constant.
      * @return probability of a correct answer.
      */
-    public double probability(double theta, double[] iparam, int response, double D){
+    public double probability(double theta, double[] iparam, int response){
         double prob = 0.0;
         if(response==1){
-            return probRight(theta, iparam, D);
+            return probRight(theta, iparam);
         }else{
-            return probWrong(theta, iparam, D);
+            return probWrong(theta, iparam);
         }
     }
 
@@ -161,10 +160,9 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      *
      * @param theta person ability parameter.
      * @param iparam item parameter array that is one to three in length.
-     * @param D scaling constant.
      * @return probability of a correct answer.
      */
-    private double probRight(double theta, double[] iparam, double D){
+    private double probRight(double theta, double[] iparam){
         double z = 0;
 
         if(iparam.length==1){
@@ -180,9 +178,9 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
 
     }
 
-    private double probWrong(double theta, double[] iparam, double D){
+    private double probWrong(double theta, double[] iparam){
         if(iparam.length==3 && iparam[2]<0) return 0;
-        return 1.0 - probRight(theta, iparam, D);
+        return 1.0 - probRight(theta, iparam);
     }
 
     private double probRight(double theta){
@@ -647,10 +645,10 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         }
 
         if(response==1){
-            return probRight(theta, iparam, D);
+            return probRight(theta, iparam);
 
         }else{
-            return 1.0-probRight(theta, iparam, D);
+            return 1.0-probRight(theta, iparam);
         }
 
     }
@@ -680,9 +678,9 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
         }
 
         if(response==1){
-            return probRight(theta, iparam, D);
+            return probRight(theta, iparam);
         }else{
-            return 1.0-probRight(theta, iparam, D);
+            return 1.0-probRight(theta, iparam);
         }
 
     }
@@ -778,6 +776,10 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
             difficultyStdError = x[1];
             guessingStdError = x[2];
         }
+    }
+
+    public void setScalingConstant(double D){
+        this.D = D;
     }
 
     /**
@@ -975,7 +977,7 @@ public class Irm3PL extends AbstractItemResponseModelWithGradient {
      * values for every item on the test, the proposal values can be accepted as the new parameter estimates. This
      * method must be called to accept the proposal values as the new estimates.
      *
-     * Returns the maximum relative absolute difference between existing parameters and new parameters.
+     * Returns the maximum relative absolute difference includes existing parameters and new parameters.
      *
      */
     public double acceptAllProposalValues(){

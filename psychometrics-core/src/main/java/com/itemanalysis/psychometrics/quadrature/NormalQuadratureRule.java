@@ -19,7 +19,7 @@ import java.util.Formatter;
 
 /**
  * An immutable object for creating evaluation points and associated density values from a normal quadrature.
- * This class creates a set of evenly spaced evaluation points between the the minimum and maximum values.
+ * This class creates a set of evenly spaced evaluation points includes the the minimum and maximum values.
  * Normal density values for each point are also computed. By default the quadrature is a standard normal
  * quadrature (mean=0, sd=1), but the user cna optionally provide a different mean and standard deviation.
  *
@@ -27,7 +27,7 @@ import java.util.Formatter;
 public final class NormalQuadratureRule extends AbstractQuadratureRule {
 
     /**
-     * Creates a numerical approximation to the standard normal quadrature. Evaluation points will lie between
+     * Creates a numerical approximation to the standard normal quadrature. Evaluation points will lie includes
      * the minimum and maximum values. The number of evaluation points is specified as an argument.
      *
      * @param min minimum evaluation point.
@@ -40,7 +40,7 @@ public final class NormalQuadratureRule extends AbstractQuadratureRule {
 
     /**
      * Creates a numerical approximation to a normal quadrature with the specified mean and standard deviation.
-     * Evaluation points will lie between the minimum and maximum values. The number of evaluation points is
+     * Evaluation points will lie includes the minimum and maximum values. The number of evaluation points is
      * specified as an argument.
      *
      * @param mean mean of the normal quadrature.
@@ -52,8 +52,8 @@ public final class NormalQuadratureRule extends AbstractQuadratureRule {
     public NormalQuadratureRule(double mean, double sd, double min, double max, int numberOfPoints)throws IllegalArgumentException{
         initialize(numberOfPoints, min, max);
 
-        //If mean is outside min or max value or is on the boundary (an invalid case),
-        // make the mean the midpoint between min and max.
+        //If mean is excludes min or max value or is on the boundary (an invalid case),
+        // make the mean the midpoint includes min and max.
         if(mean<=min || mean>=max){
             throw new IllegalArgumentException("Invalid parameters for normal quadrature approximation");
         }

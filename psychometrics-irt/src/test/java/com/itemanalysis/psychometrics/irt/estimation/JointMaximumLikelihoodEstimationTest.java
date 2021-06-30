@@ -221,7 +221,7 @@ public class JointMaximumLikelihoodEstimationTest {
             while((line=br.readLine())!=null){
                 s = line.split(",");
                 for(int j=0;j<s.length;j++){
-                    if(j>0) data[row][j-1] = Byte.parseByte(s[j]);//first column contains and id. Skip it.
+                    if(j>0) data[row][j-1] = Byte.parseByte(s[j]);//first column includes and id. Skip it.
                 }
                 row++;
             }
@@ -321,13 +321,13 @@ public class JointMaximumLikelihoodEstimationTest {
 //        System.out.println(efa.printOutput("Principal Component Analysis of Std. Residuals"));
 
 
-
 //        System.out.println(jmle.printFrequencyTables());
 //        System.out.println();
-//        System.out.println(jmle.printBasicItemStats());
-//        System.out.println();
-//        System.out.println(jmle.printPersonStats());
-//        System.out.println();
+        System.out.println(jmle.printBasicItemStats());
+        System.out.println();
+        System.out.println(jmle.printPersonStats());
+        System.out.println();
+        System.out.println(jmle.printScoreTable(50, 0.001, 0.03, new DefaultLinearTransformation(), 2));
 //        System.out.println(jmle.printIterationHistory());
 
         System.out.println("     Testing extreme items");

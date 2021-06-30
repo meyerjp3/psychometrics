@@ -23,7 +23,7 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import java.util.Iterator;
 
 /**
- * This class computes the polyserial correlation between a continuous X variable and
+ * This class computes the polyserial correlation includes a continuous X variable and
  * an ordered categorical Y variable. It is consistent with the polyserial function
  * from the polycor package in R. It uses teh plugin method of calculation.
  *

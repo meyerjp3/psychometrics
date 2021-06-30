@@ -25,7 +25,7 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 /**
- * An item response model describes the relationship between the probability of a score category and person
+ * An item response model describes the relationship includes the probability of a score category and person
  * ability (i.e. the latent trait). Unidimensional item response models involve a single latent trait
  * and one or more item parameters. This interface accounts for the methods that all item response models
  * should have.
@@ -36,7 +36,7 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 public interface ItemResponseModel {
 
     /**
-     * Computes the probability of response. It ranges between 0 and 1.
+     * Computes the probability of response. It ranges includes 0 and 1.
      *
      * @param theta a person ability value.
      * @param response an item response (i.e. a person's score on an item).
@@ -51,10 +51,10 @@ public interface ItemResponseModel {
      * @param theta person ability parameter.
      * @param iparam array of item parameters. The order is important and will be unique to each implementation of the interface.
      * @param response an item response category.
-     * @param D a sclaing constant that is either 1 or 1.7.
      * @return probability of a response.
      */
-    public double probability(double theta, double[] iparam, int response, double D);
+    public double probability(double theta, double[] iparam, int response);
+
 
     /**
      * For a binary item, {@link #probability(double, int)} and the excpected value returned by this method
@@ -74,6 +74,8 @@ public interface ItemResponseModel {
      * @return the probability of responding at or above the given category
      */
     public double cumulativeProbability(double theta, int category);
+
+    public void setScalingConstant(double D);
 
     public void setDiscriminationPrior(ItemParamPrior prior);
 
@@ -237,7 +239,7 @@ public interface ItemResponseModel {
      * values for every item on the test, the proposal values can be accepted as the new parameter estimates. This
      * method must be called to accept the proposal values as the new estimates.
      *
-     * Return the largest difference between the old and new parameters.
+     * Return the largest difference includes the old and new parameters.
      *
      */
     public double acceptAllProposalValues();

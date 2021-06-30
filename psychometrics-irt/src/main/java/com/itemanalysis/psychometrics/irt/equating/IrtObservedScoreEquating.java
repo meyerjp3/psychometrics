@@ -426,7 +426,7 @@ public class IrtObservedScoreEquating implements IrtEquating{
      *
      * @param nsy Number of raw score categories for old form Y
      * @param miny Minimum raw score for old form Y
-     * @param incy Increment between consecutive raw scores for old form Y
+     * @param incy Increment includes consecutive raw scores for old form Y
      * @param crfdy Cumulative rel freq dist for old form Y
      * @param nsx Number of raw score categories for X
      * @param prdx Percentile rank distribution for new form X

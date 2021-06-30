@@ -18,6 +18,7 @@ package com.itemanalysis.psychometrics.statistics;
 import com.itemanalysis.psychometrics.data.VariableAttributes;
 import org.apache.commons.math3.stat.Frequency;
 
+import java.util.Formatter;
 import java.util.Iterator;
 import java.util.TreeMap;
 
@@ -53,18 +54,31 @@ public class TwoWayTable {
 	}
 	
 	public void addValue(Comparable<?> rowValue, Comparable<?> colValue){
-		Frequency ft=tableRows.get(rowValue);
-		if(ft==null){
-			ft=new Frequency();
-			ft.addValue(colValue);
-			tableRows.put(rowValue,ft);
-		}else{
-			ft.addValue(colValue);
-		}
-		rowMargin.addValue(rowValue); //addValue row margins
-		colMargin.addValue(colValue); //addValue column margins
-		totalCount++;
+//		Frequency ft=tableRows.get(rowValue);
+//		if(ft==null){
+//			ft=new Frequency();
+//			ft.addValue(colValue);
+//			tableRows.put(rowValue,ft);
+//		}else{
+//			ft.addValue(colValue);
+//		}
+//		rowMargin.addValue(rowValue); //addValue row margins
+//		colMargin.addValue(colValue); //addValue column margins
+//		totalCount++;
+        addValue(rowValue, colValue, 1);
 	}
+
+	public void addValue(Comparable<?> rowValue, Comparable<?> colValue, long frequency){
+        Frequency ft=tableRows.get(rowValue);
+        if(ft==null){
+            ft=new Frequency();
+            tableRows.put(rowValue,ft);
+        }
+        ft.incrementValue(colValue, frequency);
+        rowMargin.incrementValue(rowValue, frequency);
+        colMargin.incrementValue(colValue, frequency);
+        totalCount+=frequency;
+    }
 
     public void addValue(int rowValue, int colValue){
         addValue(Long.valueOf(rowValue), Long.valueOf(colValue));
@@ -80,6 +94,22 @@ public class TwoWayTable {
 
     public void addValue(char rowValue, char colValue){
         addValue(Character.valueOf(rowValue), Character.valueOf(colValue));
+    }
+
+    public void addValue(int rowValue, int colValue, long frequency){
+        addValue(Long.valueOf(rowValue), Long.valueOf(colValue), frequency);
+    }
+
+    public void addValue(Integer rowValue, Integer colValue, long frequency){
+        addValue(Long.valueOf(rowValue.longValue()), Long.valueOf(colValue.longValue()), frequency);
+    }
+
+    public void addValue(long rowValue, long colValue, long frequency){
+        addValue(Long.valueOf(rowValue), Long.valueOf(colValue), frequency);
+    }
+
+    public void addValue(char rowValue, char colValue, long frequency){
+        addValue(Character.valueOf(rowValue), Character.valueOf(colValue), frequency);
     }
 
     public void clear(){
@@ -428,5 +458,50 @@ public class TwoWayTable {
 	public int getSize(){
 		return tableRows.size();
 	}
+
+	public double[] getDimensions(){
+	    double[] dim = new double[2];
+	    dim[0] = rowMargin.getUniqueCount();
+	    dim[1] = colMargin.getUniqueCount();
+	    return dim;
+    }
+
+	public String toString(){
+	    StringBuilder sb = new StringBuilder();
+        Formatter f = new Formatter(sb);
+
+        Iterator<Comparable<?>> rows = rowMargin.valuesIterator();
+        Iterator<Comparable<?>> cols = null;
+        Comparable<?> rTemp = null;
+
+        f.format("%15s", "Row/Col");
+
+        Iterator<Comparable<?>> header = colMargin.valuesIterator();
+        while(header.hasNext()){
+            f.format("%10s", header.next().toString());
+        }
+        f.format("%n");
+
+        f.format("%15s", "---------------");
+        header = colMargin.valuesIterator();
+        while(header.hasNext()){
+            f.format("%10s", "----------");
+        }
+        f.format("%n");
+
+        while(rows.hasNext()){
+            cols = colMargin.valuesIterator();
+            rTemp = rows.next();
+
+            f.format("%15s", rTemp.toString()+ " | ");
+
+            while(cols.hasNext()){
+                f.format("%10d%3s", getCount(rTemp, cols.next()), "");
+            }
+            f.format("%n");
+        }
+
+	    return f.toString();
+    }
 
 }

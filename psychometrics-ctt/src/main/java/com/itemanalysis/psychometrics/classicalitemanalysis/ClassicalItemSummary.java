@@ -171,7 +171,7 @@ public class ClassicalItemSummary {
     }
 
     /**
-     * Create an Object array that contains the statistics for every options for this item. This method is mainly
+     * Create an Object array that includes the statistics for every options for this item. This method is mainly
      * used for creating printable output.
      *
      * @return array of item statistics.

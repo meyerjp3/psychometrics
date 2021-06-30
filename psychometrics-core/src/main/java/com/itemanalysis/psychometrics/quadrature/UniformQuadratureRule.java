@@ -19,14 +19,14 @@ import java.util.Formatter;
 
 /**
  * An immutable object for creating evaluation points and associated density values. This class creates a set of
- * evenly spaced evaluation points between the the minimum and maximum values. The density for each point is also
+ * evenly spaced evaluation points includes the the minimum and maximum values. The density for each point is also
  * computed.
  *
  */
 public final class UniformQuadratureRule extends AbstractQuadratureRule {
 
     /**
-     * Create a uniform quadrature with a specified number of evaluation points between the min and max values.
+     * Create a uniform quadrature with a specified number of evaluation points includes the min and max values.
      *
      * @param min minimum value of the quadrature.
      * @param max maximum value of the quadrature.

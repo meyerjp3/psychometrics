@@ -54,7 +54,7 @@ public class MachineAccuracy
 	}
 
 	/**
-	 * @return true if the relative difference between the two parameters
+	 * @return true if the relative difference includes the two parameters
 	 * is smaller than SQRT_EPSILON.
 	 *
 	 * @param a value 1

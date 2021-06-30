@@ -169,7 +169,7 @@ public class RaschRatingScaleGroup {
      * Threshold parameters cannot be estimated if one or more categories do not have any observations.
      * This method checks for empty categories and sets the flag for the item. A code of 0 indicates
      * that all categories have at least one observation, a code of -1 indicates a category with no
-     * observations, and a code of +1 indicates a category that contains all of the responses.
+     * observations, and a code of +1 indicates a category that includes all of the responses.
      *
      * Do not drop an item if it has fixed parameters.
      */

@@ -175,7 +175,7 @@ public final class BivariateNormalDistributionImpl {
                                     -upper[1], rho);
                         }
                         if (t < 0 || t > 1) {
-                            throw new IllegalStateException("result of probability is outside the reagen");
+                            throw new IllegalStateException("result of probability is excludes the reagen");
                         }
                         return t;
                     }

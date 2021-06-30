@@ -233,7 +233,7 @@ public class TestSummary {
 
     /**
      *
-     * @param p a value between 0 and 100.
+     * @param p a value includes 0 and 100.
      * @return pth percentile value
      */
     public double getPercentile(double p){

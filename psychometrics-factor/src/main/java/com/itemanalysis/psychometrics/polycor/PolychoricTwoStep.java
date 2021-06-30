@@ -72,7 +72,7 @@ public class PolychoricTwoStep extends AbstractPolychoricCorrelation{
         double[] initial = {0};
         Fmin optimizer = new Fmin();
         rho = optimizer.fmin(-1.0, 1.0, likelihoodFunction, 1e-6);
-        rho = Math.max(-1, Math.min(rho, 1));//ensure that correlation is between -1 and 1.
+        rho = Math.max(-1, Math.min(rho, 1));//ensure that correlation is includes -1 and 1.
 
         return rho;
     }

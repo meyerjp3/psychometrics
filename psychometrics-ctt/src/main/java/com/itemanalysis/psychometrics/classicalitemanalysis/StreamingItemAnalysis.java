@@ -1,14 +1,13 @@
 package com.itemanalysis.psychometrics.classicalitemanalysis;
 
+import com.itemanalysis.psychometrics.data.TidyOutput;
 import com.itemanalysis.psychometrics.statistics.PearsonCorrelation;
 import com.itemanalysis.psychometrics.statistics.PolyserialCorrelationPlugin;
 import org.apache.commons.math3.stat.Frequency;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
-import java.util.Formatter;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * A class for calculating classical item statistics. It does not store data in memory. It uses
@@ -40,6 +39,9 @@ public class StreamingItemAnalysis {
     private long missingCount = 0;
     private int precision = 4;
 
+    //Computes the mean test score for each option
+    private HashMap<Object, Mean> optionScoreMean = null;
+
     //flag criteria
     private double lowPvalue = 0.1;
     private double highPvalue = 0.9;
@@ -65,6 +67,7 @@ public class StreamingItemAnalysis {
         testScoreMean = new Mean();
         testScoreStandardDeviation = new StandardDeviation(unbiased);
         selectedMean = new HashMap<Object, Mean>();
+        optionScoreMean = new HashMap<Object, Mean>();
 
         if(discriminationType==DiscriminationType.POLYSERIAL){
             polyserialCorrelation = new PolyserialCorrelationPlugin();
@@ -109,6 +112,13 @@ public class StreamingItemAnalysis {
         }
         m1.increment(rawScore);
 
+        Mean optionMean = optionScoreMean.get(response);
+        if(optionMean==null){
+            optionMean = new Mean();
+            optionScoreMean.put(response, optionMean);
+        }
+        optionMean.increment(rawScore);
+
     }
 
     /**
@@ -128,12 +138,16 @@ public class StreamingItemAnalysis {
         this.precision = Math.abs(precision);
     }
 
+    public String getItemName(){
+        return itemName;
+    }
+
     /**
      * Set the lower bound for the item difficulty flag. Item difficulty values as
      * a percent of the observed maximum item score (p-values) below this number will be flagged.
-     * Forced to be between 0 and 1.
+     * Forced to be includes 0 and 1.
      *
-     * @param lowPvalue item mean expressed as a proportion. Must be between 0 and 1.
+     * @param lowPvalue item mean expressed as a proportion. Must be includes 0 and 1.
      */
     public void setLowPvalue(double lowPvalue){
         this.lowPvalue = Math.min(Math.max(0, lowPvalue), 1.0);
@@ -142,9 +156,9 @@ public class StreamingItemAnalysis {
     /**
      * Set the upper bound for the item difficulty flag. Item difficulty values as
      * a percent of the observed maximum item score (p-values) above this number will be flagged.
-     * Forced to be between 0 and 1.
+     * Forced to be includes 0 and 1.
      *
-     * @param highPvalue item mean expressed as a proportion. Must be between 0 and 1.
+     * @param highPvalue item mean expressed as a proportion. Must be includes 0 and 1.
      */
     public void setHighPvalue(double highPvalue){
         this.highPvalue = Math.max(Math.min(1, highPvalue), 0.0);
@@ -152,9 +166,9 @@ public class StreamingItemAnalysis {
 
     /**
      * Sets the lower bound for an item discrimination flag. Item-total correlations below this value
-     * will be flagged. Forced to be between -1 and 1.
+     * will be flagged. Forced to be includes -1 and 1.
      *
-     * @param lowDiscrimination a correlation value between 0 and 1.
+     * @param lowDiscrimination a correlation value includes 0 and 1.
      */
     public void setLowDiscrimination(double lowDiscrimination){
         this.lowDiscrimination = Math.min(Math.max(lowDiscrimination, -1.0), 1.0);
@@ -162,9 +176,9 @@ public class StreamingItemAnalysis {
 
     /**
      * Sets the upper bound for an item discrimination flag. Item-total correlations above this value
-     * will be flagged. Forced to be between -1 and 1.
+     * will be flagged. Forced to be includes -1 and 1.
      *
-     * @param highDiscrimination a correlation value between 0 and 1.
+     * @param highDiscrimination a correlation value includes 0 and 1.
      */
     public void setHighDiscrimination(double highDiscrimination){
         this.highDiscrimination = Math.min(Math.max(highDiscrimination, -1.0), 1.0);
@@ -233,7 +247,7 @@ public class StreamingItemAnalysis {
     }
 
     /**
-     * Point-biserial correlation that describes the relationship between selecting the response
+     * Point-biserial correlation that describes the relationship includes selecting the response
      * and the raw test score. It is the option point-biserial correlation.
      *
      * @param response the item response
@@ -282,6 +296,12 @@ public class StreamingItemAnalysis {
         }
 
         return ptbis;
+    }
+
+    public double getOptionMeanAt(Object option){
+        Mean m = optionScoreMean.get(option);
+        if(m==null) return Double.NaN;
+        return m.getResult();
     }
 
     /**
@@ -351,12 +371,20 @@ public class StreamingItemAnalysis {
     public String getDiscriminationFlag(){
         double discrim = getItemTotalCorrelation();
 
+
+
+        if(discrim < 0) return "Warning";
+
         if(discrim < lowDiscrimination){
             return "LD";
         }else if(discrim > highDiscrimination){
             return "HD";
         }
         return "";
+    }
+
+    public Frequency getResponseOptionFrequencyTable(){
+        return freq;
     }
 
     /**
@@ -418,6 +446,7 @@ public class StreamingItemAnalysis {
             while(iter.hasNext()){
                 Comparable<?> value = iter.next();
                 String s = value.toString();
+
                 f.format("%10s", s.substring(Math.max(0, s.length()-9)));
                 f.format("%10d", freq.getCount(value));
                 f.format("%10."+precision+"f", getProportionAt(value));
@@ -485,7 +514,7 @@ public class StreamingItemAnalysis {
     }
 
     /**
-     * Create an Object array that contains the statistics for every options for this item. This method is mainly
+     * Create an Object array that includes the statistics for every options for this item. This method is mainly
      * used for writing output to file using the Outputter interface.
      *
      * @return array of item statistics.
@@ -526,6 +555,155 @@ public class StreamingItemAnalysis {
         }
 
         return obj;
+    }
+
+    /**
+     * Formats output as a tidy dataset for a csv file
+     *
+     * Output has six columns (long format): name, part, method, group, statistic, value
+     *
+     * @return a string array in tidy format
+     */
+    public TidyOutput getTidyOutput(){
+
+        double validCount = getValidCount();
+        TidyOutput tidyOutput = new TidyOutput();
+        String timeStamp = tidyOutput.getTimeStamp();
+
+        tidyOutput.addValue("name", getItemName());
+        tidyOutput.addValue("date", timeStamp);
+        tidyOutput.addValue("part", "item");
+        tidyOutput.addValue("part_id", "");
+        tidyOutput.addValue("method", "cia");
+        tidyOutput.addValue("model", "");
+        tidyOutput.addValue("statistic", "ctt_difficulty");
+        tidyOutput.addValue("value", Double.valueOf(getItemDifficulty()).toString());
+        tidyOutput.addValue("status", getDifficultyFlag());
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", getItemName());
+        tidyOutput.addValue("date", timeStamp);
+        tidyOutput.addValue("part", "item");
+        tidyOutput.addValue("part_id", "");
+        tidyOutput.addValue("method", "cia");
+        tidyOutput.addValue("model", "");
+        tidyOutput.addValue("statistic", "ctt_discrimination");
+        tidyOutput.addValue("value", Double.valueOf(getItemTotalCorrelation()).toString());
+        tidyOutput.addValue("status", getDiscriminationFlag());
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", getItemName());
+        tidyOutput.addValue("date", timeStamp);
+        tidyOutput.addValue("part", "item");
+        tidyOutput.addValue("part_id", "");
+        tidyOutput.addValue("method", "cia");
+        tidyOutput.addValue("model", "");
+        tidyOutput.addValue("statistic", "std_deviation");
+        tidyOutput.addValue("value", Double.valueOf(getItemStandardDeviation()).toString());
+        tidyOutput.addValue("status", "");
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", getItemName());
+        tidyOutput.addValue("date", timeStamp);
+        tidyOutput.addValue("part", "item");
+        tidyOutput.addValue("part_id", "");
+        tidyOutput.addValue("method", "cia");
+        tidyOutput.addValue("model", "");
+        tidyOutput.addValue("statistic", "valid_count");
+        tidyOutput.addValue("value", Double.valueOf(validCount).toString());
+        tidyOutput.addValue("status", "");
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", getItemName());
+        tidyOutput.addValue("date", timeStamp);
+        tidyOutput.addValue("part", "item");
+        tidyOutput.addValue("part_id", "");
+        tidyOutput.addValue("method", "cia");
+        tidyOutput.addValue("model", "");
+        tidyOutput.addValue("statistic", "missing_count");
+        tidyOutput.addValue("value", Double.valueOf(getMissingCount()).toString());
+        tidyOutput.addValue("status", "");
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", getItemName());
+        tidyOutput.addValue("date", timeStamp);
+        tidyOutput.addValue("part", "item");
+        tidyOutput.addValue("part_id", "");
+        tidyOutput.addValue("method", "cia");
+        tidyOutput.addValue("model", "");
+        tidyOutput.addValue("statistic", "total_count");
+        tidyOutput.addValue("value", Double.valueOf(getTotalCount()).toString());
+        tidyOutput.addValue("status", "");
+        tidyOutput.nextRow();
+
+        if(allCategories){
+
+            tidyOutput.addValue("name", getItemName());
+            tidyOutput.addValue("date", timeStamp);
+            tidyOutput.addValue("part", "item");
+            tidyOutput.addValue("part_id", "");
+            tidyOutput.addValue("method", "cia");
+            tidyOutput.addValue("model", "");
+            tidyOutput.addValue("statistic", "number_of_options");
+            tidyOutput.addValue("value", Double.valueOf(freq.getUniqueCount()).toString());
+            tidyOutput.addValue("status", "");
+            tidyOutput.nextRow();
+
+            long optionCount = 0;
+            double proportion = 0;
+            double optionTotalCorrelation = 0;
+
+            Iterator<Comparable<?>> iter = freq.valuesIterator();
+            while(iter.hasNext()){
+                Comparable<?> value = iter.next();
+
+                optionCount = 0;
+                proportion = 0;
+                optionTotalCorrelation = 0;
+
+                if(validCount>0){
+                    optionCount = freq.getCount(value);
+                    proportion = getProportionAt(value);
+                    optionTotalCorrelation = getPointBiserialAt(value);
+                }
+
+                tidyOutput.addValue("name", getItemName());
+                tidyOutput.addValue("date", timeStamp);
+                tidyOutput.addValue("part", "option");
+                tidyOutput.addValue("part_id", value.toString());
+                tidyOutput.addValue("method", "cia");
+                tidyOutput.addValue("model", "");
+                tidyOutput.addValue("statistic", "option_frequency");
+                tidyOutput.addValue("value", Long.valueOf(optionCount).toString());
+                tidyOutput.addValue("status", "");
+                tidyOutput.nextRow();
+
+                tidyOutput.addValue("name", getItemName());
+                tidyOutput.addValue("date", timeStamp);
+                tidyOutput.addValue("part", "option");
+                tidyOutput.addValue("part_id", value.toString());
+                tidyOutput.addValue("method", "cia");
+                tidyOutput.addValue("model", "");
+                tidyOutput.addValue("statistic", "option_proportion");
+                tidyOutput.addValue("value", Double.valueOf(proportion).toString());
+                tidyOutput.addValue("status", "");
+                tidyOutput.nextRow();
+
+                tidyOutput.addValue("name", getItemName());
+                tidyOutput.addValue("date", timeStamp);
+                tidyOutput.addValue("part", "option");
+                tidyOutput.addValue("part_id", value.toString());
+                tidyOutput.addValue("method", "cia");
+                tidyOutput.addValue("model", "");
+                tidyOutput.addValue("statistic", "option_total_correlation");
+                tidyOutput.addValue("value", Double.valueOf(optionTotalCorrelation).toString());
+                tidyOutput.addValue("status", "");
+                tidyOutput.nextRow();
+            }
+        }
+
+        return tidyOutput;
+
     }
 
 

@@ -150,7 +150,7 @@ public class PercentileRank {
     }
 
     /**
-     * For r number of score levels between min and max, inclusive, this method
+     * For r number of score levels includes min and max, inclusive, this method
      * returns a r x 2 array with integer based scores in first column
      * and percentile ranks in the second column. This method is useful when
      * only the raw scores and corresponding percentile ranks are needed.

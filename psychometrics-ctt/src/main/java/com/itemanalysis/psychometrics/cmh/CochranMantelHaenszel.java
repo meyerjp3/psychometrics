@@ -15,15 +15,14 @@
  */
 package com.itemanalysis.psychometrics.cmh;
 
+import com.itemanalysis.psychometrics.data.TidyOutput;
 import com.itemanalysis.psychometrics.data.VariableAttributes;
 import com.itemanalysis.psychometrics.data.VariableName;
+import com.itemanalysis.psychometrics.statistics.WeightedOnlineStandardDeviation;
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
-import java.util.Formatter;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  *
@@ -39,21 +38,28 @@ public class CochranMantelHaenszel {
     /**
      * Computes the Cochran-Mantel-Haenszel statistics and related quantities.
      *
-     * TreeMap contains the k, R X C tables.
+     * TreeMap includes the k, R X C tables.
      * Each table is a strata indexed by an ordinal number that is the TreeMap key.
      * The TwoWayTable allows for R X C tables, but this use is based on 2 X C tables.
      * 
      */
     private TreeMap<Double, CmhTable> strata = null;
+    private TreeSet<Double> itemScores = null;
+    private String title = "";
     private String focalCode = "";
     private String referenceCode = "";
-    private VariableAttributes groupVariable = null;
-    private VariableAttributes itemVariable = null;
-    private StandardDeviation combinedGroupsSd = null;
-    private StandardDeviation focalSd = null;
-    private StandardDeviation referenceSd = null;
+    private String itemName = null;
+    private WeightedOnlineStandardDeviation combinedGroupsSd = null;
+    private WeightedOnlineStandardDeviation focalSd = null;
+    private WeightedOnlineStandardDeviation referenceSd = null;
     private boolean etsDelta = false;
+    private double totalSampleSize = 0;
+    private double totalFocalSize = 0;
+    private double totalReferenceSize = 0;
     private double validSampleSize = 0.0;
+    private double validFocalSampleSize = 0;
+    private double validReferenceSampleSize = 0;
+    private int validStrata = 0;
     private Double cmhChiSquare = null;
     private Double comOddsRatio = null;
     private ChiSquaredDistribution chiSquare = new ChiSquaredDistribution(1.0);
@@ -62,20 +68,25 @@ public class CochranMantelHaenszel {
     double maxItemScore = -Double.MAX_VALUE;
 
 
-    public CochranMantelHaenszel(String focalCode, String referenceCode, VariableAttributes groupVariable, VariableAttributes itemVariable,
-                                 boolean etsDelta){
+    public CochranMantelHaenszel(String focalCode, String referenceCode, String itemName, boolean etsDelta){
+        this(focalCode+"_"+referenceCode, focalCode, referenceCode, itemName, etsDelta);
+    }
+
+    public CochranMantelHaenszel(String title, String focalCode, String referenceCode, String itemName, boolean etsDelta){
         strata = new TreeMap<Double, CmhTable>();
+        itemScores = new TreeSet<Double>();
+        this.title = title + "("+focalCode+"_"+referenceCode+")";
         this.focalCode = focalCode;
         this.referenceCode = referenceCode;
-        this.groupVariable = groupVariable;
-        this.itemVariable = itemVariable;
+        this.itemName = itemName;
         this.etsDelta = etsDelta;
-        combinedGroupsSd = new StandardDeviation();
-        focalSd = new StandardDeviation();
-        referenceSd = new StandardDeviation();
+        combinedGroupsSd = new WeightedOnlineStandardDeviation();
+        focalSd = new WeightedOnlineStandardDeviation();
+        referenceSd = new WeightedOnlineStandardDeviation();
     }
 
     /**
+     * Increment the statistic for one observation.
      *
      * @param strataScore mathing score i.e. raw score, decile, or quintile
      * @param groupValue examinees group membership
@@ -94,13 +105,47 @@ public class CochranMantelHaenszel {
 
         if(groupValue.equals(focalCode)){
             focalSd.increment(itemScore);
+            itemScores.add(itemScore);
         }else if(groupValue.equals(referenceCode)){
             referenceSd.increment(itemScore);
+            itemScores.add(itemScore);
         }
 
         minItemScore = Math.min(minItemScore, itemScore);
         maxItemScore = Math.max(maxItemScore, itemScore);
         
+    }
+
+    /**
+     * Increment the statistic with a weighted observation.
+     *
+     * @param strataScore mathing score i.e. raw score, decile, or quintile
+     * @param groupValue examinees group membership
+     * @param itemScore examinees response to item
+     * @param frequency a frequency weight
+     */
+    public void increment(double strataScore, String groupValue, double itemScore, long frequency){
+        if(groupValue==null || "".equals(groupValue.trim()) || Double.isNaN(itemScore)) return;
+
+        CmhTable temp = strata.get(strataScore);
+        if(temp==null){
+            temp = new CmhTable(focalCode, referenceCode);
+            strata.put(strataScore, temp);
+        }
+        temp.increment(groupValue, itemScore, frequency);
+        combinedGroupsSd.increment(itemScore, frequency);
+
+        if(groupValue.equals(focalCode)){
+            focalSd.increment(itemScore, frequency);
+            itemScores.add(itemScore);
+        }else if(groupValue.equals(referenceCode)){
+            referenceSd.increment(itemScore, frequency);
+            itemScores.add(itemScore);
+        }
+
+        minItemScore = Math.min(minItemScore, itemScore);
+        maxItemScore = Math.max(maxItemScore, itemScore);
+
     }
 
     public double focalTotalSize(){
@@ -114,6 +159,14 @@ public class CochranMantelHaenszel {
             fSum += table.focalSize();
         }
         return fSum;
+    }
+
+    public double getTotalFocalSize(){
+        return totalFocalSize;
+    }
+
+    public double getTotalReferenceSize(){
+        return totalReferenceSize;
     }
 
     public boolean isPolytomous(){
@@ -130,8 +183,7 @@ public class CochranMantelHaenszel {
      */
     public double cochranMantelHaenszel(){
         if(cmhChiSquare!=null) return cmhChiSquare;
-        Set<Double> keys = strata.keySet();
-        Iterator<Double> iter = keys.iterator();
+        Iterator<Double> iter = strata.keySet().iterator();
         CmhTable table = null;
         double focalSumOfScoresSum = 0.0;
         double expectedValueSum = 0.0;
@@ -143,17 +195,21 @@ public class CochranMantelHaenszel {
             table = strata.get(iter.next());
             tableVar = table.variance();
             tableTotal = table.total();
+            totalSampleSize += tableTotal;
+            totalFocalSize += table.focalSize();
+            totalReferenceSize += table.referenceSize();
 
             if(tableVar>0){
                 validSampleSize+=tableTotal;
+                validFocalSampleSize+=table.focalSize();
+                validReferenceSampleSize+=table.referenceSize();
+                validStrata++;
                 focalSumOfScoresSum += table.focalSumOfScores();
                 expectedValueSum += table.expectedValue();
                 varSum += tableVar;
             }
-            tableTotal=0;
-            tableVar=0;
-            
         }
+
         cmhChiSquare = Math.pow(focalSumOfScoresSum-expectedValueSum, 2)/varSum;
         return cmhChiSquare;
     }
@@ -322,6 +378,8 @@ public class CochranMantelHaenszel {
     }
 
     public String etsBinayClassification(double cochranMantelHaenszel, double pvalue, double commonOddsRatio){
+        if(validSampleSize==0) return "";
+
         double[] ci = commonOddsRatioConfidenceInterval(commonOddsRatio);
         String difClass = "B ";
         if(pvalue > 0.05 || (0.65 < commonOddsRatio && commonOddsRatio < 1.53)){
@@ -357,8 +415,8 @@ public class CochranMantelHaenszel {
         return difClass;
     }
 
-    public VariableName getVariableName(){
-        return itemVariable.getName();
+    public String getVariableName(){
+        return itemName;
     }
 
     public double getPValue(){
@@ -369,6 +427,14 @@ public class CochranMantelHaenszel {
 
     public int getSampleSize(){
         return (int)validSampleSize;
+    }
+
+    public long getValidFocalSampleSize(){
+        return (long)validFocalSampleSize;
+    }
+
+    public long getValidReferenceSampleSize(){
+        return (long)validReferenceSampleSize;
     }
 
     public double getEffectSize(){
@@ -406,6 +472,14 @@ public class CochranMantelHaenszel {
             etsClass = smdDifClass();
         }
         return etsClass;
+    }
+
+    public String getFocalCode(){
+        return focalCode;
+    }
+
+    public String getReferenceCode(){
+        return referenceCode;
     }
 
     /**
@@ -449,6 +523,87 @@ public class CochranMantelHaenszel {
             f.format("%100s", table.toString()); f.format("%n");
         }
         return f.toString();
+    }
+
+    /**
+     * Creates an array list of string arrays. Each element in the List is a row of data.
+     * Each row has five columns (array elements): item name, group ID, stratum, item score, and frequency count.
+     * Focal group data are shown first, then reference group data.
+     *
+     * @return array list of data
+     */
+    public ArrayList<String[]> getFrequencyTables(){
+        ArrayList<String[]> tableList = new ArrayList<>();
+        CmhTable table = null;
+        String[] rowValues = null;
+
+        //Focal group data
+        for(Double score : strata.keySet()){
+            table = strata.get(score);
+
+            for(Double itemScore : itemScores){
+                rowValues = new String[5];
+                rowValues[0] = itemName;
+                rowValues[1] = focalCode;
+                rowValues[2] = score.toString();
+                rowValues[3] = itemScore.toString();
+                rowValues[4] = Long.valueOf((long)table.getFocalRow().freqAt(itemScore)).toString();
+                tableList.add(rowValues);
+            }
+        }
+
+        //Reference group data
+        for(Double score : strata.keySet()){
+            table = strata.get(score);
+
+            for(Double itemScore : itemScores){
+                rowValues = new String[5];
+                rowValues[0] = itemName;
+                rowValues[1] = referenceCode;
+                rowValues[2] = score.toString();
+                rowValues[3] = itemScore.toString();
+                rowValues[4] = Long.valueOf((long)table.getReferenceRow().freqAt(itemScore)).toString();
+                tableList.add(rowValues);
+            }
+        }
+
+        return tableList;
+    }
+
+    public TidyOutput getTidyFrequencyTables(){
+        TidyOutput tidyOutput = new TidyOutput();
+        CmhTable table = null;
+
+        //Focal group data
+        for(Double score : strata.keySet()){
+            table = strata.get(score);
+
+            for(Double itemScore : itemScores){
+                tidyOutput.addValue("itemid", itemName);
+                tidyOutput.addValue("group", focalCode);
+                tidyOutput.addValue("stratum", score.toString());
+                tidyOutput.addValue("itemscore", itemScore.toString());
+                tidyOutput.addValue("frequency", Long.valueOf((long)table.getFocalRow().freqAt(itemScore)).toString());
+                tidyOutput.nextRow();
+
+            }
+        }
+
+        //Reference group data
+        for(Double score : strata.keySet()){
+            table = strata.get(score);
+
+            for(Double itemScore : itemScores){
+                tidyOutput.addValue("itemid", itemName);
+                tidyOutput.addValue("group", referenceCode);
+                tidyOutput.addValue("stratum", score.toString());
+                tidyOutput.addValue("itemscore", itemScore.toString());
+                tidyOutput.addValue("frequency", Long.valueOf((long)table.getReferenceRow().freqAt(itemScore)).toString());
+                tidyOutput.nextRow();
+            }
+        }
+
+        return tidyOutput;
     }
 
     public String printHeader(){
@@ -512,7 +667,7 @@ public class CochranMantelHaenszel {
         }
 
 
-        output += itemVariable.getName().toString() + ",";
+        output += itemName + ",";
 
         if(Double.isNaN(cmh) || Double.isInfinite(cmh)){
             output += ",";
@@ -592,7 +747,7 @@ public class CochranMantelHaenszel {
             etsClass = smdDifClass();
         }
 
-        f.format("%-10s", itemVariable.getName().toString());f.format("%2s", " ");
+        f.format("%-10s", itemName);f.format("%2s", " ");
 //		f.format("%10s", focalCode + "/" + referenceCode);f.format("%2s", " ");
 		f.format("%10.2f", cmh);f.format("%2s", " ");
 		f.format("%7.2f", pvalue);f.format("%2s", " ");
@@ -602,6 +757,181 @@ public class CochranMantelHaenszel {
         return f.toString();
     }
 
+    /**
+     * Formats output as a tidy dataset for a csv file
+     *
+     * @return a string array in tidy format
+     */
+    public TidyOutput getTidyOutput() {
+        double cmh = cochranMantelHaenszel();
+        double pvalue = getPValue();
+        double commonOddsRatio = 0.0;
+        double[] tempConfInt = {0.0, 0.0};
+        double[] confInt = {0.0, 0.0};
+        double smd = 0.0;
+        double effectSize = 0.0;
+        String etsClass = "";
+
+        if(!isPolytomous()){
+            commonOddsRatio = commonOddsRatio();
+            tempConfInt = commonOddsRatioConfidenceInterval(commonOddsRatio);
+            if (etsDelta) {
+                effectSize = etsDelta(commonOddsRatio);
+                confInt[0] = etsDelta(tempConfInt[0]);
+                confInt[1] = etsDelta(tempConfInt[1]);
+            } else {
+                effectSize = commonOddsRatio;
+                confInt[0] = tempConfInt[0];
+                confInt[1] = tempConfInt[1];
+            }
+            etsClass = etsBinayClassification(cmh, pvalue, commonOddsRatio);
+        }else if(isPolytomous()){
+            smd = pF();
+            tempConfInt = smdConfidenceInterval(smd);
+            confInt[0] = tempConfInt[0];
+            confInt[1] = tempConfInt[1];
+            effectSize = pF();
+            etsClass = smdDifClass();
+        }
+
+        TidyOutput tidyOutput = new TidyOutput();
+        String timeStamp = tidyOutput.getTimeStamp();
+
+        tidyOutput.addValue("name", itemName);
+        tidyOutput.addValue("date", timeStamp);
+        tidyOutput.addValue("method", "dif_cmh");
+        tidyOutput.addValue("title", title);
+        tidyOutput.addValue("focal", focalCode);
+        tidyOutput.addValue("reference", referenceCode);
+        tidyOutput.addValue("statistic", "chi_square");
+        tidyOutput.addValue("value", Double.valueOf(cmh).toString());
+        tidyOutput.addValue("etsclass", etsClass);
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", itemName);
+        tidyOutput.addValue("date", timeStamp);
+        tidyOutput.addValue("method", "dif_cmh");
+        tidyOutput.addValue("title", title);
+        tidyOutput.addValue("focal", focalCode);
+        tidyOutput.addValue("reference", referenceCode);
+        tidyOutput.addValue("statistic", "p_value");
+        tidyOutput.addValue("value", Double.valueOf(pvalue).toString());
+        tidyOutput.addValue("etsclass", etsClass);
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", itemName);
+        tidyOutput.addValue("date", timeStamp);
+        tidyOutput.addValue("method", "dif_cmh");
+        tidyOutput.addValue("title", title);
+        tidyOutput.addValue("focal", focalCode);
+        tidyOutput.addValue("reference", referenceCode);
+        tidyOutput.addValue("statistic", "valid_strata");
+        tidyOutput.addValue("value", Integer.valueOf(validStrata).toString());
+        tidyOutput.addValue("etsclass", etsClass);
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", itemName);
+        tidyOutput.addValue("date", timeStamp);
+        tidyOutput.addValue("method", "dif_cmh");
+        tidyOutput.addValue("title", title);
+        tidyOutput.addValue("focal", focalCode);
+        tidyOutput.addValue("reference", referenceCode);
+        tidyOutput.addValue("statistic", "valid_focal_count");
+        tidyOutput.addValue("value", Long.valueOf(getValidFocalSampleSize()).toString());
+        tidyOutput.addValue("etsclass", etsClass);
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", itemName);
+        tidyOutput.addValue("date", timeStamp);
+        tidyOutput.addValue("method", "dif_cmh");
+        tidyOutput.addValue("title", title);
+        tidyOutput.addValue("focal", focalCode);
+        tidyOutput.addValue("reference", referenceCode);
+        tidyOutput.addValue("statistic", "valid_reference_count");
+        tidyOutput.addValue("value", Long.valueOf(getValidReferenceSampleSize()).toString());
+        tidyOutput.addValue("etsclass", etsClass);
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", itemName);
+        tidyOutput.addValue("date", timeStamp);
+        tidyOutput.addValue("method", "dif_cmh");
+        tidyOutput.addValue("title", title);
+        tidyOutput.addValue("focal", focalCode);
+        tidyOutput.addValue("reference", referenceCode);
+        tidyOutput.addValue("statistic", "valid_total_count");
+        tidyOutput.addValue("value", Double.valueOf(validSampleSize).toString());
+        tidyOutput.addValue("etsclass", etsClass);
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", itemName);
+        tidyOutput.addValue("date", timeStamp);
+        tidyOutput.addValue("method", "dif_cmh");
+        tidyOutput.addValue("title", title);
+        tidyOutput.addValue("focal", focalCode);
+        tidyOutput.addValue("reference", referenceCode);
+        tidyOutput.addValue("statistic", "focal_count");
+        tidyOutput.addValue("value", Double.valueOf(totalFocalSize).toString());
+        tidyOutput.addValue("etsclass", etsClass);
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", itemName);
+        tidyOutput.addValue("date", timeStamp);
+        tidyOutput.addValue("method", "dif_cmh");
+        tidyOutput.addValue("title", title);
+        tidyOutput.addValue("focal", focalCode);
+        tidyOutput.addValue("reference", referenceCode);
+        tidyOutput.addValue("statistic", "reference_count");
+        tidyOutput.addValue("value", Double.valueOf(totalReferenceSize).toString());
+        tidyOutput.addValue("etsclass", etsClass);
+        tidyOutput.nextRow();
+
+
+        tidyOutput.addValue("name", itemName);
+        tidyOutput.addValue("date", timeStamp);
+        tidyOutput.addValue("method", "dif_cmh");
+        tidyOutput.addValue("title", title);
+        tidyOutput.addValue("focal", focalCode);
+        tidyOutput.addValue("reference", referenceCode);
+        tidyOutput.addValue("statistic", "total_count");
+        tidyOutput.addValue("value", Double.valueOf(totalSampleSize).toString());
+        tidyOutput.addValue("etsclass", etsClass);
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", itemName);
+        tidyOutput.addValue("date", timeStamp);
+        tidyOutput.addValue("method", "dif_cmh");
+        tidyOutput.addValue("title", title);
+        tidyOutput.addValue("focal", focalCode);
+        tidyOutput.addValue("reference", referenceCode);
+        tidyOutput.addValue("statistic", "effect_size");
+        tidyOutput.addValue("value", Double.valueOf(effectSize).toString());
+        tidyOutput.addValue("etsclass", etsClass);
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", itemName);
+        tidyOutput.addValue("date", timeStamp);
+        tidyOutput.addValue("method", "dif_cmh");
+        tidyOutput.addValue("title", title);
+        tidyOutput.addValue("focal", focalCode);
+        tidyOutput.addValue("reference", referenceCode);
+        tidyOutput.addValue("statistic", "conf_int_lower");
+        tidyOutput.addValue("value", Double.valueOf(confInt[0]).toString());
+        tidyOutput.addValue("etsclass", etsClass);
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", itemName);
+        tidyOutput.addValue("date", timeStamp);
+        tidyOutput.addValue("method", "dif_cmh");
+        tidyOutput.addValue("title", title);
+        tidyOutput.addValue("focal", focalCode);
+        tidyOutput.addValue("reference", referenceCode);
+        tidyOutput.addValue("statistic", "conf_int_upper");
+        tidyOutput.addValue("value", Double.valueOf(confInt[1]).toString());
+        tidyOutput.addValue("etsclass", etsClass);
+        tidyOutput.nextRow();
+
+        return tidyOutput;
+    }
 
 
 }

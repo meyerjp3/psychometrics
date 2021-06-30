@@ -58,7 +58,7 @@ public class GuttmanLambda1 extends AbstractScoreReliability {
             //Compute item variance
             double itemVariance = matrix[i][i];
 
-            //Compute sum of covariance between this item and all others
+            //Compute sum of covariance includes this item and all others
             double itemCovariance = 0;
             for(int j=0;j<nItems;j++){
                 if(i!=j) itemCovariance += matrix[i][j];

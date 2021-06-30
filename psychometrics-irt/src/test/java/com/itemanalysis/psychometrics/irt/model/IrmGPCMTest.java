@@ -77,10 +77,10 @@ public class IrmGPCMTest {
         double[] initialValue = {0,0,0,0};
         double[] iparam = {1.5, 0.0, -2.0, 0.0, 0.5};
         IrmGPCM irm = new IrmGPCM(1.0, initialValue, 1.7);
-        assertEquals("Probability Test, Cat 1, at theta: 0", 0.002667544, irm.probability(0.0, iparam, 0, 1.7), 1e-6);
-        assertEquals("Probability Test, Cat 2, at theta: 0", 0.4375357, irm.probability(0.0, iparam, 1, 1.7), 1e-6);
-        assertEquals("Probability Test, Cat 3, at theta: 0", 0.4375357, irm.probability(0.0, iparam, 2, 1.7), 1e-6);
-        assertEquals("Probability Test, Cat 4, at theta: 0", 0.122261, irm.probability(0.0, iparam, 3, 1.7), 1e-6);
+        assertEquals("Probability Test, Cat 1, at theta: 0", 0.002667544, irm.probability(0.0, iparam, 0), 1e-6);
+        assertEquals("Probability Test, Cat 2, at theta: 0", 0.4375357, irm.probability(0.0, iparam, 1), 1e-6);
+        assertEquals("Probability Test, Cat 3, at theta: 0", 0.4375357, irm.probability(0.0, iparam, 2), 1e-6);
+        assertEquals("Probability Test, Cat 4, at theta: 0", 0.122261, irm.probability(0.0, iparam, 3), 1e-6);
 
     }
 

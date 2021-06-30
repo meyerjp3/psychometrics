@@ -57,7 +57,7 @@ public class IrmGRM extends AbstractItemResponseModel {
         defaultScoreWeights();
     }
 
-    public double cumulativeProbability(double theta, double[] iparam, int category, double D){
+    public double cumulativeProbability(double theta, double[] iparam, int category){
         if(category>maxCategory || category<minCategory) return 0;
         if(category==minCategory) return 1.0;
 
@@ -89,9 +89,9 @@ public class IrmGRM extends AbstractItemResponseModel {
         return prob;
     }
 
-    public double probability(double theta, double[] iparam, int response, double D){
-        if(response==minCategory)  return 1.0-cumulativeProbability(theta, iparam, response+1, D);
-        if(response==maxCategory) return cumulativeProbability(theta, iparam, response, D);
+    public double probability(double theta, double[] iparam, int response){
+        if(response==minCategory)  return 1.0-cumulativeProbability(theta, iparam, response+1);
+        if(response==maxCategory) return cumulativeProbability(theta, iparam, response);
         double prob1 = cumulativeProbability(theta, response+1);
         double prob = cumulativeProbability(theta, response);
         return prob - prob1;
@@ -387,6 +387,9 @@ public class IrmGRM extends AbstractItemResponseModel {
         }
     }
 
+    public void setScalingConstant(double D){
+        this.D = D;
+    }
 
     public double getDifficulty(){
         return 0.0;

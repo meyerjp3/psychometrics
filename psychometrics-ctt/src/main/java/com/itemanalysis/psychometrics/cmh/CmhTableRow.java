@@ -16,8 +16,8 @@
 package com.itemanalysis.psychometrics.cmh;
 
 
+import com.itemanalysis.psychometrics.statistics.WeightedOnlineMean;
 import org.apache.commons.math3.stat.Frequency;
-import org.apache.commons.math3.stat.descriptive.moment.Mean;
 
 import java.util.Formatter;
 import java.util.Iterator;
@@ -34,19 +34,40 @@ public class CmhTableRow {
 
     private double rowTotal = 0.0;
 
-    private Mean mean = null;
+    private WeightedOnlineMean mean = null;
 
     public CmhTableRow(Object rowValue){
         this.rowValue = rowValue;
         columns = new Frequency();
-        mean = new Mean();
+        mean = new WeightedOnlineMean();
     }
 
+    /**
+     * Increment count by one observation
+     *
+     * @param rowValue a row value
+     * @param itemScore the item score
+     */
     public void count(Object rowValue, Double itemScore){
         if(rowValue!=null && rowValue.equals(this.rowValue)){
             columns.addValue(itemScore);
             mean.increment(itemScore);
             rowTotal++;
+        }
+    }
+
+    /**
+     * Increment count for multiple observations given by a frequency weight
+     *
+     * @param rowValue a row value
+     * @param itemScore an item score
+     * @param frequency a frequency weight
+     */
+    public void count(Object rowValue, Double itemScore, long frequency){
+        if(rowValue!=null && rowValue.equals(this.rowValue)){
+            columns.incrementValue(itemScore, frequency);
+            mean.increment(itemScore, frequency);
+            rowTotal+=frequency;
         }
     }
 

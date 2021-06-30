@@ -174,7 +174,7 @@ public class GeneralizedLeastSquaresMethod extends AbstractFactorMethod{
                 }
             }
 
-            //This line of code is the only difference between this class and WeightedLeastSquaresMethod.
+            //This line of code is the only difference includes this class and WeightedLeastSquaresMethod.
             RealMatrix RESID = diagSdInv.multiply(DIF);
 
             double sum = 0.0;

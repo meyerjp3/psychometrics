@@ -15,6 +15,7 @@
  */
 package com.itemanalysis.psychometrics.statistics;
 
+import com.itemanalysis.psychometrics.data.TidyOutput;
 import org.apache.commons.math3.stat.descriptive.moment.Kurtosis;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.Skewness;
@@ -26,6 +27,10 @@ import java.util.Formatter;
 
 public class StreamingDescriptiveStatistics {
 
+    private String variableName = "";
+    private String groupVariable = "";
+    private String groupId = "";
+    private double sum = 0;
     private Min min = new Min();
     private Max max = new Max();
     private Mean m = new Mean();
@@ -37,13 +42,24 @@ public class StreamingDescriptiveStatistics {
 
     }
 
+    public StreamingDescriptiveStatistics(String variableName, String groupVariable, String groupId){
+        this.variableName = variableName;
+        this.groupVariable = groupVariable;
+        this.groupId = groupId;
+    }
+
     public void increment(double x){
+        sum += x;
         min.increment(x);
         max.increment(x);
         m.increment(x);
         sd.increment(x);
         skew.increment(x);
         kurt.increment(x);
+    }
+
+    public double getSum(){
+        return sum;
     }
 
     public double getMin(){
@@ -75,6 +91,7 @@ public class StreamingDescriptiveStatistics {
     }
 
     public void clear(){
+        sum = 0;
         min.clear();
         max.clear();
         m.clear();
@@ -99,6 +116,8 @@ public class StreamingDescriptiveStatistics {
         f.format("%30s", "------------------------------");f.format("%n");
         f.format("%-10s", "N");f.format("%5s", "");
         f.format("%10.4f", (double)m.getN());f.format("%5s", "");f.format("%n");
+        f.format("%-10s", "Sum");f.format("%5s", "");
+        f.format("%10.4f", sum);f.format("%5s", "");f.format("%n");
         f.format("%-10s", "Min");f.format("%5s", "");
         f.format("%10.4f", min.getResult());f.format("%5s", "");f.format("%n");
         f.format("%-10s", "Max");f.format("%5s", "");
@@ -115,6 +134,82 @@ public class StreamingDescriptiveStatistics {
         return f.toString();
     }
 
+    /**
+     * Formats output as a tidy dataset for a csv file
+     *
+     * Output has five columns (long format): name, part, part id, method, group name, statistic, value
+     *
+     * @return
+     */
+    public TidyOutput getTidyOutput() {
 
+        TidyOutput tidyOutput = new TidyOutput();
+
+        tidyOutput.addValue("name", variableName);
+        tidyOutput.addValue("method", "descriptive_statistics");
+        tidyOutput.addValue("group_variable", groupVariable);
+        tidyOutput.addValue("group_id", groupId);
+        tidyOutput.addValue("statistic", "sample_size");
+        tidyOutput.addValue("value", Long.valueOf(m.getN()).toString());
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", variableName);
+        tidyOutput.addValue("method", "descriptive_statistics");
+        tidyOutput.addValue("group_variable", groupVariable);
+        tidyOutput.addValue("group_id", groupId);
+        tidyOutput.addValue("statistic", "sum");
+        tidyOutput.addValue("value", Double.valueOf(sum).toString());
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", variableName);
+        tidyOutput.addValue("method", "descriptive_statistics");
+        tidyOutput.addValue("group_variable", groupVariable);
+        tidyOutput.addValue("group_id", groupId);
+        tidyOutput.addValue("statistic", "min");
+        tidyOutput.addValue("value", Double.valueOf(min.getResult()).toString());
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", variableName);
+        tidyOutput.addValue("method", "descriptive_statistics");
+        tidyOutput.addValue("group_variable", groupVariable);
+        tidyOutput.addValue("group_id", groupId);
+        tidyOutput.addValue("statistic", "max");
+        tidyOutput.addValue("value", Double.valueOf(max.getResult()).toString());
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", variableName);
+        tidyOutput.addValue("method", "descriptive_statistics");
+        tidyOutput.addValue("group_variable", groupVariable);
+        tidyOutput.addValue("group_id", groupId);
+        tidyOutput.addValue("statistic", "mean");
+        tidyOutput.addValue("value", Double.valueOf(m.getResult()).toString());
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", variableName);
+        tidyOutput.addValue("method", "descriptive_statistics");
+        tidyOutput.addValue("group_variable", groupVariable);
+        tidyOutput.addValue("group_id", groupId);
+        tidyOutput.addValue("statistic", "std_deviation");
+        tidyOutput.addValue("value", Double.valueOf(sd.getResult()).toString());
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", variableName);
+        tidyOutput.addValue("method", "descriptive_statistics");
+        tidyOutput.addValue("group_variable", groupVariable);
+        tidyOutput.addValue("group_id", groupId);
+        tidyOutput.addValue("statistic", "skewness");
+        tidyOutput.addValue("value", Double.valueOf(skew.getResult()).toString());
+        tidyOutput.nextRow();
+
+        tidyOutput.addValue("name", variableName);
+        tidyOutput.addValue("method", "descriptive_statistics");
+        tidyOutput.addValue("group_variable", groupVariable);
+        tidyOutput.addValue("group_id", groupId);
+        tidyOutput.addValue("statistic", "kurtosis");
+        tidyOutput.addValue("value",Double.valueOf(kurt.getResult()).toString());
+
+        return tidyOutput;
+
+    }
 
 }

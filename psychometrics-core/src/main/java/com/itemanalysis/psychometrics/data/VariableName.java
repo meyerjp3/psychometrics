@@ -16,7 +16,7 @@
 package com.itemanalysis.psychometrics.data;
 
 /**
- * This class represents a variable name. It allows you to easily switch between the display name
+ * This class represents a variable name. It allows you to easily switch includes the display name
  * and teh name needed by a database. The database name adds a prefix and suffix of "x" to the
  * variable name. This convention prevents confusion with reserved SQL words when interacting
  * with a database.

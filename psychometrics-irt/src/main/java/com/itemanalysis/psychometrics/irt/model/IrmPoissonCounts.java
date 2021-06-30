@@ -60,9 +60,9 @@ public class IrmPoissonCounts extends AbstractItemResponseModel{
         this.name = name;
     }
 
-    public double probability(double theta, double[] iparam, int category, double D){
-        double t = numer(theta, iparam, category, D);
-        double b = denom(theta, iparam, D);
+    public double probability(double theta, double[] iparam, int category){
+        double t = numer(theta, iparam, category);
+        double b = denom(theta, iparam);
         return t/b;
     }
 
@@ -79,7 +79,7 @@ public class IrmPoissonCounts extends AbstractItemResponseModel{
         return t/b;
     }
 
-    private double numer(double theta, double[] iparam, int category, double D){
+    private double numer(double theta, double[] iparam, int category){
         double Zk = 0;
         double b = iparam[0];
         double[] s = Arrays.copyOfRange(iparam, 1, iparam.length);
@@ -115,12 +115,12 @@ public class IrmPoissonCounts extends AbstractItemResponseModel{
         return Math.exp(Zk);
     }
 
-    private double denom(double theta, double[] iparam, double D){
+    private double denom(double theta, double[] iparam){
         double denom = 0.0;
         double expZk = 0.0;
 
         for(int k=0;k<ncat;k++){
-            expZk = numer(theta, iparam, k, D);
+            expZk = numer(theta, iparam, k);
             denom += expZk;
         }
         return denom;
@@ -317,7 +317,7 @@ public class IrmPoissonCounts extends AbstractItemResponseModel{
         for(int i=0;i<threshold.length;i++){
             iparam[i+1] = threshold[i];//TODO will need to change when first step is added to step array. First step should alway be zero.
         }
-        return probability(theta, iparam, response, D);
+        return probability(theta, iparam, response);
     }
 
     /**
@@ -342,7 +342,7 @@ public class IrmPoissonCounts extends AbstractItemResponseModel{
         for(int i=0;i<threshold.length;i++){
             iparam[i+1] = threshold[i];//TODO will need to change when first step is added to step array. First step should alway be zero.
         }
-        return probability(theta, iparam, response, D);
+        return probability(theta, iparam, response);
     }
 
     public double tSharpExpectedValue(double theta, double intercept, double slope){
@@ -407,6 +407,9 @@ public class IrmPoissonCounts extends AbstractItemResponseModel{
 
     }
 
+    public void setScalingConstant(double D){
+        this.D = D;
+    }
 
     public double getDifficulty(){
         return difficulty;

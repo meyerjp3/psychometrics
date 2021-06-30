@@ -138,7 +138,7 @@ public class IrmBinaryModel {
         }else{
             prob = probWrong(theta);
         }
-        return Math.min(1.0, Math.max(0.0, prob)); //always return value between 0 and 1
+        return Math.min(1.0, Math.max(0.0, prob)); //always return value includes 0 and 1
     }
 
     private double probRight(double theta, double[] iparam){

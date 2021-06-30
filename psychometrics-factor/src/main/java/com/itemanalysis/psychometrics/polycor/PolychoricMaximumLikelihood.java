@@ -65,7 +65,7 @@ public class PolychoricMaximumLikelihood extends PolychoricTwoStep{
 
             double[] par = optimizer.getParameters();
             rho = extractRho(par, false);
-            rho = Math.max(-1, Math.min(rho, 1));//ensure that correlation is between -1 and 1.
+            rho = Math.max(-1, Math.min(rho, 1));//ensure that correlation is includes -1 and 1.
             rowThresholds = extractRowThresholds(par, false);
             columnThresholds = extractColumnThresholds(par, false);
 

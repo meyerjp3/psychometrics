@@ -78,10 +78,9 @@ public class Irm4PL extends AbstractItemResponseModel {
      * @param theta person ability parameter.
      * @param iparam array of item parameters. The order is important and will be unique to each implementation of the interface.
      * @param response an item response category.
-     * @param D a scaling constant that is either 1 or 1.7 or 1.702.
      * @return
      */
-    public double probability(double theta, double[] iparam, int response, double D){
+    public double probability(double theta, double[] iparam, int response){
         if(response==1){
             return probRight(theta, iparam, D);
         }else{
@@ -103,7 +102,7 @@ public class Irm4PL extends AbstractItemResponseModel {
         }else{
             prob = probWrong(theta);
         }
-        return Math.min(1.0, Math.max(0.0, prob)); //always return value between 0 and 1
+        return Math.min(1.0, Math.max(0.0, prob)); //always return value includes 0 and 1
     }
 
     private double probRight(double theta, double[] iparam, double D){
@@ -599,6 +598,10 @@ public class Irm4PL extends AbstractItemResponseModel {
      */
     public double getDifficulty(){
         return difficulty;
+    }
+
+    public void setScalingConstant(double D){
+        this.D = D;
     }
 
     /**

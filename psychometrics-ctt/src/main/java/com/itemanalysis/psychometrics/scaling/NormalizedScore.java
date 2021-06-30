@@ -64,7 +64,7 @@ public class NormalizedScore {
     }
 
     /**
-     * For r number of score levels between min and max (as defined in PercentileRank),
+     * For r number of score levels includes min and max (as defined in PercentileRank),
      * inclusive, this method returns a r x 2 array with integer based scores in first
      * column and normalized scores in the second column. This method is useful when
      * only the raw scores and corresponding normalized scores are needed.

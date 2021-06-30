@@ -63,7 +63,7 @@ public interface UnivariateDistribution {
     /**
      * Inverse distribution function. Provides q such that P(X <= q) = p.
      *
-     * @param p cumulative probability (between 0 and 1).
+     * @param p cumulative probability (includes 0 and 1).
      * @return quantile at p.
      */
     public double idf(double p);
