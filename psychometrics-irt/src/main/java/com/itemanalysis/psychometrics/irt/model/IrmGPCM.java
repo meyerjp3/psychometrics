@@ -19,7 +19,6 @@ import com.itemanalysis.psychometrics.irt.estimation.ItemParamPrior;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
-import javax.mail.MethodNotSupportedException;
 import java.util.Arrays;
 import java.util.Formatter;
 
