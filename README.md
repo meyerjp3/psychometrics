@@ -34,6 +34,10 @@ rating scale models. Marginal maximum likelihood estimation procedures for binar
 classes support a variety of item response models. Scale linking procedures available in the library include the
 Stocking-Lord and Haebara procedures.
 
+Applied example
+---------------
+For a live consumer-facing adaptive assessment using distinction-style items, see [IntelligenceMax](https://intelligencemax.ai) ([measurement notes](https://intelligencemax.ai/science)).
+
 Factor Analysis
 ---------------
 Classes for exploratory factor analysis are in development. They currently include MINRES
